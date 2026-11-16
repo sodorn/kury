@@ -1,0 +1,10 @@
+keys,pl
+BUILDING_COOP_NAME,Kurnik
+BUILDING_COOP_DESC,"Tu mieszkają kury i znoszą jaja."
+BUILDING_INCUBATOR_NAME,Inkubator
+BUILDING_INCUBATOR_DESC,"Z włożonych tu jaj wykluwają się pisklęta."
+BUILDING_STORAGE_NAME,Magazyn
+BUILDING_STORAGE_DESC,"Miejsce na zebrane jaja i zapas paszy."
+BUILDING_SHOP_NAME,Sklep
+BUILDING_SHOP_DESC,"Sprzedasz tu jaja, a kupisz paszę i nowe kury."
+PANEL_COMING_SOON,"Zarządzanie budynkiem pojawi się w kolejnej wersji."

@@ -1,0 +1,9 @@
+{
+	"start": {
+		"money": 100,
+		"eggs": 0,
+		"feed": 20,
+		"hens": 3,
+		"chicks": 0
+	}
+}

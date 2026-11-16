@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="440" viewBox="0 0 480 440">
+  <g stroke="#4b2e16" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="244" cy="404" rx="212" ry="26" fill="#2f5d1e" opacity="0.28" stroke="none"/>
+    <!-- silos -->
+    <rect x="338" y="124" width="100" height="270" rx="6" fill="#c7d3da"/>
+    <path d="M338 124Q388 46 438 124Z" fill="#9fb0ba"/>
+    <path d="M338 186H438M338 250H438M338 314H438" stroke="#8fa0aa" stroke-width="4" fill="none"/>
+    <path d="M356 140V380" stroke="#ffffff" stroke-width="8" opacity="0.5" fill="none"/>
+    <!-- stodola: bok -->
+    <polygon points="300,214 352,192 352,368 300,392" fill="#2f7f9e"/>
+    <!-- stodola: front -->
+    <polygon points="60,392 60,214 100,150 180,104 260,150 300,214 300,392" fill="#46a6c9"/>
+    <path d="M60 300H120M240 300H300" stroke="#2f7f9e" stroke-width="4" fill="none"/>
+    <!-- dach: boki -->
+    <polygon points="180,84 234,62 322,112 268,134" fill="#434c63"/>
+    <polygon points="268,134 322,112 370,190 316,212" fill="#39415a"/>
+    <!-- dach: front -->
+    <polygon points="180,84 92,134 44,212 64,224 104,160 180,116 256,160 296,224 316,212 268,134" fill="#5d6884"/>
+    <!-- okno na stryszku -->
+    <rect x="154" y="158" width="52" height="46" rx="6" fill="#23485a"/>
+    <path d="M180 158V204M154 181H206" stroke="#fff3d6" stroke-width="4" fill="none"/>
+    <!-- wrota -->
+    <rect x="118" y="250" width="124" height="142" rx="4" fill="#fff3d6"/>
+    <path d="M180 250V392M118 250L180 392M180 250L118 392M180 250L242 392M242 250L180 392" stroke="#2f7f9e" stroke-width="5" fill="none"/>
+    <rect x="118" y="250" width="124" height="142" rx="4" fill="none"/>
+    <!-- worki -->
+    <path d="M34 404q-10-44 8-62q22-12 44 0q18 18 8 62Z" fill="#d8b47a"/>
+    <path d="M48 344q16 10 32 0" stroke-width="4" fill="none"/>
+    <path d="M250 410q-8-36 6-52q18-10 36 0q14 16 6 52Z" fill="#e3c592"/>
+    <path d="M262 360q12 8 24 0" stroke-width="4" fill="none"/>
+  </g>
+</svg>
