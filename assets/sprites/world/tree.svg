@@ -1,23 +1,55 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="240" height="300" viewBox="0 0 240 300">
-  <ellipse cx="120" cy="278" rx="82" ry="16" fill="#2f5d1e" opacity="0.28"/>
-  <rect x="102" y="170" width="36" height="108" rx="8" fill="#8a5a2b" stroke="#4b2e16" stroke-width="6"/>
-  <g fill="#4fae3a" stroke="#4b2e16" stroke-width="12">
-    <circle cx="76" cy="134" r="58"/>
-    <circle cx="164" cy="134" r="58"/>
-    <circle cx="120" cy="82" r="66"/>
-  </g>
-  <g fill="#4fae3a">
-    <circle cx="76" cy="134" r="58"/>
-    <circle cx="164" cy="134" r="58"/>
-    <circle cx="120" cy="82" r="66"/>
-  </g>
-  <g fill="#6cc750">
-    <circle cx="104" cy="66" r="34"/>
-    <circle cx="64" cy="120" r="24"/>
-  </g>
-  <g fill="#e8553f" stroke="#4b2e16" stroke-width="3">
-    <circle cx="150" cy="110" r="9"/>
-    <circle cx="92" cy="150" r="9"/>
-    <circle cx="176" cy="156" r="9"/>
+  <defs>
+    <radialGradient id="tShadow" cx="120" cy="278" r="82" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 224) scale(1 0.195)">
+      <stop offset="0" stop-color="#2d4a18" stop-opacity="0.42"/>
+      <stop offset="0.7" stop-color="#2d4a18" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#2d4a18" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tTrunk" x1="100" y1="170" x2="142" y2="278" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#C08B52"/>
+      <stop offset="0.5" stop-color="#99622C"/>
+      <stop offset="1" stop-color="#7A4A20"/>
+    </linearGradient>
+    <radialGradient id="tLeafA" cx="96" cy="60" r="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8FDC63"/>
+      <stop offset="0.5" stop-color="#5FBA3E"/>
+      <stop offset="1" stop-color="#3C8E2B"/>
+    </radialGradient>
+  </defs>
+
+  <ellipse cx="120" cy="278" rx="82" ry="16" fill="url(#tShadow)"/>
+
+  <g stroke="#4A2D16" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <!-- pien z korzeniami -->
+    <path d="M102 176h36v96q0 8-8 8h-20q-8 0-8-8Z" fill="url(#tTrunk)"/>
+    <path d="M102 262q-16 6-24 18h40M138 262q16 6 24 18h-40" fill="url(#tTrunk)"/>
+    <path d="M112 196v64M126 210v50" stroke="#7A4A20" stroke-width="4" stroke-opacity="0.55" fill="none"/>
+
+    <!-- korona -->
+    <path d="M120 16a66 66 0 0 1 60 42 58 58 0 0 1 2 104 60 60 0 0 1-124 0 58 58 0 0 1 2-104A66 66 0 0 1 120 16Z" fill="url(#tLeafA)"/>
+    <!-- jasne kepki -->
+    <g stroke="none" fill="#8FDC63" fill-opacity="0.85">
+      <circle cx="98" cy="66" r="30"/>
+      <circle cx="70" cy="110" r="21"/>
+      <circle cx="128" cy="48" r="18"/>
+    </g>
+    <g stroke="none" fill="#AEE87F" fill-opacity="0.8">
+      <circle cx="94" cy="58" r="17"/>
+      <circle cx="72" cy="98" r="10"/>
+    </g>
+    <!-- cien pod korona -->
+    <path d="M62 150a60 60 0 0 0 116 4 58 58 0 0 1-116-4Z" fill="#2F7A22" fill-opacity="0.35" stroke="none"/>
+
+    <!-- jablka -->
+    <g stroke-width="3">
+      <circle cx="152" cy="108" r="10" fill="#EE5B44"/>
+      <circle cx="90" cy="150" r="10" fill="#EE5B44"/>
+      <circle cx="176" cy="154" r="10" fill="#EE5B44"/>
+    </g>
+    <g stroke="none" fill="#FFC2A8" fill-opacity="0.9">
+      <circle cx="149" cy="105" r="3"/>
+      <circle cx="87" cy="147" r="3"/>
+      <circle cx="173" cy="151" r="3"/>
+    </g>
   </g>
 </svg>

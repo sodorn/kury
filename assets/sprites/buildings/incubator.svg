@@ -1,38 +1,109 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="440" height="420" viewBox="0 0 440 420">
   <defs>
-    <radialGradient id="glow" cx="0.5" cy="0.45" r="0.6">
-      <stop offset="0" stop-color="#fff9c4"/>
-      <stop offset="1" stop-color="#ffc24a"/>
+    <radialGradient id="iShadow" cx="226" cy="388" r="186" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 310) scale(1 0.2)">
+      <stop offset="0" stop-color="#2d4a18" stop-opacity="0.45"/>
+      <stop offset="0.7" stop-color="#2d4a18" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#2d4a18" stop-opacity="0"/>
     </radialGradient>
+    <linearGradient id="iBody" x1="70" y1="196" x2="300" y2="372" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF4DA"/>
+      <stop offset="0.55" stop-color="#F8DFAE"/>
+      <stop offset="1" stop-color="#E0BE80"/>
+    </linearGradient>
+    <linearGradient id="iSide" x1="330" y1="196" x2="386" y2="370" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E2CFA4"/>
+      <stop offset="1" stop-color="#BFA878"/>
+    </linearGradient>
+    <linearGradient id="iRoof" x1="60" y1="134" x2="300" y2="206" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7FE0CB"/>
+      <stop offset="0.5" stop-color="#4FC2AC"/>
+      <stop offset="1" stop-color="#2F9A87"/>
+    </linearGradient>
+    <linearGradient id="iRoofSide" x1="348" y1="134" x2="404" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#36A28E"/>
+      <stop offset="1" stop-color="#1F7566"/>
+    </linearGradient>
+    <linearGradient id="iBase" x1="66" y1="338" x2="66" y2="376" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4FC2AC"/>
+      <stop offset="1" stop-color="#2A8574"/>
+    </linearGradient>
+    <radialGradient id="iGlow" cx="168" cy="252" r="78" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFDF0"/>
+      <stop offset="0.45" stop-color="#FFEFB5"/>
+      <stop offset="1" stop-color="#FFC75C"/>
+    </radialGradient>
+    <linearGradient id="iGlass" x1="110" y1="196" x2="230" y2="330" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.75"/>
+      <stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="iBrass" x1="150" y1="92" x2="200" y2="150" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFE9A8"/>
+      <stop offset="1" stop-color="#D1A03C"/>
+    </linearGradient>
   </defs>
-  <g stroke="#4b2e16" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
-    <ellipse cx="226" cy="388" rx="186" ry="24" fill="#2f5d1e" opacity="0.28" stroke="none"/>
-    <!-- komin / lampa -->
-    <rect x="150" y="92" width="48" height="52" fill="#c9ced6"/>
-    <ellipse cx="174" cy="92" rx="24" ry="9" fill="#e6eaf0"/>
-    <!-- sciana boczna -->
-    <polygon points="330,196 384,172 384,350 330,376" fill="#d9c9a0"/>
-    <polygon points="330,340 384,316 384,350 330,376" fill="#2f8f80"/>
+
+  <ellipse cx="226" cy="388" rx="186" ry="28" fill="url(#iShadow)"/>
+
+  <g stroke="#5A3720" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+    <!-- dymki z kominka -->
+    <g fill="#FFFFFF" fill-opacity="0.75" stroke="none">
+      <circle cx="176" cy="60" r="11"/>
+      <circle cx="196" cy="38" r="8"/>
+      <circle cx="210" cy="20" r="5.5"/>
+    </g>
+    <!-- kominek -->
+    <path d="M152 92h46v52h-46Z" fill="url(#iBrass)"/>
+    <ellipse cx="175" cy="92" rx="23" ry="9" fill="#FFF2C9"/>
+
+    <!-- nogi -->
+    <path d="M96 376v22M330 376v22" stroke-width="18" stroke="#7A4A22"/>
+
+    <!-- bok -->
+    <path d="M330 196 386 170v180l-56 26Z" fill="url(#iSide)"/>
+    <path d="M330 340 386 314v36l-56 26Z" fill="#2F9A87"/>
+
     <!-- korpus -->
-    <rect x="66" y="196" width="264" height="180" rx="14" fill="#fff3d6"/>
-    <path d="M69 340H327V362a14 14 0 0 1-14 14H83a14 14 0 0 1-14-14Z" fill="#3fa796"/>
+    <path d="M70 196h260v180H70Z" fill="url(#iBody)" rx="14"/>
+    <path d="M70 338h260v26a12 12 0 0 1-12 12H82a12 12 0 0 1-12-12Z" fill="url(#iBase)"/>
+
     <!-- dach -->
-    <polygon points="52,170 106,138 402,138 348,170" fill="#5cc9b5"/>
-    <polygon points="348,170 402,138 402,168 348,200" fill="#277567"/>
-    <rect x="52" y="170" width="296" height="30" rx="8" fill="#2f8f80"/>
-    <!-- okno z jajami -->
-    <circle cx="176" cy="268" r="68" fill="url(#glow)" stroke-width="8"/>
-    <ellipse cx="177" cy="312" rx="46" ry="12" fill="#d9a441" stroke-width="4"/>
-    <ellipse cx="147" cy="288" rx="17" ry="23" fill="#fffaf0" stroke-width="4"/>
-    <ellipse cx="208" cy="289" rx="17" ry="23" fill="#fffaf0" stroke-width="4"/>
-    <ellipse cx="178" cy="280" rx="19" ry="26" fill="#fffaf0" stroke-width="4"/>
-    <path d="M132 236a56 56 0 0 1 44-24" stroke="#ffffff" stroke-width="7" fill="none" opacity="0.8"/>
+    <path d="M50 170 106 136h298l-56 34Z" fill="url(#iRoof)"/>
+    <path d="M348 170 404 136v34l-56 34Z" fill="url(#iRoofSide)"/>
+    <path d="M50 170h298v32H50Z" fill="#2F9A87"/>
+    <path d="M56 170 108 140" stroke="#CFF5EB" stroke-width="5" stroke-opacity="0.7" fill="none"/>
+
+    <!-- szklana kopula z jajami -->
+    <circle cx="168" cy="268" r="72" fill="url(#iGlow)" stroke-width="7"/>
+    <ellipse cx="169" cy="316" rx="48" ry="13" fill="#D79B36" stroke-width="4"/>
+    <ellipse cx="137" cy="290" rx="18" ry="24" fill="#FFFCF4" stroke-width="4"/>
+    <ellipse cx="201" cy="291" rx="18" ry="24" fill="#FFF6E2" stroke-width="4"/>
+    <ellipse cx="169" cy="281" rx="20" ry="27" fill="#FFFFFF" stroke-width="4"/>
+    <path d="M108 250a72 72 0 0 1 56-44 72 72 0 0 0-50 54Z" fill="#FFFFFF" fill-opacity="0.5" stroke="none"/>
+    <path d="M120 234a60 60 0 0 1 42-28" stroke="#FFFFFF" stroke-width="8" stroke-opacity="0.85" fill="none"/>
+
     <!-- termometr -->
-    <rect x="278" y="214" width="22" height="92" rx="11" fill="#ffffff" stroke-width="4"/>
-    <rect x="285" y="250" width="8" height="52" rx="4" fill="#e8553f" stroke="none"/>
-    <circle cx="289" cy="308" r="14" fill="#e8553f" stroke-width="4"/>
-    <!-- sruby -->
-    <circle cx="84" cy="214" r="4" fill="#4b2e16" stroke="none"/>
-    <circle cx="312" cy="214" r="4" fill="#4b2e16" stroke="none"/>
+    <rect x="272" y="212" width="26" height="94" rx="13" fill="#FFFFFF" stroke-width="4"/>
+    <rect x="280" y="248" width="10" height="56" rx="5" fill="#E8553F" stroke="none"/>
+    <circle cx="285" cy="310" r="16" fill="#E8553F" stroke-width="4"/>
+    <path d="M304 232h12M304 252h12M304 272h12" stroke-width="3"/>
+
+    <!-- pokretlo i wskaznik -->
+    <circle cx="285" cy="356" r="13" fill="#FFE9A8" stroke-width="4"/>
+    <path d="M285 356l8-7" stroke-width="4"/>
+    <circle cx="110" cy="356" r="9" fill="#8FE36B" stroke-width="4"/>
+    <circle cx="140" cy="356" r="9" fill="#FFD152" stroke-width="4"/>
+
+    <!-- nity -->
+    <g fill="#C9A96A" stroke="none">
+      <circle cx="84" cy="212" r="5"/>
+      <circle cx="316" cy="212" r="5"/>
+      <circle cx="84" cy="324" r="5"/>
+      <circle cx="316" cy="324" r="5"/>
+    </g>
+
+    <!-- trawa przy nogach -->
+    <path d="M78 398q4-20 10-4 4-22 10-4" fill="none" stroke="#5FAE3C" stroke-width="5"/>
+    <path d="M340 398q4-20 10-4 4-22 10-4" fill="none" stroke="#5FAE3C" stroke-width="5"/>
   </g>
 </svg>

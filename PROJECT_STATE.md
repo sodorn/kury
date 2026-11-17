@@ -4,7 +4,9 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 2 zakonczony** (wersja 0.2.1). Nastepny: ETAP 3.
+- Aktualny etap: **ETAP 2 zakonczony**. Nastepny: ETAP 3.
+- Wersje grafiki: **1.0** plaski wektor (galaz `v1.0-grafika-plaska`, commit 6ea3a3c),
+  **2.0** cieplejsza i bardziej basniowa (galaz `main`) — wlasciciel wybiera, ktora zostaje.
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
 - Repo: `sodorn/kury`, galaz `main`. Claude pushuje, wlasciciel robi `git pull`.
 - APK jeszcze nie powstal. Srodowisko Claude nie ma dostepu do serwera Google
@@ -29,6 +31,11 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
   Sceny tylko czytaja `Game.state` i sluchaja `Events`.
 - Teksty w `data/strings.csv` (pl), uzywane przez `tr()`.
 - Grafika wlasna (SVG, wektor), font Baloo 2 (licencja OFL, `assets/fonts/OFL.txt`).
+  Styl 2.0: gradienty na kazdej duzej plaszczyznie, swiatlo z gory z lewej, miekkie
+  cienie robione gradientem radialnym (nie filtrem — Godot renderuje SVG przez
+  ThorVG, ktory filtrow nie obsluguje), cieplejsza paleta, wiecej drobiazgow.
+- Rozmiary plotna i punkty zaczepienia sprite'ow sa stale — zmiana stylu nie rusza
+  farm.tscn. Przy nowej grafice budynku trzymaj dotychczasowe wymiary.
 - Dotyk: obiekty reaguja na `InputEventScreenTouch`; na PC mysz jest
   emulowana jako dotyk (ustawienie projektu).
 - Testy uruchamiamy **jako sceny**, nie przez `-s`. Skrypt podany w `-s`
@@ -90,8 +97,7 @@ tools/       gen_ground.py          generator tla i przedniego plotu
 
 ## Znane problemy / uwagi
 
-- Kierunek graficzny do potwierdzenia z wlascicielem (obecny: plaski wektor
-  z gruba kreska).
+- Kierunek graficzny do potwierdzenia: wlasciciel porownuje 1.0 i 2.0.
 - Liczniki HUD mieszcza ok. 6 cyfr; skracanie duzych liczb (1,2 mln) w ETAPIE 5.
 - Eksport Android (ETAP 7): potwierdzic, ze `data/*.json` trafiaja do paczki
   (w razie potrzeby filtr `*.json` w presecie eksportu); potwierdzic wersje
@@ -101,6 +107,7 @@ tools/       gen_ground.py          generator tla i przedniego plotu
 ## Komendy
 
 ```
+tools/build_web.sh <katalog>          # wersja do przegladarki
 godot --headless --path . --import
 godot --headless --path . res://tests/tests.tscn
 godot --path . res://tests/smoke_ui.tscn -- <katalog_na_zrzuty>

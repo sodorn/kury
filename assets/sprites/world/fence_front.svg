@@ -1,20 +1,50 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1080" height="72" viewBox="0 0 1080 72">
-<rect x="120" y="26" width="360" height="10" rx="3" fill="#f3e3bd" stroke="#4b2e16" stroke-width="3"/>
-<rect x="120" y="46" width="360" height="10" rx="3" fill="#f3e3bd" stroke="#4b2e16" stroke-width="3"/>
-<rect x="600" y="26" width="360" height="10" rx="3" fill="#f3e3bd" stroke="#4b2e16" stroke-width="3"/>
-<rect x="600" y="46" width="360" height="10" rx="3" fill="#f3e3bd" stroke="#4b2e16" stroke-width="3"/>
-<rect x="112" y="14" width="16" height="52" rx="4" fill="#fbf1da" stroke="#4b2e16" stroke-width="4"/>
-<rect x="172" y="14" width="16" height="52" rx="4" fill="#fbf1da" stroke="#4b2e16" stroke-width="4"/>
-<rect x="232" y="14" width="16" height="52" rx="4" fill="#fbf1da" stroke="#4b2e16" stroke-width="4"/>
-<rect x="292" y="14" width="16" height="52" rx="4" fill="#fbf1da" stroke="#4b2e16" stroke-width="4"/>
-<rect x="352" y="14" width="16" height="52" rx="4" fill="#fbf1da" stroke="#4b2e16" stroke-width="4"/>
-<rect x="412" y="14" width="16" height="52" rx="4" fill="#fbf1da" stroke="#4b2e16" stroke-width="4"/>
-<rect x="469" y="4" width="22" height="62" rx="4" fill="#fbf1da" stroke="#4b2e16" stroke-width="4"/>
-<rect x="589" y="4" width="22" height="62" rx="4" fill="#fbf1da" stroke="#4b2e16" stroke-width="4"/>
-<rect x="652" y="14" width="16" height="52" rx="4" fill="#fbf1da" stroke="#4b2e16" stroke-width="4"/>
-<rect x="712" y="14" width="16" height="52" rx="4" fill="#fbf1da" stroke="#4b2e16" stroke-width="4"/>
-<rect x="772" y="14" width="16" height="52" rx="4" fill="#fbf1da" stroke="#4b2e16" stroke-width="4"/>
-<rect x="832" y="14" width="16" height="52" rx="4" fill="#fbf1da" stroke="#4b2e16" stroke-width="4"/>
-<rect x="892" y="14" width="16" height="52" rx="4" fill="#fbf1da" stroke="#4b2e16" stroke-width="4"/>
-<rect x="952" y="14" width="16" height="52" rx="4" fill="#fbf1da" stroke="#4b2e16" stroke-width="4"/>
+<defs>
+<linearGradient id="grass" x1="0" y1="0" x2="0" y2="2400" gradientUnits="userSpaceOnUse">
+  <stop offset="0" stop-color="#9FDA6B"/>
+  <stop offset="0.35" stop-color="#8BCE57"/>
+  <stop offset="0.7" stop-color="#7CC24B"/>
+  <stop offset="1" stop-color="#6EB441"/>
+</linearGradient>
+<radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+  <stop offset="0" stop-color="#FFF7C4" stop-opacity="0.5"/>
+  <stop offset="0.6" stop-color="#FFF2A8" stop-opacity="0.18"/>
+  <stop offset="1" stop-color="#FFF2A8" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="shade" cx="0.5" cy="0.5" r="0.5">
+  <stop offset="0" stop-color="#3C8E2B" stop-opacity="0.28"/>
+  <stop offset="1" stop-color="#3C8E2B" stop-opacity="0"/>
+</radialGradient>
+<linearGradient id="dirt" x1="0" y1="0" x2="0" y2="2400" gradientUnits="userSpaceOnUse">
+  <stop offset="0" stop-color="#F0D9A6"/>
+  <stop offset="1" stop-color="#DFC287"/>
+</linearGradient>
+<linearGradient id="sand" x1="120" y1="1090" x2="960" y2="1500" gradientUnits="userSpaceOnUse">
+  <stop offset="0" stop-color="#F0D6A0"/>
+  <stop offset="0.5" stop-color="#E3C184"/>
+  <stop offset="1" stop-color="#D2AC68"/>
+</linearGradient>
+<linearGradient id="post" x1="0" y1="0" x2="0" y2="62" gradientUnits="userSpaceOnUse">
+  <stop offset="0" stop-color="#FFF6DF"/>
+  <stop offset="1" stop-color="#E4CFA4"/>
+</linearGradient>
+</defs>
+<rect x="120" y="26" width="360" height="11" rx="4" fill="#F3E3BD" stroke="#4A2D16" stroke-width="3"/>
+<rect x="120" y="46" width="360" height="11" rx="4" fill="#F3E3BD" stroke="#4A2D16" stroke-width="3"/>
+<rect x="600" y="26" width="360" height="11" rx="4" fill="#F3E3BD" stroke="#4A2D16" stroke-width="3"/>
+<rect x="600" y="46" width="360" height="11" rx="4" fill="#F3E3BD" stroke="#4A2D16" stroke-width="3"/>
+<rect x="112" y="14" width="16" height="52" rx="6" fill="url(#post)" stroke="#4A2D16" stroke-width="4"/>
+<rect x="172" y="14" width="16" height="52" rx="6" fill="url(#post)" stroke="#4A2D16" stroke-width="4"/>
+<rect x="232" y="14" width="16" height="52" rx="6" fill="url(#post)" stroke="#4A2D16" stroke-width="4"/>
+<rect x="292" y="14" width="16" height="52" rx="6" fill="url(#post)" stroke="#4A2D16" stroke-width="4"/>
+<rect x="352" y="14" width="16" height="52" rx="6" fill="url(#post)" stroke="#4A2D16" stroke-width="4"/>
+<rect x="412" y="14" width="16" height="52" rx="6" fill="url(#post)" stroke="#4A2D16" stroke-width="4"/>
+<rect x="469" y="4" width="22" height="62" rx="6" fill="url(#post)" stroke="#4A2D16" stroke-width="4"/>
+<rect x="589" y="4" width="22" height="62" rx="6" fill="url(#post)" stroke="#4A2D16" stroke-width="4"/>
+<rect x="652" y="14" width="16" height="52" rx="6" fill="url(#post)" stroke="#4A2D16" stroke-width="4"/>
+<rect x="712" y="14" width="16" height="52" rx="6" fill="url(#post)" stroke="#4A2D16" stroke-width="4"/>
+<rect x="772" y="14" width="16" height="52" rx="6" fill="url(#post)" stroke="#4A2D16" stroke-width="4"/>
+<rect x="832" y="14" width="16" height="52" rx="6" fill="url(#post)" stroke="#4A2D16" stroke-width="4"/>
+<rect x="892" y="14" width="16" height="52" rx="6" fill="url(#post)" stroke="#4A2D16" stroke-width="4"/>
+<rect x="952" y="14" width="16" height="52" rx="6" fill="url(#post)" stroke="#4A2D16" stroke-width="4"/>
 </svg>
