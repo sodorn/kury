@@ -2,33 +2,21 @@
 	{
 		"id": "coop",
 		"name": "BUILDING_COOP_NAME",
-		"desc": "BUILDING_COOP_DESC",
-		"sprite": "res://assets/sprites/buildings/coop.svg",
-		"anchor": [240, 404],
-		"position": [290, 950]
+		"desc": "BUILDING_COOP_DESC"
 	},
 	{
 		"id": "incubator",
 		"name": "BUILDING_INCUBATOR_NAME",
-		"desc": "BUILDING_INCUBATOR_DESC",
-		"sprite": "res://assets/sprites/buildings/incubator.svg",
-		"anchor": [220, 388],
-		"position": [790, 950]
+		"desc": "BUILDING_INCUBATOR_DESC"
 	},
 	{
 		"id": "storage",
 		"name": "BUILDING_STORAGE_NAME",
-		"desc": "BUILDING_STORAGE_DESC",
-		"sprite": "res://assets/sprites/buildings/storage.svg",
-		"anchor": [240, 404],
-		"position": [270, 2040]
+		"desc": "BUILDING_STORAGE_DESC"
 	},
 	{
 		"id": "shop",
 		"name": "BUILDING_SHOP_NAME",
-		"desc": "BUILDING_SHOP_DESC",
-		"sprite": "res://assets/sprites/buildings/shop.svg",
-		"anchor": [240, 398],
-		"position": [800, 2040]
+		"desc": "BUILDING_SHOP_DESC"
 	}
 ]

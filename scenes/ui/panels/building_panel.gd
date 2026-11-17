@@ -27,13 +27,13 @@ func is_open() -> bool:
 	return visible and not _closing
 
 
-func open(building_id: String) -> void:
-	var def := Config.building(building_id)
+func open(building_id: String, picture: Texture2D = null) -> void:
+	var def := GameData.building(building_id)
 	if def.is_empty():
 		return
 	_title.text = tr(def.get("name", ""))
 	_description.text = tr(def.get("desc", ""))
-	_picture.texture = load(def.get("sprite", "")) as Texture2D
+	_picture.texture = picture
 	_bottom_spacer.custom_minimum_size.y = SafeArea.bottom_inset(get_viewport())
 
 	_closing = false

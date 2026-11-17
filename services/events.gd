@@ -5,6 +5,6 @@ extends Node
 @warning_ignore("unused_signal")
 signal resources_changed
 
-## Gracz dotknal budynku na mapie.
+## Gracz dotknal budynku na mapie; `picture` to grafika tego budynku.
 @warning_ignore("unused_signal")
-signal building_tapped(building_id: String)
+signal building_tapped(building_id: String, picture: Texture2D)

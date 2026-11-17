@@ -9,5 +9,5 @@ func _ready() -> void:
 
 
 func new_game() -> void:
-	state = FarmState.from_start_config(Config.balance.get("start", {}))
+	state = FarmState.from_start_config(GameData.balance().get("start", {}))
 	Events.resources_changed.emit()

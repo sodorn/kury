@@ -1,10 +1,27 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scenes/farm/farm.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/world/ground.svg" id="2"]
 [ext_resource type="Texture2D" path="res://assets/sprites/world/fence_front.svg" id="3"]
 [ext_resource type="Texture2D" path="res://assets/sprites/world/tree.svg" id="4"]
 [ext_resource type="Texture2D" path="res://assets/sprites/world/bush.svg" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/farm/building.tscn" id="6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buildings/coop.svg" id="7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buildings/incubator.svg" id="8"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buildings/storage.svg" id="9"]
+[ext_resource type="Texture2D" path="res://assets/sprites/buildings/shop.svg" id="10"]
+
+[sub_resource type="RectangleShape2D" id="ShapeCoop"]
+size = Vector2(393.6, 378.4)
+
+[sub_resource type="RectangleShape2D" id="ShapeIncubator"]
+size = Vector2(360.8, 361.2)
+
+[sub_resource type="RectangleShape2D" id="ShapeStorage"]
+size = Vector2(393.6, 378.4)
+
+[sub_resource type="RectangleShape2D" id="ShapeShop"]
+size = Vector2(393.6, 369.8)
 
 [node name="Farm" type="Node2D"]
 script = ExtResource("1")
@@ -15,6 +32,54 @@ centered = false
 
 [node name="Objects" type="Node2D" parent="."]
 y_sort_enabled = true
+
+[node name="Coop" parent="Objects" instance=ExtResource("6")]
+position = Vector2(290, 950)
+building_id = "coop"
+
+[node name="Sprite" parent="Objects/Coop" index="0"]
+texture = ExtResource("7")
+offset = Vector2(-240, -404)
+
+[node name="Shape" parent="Objects/Coop" index="1"]
+position = Vector2(0, -184)
+shape = SubResource("ShapeCoop")
+
+[node name="Incubator" parent="Objects" instance=ExtResource("6")]
+position = Vector2(790, 950)
+building_id = "incubator"
+
+[node name="Sprite" parent="Objects/Incubator" index="0"]
+texture = ExtResource("8")
+offset = Vector2(-220, -388)
+
+[node name="Shape" parent="Objects/Incubator" index="1"]
+position = Vector2(0, -178)
+shape = SubResource("ShapeIncubator")
+
+[node name="Storage" parent="Objects" instance=ExtResource("6")]
+position = Vector2(270, 2040)
+building_id = "storage"
+
+[node name="Sprite" parent="Objects/Storage" index="0"]
+texture = ExtResource("9")
+offset = Vector2(-240, -404)
+
+[node name="Shape" parent="Objects/Storage" index="1"]
+position = Vector2(0, -184)
+shape = SubResource("ShapeStorage")
+
+[node name="Shop" parent="Objects" instance=ExtResource("6")]
+position = Vector2(800, 2040)
+building_id = "shop"
+
+[node name="Sprite" parent="Objects/Shop" index="0"]
+texture = ExtResource("10")
+offset = Vector2(-240, -398)
+
+[node name="Shape" parent="Objects/Shop" index="1"]
+position = Vector2(0, -183)
+shape = SubResource("ShapeShop")
 
 [node name="FenceFront" type="Sprite2D" parent="Objects"]
 position = Vector2(0, 1508)
@@ -75,3 +140,8 @@ position = Vector2(1030, 1630)
 texture = ExtResource("5")
 centered = false
 offset = Vector2(-85, -104)
+
+[editable path="Objects/Coop"]
+[editable path="Objects/Incubator"]
+[editable path="Objects/Storage"]
+[editable path="Objects/Shop"]

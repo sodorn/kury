@@ -1,13 +1,16 @@
-extends SceneTree
+extends Node
 ## Test dymny z oknem: uruchamia scene glowna, symuluje dotkniecie kazdego
-## budynku i sprawdza, czy otwiera sie panel. Zapisuje zrzuty ekranu.
-##   godot --path . -s tests/smoke_ui.gd -- <katalog_na_zrzuty>
+## budynku i sprawdza, czy otwiera sie panel z wlasciwym tytulem.
+## Zapisuje zrzuty ekranu.
+##   godot --path . res://tests/smoke_ui.tscn -- <katalog_na_zrzuty>
 ## Wymaga wyswietlania (na serwerze: xvfb-run).
 
 var _failed := 0
 
 
-func _initialize() -> void:
+func _ready() -> void:
+	# Odroczone, bo w trakcie _ready() drzewo sceny jest zajete i add_child()
+	# na korzeniu zostalby odrzucony.
 	_run.call_deferred()
 
 
@@ -18,14 +21,13 @@ func _run() -> void:
 		out_dir = args[0].trim_suffix("/") + "/"
 
 	var main: Node = load("res://scenes/main/main.tscn").instantiate()
-	root.add_child(main)
+	get_tree().root.add_child(main)
 	await _frames(20)
 	_shot(out_dir + "farm.png")
 
 	var panel: Control = main.get_node("Hud/Root/BuildingPanel")
 	var title: Label = panel.get_node("Sheet/Content/Header/Title")
-	var config: Node = root.get_node("Config")
-	for def: Dictionary in config.buildings:
+	for def: Dictionary in GameData.buildings():
 		var id: String = def["id"]
 		var building: Node2D = main.get_node("Farm/Objects").get_node(id.capitalize())
 		var point: Vector2 = building.get_global_transform_with_canvas() * Vector2(0, -150)
@@ -43,14 +45,14 @@ func _run() -> void:
 		if panel.visible:
 			print("%s: panel sie nie zamknal" % id)
 			_failed += 1
-	quit(1 if _failed > 0 else 0)
+	get_tree().quit(1 if _failed > 0 else 0)
 
 
 func _tap(point: Vector2) -> void:
 	for pressed in [true, false]:
 		var event := InputEventScreenTouch.new()
 		event.index = 0
-		event.position = point * root.get_final_transform().get_scale()
+		event.position = point * get_tree().root.get_final_transform().get_scale()
 		event.pressed = pressed
 		Input.parse_input_event(event)
 		await _frames(4)
@@ -58,9 +60,9 @@ func _tap(point: Vector2) -> void:
 
 func _frames(count: int) -> void:
 	for i in count:
-		await process_frame
+		await get_tree().process_frame
 
 
 func _shot(path: String) -> void:
-	root.get_texture().get_image().save_png(path)
+	get_tree().root.get_texture().get_image().save_png(path)
 	print("zrzut: " + path)

@@ -1,13 +1,15 @@
 class_name Building
 extends Area2D
 ## Budynek na mapie. Poczatek wezla (0,0) lezy u podstawy budynku,
-## dzieki czemu sortowanie po Y i animacja "sprezynowania" dzialaja naturalnie.
+## dzieki czemu sortowanie po Y dziala naturalnie.
+## Grafike, pozycje i obszar dotyku ustawia sie w scenie farm.tscn,
+## wiec widac je w edytorze.
+## Teksty i parametry pochodza z data/buildings.json, dopasowane po `building_id`.
 
-const HIT_SCALE := Vector2(0.82, 0.86)
 ## Maksymalny ruch palca (px ekranu), przy ktorym dotyk liczy sie jako tapniecie.
 const TAP_MAX_MOVE := 60.0
 
-var building_id: String = ""
+@export var building_id: String = ""
 
 var _pressed_touch: int = -1
 var _pressed_at := Vector2.ZERO
@@ -17,26 +19,13 @@ var _tween: Tween
 @onready var _shape: CollisionShape2D = $Shape
 
 
-## Wywolac po dodaniu do drzewa. `def` to wpis z data/buildings.json.
-func setup(def: Dictionary) -> void:
-	building_id = def.get("id", "")
-	name = building_id.capitalize()
-	var pos: Array = def.get("position", [0, 0])
-	position = Vector2(pos[0], pos[1])
-
-	var texture := load(def.get("sprite", "")) as Texture2D
-	if texture == null:
-		push_error("Building: brak grafiki dla '%s'" % building_id)
-		return
-	var anchor_data: Array = def.get("anchor", [texture.get_width() / 2.0, texture.get_height()])
-	var anchor := Vector2(anchor_data[0], anchor_data[1])
-	_sprite.texture = texture
-	_sprite.offset = -anchor
-
-	var rect := RectangleShape2D.new()
-	rect.size = texture.get_size() * HIT_SCALE
-	_shape.shape = rect
-	_shape.position = Vector2(texture.get_width() / 2.0 - anchor.x, -anchor.y / 2.0)
+func _ready() -> void:
+	if GameData.building(building_id).is_empty():
+		push_error("Building '%s': brak wpisu o id '%s' w data/buildings.json" % [name, building_id])
+	if _sprite.texture == null:
+		push_error("Building '%s': brak grafiki w wezle Sprite" % name)
+	if _shape.shape == null:
+		push_error("Building '%s': brak ksztaltu obszaru dotyku w wezle Shape" % name)
 
 
 func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:
@@ -54,7 +43,7 @@ func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> vo
 		# Puszczenie palca daleko od miejsca nacisniecia to przeciagniecie, nie tapniecie.
 		if touch.position.distance_to(_pressed_at) <= TAP_MAX_MOVE:
 			_bounce()
-			Events.building_tapped.emit(building_id)
+			Events.building_tapped.emit(building_id, _sprite.texture)
 
 
 func _press_feedback() -> void:
