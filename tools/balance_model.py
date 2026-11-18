@@ -1,0 +1,218 @@
+#!/usr/bin/env python3
+"""Model ekonomii gry — sprawdza, czy liczby z data/*.json trzymaja sie kupy.
+
+Uruchomienie z katalogu projektu:  python3 tools/balance_model.py
+
+Czesc 1: tabela oplacalnosci kazdej rasy (zwrot z jaj, zysk z hodowli).
+Czesc 2: symulacja gracza, ktory gra rozsadnie - karmi stado, sprzedaje jaja,
+trzyma tyle kur najlepszej rasy, by inkubator chodzil pelny, sprzedaje
+nadwyzke mlodych, rozbudowuje inkubator i kupuje kazda nowa rase, gdy sie
+odblokuje. Wypisuje, po ilu godzinach dochodzi do wygranej.
+
+Nie zastepuje grania, ale wylapuje liczby bez sensu: rase, ktora nigdy sie
+nie zwraca, albo milion osiagalny w kwadrans.
+"""
+import json
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+BREEDS = {b["id"]: b for b in json.loads((ROOT / "data/breeds.json").read_text())}
+BALANCE = json.loads((ROOT / "data/balance.json").read_text())
+
+STEP = 1.0  # sekunda
+MAX_HOURS = 300
+
+
+def feed_cost_per_unit() -> float:
+    economy = BALANCE["economy"]
+    return economy["feed_pack_price"] / economy["feed_pack_size"]
+
+
+def profit_per_hen_minute(breed_id: str) -> float:
+    """Zysk z jednej kury na minute: jaja minus pasza."""
+    breed = BREEDS[breed_id]
+    eggs_per_minute = 60.0 / breed["egg_seconds"]
+    feed = BALANCE["economy"]["feed_per_hen_minute"] * feed_cost_per_unit()
+    return eggs_per_minute * breed["egg_value"] - feed
+
+
+def payback_minutes(breed_id: str) -> float:
+    """Po ilu minutach kura zwraca swoja cene z samych jaj."""
+    profit = profit_per_hen_minute(breed_id)
+    if profit <= 0:
+        return float("inf")
+    return BREEDS[breed_id]["price"] / profit
+
+
+def cycle_seconds(breed_id: str) -> float:
+    breed = BREEDS[breed_id]
+    return breed["incubate_seconds"] + breed["grow_seconds"]
+
+
+def breeding_profit_per_hour(breed_id: str, slots: int) -> float:
+    """Zysk z odchowywania i sprzedazy mlodych tej rasy, na godzine."""
+    breed = BREEDS[breed_id]
+    eggs_used = BALANCE["incubator"]["eggs_per_chick"]
+    revenue = breed["sell_price"] - eggs_used * breed["egg_value"]
+    return revenue * slots * 3600.0 / cycle_seconds(breed_id)
+
+
+def hens_to_saturate(breed_id: str, slots: int) -> int:
+    """Ile kur danej rasy trzeba, by inkubator nie stal pusty."""
+    per_chick = BALANCE["incubator"]["eggs_per_chick"]
+    needed = slots * per_chick * BREEDS[breed_id]["egg_seconds"] / cycle_seconds(breed_id)
+    return max(3, int(needed) + 1)
+
+
+def simulate(verbose: bool = True) -> dict:
+    money = float(BALANCE["start"]["money"])
+    feed = float(BALANCE["start"]["feed"])
+    hens: dict[str, int] = {}
+    for breed_id in BALANCE["start"]["hens"]:
+        hens[breed_id] = hens.get(breed_id, 0) + 1
+    owned_ever = set(hens)
+    unlocked = {b for b, d in BREEDS.items() if not d.get("unlock")}
+    incubating: list[list] = []
+    growing: list[list] = []
+    eggs: dict[str, int] = {}
+    timers = {b: 0.0 for b in BREEDS}
+
+    day_seconds = BALANCE["day"]["seconds"]
+    slots = BALANCE["incubator"]["slots"]
+    upgrades = list(BALANCE["incubator"].get("upgrades", []))
+    per_chick = BALANCE["incubator"]["eggs_per_chick"]
+    feed_rate = BALANCE["economy"]["feed_per_hen_minute"]
+    pack_size = BALANCE["economy"]["feed_pack_size"]
+    pack_price = BALANCE["economy"]["feed_pack_price"]
+    goal = BALANCE["win"]["money"]
+
+    history = []
+    starved = 0
+    seconds = 0.0
+    while seconds < MAX_HOURS * 3600:
+        seconds += STEP
+        day = int(seconds / day_seconds)
+        total_hens = sum(hens.values())
+        best = max((b for b in hens if hens[b] > 0),
+                   key=lambda b: BREEDS[b]["sell_price"], default=None)
+
+        # --- pasza -------------------------------------------------------
+        need = total_hens * feed_rate * 15  # zapas na 15 minut
+        while feed < need and money >= pack_price:
+            money -= pack_price
+            feed += pack_size
+        burn = total_hens * feed_rate * STEP / 60.0
+        if feed >= burn:
+            feed -= burn
+        else:
+            feed = 0.0
+            starved += 1
+            continue  # glodne kury nie znosza
+
+        # --- znoszenie jaj ----------------------------------------------
+        for breed_id, count in hens.items():
+            if count == 0:
+                continue
+            timers[breed_id] += STEP * count
+            interval = BREEDS[breed_id]["egg_seconds"]
+            while timers[breed_id] >= interval:
+                timers[breed_id] -= interval
+                eggs[breed_id] = eggs.get(breed_id, 0) + 1
+
+        # --- inkubator ---------------------------------------------------
+        for breed_id in sorted(hens, key=lambda b: -BREEDS[b]["sell_price"]):
+            while (len(incubating) + len(growing) < slots
+                   and eggs.get(breed_id, 0) >= per_chick and hens[breed_id] > 0):
+                eggs[breed_id] -= per_chick
+                incubating.append([breed_id, BREEDS[breed_id]["incubate_seconds"]])
+        for batch in list(incubating):
+            batch[1] -= STEP
+            if batch[1] <= 0:
+                incubating.remove(batch)
+                growing.append([batch[0], BREEDS[batch[0]]["grow_seconds"]])
+        for chick in list(growing):
+            chick[1] -= STEP
+            if chick[1] <= 0:
+                growing.remove(chick)
+                hens[chick[0]] = hens.get(chick[0], 0) + 1
+
+        # --- sprzedaz jaj: zapas tylko dla najlepszej rasy ---------------
+        for breed_id, count in list(eggs.items()):
+            reserve = slots * per_chick if breed_id == best else 0
+            surplus = count - reserve
+            if surplus > 0:
+                money += surplus * BREEDS[breed_id]["egg_value"]
+                eggs[breed_id] = reserve
+
+        # --- sprzedaz nadwyzki kur --------------------------------------
+        for breed_id in list(hens):
+            if breed_id == best:
+                keep = hens_to_saturate(breed_id, slots)
+            else:
+                keep = 1  # jedna zostaje do kolekcji
+            while hens[breed_id] > keep:
+                hens[breed_id] -= 1
+                money += BREEDS[breed_id]["sell_price"]
+
+        # --- rozbudowa inkubatora ---------------------------------------
+        while upgrades and money >= upgrades[0]["price"] * 2:
+            upgrade = upgrades.pop(0)
+            money -= upgrade["price"]
+            slots = upgrade["slots"]
+            history.append((seconds / 3600.0, "inkubator na %d jaj" % slots))
+
+        # --- odblokowania i zakup nowej rasy ----------------------------
+        for breed_id, breed in BREEDS.items():
+            if breed_id in unlocked:
+                continue
+            need_unlock = breed.get("unlock", {})
+            if (money >= need_unlock.get("money", 0)
+                    and day >= need_unlock.get("days", 0)
+                    and total_hens >= need_unlock.get("hens", 0)
+                    and feed >= need_unlock.get("feed", 0)
+                    and all(hens.get(r, 0) > 0 for r in need_unlock.get("breeds", []))):
+                unlocked.add(breed_id)
+                history.append((seconds / 3600.0, "odblokowana %s" % breed_id))
+        for breed_id in sorted(unlocked, key=lambda b: -BREEDS[b]["price"]):
+            if breed_id not in owned_ever and money >= BREEDS[breed_id]["price"] * 2:
+                money -= BREEDS[breed_id]["price"]
+                hens[breed_id] = hens.get(breed_id, 0) + 1
+                owned_ever.add(breed_id)
+                history.append((seconds / 3600.0,
+                                "kupiona pierwsza %s za %d zl" % (breed_id, BREEDS[breed_id]["price"])))
+
+        # --- warunki wygranej -------------------------------------------
+        if money >= goal:
+            return {"hours": seconds / 3600.0, "history": history, "hens": dict(hens),
+                    "money": money, "won": True, "by": "milion zlotych", "starved": starved}
+        if BALANCE["win"].get("collection") and all(hens.get(b, 0) > 0 for b in BREEDS):
+            return {"hours": seconds / 3600.0, "history": history, "hens": dict(hens),
+                    "money": money, "won": True, "by": "pelna kolekcja", "starved": starved}
+
+    return {"hours": MAX_HOURS, "history": history, "hens": dict(hens),
+            "money": money, "won": False, "starved": starved}
+
+
+if __name__ == "__main__":
+    start_slots = BALANCE["incubator"]["slots"]
+    max_slots = BALANCE["incubator"]["upgrades"][-1]["slots"]
+    print("rasa            jajko    cena  sprzedaz   zwrot z jaj    hodowla/h (%d slotow)" % max_slots)
+    for breed_id, breed in BREEDS.items():
+        payback = payback_minutes(breed_id)
+        payback_text = "%6.0f min" % payback if payback != float("inf") else "    nigdy"
+        print("%-12s %6.2f %7d %9d %13s %14.0f" % (
+            breed_id, breed["egg_value"], breed["price"], breed["sell_price"],
+            payback_text, breeding_profit_per_hour(breed_id, max_slots)))
+
+    print("\nsymulacja rozsadnego gracza (start: %d slotow):" % start_slots)
+    result = simulate()
+    for hours, what in result["history"]:
+        print("  %6.1f h  %s" % (hours, what))
+    if result["won"]:
+        print("  WYGRANA po %.1f h gry (%s), konto %.0f zl" % (
+            result["hours"], result["by"], result["money"]))
+    else:
+        print("  BRAK WYGRANEJ w %d h, konto %.0f zl — ekonomia za wolna" % (
+            MAX_HOURS, result["money"]))
+    if result["starved"]:
+        print("  uwaga: %d sekund bez paszy" % result["starved"])

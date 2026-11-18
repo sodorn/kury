@@ -8,7 +8,14 @@ const CHICK_SPRITE := "res://assets/sprites/animals/chick.svg"
 const SPEED := 44.0
 ## Pisklęta sa drobniejsze i bardziej rozbiegane.
 const CHICK_SPEED := 58.0
-const CHICK_SCALE := Vector2(0.72, 0.82)
+## Rozmiary podniesione o 40% wzgledem wersji 5.0 — w kure duzo latwiej trafic
+## palcem na telefonie.
+const CHICK_SCALE := Vector2(1.01, 1.15)
+const HEN_SCALE := Vector2(1.15, 1.33)
+## Chora kura rusza sie niechetnie i jest przygaszona.
+const SICK_SPEED := 18.0
+const SICK_TINT := Color(0.82, 0.86, 0.78)
+const SICK_REST_SECONDS := Vector2(3.0, 6.0)
 ## Ile sekund zwierze stoi i dziobie miedzy spacerami.
 const REST_SECONDS := Vector2(1.2, 3.4)
 const CHICK_REST_SECONDS := Vector2(0.4, 1.4)
@@ -18,6 +25,8 @@ const ARRIVED_DISTANCE := 8.0
 
 var breed_id: String = ""
 var is_chick := false
+## Kura chora: nie znosi jaj, ma nad soba banke z krzyzem i wkrotce padnie.
+var is_sick := false
 ## Zwierze jest w trakcie animacji znikania — scena ma go juz nie liczyc.
 var leaving := false
 
@@ -31,15 +40,14 @@ var _speed := SPEED
 var _rest_range := REST_SECONDS
 
 @onready var _sprite: Sprite2D = $Sprite
+@onready var _sick_mark: Sprite2D = $Sick
 
 
 ## `bounds` to obszar w ukladzie farmy, po ktorym zwierze moze chodzic.
-func setup(animal_breed_id: String, bounds: Rect2, chick: bool = false) -> void:
+func setup(animal_breed_id: String, bounds: Rect2, chick: bool = false, sick: bool = false) -> void:
 	breed_id = animal_breed_id
 	is_chick = chick
 	_bounds = bounds
-	_speed = CHICK_SPEED if chick else SPEED
-	_rest_range = CHICK_REST_SECONDS if chick else REST_SECONDS
 
 	var path: String = CHICK_SPRITE if chick else String(GameData.breed(breed_id).get("sprite", ""))
 	var texture := load(path) as Texture2D
@@ -50,11 +58,33 @@ func setup(animal_breed_id: String, bounds: Rect2, chick: bool = false) -> void:
 
 	position = _random_point()
 	_target = _random_point()
+	# Lekko rozne rozmiary, zeby stado nie wygladalo jak kopie jednej kury.
+	var range_used := CHICK_SCALE if chick else HEN_SCALE
+	var size := randf_range(range_used.x, range_used.y)
+	scale = Vector2(size, size)
+	set_sick(sick)
 	_rest_left = randf_range(0.0, _rest_range.y)
 	_rest_time = maxf(_rest_left, 0.01)
-	# Lekko rozne rozmiary, zeby stado nie wygladalo jak kopie jednej kury.
-	var size := randf_range(CHICK_SCALE.x, CHICK_SCALE.y) if chick else randf_range(0.82, 0.95)
-	scale = Vector2(size, size)
+
+
+## Przestawia zwierze miedzy stanem zdrowym i chorym.
+func set_sick(sick: bool) -> void:
+	is_sick = sick
+	_speed = SICK_SPEED if sick else (CHICK_SPEED if is_chick else SPEED)
+	_rest_range = SICK_REST_SECONDS if sick else (CHICK_REST_SECONDS if is_chick else REST_SECONDS)
+	if _sprite != null:
+		_sprite.modulate = SICK_TINT if sick else Color.WHITE
+	if _sick_mark != null:
+		_sick_mark.visible = sick
+		if sick:
+			_pulse_mark()
+
+
+## Banka nad chora kura lekko pulsuje, zeby wpadla w oko na pelnym wybiegu.
+func _pulse_mark() -> void:
+	var tween := create_tween().set_loops()
+	tween.tween_property(_sick_mark, "scale", Vector2(1.16, 1.16), 0.5).set_trans(Tween.TRANS_SINE)
+	tween.tween_property(_sick_mark, "scale", Vector2.ONE, 0.5).set_trans(Tween.TRANS_SINE)
 
 
 func _process(delta: float) -> void:

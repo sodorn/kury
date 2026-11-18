@@ -12,7 +12,7 @@ import random
 from pathlib import Path
 
 W, H = 1080, 2400
-RUN = (120, 1090, 960, 1500)          # x0, y0, x1, y1 wybiegu
+RUN = (50, 1040, 1030, 1575)          # x0, y0, x1, y1 wybiegu
 GATE = (480, 600)                     # przerwa w plocie (gora i dol)
 OUTLINE = "#7E4F2A"
 OUT_DIR = Path(__file__).resolve().parent.parent / "assets/sprites/world"
@@ -21,7 +21,7 @@ OUT_DIR = Path(__file__).resolve().parent.parent / "assets/sprites/world"
 BLOCKED = [
     (RUN[0] - 50, RUN[1] - 70, RUN[2] + 50, RUN[3] + 50),
     (160, 940, 920, 1070), (470, 1000, 610, 1100),
-    (470, 1490, 610, H), (160, 2030, 920, 2160),
+    (470, 1565, 610, H), (160, 2030, 920, 2160),
     (60, 520, 520, 990), (580, 540, 1010, 990),
     (30, 1600, 510, 2080), (560, 1610, 1040, 2080),
 ]
@@ -220,7 +220,7 @@ def ground():
         s.append(tuft(x, y, rnd).replace('stroke="#64BD45"', 'stroke="#ADCA84"'))
 
     # kamyki wzdluz sciezek
-    for y in (1005, 2095):
+    for y in (1000, 2095):
         for x in range(250, 840, 46):
             for side, off in ((-1, 52), (1, 52)):
                 if rnd.random() < 0.5:
@@ -240,8 +240,8 @@ def ground():
         s.append(butterfly(x, y, rnd))
 
     # karmnik i poidlo
-    s.append(feeder(250, 1180))
-    s.append(waterer(860, 1180))
+    s.append(feeder(160, 1120))
+    s.append(waterer(940, 1120))
 
     # plot: boki i tyl (przod jest osobnym sprite'em, zeby zaslanial kury)
     for x in (x0, x1):

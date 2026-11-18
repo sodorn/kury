@@ -24,8 +24,8 @@ func _refresh() -> void:
 	if state == null:
 		return
 	_money.set_value(state.money)
-	_eggs.set_value(state.eggs)
-	_feed.set_value(int(floor(state.feed)))
+	_eggs.set_value(state.egg_count())
+	_feed.set_value(floor(state.feed))
 	_animals.set_value(state.hen_count())
 
 

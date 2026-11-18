@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="90" viewBox="0 0 140 90">
+  <!-- Padla kura lezaca na boku. Kolory zgaszone, bez krwi: scena ma byc
+       smutna, nie makabryczna. Grafika jest bialoszara, a kod podbarwia ja
+       na kolor rasy i wygasza w miare rozkladu. -->
+  <defs>
+    <radialGradient id="dBody" cx="62" cy="48" r="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E8E2D6"/>
+      <stop offset="1" stop-color="#C7BFB1"/>
+    </radialGradient>
+  </defs>
+
+  <g stroke="#8A6A55" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="68" cy="78" rx="46" ry="8" fill="#6B8F4E" fill-opacity="0.22" stroke="none"/>
+
+    <!-- rozsypane piora obok -->
+    <path d="M18 70q-10-6-6-14q9 3 11 11Z" fill="#EFEAE0" stroke-width="3"/>
+    <path d="M118 66q10-5 7-13q-9 3-12 10Z" fill="#EFEAE0" stroke-width="3"/>
+
+    <!-- ogon opuszczony na ziemie -->
+    <path d="M26 56Q8 50 10 36Q26 42 34 52Z" fill="#B6AC9C"/>
+
+    <!-- tulow lezacy poziomo -->
+    <ellipse cx="64" cy="52" rx="42" ry="24" fill="url(#dBody)"/>
+
+    <!-- skrzydlo odstajace do gory -->
+    <path d="M48 42Q66 24 86 38Q70 54 50 52Q44 47 48 42Z" fill="#DCD4C6"/>
+
+    <!-- nogi sztywno w gore -->
+    <path d="M58 32v-16M58 16h-8M58 16h8" stroke="#C49B63" stroke-width="3.6"/>
+    <path d="M78 34v-14M78 20h-8M78 20h8" stroke="#C49B63" stroke-width="3.6"/>
+
+    <!-- glowa opadla w dol -->
+    <circle cx="104" cy="58" r="18" fill="#DED6C8"/>
+    <path d="M100 24q4-6 8-1" fill="none" stroke-width="3" stroke="#B6A99A"/>
+    <!-- dziob -->
+    <path d="M120 58l14 4-14 5Z" fill="#D2B178"/>
+    <!-- zamkniete oko -->
+    <path d="M106 54q5 2 9 0" fill="none" stroke-width="3.4"/>
+  </g>
+</svg>

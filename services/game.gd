@@ -46,6 +46,7 @@ func _process(delta: float) -> void:
 	_reported_no_feed = hungry
 
 	_check_unlocks()
+	_check_win()
 
 	_autosave_left -= delta
 	if _autosave_left <= 0.0:
@@ -62,11 +63,36 @@ func _report(result: Dictionary) -> void:
 	if int(result["hatched"]) > 0 or int(result["grown_up"]) > 0:
 		Events.resources_changed.emit()
 
+	var sick := int(result["got_sick"])
+	if sick > 0:
+		Events.notice.emit(tr("HINT_SICK") % sick)
+	var died_disease := int(result["died_disease"])
+	if died_disease > 0:
+		Events.notice.emit(tr("HINT_DIED_DISEASE") % died_disease)
+		Events.resources_changed.emit()
+	var died_hunger := int(result["died_hunger"])
+	if died_hunger > 0:
+		Events.notice.emit(tr("HINT_DIED_HUNGER") % died_hunger)
+		Events.resources_changed.emit()
+	var fox := int(result["fox_took"])
+	if fox > 0:
+		Events.fox_visited.emit(fox)
+		Events.notice.emit(tr("HINT_FOX") % fox)
+		Events.resources_changed.emit()
+
 
 func _check_unlocks() -> void:
 	for breed_id in Simulation.check_unlocks(state):
 		Events.breed_unlocked.emit(breed_id)
 		Events.notice.emit(tr("HINT_BREED_UNLOCKED") % tr(GameData.breed(breed_id).get("name", "")))
+
+
+func _check_win() -> void:
+	var reason := Simulation.check_win(state)
+	if reason.is_empty():
+		return
+	Events.game_won.emit(reason)
+	save()
 
 
 ## Wczytuje stan: najpierw lokalnie, potem (jesli wlaczony) z serwera.
@@ -130,42 +156,61 @@ func reset() -> void:
 
 ## Dolicza produkcje z czasu, kiedy gra byla zamknieta.
 func _catch_up(elapsed: float) -> void:
-	var max_hours := float(GameData.balance().get("offline", {}).get("max_hours", 8.0))
+	var max_hours := float(GameData.balance().get("offline", {}).get("max_hours", 12.0))
 	var seconds := clampf(elapsed, 0.0, max_hours * 3600.0)
 	if seconds < 1.0:
 		return
-	var result := Simulation.advance(state, seconds)
+	var result := Simulation.advance(state, seconds, true)
 	_check_unlocks()
+	_check_win()
 	var laid := int(result["eggs_laid"])
 	if laid > 0:
 		Events.notice.emit(tr("HINT_WELCOME_BACK") % laid)
+	var lost := int(result["died_hunger"]) + int(result["died_disease"]) + int(result["fox_took"])
+	if lost > 0:
+		Events.notice.emit(tr("HINT_LOST_WHILE_AWAY") % lost)
 
 
-## Zbiera jedno jajko z wybiegu. Zwraca false, jesli nie bylo czego zbierac.
-func collect_egg() -> bool:
-	if state.eggs_on_ground <= 0:
+# --- jaja ---------------------------------------------------------------
+
+
+## Zbiera z wybiegu jedno jajko danej rasy. Zwraca false, jesli go tam nie ma.
+func collect_egg_of_breed(breed_id: String) -> bool:
+	var index := state.eggs_on_ground.find(breed_id)
+	if index < 0:
 		return false
-	state.eggs_on_ground -= 1
-	state.eggs += 1
+	state.eggs_on_ground.remove_at(index)
+	state.add_egg(breed_id)
 	Events.resources_changed.emit()
 	return true
 
 
-## Sprzedaje wszystkie zebrane jaja. Zwraca zarobek.
-func sell_eggs() -> int:
-	if state.eggs <= 0:
-		return 0
+## Ile jaj kazdej rasy lezy na wybiegu: {"leghorn": 3}.
+func ground_eggs_by_breed() -> Dictionary:
+	var counts := {}
+	for breed_id: String in state.eggs_on_ground:
+		counts[breed_id] = int(counts.get(breed_id, 0)) + 1
+	return counts
+
+
+## Sprzedaje wszystkie zebrane jaja. Zwraca zarobek w zlotowkach.
+func sell_eggs() -> float:
 	var earned := state.eggs_value()
+	if earned <= 0.0:
+		return 0.0
 	state.money += earned
-	state.eggs = 0
+	state.eggs.clear()
 	Events.resources_changed.emit()
 	return earned
+
+
+# --- pasza --------------------------------------------------------------
 
 
 ## Kupuje jedna paczke paszy. Zwraca false przy braku pieniedzy.
 func buy_feed() -> bool:
 	var economy: Dictionary = GameData.balance().get("economy", {})
-	var price := int(economy.get("feed_pack_price", 0))
+	var price := float(economy.get("feed_pack_price", 0))
 	if state.money < price:
 		return false
 	state.money -= price
@@ -175,12 +220,15 @@ func buy_feed() -> bool:
 	return true
 
 
+# --- handel kurami ------------------------------------------------------
+
+
 ## Kupuje kure podanej rasy. Rasa musi byc odblokowana.
 func buy_hen(breed_id: String) -> bool:
 	var def := GameData.breed(breed_id)
 	if def.is_empty() or not state.is_unlocked(breed_id):
 		return false
-	var price := int(def.get("price", 0))
+	var price := float(def.get("price", 0))
 	if state.money < price:
 		return false
 	state.money -= price
@@ -191,15 +239,12 @@ func buy_hen(breed_id: String) -> bool:
 	return true
 
 
-## Sprzedaje jedna kure podanej rasy. Zwraca uzyskana kwote albo 0.
-func sell_hen(breed_id: String) -> int:
-	var index := -1
-	for i in state.chickens.size():
-		if state.chickens[i].breed_id == breed_id:
-			index = i
-			break
+## Sprzedaje jedna zdrowa kure danej rasy do dalszej hodowli — polowa ceny
+## zakupu. Chorych nikt do hodowli nie kupi. Zwraca uzyskana kwote albo 0.
+func sell_hen(breed_id: String) -> float:
+	var index := _find_hen(breed_id, false)
 	if index < 0:
-		return 0
+		return 0.0
 	var price := FarmState.hen_sell_price(breed_id)
 	state.chickens.remove_at(index)
 	state.money += price
@@ -208,30 +253,133 @@ func sell_hen(breed_id: String) -> int:
 	return price
 
 
+## Oddaje kure na mieso. Placa mniej niz za hodowlana, ale biora takze chore —
+## to jedyny sposob, zeby cos odzyskac z kury, ktora i tak padnie.
+func sell_hen_meat(breed_id: String) -> float:
+	var index := _find_hen(breed_id, true)
+	if index < 0:
+		index = _find_hen(breed_id, false)
+	if index < 0:
+		return 0.0
+	var price := FarmState.hen_meat_price(breed_id)
+	state.chickens.remove_at(index)
+	state.money += price
+	Events.hen_removed.emit(breed_id)
+	Events.resources_changed.emit()
+	return price
+
+
+## Indeks pierwszej kury danej rasy w zadanym stanie zdrowia; -1, gdy nie ma.
+func _find_hen(breed_id: String, sick: bool) -> int:
+	for i in state.chickens.size():
+		var hen: Chicken = state.chickens[i]
+		if hen.breed_id == breed_id and hen.sick == sick:
+			return i
+	return -1
+
+
+# --- weterynaria --------------------------------------------------------
+
+
+func medicine_price() -> float:
+	return float(GameData.balance().get("disease", {}).get("medicine_price", 140))
+
+
+## Cena zaszczepienia calego stada: oplata stala plus stawka od kury,
+## ktora szczepienia jeszcze nie ma.
+func vaccine_price() -> float:
+	var disease: Dictionary = GameData.balance().get("disease", {})
+	var base := float(disease.get("vaccine_price", 1200))
+	var per_hen := float(disease.get("vaccine_price_per_hen", 45))
+	return base + per_hen * state.unvaccinated_count()
+
+
+## Leczy jedna chora kure — najdrozsza, bo ja warto ratowac najbardziej.
+func buy_medicine() -> bool:
+	var price := medicine_price()
+	if state.money < price or state.sick_count() == 0:
+		return false
+	var best := -1
+	var best_value := -1.0
+	for i in state.chickens.size():
+		var hen: Chicken = state.chickens[i]
+		if not hen.sick:
+			continue
+		var value := float(GameData.breed(hen.breed_id).get("price", 0))
+		if value > best_value:
+			best_value = value
+			best = i
+	if best < 0:
+		return false
+	state.money -= price
+	var cured: Chicken = state.chickens[best]
+	cured.sick = false
+	cured.sick_seconds = 0.0
+	Events.resources_changed.emit()
+	Events.notice.emit(tr("HINT_CURED") % tr(GameData.breed(cured.breed_id).get("name", "")))
+	return true
+
+
+## Szczepi cale stado. Chroni do konca zycia, ale tylko kury, ktore zyja
+## teraz — mlode wyklute pozniej trzeba zaszczepic osobno.
+func buy_vaccine() -> bool:
+	if state.unvaccinated_count() == 0:
+		return false
+	var price := vaccine_price()
+	if state.money < price:
+		return false
+	state.money -= price
+	var count := 0
+	for hen: Chicken in state.chickens:
+		if hen.vaccinated:
+			continue
+		hen.vaccinated = true
+		hen.sick = false
+		hen.sick_seconds = 0.0
+		count += 1
+	Events.resources_changed.emit()
+	Events.notice.emit(tr("HINT_VACCINATED") % count)
+	return true
+
+
 # --- inkubator ----------------------------------------------------------
 
 
 func incubator_slots() -> int:
-	return int(GameData.balance().get("incubator", {}).get("slots", 3))
+	return state.incubator_slots()
 
 
 func eggs_per_chick() -> int:
 	return int(GameData.balance().get("incubator", {}).get("eggs_per_chick", 6))
 
 
-## Czy da sie wstawic jaja danej rasy do inkubatora.
+## Czy da sie wstawic jaja danej rasy do inkubatora. Potrzebne sa jaja
+## wlasnie tej rasy — z jaj leghorna nie wyklu je sie cemani.
 func can_incubate(breed_id: String) -> bool:
 	return state.owns_breed(breed_id) \
 			and state.incubating.size() < incubator_slots() \
-			and state.eggs >= eggs_per_chick()
+			and int(state.eggs.get(breed_id, 0)) >= eggs_per_chick()
 
 
-## Wstawia jaja do inkubatora. Rase bierzemy z posiadanego stada —
-## z jaj wlasnych kur wyklu je sie pisklę tej samej rasy.
 func incubate(breed_id: String) -> bool:
 	if not can_incubate(breed_id):
 		return false
-	state.eggs -= eggs_per_chick()
+	state.take_eggs(breed_id, eggs_per_chick())
 	state.incubating.append(EggBatch.create(breed_id, 1))
 	Events.resources_changed.emit()
+	return true
+
+
+## Rozbudowuje inkubator o kolejny poziom z balance.json.
+func upgrade_incubator() -> bool:
+	var upgrade := state.next_incubator_upgrade()
+	if upgrade.is_empty():
+		return false
+	var price := float(upgrade.get("price", 0))
+	if state.money < price:
+		return false
+	state.money -= price
+	state.incubator_level += 1
+	Events.resources_changed.emit()
+	Events.notice.emit(tr("HINT_INCUBATOR_UPGRADED") % state.incubator_slots())
 	return true

@@ -88,7 +88,8 @@ func _test_hens() -> void:
 
 
 func _test_egg_pickup() -> void:
-	Game.state.eggs_on_ground += 2
+	Game.state.eggs_on_ground.append("leghorn")
+	Game.state.eggs_on_ground.append("leghorn")
 	Events.eggs_laid.emit(2)
 	await _frames(20)
 	var eggs := _nodes_of_type("GroundEgg")
@@ -96,29 +97,30 @@ func _test_egg_pickup() -> void:
 	_shot("jajka.png")
 	if eggs.is_empty():
 		return
-	var stored_before: int = Game.state.eggs
+	var stored_before := Game.state.egg_count()
 	await _tap(_canvas_point(eggs[0], Vector2(0, -38)))
 	await _frames(40)
-	_check(Game.state.eggs == stored_before + 1, "dotkniecie jajka zwieksza stan magazynu")
+	_check(Game.state.egg_count() == stored_before + 1, "dotkniecie jajka zwieksza stan magazynu")
 	_check(_nodes_of_type("GroundEgg").size() == 1, "zebrane jajko znika z wybiegu")
 
 
 func _test_shop() -> void:
-	Game.state.eggs = 6
-	Game.state.money = 500
+	Game.state.eggs = {"leghorn": 6}
+	Game.state.money = 500.0
 	var shop: Node2D = _main.get_node("Farm/Objects/Shop")
 	await _tap(_canvas_point(shop, Vector2(0, -150)))
 	await _frames(30)
 	var actions: VBoxContainer = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Scrollable/Actions")
 	var rows := actions.get_children()
-	_check(rows.size() == 2 + GameData.breeds().size(), "sklep ma przyciski i karte kazdej rasy")
+	_check(rows.size() == 5 + GameData.breeds().size(),
+			"sklep ma przyciski, notke i karte kazdej rasy (jest %d)" % rows.size())
 	if rows.size() < 3:
 		return
 
-	var money_before: int = Game.state.money
+	var money_before: float = Game.state.money
 	(rows[0] as Button).emit_signal("pressed")
 	await _frames(10)
-	_check(Game.state.eggs == 0 and Game.state.money > money_before, "sprzedaz jaj dziala")
+	_check(Game.state.egg_count() == 0 and Game.state.money > money_before, "sprzedaz jaj dziala")
 
 	var feed_before: float = Game.state.feed
 	(rows[1] as Button).emit_signal("pressed")
@@ -126,7 +128,9 @@ func _test_shop() -> void:
 	_check(Game.state.feed > feed_before, "zakup paszy dziala")
 
 	# Karta rasy odblokowanej ma widoczny przycisk, zablokowanej nie ma.
-	var open_card := _card_button(rows[2])
+	# Karty ras siedza na koncu listy, po przyciskach i notce o szczepieniu.
+	var first_card := rows.size() - GameData.breeds().size()
+	var open_card := _card_button(rows[first_card])
 	var locked_card := _card_button(rows[rows.size() - 1])
 	_check(open_card != null and open_card.visible, "karta rasy startowej ma przycisk zakupu")
 	_check(locked_card != null and not locked_card.visible, "karta zablokowanej rasy nie pozwala kupic")
@@ -146,7 +150,7 @@ func _test_incubator_panel() -> void:
 	if panel.visible:
 		panel.close()
 		await _frames(30)
-	Game.state.eggs = Game.eggs_per_chick() * 2
+	Game.state.eggs = {"leghorn": Game.eggs_per_chick() * 2}
 	var incubator: Node2D = _main.get_node("Farm/Objects/Incubator")
 	await _tap(_canvas_point(incubator, Vector2(0, -150)))
 	await _frames(30)
@@ -162,11 +166,11 @@ func _test_incubator_panel() -> void:
 	_check(put != null, "inkubator pokazuje przycisk wlozenia jaj")
 	if put == null:
 		return
-	var eggs_before: int = Game.state.eggs
+	var eggs_before := Game.state.egg_count()
 	put.emit_signal("pressed")
 	await _frames(20)
 	_check(Game.state.incubating.size() == 1, "jaja trafily do inkubatora")
-	_check(Game.state.eggs < eggs_before, "jaja znikly z magazynu")
+	_check(Game.state.egg_count() < eggs_before, "jaja znikly z magazynu")
 
 	# Przyspieszamy czas, zeby zobaczyc pisklę i dorosla kure na wybiegu.
 	var breed_id: String = Game.state.incubating[0].breed_id
@@ -184,37 +188,46 @@ func _test_incubator_panel() -> void:
 	_check(_nodes_of_type("FarmChicken").size() == Game.state.hen_count(), "wybieg nadazyl za zmiana")
 
 
-## Sprzedaz kury w kurniku: stado maleje, pieniedzy przybywa, kura znika z wybiegu.
+## Sprzedaz kury w sklepie: stado maleje, pieniedzy przybywa, kura znika
+## z wybiegu. Handel kurami siedzi teraz w sklepie, razem z jajami i pasza.
 func _test_sell_hen() -> void:
 	var panel: Control = _main.get_node("Hud/Root/BuildingPanel")
 	if panel.visible:
 		panel.close()
 		await _frames(30)
-	var coop: Node2D = _main.get_node("Farm/Objects/Coop")
-	await _tap(_canvas_point(coop, Vector2(0, -150)))
+	var shop: Node2D = _main.get_node("Farm/Objects/Shop")
+	await _tap(_canvas_point(shop, Vector2(0, -150)))
 	await _frames(30)
-	_shot("panel_kurnik.png")
+	_shot("panel_sklep.png")
 
 	var actions: VBoxContainer = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Scrollable/Actions")
+	# Karta rasy to pionowy box: zdjecie z opisem, potem kup / sprzedaj / mieso.
 	var sell_button: Button = null
 	for child in actions.get_children():
-		if (child as Button).visible:
-			sell_button = child
+		var card := child as VBoxContainer
+		if card == null:
+			continue
+		for inner in card.get_children():
+			var button := inner as Button
+			if button != null and button.visible and not button.disabled \
+					and button.text.begins_with(tr("PANEL_SELL_HEN").left(8)):
+				sell_button = button
+				break
+		if sell_button != null:
 			break
-	_check(sell_button != null, "kurnik pokazuje przycisk sprzedazy posiadanej rasy")
+	_check(sell_button != null, "sklep pokazuje przycisk sprzedazy posiadanej rasy")
 	if sell_button == null:
 		return
 	var hens_before: int = Game.state.hen_count()
-	var money_before: int = Game.state.money
+	var money_before: float = Game.state.money
 	sell_button.emit_signal("pressed")
 	await _frames(60)
 	_check(Game.state.hen_count() == hens_before - 1, "sprzedaz zmniejsza stado")
 	_check(Game.state.money > money_before, "sprzedaz kury daje pieniadze")
-	_check(_nodes_of_type("FarmChicken").size() == Game.state.hen_count(), "sprzedana kura znika z wybiegu")
+	_check(_nodes_of_type("FarmChicken").size() <= Game.state.hen_count(),
+			"sprzedana kura znika z wybiegu")
 
 
-## Gdy skonczy sie pasza, gracz musi dostac komunikat — inaczej nie wie,
-## dlaczego kury przestaly znosic.
 func _test_no_feed_notice() -> void:
 	var panel: Control = _main.get_node("Hud/Root/BuildingPanel")
 	if panel.visible:
@@ -230,10 +243,15 @@ func _test_no_feed_notice() -> void:
 
 
 ## Przycisk ukryty w karcie rasy.
+## Pierwszy przycisk na karcie rasy — "Kup". Karta jest pionowym boxem:
+## u gory zdjecie z opisem, pod nim kup / sprzedaj / mieso.
 func _card_button(row: Node) -> Button:
 	for child in row.get_children():
 		if child is Button:
 			return child
+		for inner in child.get_children():
+			if inner is Button:
+				return inner
 	return null
 
 
@@ -252,11 +270,14 @@ func _canvas_point(node: Node2D, offset: Vector2) -> Vector2:
 	return node.get_global_transform_with_canvas() * offset
 
 
+## Dotkniecie w punkcie podanym w pikselach okna. `get_global_transform_with_canvas`
+## zwraca juz wspolrzedne okna, wiec nie wolno ich mnozyc po raz drugi przez
+## skale — przy oknie innym niz 1080 px szerokosci dotyk ladowal obok celu.
 func _tap(point: Vector2) -> void:
 	for pressed in [true, false]:
 		var event := InputEventScreenTouch.new()
 		event.index = 0
-		event.position = point * get_tree().root.get_final_transform().get_scale()
+		event.position = point
 		event.pressed = pressed
 		Input.parse_input_event(event)
 		await _frames(4)

@@ -3,8 +3,11 @@ extends PanelContainer
 ## Licznik zasobu w gornym pasku: ikona + liczba.
 
 @export var icon: Texture2D
+## Licznik pieniedzy pokazuje kwote ze zlotowkami, reszta - zwykla liczbe.
+@export var is_money := false
 
-var _value: int = -1
+var _value := -1.0
+var _text := ""
 
 @onready var _icon: TextureRect = $Row/Icon
 @onready var _label: Label = $Row/Value
@@ -14,12 +17,14 @@ func _ready() -> void:
 	_icon.texture = icon
 
 
-func set_value(value: int) -> void:
-	if value == _value:
+func set_value(value: float) -> void:
+	var text := NumberFormat.amount_only(value) if is_money else NumberFormat.grouped(int(value))
+	if text == _text:
 		return
-	var animate := _value >= 0
+	var animate := _value >= 0.0
 	_value = value
-	_label.text = NumberFormat.grouped(value)
+	_text = text
+	_label.text = text
 	if animate:
 		_pop()
 

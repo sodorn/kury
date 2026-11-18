@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="190" height="130" viewBox="0 0 190 130">
+  <!-- Lis skradajacy sie w prawo. Ten sam styl co kury: gruby jasny kontur,
+       gradienty, zadnych filtrow SVG (ThorVG ich nie obsluguje). -->
+  <defs>
+    <radialGradient id="fxBody" cx="76" cy="62" r="70" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFA863"/>
+      <stop offset="0.6" stop-color="#F08A42"/>
+      <stop offset="1" stop-color="#D46A28"/>
+    </radialGradient>
+    <radialGradient id="fxHead" cx="146" cy="48" r="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFB273"/>
+      <stop offset="1" stop-color="#E67D36"/>
+    </radialGradient>
+    <linearGradient id="fxTail" x1="4" y1="40" x2="56" y2="86" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF3DF"/>
+      <stop offset="0.45" stop-color="#F59A4E"/>
+      <stop offset="1" stop-color="#D46A28"/>
+    </linearGradient>
+  </defs>
+
+  <g stroke="#8A6A55" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="96" cy="120" rx="68" ry="8" fill="#6B8F4E" fill-opacity="0.26" stroke="none"/>
+
+    <!-- puszysta kita z bialym koncem -->
+    <path d="M44 78Q6 86 10 48Q26 30 44 46Q58 62 50 80Z" fill="url(#fxTail)"/>
+    <path d="M14 54Q8 72 24 80Q14 68 20 56Z" fill="#FFF6E6" stroke="none"/>
+
+    <!-- nogi w pol kroku -->
+    <path d="M62 92v22M78 96v18" stroke="#C4601F" stroke-width="9"/>
+    <path d="M108 92v22M124 96v18" stroke="#D46A28" stroke-width="9"/>
+
+    <!-- tulow przyczajony, niski -->
+    <ellipse cx="94" cy="70" rx="56" ry="29" fill="url(#fxBody)"/>
+    <path d="M52 84Q94 98 138 82Q96 92 52 84Z" fill="#FFF3DF" stroke="none"/>
+
+    <!-- glowa -->
+    <circle cx="146" cy="52" r="28" fill="url(#fxHead)"/>
+    <!-- uszy -->
+    <path d="M128 32L122 4l24 14Z" fill="#E67D36"/>
+    <path d="M156 28L166 4l10 24Z" fill="#E67D36"/>
+    <path d="M131 28l-3-14l12 7Z" fill="#8A5A3C" stroke="none"/>
+    <path d="M160 26l6-13l5 13Z" fill="#8A5A3C" stroke="none"/>
+
+    <!-- jasny pysk -->
+    <path d="M150 50q28 0 32 14q-6 14-32 12q-10-14 0-26Z" fill="#FFF6E6"/>
+    <!-- nos -->
+    <ellipse cx="184" cy="62" rx="6" ry="5" fill="#5C4030" stroke="none"/>
+
+    <!-- oko przymkniete, lis sie skrada -->
+    <path d="M150 44q7-4 13 0" fill="none" stroke-width="4"/>
+    <circle cx="156" cy="48" r="4" fill="#5C4030" stroke="none"/>
+    <circle cx="157.4" cy="46.6" r="1.5" fill="#FFFFFF" stroke="none"/>
+  </g>
+</svg>

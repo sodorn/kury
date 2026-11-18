@@ -28,3 +28,11 @@ signal breed_unlocked(breed_id: String)
 ## Krotki komunikat dla gracza (np. koniec paszy).
 @warning_ignore("unused_signal")
 signal notice(text: String)
+
+## Lis odwiedzil wybieg i porwal `count` kur — scena ma to pokazac.
+@warning_ignore("unused_signal")
+signal fox_visited(count: int)
+
+## Gra zostala wygrana; `reason` to "money" albo "collection".
+@warning_ignore("unused_signal")
+signal game_won(reason: String)

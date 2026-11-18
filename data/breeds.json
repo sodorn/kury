@@ -6,13 +6,13 @@
 		"rarity": "RARITY_COMMON",
 		"sprite": "res://assets/sprites/animals/hen_white.svg",
 		"photo": "res://assets/photos/leghorn.jpg",
-		"egg_seconds": 40,
-		"feed_per_minute": 0.5,
-		"egg_value": 5,
-		"price": 80,
-		"sell_price": 40,
-		"incubate_seconds": 150,
-		"grow_seconds": 200
+		"egg_seconds": 40.0,
+		"egg_value": 0.4,
+		"price": 36,
+		"sell_price": 18,
+		"meat_price": 12,
+		"incubate_seconds": 60.0,
+		"grow_seconds": 90.0
 	},
 	{
 		"id": "rhode",
@@ -21,14 +21,36 @@
 		"rarity": "RARITY_COMMON",
 		"sprite": "res://assets/sprites/animals/hen_brown.svg",
 		"photo": "res://assets/photos/rhode.jpg",
-		"egg_seconds": 65,
-		"feed_per_minute": 0.6,
-		"egg_value": 11,
-		"price": 260,
-		"sell_price": 160,
-		"incubate_seconds": 180,
-		"grow_seconds": 240,
-		"unlock": {"money": 200, "hens": 3, "feed": 10}
+		"egg_seconds": 48.0,
+		"egg_value": 0.55,
+		"price": 50,
+		"sell_price": 25,
+		"meat_price": 16,
+		"incubate_seconds": 70.0,
+		"grow_seconds": 100.0,
+		"unlock": {
+			"money": 250,
+			"days": 1
+		}
+	},
+	{
+		"id": "nagoszyja",
+		"name": "BREED_NAGOSZYJA_NAME",
+		"desc": "BREED_NAGOSZYJA_DESC",
+		"rarity": "RARITY_UNCOMMON",
+		"sprite": "res://assets/sprites/animals/hen_naked_neck.svg",
+		"photo": "res://assets/photos/nagoszyja.jpg",
+		"egg_seconds": 56.0,
+		"egg_value": 0.7,
+		"price": 80,
+		"sell_price": 40,
+		"meat_price": 20,
+		"incubate_seconds": 80.0,
+		"grow_seconds": 120.0,
+		"unlock": {
+			"money": 900,
+			"hens": 6
+		}
 	},
 	{
 		"id": "araukana",
@@ -37,30 +59,19 @@
 		"rarity": "RARITY_UNCOMMON",
 		"sprite": "res://assets/sprites/animals/hen_araukana.svg",
 		"photo": "res://assets/photos/araukana.jpg",
-		"egg_seconds": 80,
-		"feed_per_minute": 0.65,
-		"egg_value": 19,
-		"price": 700,
-		"sell_price": 450,
-		"incubate_seconds": 210,
-		"grow_seconds": 280,
-		"unlock": {"money": 600, "days": 1, "hens": 5, "feed": 20, "breeds": ["rhode"]}
-	},
-	{
-		"id": "czubatka",
-		"name": "BREED_CZUBATKA_NAME",
-		"desc": "BREED_CZUBATKA_DESC",
-		"rarity": "RARITY_UNCOMMON",
-		"sprite": "res://assets/sprites/animals/hen_polish.svg",
-		"photo": "res://assets/photos/czubatka.jpg",
-		"egg_seconds": 95,
-		"feed_per_minute": 0.7,
-		"egg_value": 28,
-		"price": 1600,
-		"sell_price": 1100,
-		"incubate_seconds": 240,
-		"grow_seconds": 320,
-		"unlock": {"money": 1500, "days": 2, "hens": 7, "feed": 30}
+		"egg_seconds": 64.0,
+		"egg_value": 0.95,
+		"price": 140,
+		"sell_price": 70,
+		"meat_price": 22,
+		"incubate_seconds": 90.0,
+		"grow_seconds": 140.0,
+		"unlock": {
+			"money": 3000,
+			"days": 3,
+			"hens": 10
+		},
+		"egg_tint": "#A8DCD2"
 	},
 	{
 		"id": "jedwabista",
@@ -69,47 +80,85 @@
 		"rarity": "RARITY_RARE",
 		"sprite": "res://assets/sprites/animals/hen_silkie.svg",
 		"photo": "res://assets/photos/jedwabista.jpg",
-		"egg_seconds": 130,
-		"feed_per_minute": 0.55,
-		"egg_value": 36,
-		"price": 3400,
-		"sell_price": 2500,
-		"incubate_seconds": 240,
-		"grow_seconds": 320,
+		"egg_seconds": 72.0,
+		"egg_value": 1.2,
+		"price": 220,
+		"sell_price": 110,
+		"meat_price": 18,
+		"incubate_seconds": 100.0,
+		"grow_seconds": 160.0,
 		"incubation_bonus": 0.5,
-		"unlock": {"money": 3000, "days": 3, "hens": 9, "feed": 40}
+		"unlock": {
+			"money": 8000,
+			"breeds": [
+				"araukana"
+			]
+		},
+		"egg_tint": "#F6E7CC"
 	},
 	{
-		"id": "nagoszyja",
-		"name": "BREED_NAGOSZYJA_NAME",
-		"desc": "BREED_NAGOSZYJA_DESC",
+		"id": "brahma",
+		"name": "BREED_BRAHMA_NAME",
+		"desc": "BREED_BRAHMA_DESC",
 		"rarity": "RARITY_RARE",
-		"sprite": "res://assets/sprites/animals/hen_naked_neck.svg",
-		"photo": "res://assets/photos/nagoszyja.jpg",
-		"egg_seconds": 110,
-		"feed_per_minute": 0.4,
-		"egg_value": 44,
-		"price": 7000,
-		"sell_price": 5200,
-		"incubate_seconds": 270,
-		"grow_seconds": 340,
-		"unlock": {"money": 6500, "days": 4, "hens": 11, "feed": 50}
+		"sprite": "res://assets/sprites/animals/hen_brahma.svg",
+		"photo": "res://assets/photos/brahma.jpg",
+		"egg_seconds": 80.0,
+		"egg_value": 1.45,
+		"price": 350,
+		"sell_price": 175,
+		"meat_price": 40,
+		"incubate_seconds": 110.0,
+		"grow_seconds": 180.0,
+		"unlock": {
+			"money": 22000,
+			"hens": 16
+		},
+		"egg_tint": "#F0DCC0"
+	},
+	{
+		"id": "czubatka",
+		"name": "BREED_CZUBATKA_NAME",
+		"desc": "BREED_CZUBATKA_DESC",
+		"rarity": "RARITY_RARE",
+		"sprite": "res://assets/sprites/animals/hen_polish.svg",
+		"photo": "res://assets/photos/czubatka.jpg",
+		"egg_seconds": 88.0,
+		"egg_value": 1.75,
+		"price": 600,
+		"sell_price": 300,
+		"meat_price": 24,
+		"incubate_seconds": 120.0,
+		"grow_seconds": 200.0,
+		"unlock": {
+			"money": 55000,
+			"days": 7,
+			"breeds": [
+				"jedwabista"
+			]
+		}
 	},
 	{
 		"id": "sultanka",
 		"name": "BREED_SULTANKA_NAME",
 		"desc": "BREED_SULTANKA_DESC",
-		"rarity": "RARITY_LEGENDARY",
+		"rarity": "RARITY_EPIC",
 		"sprite": "res://assets/sprites/animals/hen_sultan.svg",
 		"photo": "res://assets/photos/sultanka.jpg",
-		"egg_seconds": 180,
-		"feed_per_minute": 0.75,
-		"egg_value": 72,
-		"price": 14000,
-		"sell_price": 10500,
-		"incubate_seconds": 300,
-		"grow_seconds": 400,
-		"unlock": {"money": 13000, "days": 5, "hens": 13, "feed": 60}
+		"egg_seconds": 100.0,
+		"egg_value": 2.3,
+		"price": 1400,
+		"sell_price": 700,
+		"meat_price": 28,
+		"incubate_seconds": 140.0,
+		"grow_seconds": 230.0,
+		"unlock": {
+			"money": 160000,
+			"hens": 24,
+			"breeds": [
+				"czubatka"
+			]
+		}
 	},
 	{
 		"id": "cemani",
@@ -118,13 +167,21 @@
 		"rarity": "RARITY_LEGENDARY",
 		"sprite": "res://assets/sprites/animals/hen_cemani.svg",
 		"photo": "res://assets/photos/cemani.jpg",
-		"egg_seconds": 210,
-		"feed_per_minute": 0.8,
-		"egg_value": 115,
-		"price": 28000,
-		"sell_price": 21000,
-		"incubate_seconds": 330,
-		"grow_seconds": 440,
-		"unlock": {"money": 26000, "days": 6, "hens": 15, "feed": 80}
+		"egg_seconds": 120.0,
+		"egg_value": 3.0,
+		"price": 6000,
+		"sell_price": 3000,
+		"meat_price": 60,
+		"incubate_seconds": 160.0,
+		"grow_seconds": 260.0,
+		"unlock": {
+			"money": 600000,
+			"days": 14,
+			"hens": 25,
+			"breeds": [
+				"sultanka"
+			]
+		},
+		"egg_tint": "#E6D2B4"
 	}
 ]

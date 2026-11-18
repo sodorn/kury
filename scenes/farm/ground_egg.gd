@@ -10,11 +10,25 @@ var _pressed_touch: int = -1
 var _pressed_at := Vector2.ZERO
 ## Jajko juz zebrane — scena ma go nie liczyc.
 var collected := false
+## Rasa kury, ktora zniosla to jajko. Decyduje o cenie i o odcieniu skorupki.
+var breed_id: String = ""
 
 @onready var _sprite: Sprite2D = $Sprite
 
 
+## Ustawia rase i miejsce. Wolane zaraz po dodaniu do sceny.
+func setup(egg_breed_id: String, spot: Vector2) -> void:
+	breed_id = egg_breed_id
+	position = spot
+	var tint := String(GameData.breed(breed_id).get("egg_tint", ""))
+	if not tint.is_empty() and _sprite != null:
+		_sprite.modulate = Color(tint)
+
+
 func _ready() -> void:
+	var tint := String(GameData.breed(breed_id).get("egg_tint", ""))
+	if not tint.is_empty():
+		_sprite.modulate = Color(tint)
 	# Pojawienie sie: jajko "wyskakuje" z ziemi.
 	_sprite.scale = Vector2(0.2, 0.2)
 	var tween := create_tween()
@@ -39,7 +53,7 @@ func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> vo
 func collect() -> void:
 	if collected:
 		return
-	if not Game.collect_egg():
+	if not Game.collect_egg_of_breed(breed_id):
 		queue_free()
 		return
 	collected = true

@@ -4,11 +4,13 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 4 zakonczony** (wersja 5.0): zapis lokalny i serwerowy,
-  czas offline, inkubator z pisklętami, osiem ras z odblokowywaniem.
+- Aktualny etap: **ETAP 5 zakonczony** (wersja 6.0): ekonomia w zlotowkach,
+  dziewiec ras, glod, choroby, szczepienia, lis, handel kurami w sklepie,
+  rozbudowa inkubatora i dwa warunki wygranej.
 - Wersje grafiki: **1.0** plaski wektor (galaz `v1.0-grafika-plaska`, commit 6ea3a3c),
   **2.1** pastelowa, miekkie kontury, zaokraglone sylwetki — aktualna.
-- Wersje do cofniecia sie: `v1.0-grafika-plaska`, `v3.0-etap3`, `v4.0-zapis` (galezie na GitHubie).
+- Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
+  `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -51,6 +53,8 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
   kompiluje sie, zanim zarejestruja sie autoloady, i wtedy skrypty scen nie
   daja sie zaladowac (wezly traca skrypt bez widocznego bledu).
 - Zapis gry (od ETAPU 4): `user://save.json` z polem `version` i migracjami.
+  Format 3 (wersja 6.0): pieniadze ulamkowe, jaja liczone wedlug rasy,
+  zwloki, choroby, poziom inkubatora, stan wygranej.
 - Postep offline (od ETAPU 4): jedna funkcja `advance(state, dt)` dla ticka
   na zywo i nadrabiania; limit czasu offline w `balance.json`.
 
@@ -71,6 +75,8 @@ assets/      sprites/world, sprites/buildings, ui, fonts, icon.svg
 tests/       tests.tscn + run_tests.gd    logika, dane, scena farmy (headless)
              smoke_ui.tscn + smoke_ui.gd  klikanie w budynki + zrzuty ekranu
 tools/       gen_ground.py          generator tla i przedniego plotu
+             balance_model.py       model ekonomii: czy liczby maja sens
+             build_web.sh           eksport wersji przegladarkowej
 ```
 
 ## Zapis po stronie serwera
@@ -224,3 +230,76 @@ godot --headless --path . res://tests/tests.tscn
 godot --path . res://tests/smoke_ui.tscn -- <katalog_na_zrzuty>
 python3 tools/gen_ground.py
 ```
+
+## Ekonomia i zdarzenia (ETAP 5, wersja 6.0)
+
+### Pieniadze i ceny
+
+- Wszystkie kwoty sa w **zlotowkach, ulamkowo** (`money: float`), bo jajko moze
+  kosztowac 40 groszy. Wyswietlanie wylacznie przez `NumberFormat.money`.
+- Ceny kur wziete z polskiego rynku (ogloszenia 2025-2026): nioska 36 zl,
+  Rhode Island 50 zl, nagoszyja 80 zl, araukana 140 zl, jedwabista 220 zl,
+  brahma 350 zl, czubatka 600 zl, sultanka 1400 zl, Ayam Cemani 6000 zl.
+  Gorny kraniec jest rozciagniety wzgledem typowych ogloszen (Cemani bez
+  rodowodu chodzi juz od ~100 zl), bo gra potrzebuje rozpietosci.
+- **Sprzedaz kury = dokladnie polowa ceny zakupu.** Jest na to test, wiec
+  przy zmianie ceny trzeba zmienic obie liczby.
+- **Mieso** (`meat_price`) jest zawsze tansze od sprzedazy hodowlanej i tez
+  ma test. Sens miesa: skupuje takze **chore** kury, ktorych nikt nie kupi
+  do hodowli. To jedyny sposob, zeby cos odzyskac z kury, ktora i tak padnie.
+- Jajka: od 0,40 zl (leghorn) do 3,00 zl (cemani). Cena jajka jest kotwica
+  calego balansu — od niej liczy sie reszta.
+- Pasza: worek 25 kg za 60 zl (2,40 zl/kg, tyle co naprawde). **Kazda kura
+  zjada tyle samo**, niezaleznie od rasy; pisklę polowe porcji.
+
+### Model ekonomii
+
+- `tools/balance_model.py` liczy oplacalnosc kazdej rasy i symuluje rozsadnego
+  gracza. Uruchamiac po **kazdej** zmianie cen w `data/*.json`.
+- Stan na wersje 6.0: pelna kolekcja ras po ~19,5 h gry, milion zlotych po
+  ~21,7 h. Oba warunki wygranej wypadaja prawie rownoczesnie — o to chodzilo.
+- Zarabia sie nie na jajach, tylko na **hodowli**: z 6 jaj wyklu wa sie pisklę,
+  ktore po odchowaniu sprzedaje sie za polowe ceny rasy. Dlatego droga rasa
+  oplaca sie mimo tej samej paszy. Jaja same w sobie ledwie pokrywaja pasze.
+- Waskim gardlem jest liczba miejsc w inkubatorze, stad rozbudowa:
+  3 -> 6 (1200 zl) -> 10 (12 000 zl) -> 15 (90 000 zl).
+
+### Zdarzenia
+
+- **Glod**: po `hunger.grace_minutes` bez paszy kury padaja po jednej co
+  `death_interval_seconds` i zostawiaja zwloki, ktore rozkladaja sie
+  `corpse_seconds`. Pozycja zwlok siedzi w stanie gry, nie w scenie — po
+  wznowieniu leza tam, gdzie padly.
+- **Choroby**: `disease.chance_per_hen_hour` na kure. Chora nie znosi jaj
+  i po `death_minutes` pada. Lek leczy jedna kure (wybiera najdrozsza chora).
+  Szczepienie chroni do konca zycia, ale **tylko kury zyjace w chwili
+  szczepienia** — mlode wyklute pozniej trzeba zaszczepic osobno.
+- **Lis**: raz na `fox.min_hours`-`max_hours` zabiera 20-90% stada, ale nigdy
+  calego i nie przychodzi do stada mniejszego niz `min_hens`. Zwlok nie ma,
+  bo lis zabiera kury ze soba. Przebiega przez wybieg (scenes/farm/fox.tscn).
+- **Bezpiecznik offline**: przy nadrabianiu czasu laczne straty (glod +
+  choroby + lis) nie moga przekroczyc `hunger.offline_max_share` stada.
+  Bez tego powrot po dobie oznaczalby pusty wybieg i koniec zabawy.
+
+### Wygrana
+
+- Dwa warunki, oba w `balance.json`: `win.money` (milion zlotych) albo
+  `win.collection` (po jednej kurze kazdej rasy). Stan wygranej jest zapisany,
+  wiec okno pokazuje sie raz. Gra toczy sie dalej.
+
+### Wybieg
+
+- Obszar chodzenia kur siedzi w `balance.json` (`run.area`) i czyta go
+  **zarowno symulacja** (kladzie zwloki), **jak i scena**. Przy zmianie
+  trzeba przegenerowac tlo (`tools/gen_ground.py` — stala `RUN`) i przesunac
+  `FenceFront` w `farm.tscn`. Te trzy miejsca musza sie zgadzac.
+- Kury i jaja sa o 40% wieksze niz w 5.0 (latwiej trafic palcem).
+- `run.max_visible_hens` ogranicza liczbe rysowanych kur; przy wiekszym stadzie
+  scena pokazuje proporcjonalna probke, ale po jednej sztuce kazdej rasy.
+  Chore kury pokazywane sa zawsze, bo to one wymagaja reakcji.
+
+### Zdjecia ras w sklepie
+
+- Karta rasy pokazuje `assets/photos/<id>.jpg`, a gdy pliku nie ma — rysunek
+  z wybiegu. Dzieki temu gra dziala bez zdjec. Lista nazw plikow i wymagania:
+  `assets/photos/CZYTAJ_TO.md`.

@@ -11,20 +11,23 @@ extends RefCounted
 
 const PATH := "user://save.json"
 ## Numer formatu zapisu. Podnosic przy KAZDEJ zmianie ukladu pol.
-const VERSION := 2
+const VERSION := 3
 
 
 ## Zamienia stan gry na slownik gotowy do zapisu.
 static func to_dict(state: FarmState) -> Dictionary:
 	var hens := []
 	for hen: Chicken in state.chickens:
-		hens.append({"breed": hen.breed_id, "since_last_egg": hen.since_last_egg})
+		hens.append(hen.to_dict())
 	var batches := []
 	for batch: EggBatch in state.incubating:
 		batches.append({"breed": batch.breed_id, "elapsed": batch.elapsed, "count": batch.count})
 	var chicks := []
 	for chick: Chick in state.chicks:
 		chicks.append({"breed": chick.breed_id, "grown": chick.grown})
+	var corpses := []
+	for corpse: Corpse in state.corpses:
+		corpses.append(corpse.to_dict())
 	return {
 		"version": VERSION,
 		"saved_at": Time.get_unix_time_from_system(),
@@ -32,11 +35,18 @@ static func to_dict(state: FarmState) -> Dictionary:
 		"eggs": state.eggs,
 		"eggs_on_ground": state.eggs_on_ground,
 		"feed": state.feed,
+		"day_fraction": state.day_fraction,
 		"days": state.days,
 		"unlocked": state.unlocked_breeds,
 		"chickens": hens,
 		"incubating": batches,
 		"chicks": chicks,
+		"corpses": corpses,
+		"incubator_level": state.incubator_level,
+		"fox_timer": state.fox_timer,
+		"hunger_seconds": state.hunger_seconds,
+		"won": state.won,
+		"win_reason": state.win_reason,
 	}
 
 
@@ -52,11 +62,25 @@ static func from_dict(data: Dictionary) -> Dictionary:
 	data = _migrate(data, version)
 
 	var state := FarmState.new()
-	state.money = int(data.get("money", 0))
-	state.eggs = int(data.get("eggs", 0))
-	state.eggs_on_ground = int(data.get("eggs_on_ground", 0))
+	state.money = float(data.get("money", 0))
 	state.feed = float(data.get("feed", 0.0))
 	state.days = int(data.get("days", 0))
+	state.day_fraction = clampf(float(data.get("day_fraction", 0.0)), 0.0, 1.0)
+	state.incubator_level = maxi(0, int(data.get("incubator_level", 0)))
+	state.fox_timer = float(data.get("fox_timer", -1.0))
+	state.hunger_seconds = maxf(0.0, float(data.get("hunger_seconds", 0.0)))
+	state.won = bool(data.get("won", false))
+	state.win_reason = String(data.get("win_reason", ""))
+	# Jaja liczone wedlug rasy kury, ktora je zniosla.
+	for breed_id: String in Dictionary(data.get("eggs", {})):
+		if GameData.breed(breed_id).is_empty():
+			continue
+		var count := int(Dictionary(data.get("eggs", {}))[breed_id])
+		if count > 0:
+			state.eggs[breed_id] = count
+	for breed_id: String in data.get("eggs_on_ground", []):
+		if not GameData.breed(breed_id).is_empty():
+			state.eggs_on_ground.append(breed_id)
 	for breed_id: String in data.get("unlocked", []):
 		if not GameData.breed(breed_id).is_empty() and not state.unlocked_breeds.has(breed_id):
 			state.unlocked_breeds.append(breed_id)
@@ -66,7 +90,7 @@ static func from_dict(data: Dictionary) -> Dictionary:
 		if GameData.breed(breed_id).is_empty():
 			push_warning("SaveGame: pomijam kure nieznanej rasy '%s'" % breed_id)
 			continue
-		state.chickens.append(Chicken.create(breed_id, float(entry.get("since_last_egg", 0.0))))
+		state.chickens.append(Chicken.from_dict(entry))
 	for entry: Dictionary in data.get("incubating", []):
 		var breed_id := String(entry.get("breed", ""))
 		if GameData.breed(breed_id).is_empty():
@@ -78,7 +102,13 @@ static func from_dict(data: Dictionary) -> Dictionary:
 		if GameData.breed(breed_id).is_empty():
 			continue
 		state.chicks.append(Chick.create(breed_id, float(entry.get("grown", 0.0))))
+	for entry: Dictionary in data.get("corpses", []):
+		if GameData.breed(String(entry.get("breed", ""))).is_empty():
+			continue
+		state.corpses.append(Corpse.from_dict(entry))
 	state.ensure_starting_unlocks()
+	if state.fox_timer < 0.0:
+		state.reset_fox_timer()
 
 	var saved_at := float(data.get("saved_at", 0.0))
 	var elapsed := maxf(0.0, Time.get_unix_time_from_system() - saved_at)
@@ -127,4 +157,23 @@ static func _migrate(data: Dictionary, from_version: int) -> Dictionary:
 		data["days"] = 0
 		data["unlocked"] = []
 		data["version"] = 2
+	if from_version < 3:
+		# Wersja 3: jaja liczone wedlug rasy, pieniadze ulamkowe (zlotowki
+		# i grosze), choroby, glod, zwloki, lis i rozbudowa inkubatora.
+		# Stare jaja bez przypisanej rasy trafiaja na pierwsza posiadana kure.
+		var fallback := "leghorn"
+		for entry: Dictionary in data.get("chickens", []):
+			fallback = String(entry.get("breed", fallback))
+			break
+		var stored_eggs := int(data.get("eggs", 0))
+		data["eggs"] = {fallback: stored_eggs} if stored_eggs > 0 else {}
+		var ground := int(data.get("eggs_on_ground", 0))
+		var ground_list := []
+		for i in maxi(0, ground):
+			ground_list.append(fallback)
+		data["eggs_on_ground"] = ground_list
+		data["corpses"] = []
+		data["incubator_level"] = 0
+		data["won"] = false
+		data["version"] = 3
 	return data

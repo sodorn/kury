@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scenes/ui/hud/hud.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud/resource_counter.tscn" id="2"]
@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" path="res://assets/ui/icon_hen.svg" id="6"]
 [ext_resource type="PackedScene" path="res://scenes/ui/panels/building_panel.tscn" id="7"]
 [ext_resource type="Script" path="res://scenes/ui/hud/notice.gd" id="8"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panels/win_panel.tscn" id="9"]
 
 [node name="Hud" type="CanvasLayer"]
 script = ExtResource("1")
@@ -39,6 +40,7 @@ theme_override_constants/separation = 14
 [node name="Money" parent="Root/TopBar/Counters" instance=ExtResource("2")]
 layout_mode = 2
 icon = ExtResource("3")
+is_money = true
 
 [node name="Eggs" parent="Root/TopBar/Counters" instance=ExtResource("2")]
 layout_mode = 2
@@ -74,3 +76,5 @@ autowrap_mode = 3
 
 [node name="BuildingPanel" parent="Root" instance=ExtResource("7")]
 layout_mode = 1
+
+[node name="WinPanel" parent="Root" instance=ExtResource("9")]

@@ -1,6 +1,7 @@
 {
+	"_opis": "Wszystkie liczby balansu gry. Ceny w zlotowkach, czasy w sekundach, zuzycie paszy w kg na minute.",
 	"start": {
-		"money": 100,
+		"money": 150,
 		"eggs": 0,
 		"feed": 20,
 		"hens": [
@@ -10,20 +11,73 @@
 		]
 	},
 	"economy": {
-		"feed_pack_size": 10,
-		"feed_pack_price": 18
+		"_opis": "Worek paszy 25 kg za 60 zl to 2,40 zl/kg - tyle kosztuje pasza dla niosek w Polsce.",
+		"feed_pack_size": 25,
+		"feed_pack_price": 60,
+		"feed_per_hen_minute": 0.085,
+		"chick_feed_multiplier": 0.5
 	},
 	"run": {
-		"max_eggs_on_ground": 24
+		"_opis": "area to obszar, po ktorym chodza kury i na ktorym lezą jaja (wspolrzedne swiata 1080x2400).",
+		"max_eggs_on_ground": 30,
+		"max_visible_hens": 26,
+		"area": {
+			"x": 110,
+			"y": 1105,
+			"w": 860,
+			"h": 420
+		}
 	},
 	"offline": {
-		"max_hours": 8
+		"max_hours": 12
 	},
 	"day": {
 		"seconds": 600
 	},
 	"incubator": {
 		"slots": 3,
-		"eggs_per_chick": 6
+		"eggs_per_chick": 6,
+		"upgrades": [
+			{
+				"slots": 6,
+				"price": 1200
+			},
+			{
+				"slots": 10,
+				"price": 12000
+			},
+			{
+				"slots": 15,
+				"price": 90000
+			}
+		]
+	},
+	"hunger": {
+		"_opis": "Po grace_minutes bez paszy kury zaczynaja padac - jedna na death_interval_seconds. offline_max_share ogranicza straty przy nadrabianiu czasu, zeby powrot do gry nie oznaczal pustego wybiegu.",
+		"grace_minutes": 3.0,
+		"death_interval_seconds": 50.0,
+		"corpse_seconds": 90.0,
+		"offline_max_share": 0.5
+	},
+	"disease": {
+		"_opis": "chance_per_hen_hour: srednia liczba zachorowan na kure na godzine. Chora kura nie znosi jaj i po death_minutes pada.",
+		"chance_per_hen_hour": 0.05,
+		"death_minutes": 7.0,
+		"medicine_price": 140,
+		"vaccine_price": 1200,
+		"vaccine_price_per_hen": 45
+	},
+	"fox": {
+		"_opis": "Lis przychodzi raz na kilka godzin i porywa od min_share do max_share stada.",
+		"min_hours": 2.0,
+		"max_hours": 5.0,
+		"min_share": 0.2,
+		"max_share": 0.9,
+		"min_hens": 5,
+		"visit_seconds": 6.0
+	},
+	"win": {
+		"money": 1000000,
+		"collection": true
 	}
 }
