@@ -4,7 +4,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 2 zakonczony**. Nastepny: ETAP 3.
+- Aktualny etap: **ETAP 3 zakonczony** (wersja 3.0). Nastepny: ETAP 4.
 - Wersje grafiki: **1.0** plaski wektor (galaz `v1.0-grafika-plaska`, commit 6ea3a3c),
   **2.1** pastelowa, miekkie kontury, zaokraglone sylwetki (galaz `main`) — aktualna.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
@@ -71,12 +71,33 @@ tests/       tests.tscn + run_tests.gd    logika, dane, scena farmy (headless)
 tools/       gen_ground.py          generator tla i przedniego plotu
 ```
 
+## Jak dziala rozgrywka (ETAP 3)
+
+- `Simulation.advance(state, delta)` to jedyne miejsce liczace uplyw czasu.
+  Tick na zywo wola ja z `Game._process`; w ETAPIE 4 ta sama funkcja nadrobi
+  czas spedzony poza gra. Liczy krokami po 1 s, wiec wynik nie zalezy od tego,
+  czy nadrabiamy godzine naraz czy sekunde po sekundzie (jest na to test).
+- Kura znosi jajko co `egg_seconds` swojej rasy, o ile jest pasza. Bez paszy
+  stado nie znosi i nic nie je, a gracz dostaje komunikat (sygnal `Events.notice`).
+- Jaja ladują na wybiegu (`eggs_on_ground`) i trzeba je zebrac dotknieciem;
+  dopiero wtedy trafiaja do magazynu (`eggs`) i mozna je sprzedac.
+  Pelny wybieg (limit w `balance.json`) wstrzymuje znoszenie — to zacheta
+  do zagladania do gry.
+- Pozycje jaj zyja tylko w scenie, stan gry trzyma sama liczbe. Po wczytaniu
+  wybieg rozstawia je na nowo w losowych miejscach.
+- Panel budynku buduje swoja zawartosc w kodzie (`_build_content`), bo liczba
+  przyciskow zalezy od liczby ras w `breeds.json`.
+
 ## Wykonane
 
 - ETAP 1: architektura, plan MVP, repo.
 - ETAP 2: projekt Godot, scena farmy (tlo, wybieg, 4 budynki, drzewa, krzaki),
   HUD z licznikami czytanymi z `Game.state`, panel budynku otwierany dotknieciem,
   motyw UI, obsluga bezpiecznego obszaru ekranu.
+- ETAP 3: rasy kur w `breeds.json`, `Simulation.advance`, kury chodzace po
+  wybiegu z dziobaniem, jaja do zbierania dotknieciem, sklep ze sprzedaza jaj
+  i zakupem paszy oraz kur, panele budynkow z realnymi danymi, komunikat
+  o braku paszy.
 - ETAP 2 (poprawki po pierwszym uruchomieniu u wlasciciela):
   budynki przeniesione z kodu do sceny (wczesniej `farm.tscn` wygladala w
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
@@ -86,21 +107,26 @@ tools/       gen_ground.py          generator tla i przedniego plotu
 ## Weryfikacja ETAPU 2 (wykonana w srodowisku Claude, Linux)
 
 - Import projektu w Godot 4.7.2: bez bledow.
-- `tests/tests.tscn`: 36/36 OK (w tym: kazdy budynek z `buildings.json` jest
+- `tests/tests.tscn`: 90/90 OK (w tym: kazdy budynek z `buildings.json` jest
   w scenie farmy, ma grafike i wpis w danych).
-- `tests/smoke_ui.tscn` (xvfb, renderer programowy) w 1080x1920 i 1080x2340:
-  scena sie renderuje, dotkniecie kazdego z 4 budynkow otwiera panel z poprawnym
-  tytulem, dotkniecie tla zamyka panel.
+- `tests/smoke_ui.tscn` (xvfb, renderer programowy): scena sie renderuje,
+  kazdy z 4 budynkow otwiera panel i zamyka go dotkniecie tla, kury chodza,
+  jajko da sie zebrac dotknieciem, przyciski sklepu sprzedaja i kupuja,
+  komunikat o braku paszy sie pokazuje.
+  Test wylacza `Game._process` — przy wolnym renderze symulacja zdazylaby
+  znosic jaja w trakcie sprawdzen i wyniki bylyby losowe.
 - Edytor uruchomiony na farm.tscn: brak ostrzezen przy wezlach.
 - NIE sprawdzone: uruchomienie na Windows, na telefonie, wydajnosc, bezpieczny
   obszar na realnym urzadzeniu.
 
-## Nastepne zadania (ETAP 3)
+## Nastepne zadania (ETAP 4)
 
-- Model kury i ras (`data/breeds.json`), kury chodzace po wybiegu (sortowanie Y).
-- Produkcja jaj wg configu, zuzycie paszy, zbieranie dotknieciem, animacja zbioru.
-- Sprzedaz jaj w sklepie; panel budynku z realnymi akcjami zamiast notki.
-- `core/simulation.gd` z `advance(state, dt)` + testy.
+- Zapis gry: `user://save.json` z polem `version` i migracjami, autosave
+  oraz zapis przy pauzie aplikacji.
+- Nadrabianie czasu offline przez `Simulation.advance` ze znacznikow czasu,
+  z limitem godzin w `balance.json`; cofniety zegar = zero postepu.
+- Inkubacja: wkladanie jaj do inkubatora, wykluwanie piskląt, wzrost w kury.
+- Po ETAPIE 4: krotki samouczek na start (3-4 kroki) i przycisk "?" z zasadami.
 
 ## Znane problemy / uwagi
 

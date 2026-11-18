@@ -3,7 +3,17 @@
 		"money": 100,
 		"eggs": 0,
 		"feed": 20,
-		"hens": 3,
-		"chicks": 0
+		"hens": [
+			"leghorn",
+			"leghorn",
+			"leghorn"
+		]
+	},
+	"economy": {
+		"feed_pack_size": 10,
+		"feed_pack_price": 18
+	},
+	"run": {
+		"max_eggs_on_ground": 24
 	}
 }

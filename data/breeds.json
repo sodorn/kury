@@ -1,0 +1,22 @@
+[
+	{
+		"id": "leghorn",
+		"name": "BREED_LEGHORN_NAME",
+		"desc": "BREED_LEGHORN_DESC",
+		"sprite": "res://assets/sprites/animals/hen_white.svg",
+		"egg_seconds": 40,
+		"feed_per_minute": 0.5,
+		"egg_value": 5,
+		"price": 80
+	},
+	{
+		"id": "rhode",
+		"name": "BREED_RHODE_NAME",
+		"desc": "BREED_RHODE_DESC",
+		"sprite": "res://assets/sprites/animals/hen_brown.svg",
+		"egg_seconds": 65,
+		"feed_per_minute": 0.6,
+		"egg_value": 11,
+		"price": 260
+	}
+]

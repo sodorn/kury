@@ -16,6 +16,8 @@ func _ready() -> void:
 	_test_farm_state()
 	_test_data_files()
 	_test_farm_scene()
+	_test_simulation()
+	_test_economy()
 	print("TESTY: %d OK, %d BLEDOW" % [_passed, _failed])
 	get_tree().quit(1 if _failed > 0 else 0)
 
@@ -28,6 +30,16 @@ func _check(condition: bool, label: String) -> void:
 		printerr("BLAD: " + label)
 
 
+## Stan oderwany od autoloadu Game, zeby testy nie zaleznialy od siebie.
+func _fresh_state(hens: Array[String] = ["leghorn"], feed := 100.0) -> FarmState:
+	var state := FarmState.new()
+	state.money = 100
+	state.feed = feed
+	for breed_id in hens:
+		state.chickens.append(Chicken.create(breed_id))
+	return state
+
+
 func _test_number_format() -> void:
 	_check(NumberFormat.grouped(0) == "0", "grouped(0)")
 	_check(NumberFormat.grouped(999) == "999", "grouped(999)")
@@ -37,27 +49,50 @@ func _test_number_format() -> void:
 
 
 func _test_farm_state() -> void:
-	var state := FarmState.from_start_config({"money": 100.0, "feed": 20, "hens": 3, "chicks": 2})
+	var state := FarmState.from_start_config({"money": 100.0, "feed": 20, "hens": ["leghorn", "leghorn"]})
 	_check(state.money == 100, "money z configu")
 	_check(state.eggs == 0, "brakujace pole = 0")
-	_check(state.animal_count() == 5, "animal_count")
-	_check(Game.state != null and Game.state.money == int(GameData.balance()["start"]["money"]),
-			"Game.state wystartowal z balance.json")
+	_check(state.hen_count() == 2, "hen_count")
+	_check(is_equal_approx(state.feed, 20.0), "feed z configu")
+	_check(Game.state != null and Game.state.hen_count() == 3, "Game wystartowal z 3 kurami z balance.json")
 
 
 func _test_data_files() -> void:
 	_check(GameData.balance().has("start"), "balance.json ma sekcje start")
 	_check(GameData.buildings().size() == 4, "buildings.json ma 4 budynki")
+	_check(GameData.breeds().size() == 2, "breeds.json ma 2 rasy")
 	var translation := load("res://data/strings.pl.translation") as Translation
 	_check(translation != null, "tlumaczenie pl wczytane")
+
 	var ids := {}
 	for def: Dictionary in GameData.buildings():
 		var id: String = def.get("id", "")
 		_check(id != "" and not ids.has(id), "unikalne id budynku: '%s'" % id)
 		ids[id] = true
 		for key in ["name", "desc"]:
-			var text_key: String = def.get(key, "")
-			_check(translation != null and translation.get_message(text_key) != &"", "tekst %s" % text_key)
+			_check(_has_text(translation, def.get(key, "")), "tekst %s" % def.get(key, ""))
+
+	for breed: Dictionary in GameData.breeds():
+		var breed_id: String = breed.get("id", "")
+		_check(breed_id != "", "rasa ma id")
+		_check(ResourceLoader.exists(breed.get("sprite", "")), "grafika rasy '%s'" % breed_id)
+		_check(float(breed.get("egg_seconds", 0)) > 0.0, "czas znoszenia rasy '%s'" % breed_id)
+		for key in ["name", "desc"]:
+			_check(_has_text(translation, breed.get(key, "")), "tekst %s" % breed.get(key, ""))
+
+	# Kazda rasa z sekcji start musi istniec w breeds.json.
+	for breed_id: String in GameData.balance().get("start", {}).get("hens", []):
+		_check(not GameData.breed(breed_id).is_empty(), "rasa startowa '%s' istnieje" % breed_id)
+
+	# Teksty uzywane przez panel.
+	for key in ["PANEL_HENS", "PANEL_FEED_LEFT", "PANEL_EGGS_STORED", "PANEL_EGGS_WORTH",
+			"PANEL_NEXT_EGG", "PANEL_SELL_EGGS", "PANEL_BUY_FEED", "PANEL_BUY_HEN",
+			"PANEL_SOLD", "PANEL_FEED_BOUGHT", "PANEL_HEN_BOUGHT"]:
+		_check(_has_text(translation, key), "tekst panelu %s" % key)
+
+
+func _has_text(translation: Translation, key: String) -> bool:
+	return translation != null and key != "" and translation.get_message(key) != &""
 
 
 ## Scena farmy musi zawierac budynki (zeby bylo je widac w edytorze),
@@ -77,3 +112,97 @@ func _test_farm_scene() -> void:
 	for def: Dictionary in GameData.buildings():
 		_check(found.has(def.get("id", "")), "budynek '%s' jest w scenie farmy" % def.get("id", ""))
 	farm.free()
+
+
+func _test_simulation() -> void:
+	var seconds := float(GameData.breed("leghorn").get("egg_seconds", 0.0))
+
+	# Jedna kura po czasie znoszenia daje dokladnie jedno jajko.
+	var state := _fresh_state()
+	var result := Simulation.advance(state, seconds)
+	_check(int(result["eggs_laid"]) == 1, "jedna kura, jedno jajko po %.0f s" % seconds)
+	_check(state.eggs_on_ground == 1, "jajko wyladowalo na wybiegu")
+	_check(state.eggs == 0, "jajko nie trafia od razu do magazynu")
+
+	# Przed czasem nie ma nic.
+	var early := _fresh_state()
+	_check(int(Simulation.advance(early, seconds - 5.0)["eggs_laid"]) == 0, "przed czasem brak jaja")
+
+	# Trzy kury przez trzy cykle: dziewiec jaj.
+	var flock := _fresh_state(["leghorn", "leghorn", "leghorn"])
+	_check(int(Simulation.advance(flock, seconds * 3.0)["eggs_laid"]) == 9, "3 kury x 3 cykle = 9 jaj")
+
+	# Pasza sie zuzywa.
+	var eating := _fresh_state(["leghorn"], 10.0)
+	Simulation.advance(eating, 60.0)
+	var expected := 10.0 - float(GameData.breed("leghorn").get("feed_per_minute", 0.0))
+	_check(absf(eating.feed - expected) < 0.01, "zuzycie paszy przez minute")
+
+	# Bez paszy nie ma jaj i jest sygnal o braku.
+	var hungry := _fresh_state(["leghorn"], 0.0)
+	var hungry_result := Simulation.advance(hungry, seconds * 2.0)
+	_check(int(hungry_result["eggs_laid"]) == 0, "brak paszy = brak jaj")
+	_check(bool(hungry_result["out_of_feed"]), "brak paszy jest raportowany")
+
+	# Wynik nie zalezy od tego, czy liczymy jednym duzym krokiem czy wieloma malymi.
+	var big := _fresh_state(["leghorn", "rhode"])
+	var small := _fresh_state(["leghorn", "rhode"])
+	Simulation.advance(big, 600.0)
+	for i in 600:
+		Simulation.advance(small, 1.0)
+	_check(big.eggs_on_ground == small.eggs_on_ground, "ten sam wynik przy roznych krokach czasu")
+
+	# Pelny wybieg wstrzymuje znoszenie.
+	var capacity := int(GameData.balance().get("run", {}).get("max_eggs_on_ground", 24))
+	var full := _fresh_state(["leghorn"])
+	full.eggs_on_ground = capacity
+	_check(int(Simulation.advance(full, seconds * 2.0)["eggs_laid"]) == 0, "pelny wybieg wstrzymuje znoszenie")
+	_check(full.eggs_on_ground == capacity, "liczba jaj na wybiegu nie przekracza limitu")
+
+
+func _test_economy() -> void:
+	var economy: Dictionary = GameData.balance().get("economy", {})
+
+	# Zbieranie: z wybiegu do magazynu.
+	Game.new_game()
+	Game.state.eggs_on_ground = 2
+	_check(Game.collect_egg(), "zbieranie jajka udaje sie, gdy jest co zbierac")
+	_check(Game.state.eggs == 1 and Game.state.eggs_on_ground == 1, "jajko przeszlo na stan magazynu")
+	Game.collect_egg()
+	_check(not Game.collect_egg(), "pusty wybieg: nie ma czego zbierac")
+
+	# Sprzedaz.
+	Game.new_game()
+	Game.state.eggs = 4
+	var money_before := Game.state.money
+	var earned := Game.sell_eggs()
+	_check(earned == 4 * int(GameData.breed("leghorn").get("egg_value", 0)), "zarobek ze sprzedazy 4 jaj")
+	_check(Game.state.money == money_before + earned, "pieniadze wzrosly o zarobek")
+	_check(Game.state.eggs == 0, "magazyn jaj pusty po sprzedazy")
+	_check(Game.sell_eggs() == 0, "sprzedaz bez jaj nic nie daje")
+
+	# Zakup paszy.
+	Game.new_game()
+	var feed_before := Game.state.feed
+	Game.state.money = int(economy.get("feed_pack_price", 0))
+	_check(Game.buy_feed(), "zakup paszy za dokladna kwote")
+	_check(absf(Game.state.feed - (feed_before + float(economy.get("feed_pack_size", 0)))) < 0.01, "pasza doliczona")
+	_check(Game.state.money == 0, "pieniadze pobrane")
+	_check(not Game.buy_feed(), "brak pieniedzy blokuje zakup paszy")
+
+	# Zakup kury.
+	Game.new_game()
+	var hens_before := Game.state.hen_count()
+	Game.state.money = int(GameData.breed("rhode").get("price", 0))
+	_check(Game.buy_hen("rhode"), "zakup kury za dokladna kwote")
+	_check(Game.state.hen_count() == hens_before + 1, "kura dolaczyla do stada")
+	_check(Game.state.money == 0, "pieniadze za kure pobrane")
+	_check(not Game.buy_hen("rhode"), "brak pieniedzy blokuje zakup kury")
+	_check(not Game.buy_hen("nieistniejaca"), "nieznana rasa nie da sie kupic")
+
+	# Wartosc jaj zalezy od stada.
+	Game.new_game()
+	Game.state.eggs = 1
+	_check(Game.state.eggs_value() == int(GameData.breed("leghorn").get("egg_value", 0)),
+			"wartosc jajka przy stadzie leghornow")
+	Game.new_game()

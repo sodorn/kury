@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scenes/ui/hud/hud.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud/resource_counter.tscn" id="2"]
@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" path="res://assets/ui/icon_feed.svg" id="5"]
 [ext_resource type="Texture2D" path="res://assets/ui/icon_hen.svg" id="6"]
 [ext_resource type="PackedScene" path="res://scenes/ui/panels/building_panel.tscn" id="7"]
+[ext_resource type="Script" path="res://scenes/ui/hud/notice.gd" id="8"]
 
 [node name="Hud" type="CanvasLayer"]
 script = ExtResource("1")
@@ -50,6 +51,26 @@ icon = ExtResource("5")
 [node name="Animals" parent="Root/TopBar/Counters" instance=ExtResource("2")]
 layout_mode = 2
 icon = ExtResource("6")
+
+[node name="Notice" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -480.0
+offset_top = 150.0
+offset_right = 480.0
+offset_bottom = 150.0
+grow_horizontal = 2
+mouse_filter = 2
+script = ExtResource("8")
+
+[node name="Text" type="Label" parent="Root/Notice"]
+layout_mode = 2
+theme_type_variation = &"NoteLabel"
+text = ""
+horizontal_alignment = 1
+autowrap_mode = 3
 
 [node name="BuildingPanel" parent="Root" instance=ExtResource("7")]
 layout_mode = 1

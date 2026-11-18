@@ -34,7 +34,7 @@ theme_type_variation = &"SheetPanel"
 
 [node name="Content" type="VBoxContainer" parent="Sheet"]
 layout_mode = 2
-theme_override_constants/separation = 20
+theme_override_constants/separation = 22
 
 [node name="Header" type="HBoxContainer" parent="Sheet/Content"]
 layout_mode = 2
@@ -58,8 +58,9 @@ layout_mode = 2
 theme_override_constants/separation = 36
 
 [node name="Picture" type="TextureRect" parent="Sheet/Content/Body"]
-custom_minimum_size = Vector2(260, 260)
+custom_minimum_size = Vector2(230, 230)
 layout_mode = 2
+size_flags_vertical = 0
 expand_mode = 1
 stretch_mode = 5
 
@@ -67,18 +68,25 @@ stretch_mode = 5
 layout_mode = 2
 size_flags_horizontal = 3
 alignment = 1
-theme_override_constants/separation = 16
+theme_override_constants/separation = 14
 
 [node name="Description" type="Label" parent="Sheet/Content/Body/Text"]
 layout_mode = 2
 text = "Opis"
 autowrap_mode = 3
 
-[node name="Note" type="Label" parent="Sheet/Content/Body/Text"]
+[node name="Status" type="Label" parent="Sheet/Content/Body/Text"]
 layout_mode = 2
 theme_type_variation = &"NoteLabel"
-text = "PANEL_COMING_SOON"
 autowrap_mode = 3
+
+[node name="Rows" type="VBoxContainer" parent="Sheet/Content"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Actions" type="VBoxContainer" parent="Sheet/Content"]
+layout_mode = 2
+theme_override_constants/separation = 18
 
 [node name="BottomSpacer" type="Control" parent="Sheet/Content"]
 layout_mode = 2
