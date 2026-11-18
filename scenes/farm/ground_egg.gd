@@ -8,7 +8,8 @@ const TAP_MAX_MOVE := 60.0
 
 var _pressed_touch: int = -1
 var _pressed_at := Vector2.ZERO
-var _collected := false
+## Jajko juz zebrane — scena ma go nie liczyc.
+var collected := false
 
 @onready var _sprite: Sprite2D = $Sprite
 
@@ -23,7 +24,7 @@ func _ready() -> void:
 
 func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:
 	var touch := event as InputEventScreenTouch
-	if touch == null or _collected:
+	if touch == null or collected:
 		return
 	if touch.pressed:
 		_pressed_touch = touch.index
@@ -36,12 +37,12 @@ func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> vo
 
 ## Zbiera jajko: zglasza to do Game i odgrywa animacje znikniecia.
 func collect() -> void:
-	if _collected:
+	if collected:
 		return
 	if not Game.collect_egg():
 		queue_free()
 		return
-	_collected = true
+	collected = true
 	set_deferred("monitorable", false)
 	input_pickable = false
 	var tween := create_tween().set_parallel()

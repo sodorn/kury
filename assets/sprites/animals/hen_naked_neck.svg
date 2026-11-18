@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="130" viewBox="0 0 140 130">
+  <defs>
+    <radialGradient id="hnBody" cx="48" cy="60" r="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F0C098"/>
+      <stop offset="0.55" stop-color="#DFA471"/>
+      <stop offset="1" stop-color="#C08350"/>
+    </radialGradient>
+    <linearGradient id="hnSkin" x1="96" y1="28" x2="112" y2="74" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F3A89C"/>
+      <stop offset="1" stop-color="#DC7D72"/>
+    </linearGradient>
+    <linearGradient id="hnBeak" x1="116" y1="30" x2="136" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFD98A"/>
+      <stop offset="1" stop-color="#EDA845"/>
+    </linearGradient>
+  </defs>
+
+  <g stroke="#8A6A55" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="62" cy="120" rx="38" ry="8" fill="#6B8F4E" fill-opacity="0.28" stroke="none"/>
+
+    <!-- ogon -->
+    <path d="M22 76Q4 62 10 42Q26 50 32 66Z" fill="#CE9361"/>
+
+    <!-- nogi -->
+    <path d="M54 100v14M54 114h-9M54 114h9" stroke="#EDA845"/>
+    <path d="M78 100v14M78 114h-9M78 114h9" stroke="#EDA845"/>
+
+    <!-- tulow -->
+    <ellipse cx="60" cy="74" rx="42" ry="34" fill="url(#hnBody)"/>
+
+    <!-- skrzydlo -->
+    <path d="M42 68Q64 58 78 76Q60 92 44 86Q36 78 42 68Z" fill="#E8B486"/>
+    <path d="M50 76Q60 72 70 79" fill="none" stroke-width="3"/>
+
+    <!-- naga szyja: to po niej poznaje sie te rase -->
+    <path d="M86 62q4-26 14-34l10 6q-8 10-8 30Z" fill="url(#hnSkin)"/>
+    <path d="M92 50q8 3 14 0M90 58q8 3 14 0" fill="none" stroke="#C86E63" stroke-width="3"/>
+
+    <!-- glowa -->
+    <circle cx="106" cy="28" r="18" fill="#E5A773"/>
+
+    <!-- grzebien i korale -->
+    <path d="M96 12q4-10 9-2q4-10 9 0q3-7 6 2" fill="#E4706A"/>
+    <path d="M110 42q7 2 7 9q-7 2-10-4Z" fill="#E4706A"/>
+    <!-- dziob -->
+    <path d="M122 28l14 5-14 6Z" fill="url(#hnBeak)"/>
+
+    <!-- oko -->
+    <circle cx="112" cy="24" r="4" fill="#3A3744" stroke="none"/>
+    <circle cx="113.4" cy="22.6" r="1.5" fill="#FFFFFF" stroke="none"/>
+  </g>
+</svg>

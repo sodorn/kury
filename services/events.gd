@@ -21,6 +21,10 @@ signal hen_added(hen: Chicken)
 @warning_ignore("unused_signal")
 signal hen_removed(breed_id: String)
 
+## Gracz odblokowal nowa rase.
+@warning_ignore("unused_signal")
+signal breed_unlocked(breed_id: String)
+
 ## Krotki komunikat dla gracza (np. koniec paszy).
 @warning_ignore("unused_signal")
 signal notice(text: String)

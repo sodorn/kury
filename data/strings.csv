@@ -2,36 +2,63 @@ keys,pl
 BUILDING_COOP_NAME,Kurnik
 BUILDING_COOP_DESC,"Tu mieszka stado. Kury znoszą jaja na wybiegu, dopóki mają paszę."
 BUILDING_INCUBATOR_NAME,Inkubator
-BUILDING_INCUBATOR_DESC,"Z włożonych tu jaj wyklują się pisklęta. Dostępny w kolejnej wersji."
+BUILDING_INCUBATOR_DESC,"Włóż jaja, a wyklują się z nich pisklęta twoich ras. Pisklę dorasta i dołącza do stada."
 BUILDING_STORAGE_NAME,Magazyn
-BUILDING_STORAGE_DESC,"Zebrane jaja i zapas paszy."
+BUILDING_STORAGE_DESC,"Zebrane jaja, zapas paszy i kod twojej farmy."
 BUILDING_SHOP_NAME,Sklep
 BUILDING_SHOP_DESC,"Sprzedasz tu jaja, kupisz paszę i nowe rasy kur."
 BREED_LEGHORN_NAME,Leghorn
-BREED_LEGHORN_DESC,"Biała nioska. Znosi często, jaja tanie."
+BREED_LEGHORN_DESC,"Biała nioska. Znosi najczęściej ze wszystkich, ale jaja są tanie."
 BREED_RHODE_NAME,Rhode Island
-BREED_RHODE_DESC,"Ruda. Znosi wolniej, ale jaja są dużo cenniejsze."
-BREED_POLISH_NAME,Czubatka polska
-BREED_POLISH_DESC,"Pióropusz na głowie zasłania jej pół świata. Jaja wyjątkowo cenne."
+BREED_RHODE_DESC,"Ruda i wytrzymała. Znosi wolniej, jaja warte dwa razy więcej."
+BREED_ARAUKANA_NAME,Araukana
+BREED_ARAUKANA_DESC,"Znosi niebieskie jaja. Nie ma ogona, za to ma pierzaste baki przy uszach."
+BREED_CZUBATKA_NAME,Czubatka polska
+BREED_CZUBATKA_DESC,"Pióropusz na głowie zasłania jej pół świata. Jaja wyraźnie cenniejsze."
+BREED_JEDWABISTA_NAME,Kura jedwabista
+BREED_JEDWABISTA_DESC,"Pióra jak futro, czarna skóra. Uwielbia siedzieć na jajach — przyspiesza inkubator o połowę."
+BREED_NAGOSZYJA_NAME,Kura nagoszyja
+BREED_NAGOSZYJA_DESC,"Goła szyja jak u indyka. Wygląda dziwnie, ale zjada najmniej paszy ze wszystkich."
+BREED_SULTANKA_NAME,Sułtanka
+BREED_SULTANKA_DESC,"Biała od czuba po opierzone nogi. Znosi rzadko, lecz każde jajko to majątek."
 BREED_CEMANI_NAME,Ayam Cemani
-BREED_CEMANI_DESC,"Czarna od grzebienia po pazury. Znosi rzadko, ale każde jajko to majątek."
+BREED_CEMANI_DESC,"Czarna od grzebienia po kości. Najrzadsza kura w grze."
 RARITY_COMMON,pospolita
 RARITY_UNCOMMON,rzadsza
 RARITY_RARE,rzadka
 RARITY_LEGENDARY,wyjątkowa
 PANEL_HENS,Kury w stadzie
+PANEL_CHICKS,Pisklęta
 PANEL_FEED_LEFT,Pasza
+PANEL_DAYS,Dzień gospodarstwa
 PANEL_EGGS_STORED,Jaja w magazynie
 PANEL_EGGS_WORTH,Wartość jaj
 PANEL_NEXT_EGG,Najbliższe jajko
-PANEL_FLOCK,Twoje stado
+PANEL_FARM_CODE,Kod farmy
+PANEL_CLOUD_ON,"Zapis na serwerze: włączony"
+PANEL_CLOUD_OFF,"Zapis na serwerze: wyłączony (gra zapisuje się w tej przeglądarce)"
 PANEL_SELL_EGGS,"Sprzedaj jaja (%d szt. za %d)"
 PANEL_BUY_FEED,"Kup paszę (%d szt. za %d)"
-PANEL_BUY_HEN,"%s — %s, kup za %d"
+PANEL_BUY_HEN,"Kup za %d"
 PANEL_SELL_HEN,"Sprzedaj %s (%d szt.) za %d"
+PANEL_LOCKED,Zablokowana
+PANEL_NEED,"Potrzebujesz: %s"
+PANEL_NEED_MONEY,"%d monet"
+PANEL_NEED_DAYS,"dzień %d"
+PANEL_NEED_HENS,"%d kur"
+PANEL_NEED_FEED,"%d paszy"
+PANEL_NEED_BREED,"rasa %s w stadzie"
+PANEL_INCUBATE,"Włóż %d jaj — pisklę rasy %s"
+PANEL_INCUBATOR_SLOTS,"Zajęte miejsca"
+PANEL_HATCHING,"Wykluwa się: %s"
+PANEL_GROWING,"Dorasta: %s"
+PANEL_NO_OWN_BREEDS,"Najpierw kup choć jedną kurę — z jej jaj wyklują się pisklęta tej samej rasy."
 PANEL_SOLD,"Sprzedano %d jaj za %d monet."
 PANEL_FEED_BOUGHT,"Pasza dosypana do magazynu."
 PANEL_HEN_BOUGHT,"%s dołączyła do stada."
 PANEL_HEN_SOLD,"Sprzedano kurę rasy %s za %d monet."
+PANEL_EGGS_IN,"Jaja w inkubatorze. Pisklę wykluje się samo."
 HINT_NO_FEED,"Skończyła się pasza — kury przestały znosić. Kup ją w sklepie."
 HINT_WELCOME_BACK,"Pod twoją nieobecność kury zniosły %d jaj. Zbierz je z wybiegu."
+HINT_BREED_UNLOCKED,"Nowa rasa w sklepie: %s"
+HINT_CLOUD_LOADED,"Wczytano farmę z serwera."

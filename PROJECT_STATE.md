@@ -4,11 +4,11 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 4 w czesci** (wersja 4.0): zapis gry i nadrabianie czasu
-  offline gotowe. Zostaje inkubacja i pisklęta.
+- Aktualny etap: **ETAP 4 zakonczony** (wersja 5.0): zapis lokalny i serwerowy,
+  czas offline, inkubator z pisklętami, osiem ras z odblokowywaniem.
 - Wersje grafiki: **1.0** plaski wektor (galaz `v1.0-grafika-plaska`, commit 6ea3a3c),
   **2.1** pastelowa, miekkie kontury, zaokraglone sylwetki — aktualna.
-- Wersje do cofniecia sie: `v1.0-grafika-plaska`, `v3.0-etap3` (galezie na GitHubie).
+- Wersje do cofniecia sie: `v1.0-grafika-plaska`, `v3.0-etap3`, `v4.0-zapis` (galezie na GitHubie).
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -73,7 +73,28 @@ tests/       tests.tscn + run_tests.gd    logika, dane, scena farmy (headless)
 tools/       gen_ground.py          generator tla i przedniego plotu
 ```
 
-## Zapis gry (ETAP 4)
+## Zapis po stronie serwera
+
+- `services/cloud.gd` (autoload `Cloud`) wysyla i pobiera stan przez HTTP.
+  Konfiguracja w `data/backend.json`; dopoki `enabled` = false, gra dziala
+  wylacznie na zapisie lokalnym i nic sie nie zmienia.
+- Protokol to kawalek REST-a Supabase (POST z `on_conflict`, GET z `eq.`),
+  ale to zwykly HTTP — pod ten sam adres mozna podstawic dowolny serwer.
+  Tabela: `tools/supabase_setup.sql`.
+- Gracza rozpoznaje **kod farmy**: losowy identyfikator zapisany przy
+  pierwszym uruchomieniu (`user://player_id.txt`), pokazywany w magazynie.
+  Bez logowania i hasla — kto zna kod, ten ma dostep do tej farmy.
+- Rozstrzyganie konfliktow: wygrywa nowszy zapis (po `saved_at`). Uwaga na
+  przyszlosc: przy recznym wpisaniu cudzego kodu na urzadzeniu z nowszym
+  zapisem lokalnym serwer przegra. Gdy dojdzie UI do przepisywania kodu,
+  trzeba tam wymusic pobranie z serwera niezaleznie od czasu.
+- Przetestowane w prawdziwej przegladarce przeciwko atrapie serwera
+  (`tools/mock_backend.py` + sterowanie Chrome): stan trafia na serwer,
+  a czyste urzadzenie z tym samym kodem farmy odtwarza go z serwera.
+  Atrapa ma naglowki CORS, bo bez nich przegladarka odrzuca zapytania —
+  prawdziwy Supabase tez je wysyla.
+
+## Zapis lokalny (ETAP 4)
 
 - `core/save_game.gd`: caly zapis i odczyt. Plik `user://save.json`, pole
   `version`, migracje w `_migrate`. Podnosic VERSION przy kazdej zmianie pol.
@@ -89,6 +110,24 @@ tools/       gen_ground.py          generator tla i przedniego plotu
 - Zapis jest lokalny dla przegladarki i urzadzenia: kazdy gracz ma swoja farme,
   nikt nie widzi cudzej. Wspolna gra na wielu urzadzeniach wymagalaby serwera
   i kont — swiadomie tego nie robimy.
+
+## Inkubator, pisklęta i rasy (ETAP 4)
+
+- Z jaj wlasnych kur wyklu wa sie pisklęta tej samej rasy: inkubator przyjmuje
+  `eggs_per_chick` jaj i zajmuje jedno z `slots` miejsc (balance.json).
+  Nie da sie wlozyc jaj rasy, ktorej nie ma sie w stadzie.
+- Pisklę rosnie `grow_seconds` i dolacza do stada jako dorosla kura.
+  Pisklęta chodza po wybiegu i zjadaja polowe paszy doroslej kury.
+- Kura jedwabista slynie z wysiadywania jaj, wiec w grze przyspiesza
+  inkubator (`incubation_bonus`).
+- Osiem ras o rosnacej rzadkosci. Nowe odblokowuja sie same, gdy gospodarstwo
+  spelni komplet warunkow z pola `unlock`: pieniadze, dzien gospodarstwa,
+  liczba kur, zapas paszy i czasem posiadanie innej rasy.
+- Dzien gospodarstwa to `day.seconds` z balance.json (domyslnie 10 minut),
+  liczony tak samo na zywo i przy nadrabianiu czasu offline.
+- Sklep pokazuje karte kazdej rasy. Zdjecie bierze z `assets/photos/<id>.jpg`,
+  a gdy pliku nie ma — rysunek z wybiegu. Dzieki temu wrzucenie zdjec nie
+  wymaga zmian w kodzie.
 
 ## Jak dziala rozgrywka (ETAP 3)
 
@@ -131,12 +170,14 @@ tools/       gen_ground.py          generator tla i przedniego plotu
 ## Weryfikacja ETAPU 2 (wykonana w srodowisku Claude, Linux)
 
 - Import projektu w Godot 4.7.2: bez bledow.
-- `tests/tests.tscn`: 131/131 OK (w tym: kazdy budynek z `buildings.json` jest
+- `tests/tests.tscn`: 217/217 OK (w tym: kazdy budynek z `buildings.json` jest
   w scenie farmy, ma grafike i wpis w danych).
-- `tests/smoke_ui.tscn` (xvfb, renderer programowy), 21 sprawdzen: scena sie
+- `tests/smoke_ui.tscn` (xvfb, renderer programowy), 32 sprawdzenia: scena sie
   renderuje, kazdy z 4 budynkow otwiera panel i zamyka go dotkniecie tla,
   kury chodza, jajko da sie zebrac dotknieciem, sklep sprzedaje i kupuje,
-  kurnik sprzedaje kure, komunikat o braku paszy sie pokazuje.
+  karta zablokowanej rasy nie pozwala kupic, inkubator przyjmuje jaja,
+  pisklę sie wykluwa, pojawia na wybiegu i dorasta, kurnik sprzedaje kure,
+  komunikat o braku paszy sie pokazuje.
 - Zapis w przegladarce sprawdzony realnie (Chrome sterowany playwright-core):
   po pierwszej sesji w IndexedDB lezy `save.json`, po ponownym wejsciu gra
   wstaje z zapisanym stanem (mniej paszy, jaja z poprzedniej sesji na wybiegu).
@@ -152,8 +193,10 @@ tools/       gen_ground.py          generator tla i przedniego plotu
 
 ## Nastepne zadania
 
-- Inkubacja: wkladanie jaj do inkubatora, wykluwanie piskląt, wzrost w kury.
 - Krotki samouczek na start (3-4 kroki) i przycisk "?" z zasadami.
+- UI do przepisania kodu farmy na inne urzadzenie (z wymuszonym pobraniem
+  z serwera, patrz uwaga wyzej).
+- Zdjecia ras: podmiana plikow w assets/photos/, bez zmian w kodzie.
 - Zdjecia ras w panelu sklepu: wlasciciel dostarcza pliki, Claude nie ma
   dostepu do sieci poza GitHubem i rejestrami pakietow, wiec sam ich nie pobierze.
   Wymagania: PNG, jeden ptak na plik, licencja pozwalajaca na uzycie

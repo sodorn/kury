@@ -40,6 +40,7 @@ func _run() -> void:
 	await _test_hens()
 	await _test_egg_pickup()
 	await _test_shop()
+	await _test_incubator_panel()
 	await _test_sell_hen()
 	await _test_no_feed_notice()
 
@@ -109,27 +110,78 @@ func _test_shop() -> void:
 	await _tap(_canvas_point(shop, Vector2(0, -150)))
 	await _frames(30)
 	var actions: VBoxContainer = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Scrollable/Actions")
-	var buttons := actions.get_children()
-	_check(buttons.size() == 2 + GameData.breeds().size(), "sklep ma komplet przyciskow")
-	if buttons.is_empty():
+	var rows := actions.get_children()
+	_check(rows.size() == 2 + GameData.breeds().size(), "sklep ma przyciski i karte kazdej rasy")
+	if rows.size() < 3:
 		return
 
 	var money_before: int = Game.state.money
-	(buttons[0] as Button).emit_signal("pressed")
+	(rows[0] as Button).emit_signal("pressed")
 	await _frames(10)
 	_check(Game.state.eggs == 0 and Game.state.money > money_before, "sprzedaz jaj dziala")
 
 	var feed_before: float = Game.state.feed
-	(buttons[1] as Button).emit_signal("pressed")
+	(rows[1] as Button).emit_signal("pressed")
 	await _frames(10)
 	_check(Game.state.feed > feed_before, "zakup paszy dziala")
 
+	# Karta rasy odblokowanej ma widoczny przycisk, zablokowanej nie ma.
+	var open_card := _card_button(rows[2])
+	var locked_card := _card_button(rows[rows.size() - 1])
+	_check(open_card != null and open_card.visible, "karta rasy startowej ma przycisk zakupu")
+	_check(locked_card != null and not locked_card.visible, "karta zablokowanej rasy nie pozwala kupic")
+
 	var hens_before: int = Game.state.hen_count()
-	(buttons[2] as Button).emit_signal("pressed")
-	await _frames(20)
+	if open_card != null:
+		open_card.emit_signal("pressed")
+	await _frames(30)
 	_check(Game.state.hen_count() == hens_before + 1, "zakup kury dziala")
 	_check(_nodes_of_type("FarmChicken").size() == Game.state.hen_count(), "kupiona kura pojawila sie na wybiegu")
 	_shot("panel_po_zakupach.png")
+
+
+## Inkubator: wlozenie jaj, wyklucie pisklecia i jego dorosniecie.
+func _test_incubator_panel() -> void:
+	var panel: Control = _main.get_node("Hud/Root/BuildingPanel")
+	if panel.visible:
+		panel.close()
+		await _frames(30)
+	Game.state.eggs = Game.eggs_per_chick() * 2
+	var incubator: Node2D = _main.get_node("Farm/Objects/Incubator")
+	await _tap(_canvas_point(incubator, Vector2(0, -150)))
+	await _frames(30)
+	_shot("panel_inkubator.png")
+
+	var actions: VBoxContainer = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Scrollable/Actions")
+	var put: Button = null
+	for child in actions.get_children():
+		var button := child as Button
+		if button != null and button.visible and not button.disabled:
+			put = button
+			break
+	_check(put != null, "inkubator pokazuje przycisk wlozenia jaj")
+	if put == null:
+		return
+	var eggs_before: int = Game.state.eggs
+	put.emit_signal("pressed")
+	await _frames(20)
+	_check(Game.state.incubating.size() == 1, "jaja trafily do inkubatora")
+	_check(Game.state.eggs < eggs_before, "jaja znikly z magazynu")
+
+	# Przyspieszamy czas, zeby zobaczyc pisklę i dorosla kure na wybiegu.
+	var breed_id: String = Game.state.incubating[0].breed_id
+	Simulation.advance(Game.state, float(GameData.breed(breed_id).get("incubate_seconds", 0)) + 1.0)
+	await _frames(40)
+	_check(Game.state.chicks.size() == 1, "pisklę sie wykluło")
+	_check(_nodes_of_type("FarmChicken").size() == Game.state.hen_count() + 1,
+			"pisklę pojawilo sie na wybiegu")
+	_shot("pisklę.png")
+
+	var hens_before: int = Game.state.hen_count()
+	Simulation.advance(Game.state, float(GameData.breed(breed_id).get("grow_seconds", 0)) + 1.0)
+	await _frames(40)
+	_check(Game.state.hen_count() == hens_before + 1, "pisklę wyroslo w kure")
+	_check(_nodes_of_type("FarmChicken").size() == Game.state.hen_count(), "wybieg nadazyl za zmiana")
 
 
 ## Sprzedaz kury w kurniku: stado maleje, pieniedzy przybywa, kura znika z wybiegu.
@@ -175,6 +227,14 @@ func _test_no_feed_notice() -> void:
 	Game.set_process(false)
 	_check(notice.visible, "komunikat o braku paszy sie pokazuje")
 	_shot("brak_paszy.png")
+
+
+## Przycisk ukryty w karcie rasy.
+func _card_button(row: Node) -> Button:
+	for child in row.get_children():
+		if child is Button:
+			return child
+	return null
 
 
 # --- narzedzia ----------------------------------------------------------

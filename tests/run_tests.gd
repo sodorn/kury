@@ -23,6 +23,8 @@ func _ready() -> void:
 	_test_economy()
 	_test_save()
 	_test_offline()
+	_test_incubator()
+	_test_unlocks()
 	SaveGame.clear()
 	print("TESTY: %d OK, %d BLEDOW" % [_passed, _failed])
 	get_tree().quit(1 if _failed > 0 else 0)
@@ -66,7 +68,7 @@ func _test_farm_state() -> void:
 func _test_data_files() -> void:
 	_check(GameData.balance().has("start"), "balance.json ma sekcje start")
 	_check(GameData.buildings().size() == 4, "buildings.json ma 4 budynki")
-	_check(GameData.breeds().size() == 4, "breeds.json ma 4 rasy")
+	_check(GameData.breeds().size() >= 8, "breeds.json ma co najmniej 8 ras")
 	var translation := load("res://data/strings.pl.translation") as Translation
 	_check(translation != null, "tlumaczenie pl wczytane")
 
@@ -87,6 +89,11 @@ func _test_data_files() -> void:
 		var sell := int(breed.get("sell_price", 0))
 		_check(buy > 0 and sell > 0 and sell < buy, "cena kupna > ceny sprzedazy dla '%s'" % breed_id)
 		_check(_has_text(translation, breed.get("rarity", "")), "nazwa rzadkosci rasy '%s'" % breed_id)
+		_check(float(breed.get("incubate_seconds", 0)) > 0.0, "czas wykluwania rasy '%s'" % breed_id)
+		_check(float(breed.get("grow_seconds", 0)) > 0.0, "czas wzrostu rasy '%s'" % breed_id)
+		for required_id: String in Dictionary(breed.get("unlock", {})).get("breeds", []):
+			_check(not GameData.breed(required_id).is_empty(),
+					"rasa '%s' wymaga istniejacej rasy '%s'" % [breed_id, required_id])
 		for key in ["name", "desc"]:
 			_check(_has_text(translation, breed.get(key, "")), "tekst %s" % breed.get(key, ""))
 
@@ -95,7 +102,10 @@ func _test_data_files() -> void:
 		_check(not GameData.breed(breed_id).is_empty(), "rasa startowa '%s' istnieje" % breed_id)
 
 	# Teksty uzywane przez panel.
-	for key in ["PANEL_HENS", "PANEL_FEED_LEFT", "PANEL_EGGS_STORED", "PANEL_EGGS_WORTH",
+	for key in ["PANEL_HENS", "PANEL_CHICKS", "PANEL_DAYS", "PANEL_INCUBATE",
+			"PANEL_HATCHING", "PANEL_GROWING", "PANEL_LOCKED", "PANEL_NEED",
+			"PANEL_NEED_MONEY", "PANEL_NEED_DAYS", "PANEL_NEED_HENS", "PANEL_NEED_FEED",
+			"PANEL_NEED_BREED", "PANEL_FARM_CODE", "HINT_BREED_UNLOCKED", "PANEL_FEED_LEFT", "PANEL_EGGS_STORED", "PANEL_EGGS_WORTH",
 			"PANEL_NEXT_EGG", "PANEL_SELL_EGGS", "PANEL_BUY_FEED", "PANEL_BUY_HEN",
 			"PANEL_SOLD", "PANEL_FEED_BOUGHT", "PANEL_HEN_BOUGHT", "PANEL_SELL_HEN",
 			"PANEL_HEN_SOLD", "HINT_NO_FEED", "HINT_WELCOME_BACK"]:
@@ -201,15 +211,17 @@ func _test_economy() -> void:
 	_check(Game.state.money == 0, "pieniadze pobrane")
 	_check(not Game.buy_feed(), "brak pieniedzy blokuje zakup paszy")
 
-	# Zakup kury.
+	# Zakup kury: tylko rasa odblokowana.
 	Game.new_game()
 	var hens_before := Game.state.hen_count()
-	Game.state.money = int(GameData.breed("rhode").get("price", 0))
-	_check(Game.buy_hen("rhode"), "zakup kury za dokladna kwote")
+	Game.state.money = int(GameData.breed("leghorn").get("price", 0))
+	_check(Game.buy_hen("leghorn"), "zakup odblokowanej rasy za dokladna kwote")
 	_check(Game.state.hen_count() == hens_before + 1, "kura dolaczyla do stada")
 	_check(Game.state.money == 0, "pieniadze za kure pobrane")
-	_check(not Game.buy_hen("rhode"), "brak pieniedzy blokuje zakup kury")
+	_check(not Game.buy_hen("leghorn"), "brak pieniedzy blokuje zakup kury")
 	_check(not Game.buy_hen("nieistniejaca"), "nieznana rasa nie da sie kupic")
+	Game.state.money = 999999
+	_check(not Game.buy_hen("cemani"), "zablokowanej rasy nie da sie kupic mimo pieniedzy")
 
 	# Wartosc jaj zalezy od stada.
 	Game.new_game()
@@ -295,3 +307,95 @@ func _test_offline() -> void:
 	var before := back_in_time.feed
 	Simulation.advance(back_in_time, -500.0)
 	_check(absf(back_in_time.feed - before) < 0.001, "cofniety zegar niczego nie zmienia")
+
+
+## Inkubator: jaja -> pisklę -> dorosla kura.
+func _test_incubator() -> void:
+	Game.new_game()
+	var cost := Game.eggs_per_chick()
+	Game.state.eggs = cost
+
+	_check(not Game.incubate("cemani"), "nie da sie wlozyc jaj rasy, ktorej sie nie ma")
+	_check(Game.incubate("leghorn"), "wlozenie jaj posiadanej rasy udaje sie")
+	_check(Game.state.eggs == 0, "jaja znikaja z magazynu")
+	_check(Game.state.incubating.size() == 1, "partia trafila do inkubatora")
+	_check(not Game.incubate("leghorn"), "bez jaj nie da sie wlozyc kolejnej partii")
+
+	# Limit miejsc.
+	Game.new_game()
+	Game.state.eggs = cost * (Game.incubator_slots() + 1)
+	for i in Game.incubator_slots():
+		_check(Game.incubate("leghorn"), "miejsce %d w inkubatorze" % (i + 1))
+	_check(not Game.incubate("leghorn"), "pelny inkubator nie przyjmuje wiecej jaj")
+
+	# Przebieg w czasie: wyklucie, potem dorastanie.
+	var state := _fresh_state(["leghorn"], 10000.0)
+	state.incubating.append(EggBatch.create("leghorn", 1))
+	var incubate_seconds := float(GameData.breed("leghorn").get("incubate_seconds", 0.0))
+	var grow_seconds := float(GameData.breed("leghorn").get("grow_seconds", 0.0))
+	var hens_before := state.hen_count()
+
+	var result := Simulation.advance(state, incubate_seconds)
+	_check(int(result["hatched"]) == 1, "po czasie wykluwania powstaje pisklę")
+	_check(state.incubating.is_empty() and state.chicks.size() == 1, "partia zamienia sie w pisklę")
+
+	result = Simulation.advance(state, grow_seconds)
+	_check(int(result["grown_up"]) == 1, "pisklę dorasta")
+	_check(state.chicks.is_empty(), "pisklę znika z listy piskląt")
+	_check(state.hen_count() == hens_before + 1, "dorosla kura dolacza do stada")
+
+	# Kura jedwabista przyspiesza inkubator.
+	var plain := _fresh_state(["leghorn"], 10000.0)
+	var silky := _fresh_state(["leghorn", "jedwabista"], 10000.0)
+	plain.incubating.append(EggBatch.create("leghorn", 1))
+	silky.incubating.append(EggBatch.create("leghorn", 1))
+	Simulation.advance(plain, incubate_seconds * 0.75)
+	Simulation.advance(silky, incubate_seconds * 0.75)
+	_check(silky.chicks.size() > plain.chicks.size(), "jedwabista przyspiesza wykluwanie")
+
+	# Pisklęta jedza, ale mniej niz dorosle.
+	var with_chick := _fresh_state(["leghorn"], 100.0)
+	var adults_only := with_chick.feed_per_minute()
+	with_chick.chicks.append(Chick.create("leghorn"))
+	_check(with_chick.feed_per_minute() > adults_only, "pisklę tez zjada pasze")
+	_check(with_chick.feed_per_minute() < adults_only * 2.0, "pisklę zjada mniej niz dorosla kura")
+	Game.new_game()
+
+
+## Odblokowywanie ras: warunki musza byc spelnione w calosci.
+func _test_unlocks() -> void:
+	var state := _fresh_state(["leghorn"], 0.0)
+	state.unlocked_breeds.clear()
+	state.ensure_starting_unlocks()
+	_check(state.is_unlocked("leghorn"), "rasa bez warunkow jest dostepna od startu")
+	_check(not state.is_unlocked("rhode"), "rasa z warunkami startuje zablokowana")
+
+	var need: Dictionary = GameData.breed("rhode").get("unlock", {})
+	state.money = int(need.get("money", 0))
+	_check(Simulation.check_unlocks(state).is_empty(), "same pieniadze nie wystarcza")
+
+	while state.hen_count() < int(need.get("hens", 0)):
+		state.chickens.append(Chicken.create("leghorn"))
+	state.feed = float(need.get("feed", 0))
+	var fresh := Simulation.check_unlocks(state)
+	_check(fresh.has("rhode"), "komplet warunkow odblokowuje rase")
+	_check(state.is_unlocked("rhode"), "odblokowana rasa zostaje w stanie")
+	_check(Simulation.check_unlocks(state).is_empty(), "rasa odblokowuje sie tylko raz")
+
+	# Warunek "miej juz inna rase".
+	var chain := _fresh_state(["leghorn"], 1000.0)
+	var araukana: Dictionary = GameData.breed("araukana")
+	var chain_need: Dictionary = araukana.get("unlock", {})
+	chain.money = int(chain_need.get("money", 0)) + 1000
+	chain.days = int(chain_need.get("days", 0))
+	while chain.hen_count() < int(chain_need.get("hens", 0)):
+		chain.chickens.append(Chicken.create("leghorn"))
+	_check(not Simulation.meets_unlock(chain, araukana), "brak wymaganej rasy blokuje odblokowanie")
+	chain.chickens.append(Chicken.create("rhode"))
+	_check(Simulation.meets_unlock(chain, araukana), "posiadanie wymaganej rasy odblokowuje")
+
+	# Dni gospodarstwa licza sie z uplywu czasu, takze offline.
+	var day_seconds := float(GameData.balance().get("day", {}).get("seconds", 600.0))
+	var clock := _fresh_state(["leghorn"], 10000.0)
+	Simulation.advance(clock, day_seconds * 2.0)
+	_check(clock.days == 2, "po dwoch dlugosciach dnia licznik dni pokazuje 2")

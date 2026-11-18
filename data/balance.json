@@ -18,5 +18,12 @@
 	},
 	"offline": {
 		"max_hours": 8
+	},
+	"day": {
+		"seconds": 600
+	},
+	"incubator": {
+		"slots": 3,
+		"eggs_per_chick": 6
 	}
 }

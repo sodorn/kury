@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="130" viewBox="0 0 140 130">
+  <defs>
+    <radialGradient id="haBody" cx="52" cy="54" r="62" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9FB6C9"/>
+      <stop offset="0.55" stop-color="#7B96AE"/>
+      <stop offset="1" stop-color="#5C7589"/>
+    </radialGradient>
+    <radialGradient id="haHead" cx="88" cy="32" r="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A9BFD1"/>
+      <stop offset="1" stop-color="#7389A0"/>
+    </radialGradient>
+    <linearGradient id="haBeak" x1="112" y1="40" x2="132" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFD98A"/>
+      <stop offset="1" stop-color="#EDA845"/>
+    </linearGradient>
+  </defs>
+
+  <g stroke="#8A6A55" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="64" cy="120" rx="38" ry="8" fill="#6B8F4E" fill-opacity="0.28" stroke="none"/>
+
+    <!-- nogi -->
+    <path d="M56 100v14M56 114h-9M56 114h9" stroke="#EDA845"/>
+    <path d="M80 100v14M80 114h-9M80 114h9" stroke="#EDA845"/>
+
+    <!-- tulow: rasa bezogonowa, wiec sylwetka konczy sie zaokragleniem -->
+    <ellipse cx="60" cy="70" rx="46" ry="38" fill="url(#haBody)"/>
+    <path d="M16 62q-10 10-2 22" fill="none" stroke-width="4"/>
+
+    <!-- skrzydlo -->
+    <path d="M40 62Q64 52 80 72Q62 90 42 82Q34 72 40 62Z" fill="#8FA8BD"/>
+    <path d="M48 70Q60 66 70 74" fill="none" stroke-width="3"/>
+
+    <!-- glowa -->
+    <circle cx="94" cy="40" r="24" fill="url(#haHead)"/>
+
+    <!-- pekate baczki przy uszach: znak rozpoznawczy araukany -->
+    <path d="M84 56q-16 8-22 0q6-12 22-8Z" fill="#B7C9D8"/>
+    <path d="M108 54q14 8 20 0q-6-11-20-7Z" fill="#B7C9D8"/>
+
+    <!-- maly grzebien -->
+    <path d="M86 20q4-10 9-3q4-10 9-1q4-7 7 2" fill="#E4706A"/>
+    <!-- dziob -->
+    <path d="M116 42l15 5-15 6Z" fill="url(#haBeak)"/>
+
+    <!-- oko -->
+    <circle cx="104" cy="36" r="4.5" fill="#3A3744" stroke="none"/>
+    <circle cx="105.6" cy="34.4" r="1.6" fill="#FFFFFF" stroke="none"/>
+
+    <!-- niebieskie jajko przy nodze, zeby rasa byla rozpoznawalna -->
+    <ellipse cx="104" cy="112" rx="11" ry="14" fill="#9FD9D2" stroke-width="3"/>
+  </g>
+</svg>

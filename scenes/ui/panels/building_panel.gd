@@ -68,6 +68,9 @@ func open(building_id: String, picture: Texture2D = null) -> void:
 	_picture.texture = picture
 	_status.text = ""
 	_flash_left = 0.0
+	# Zerujemy wysokosc listy z poprzedniego budynku, inaczej jej rozmiar
+	# trzymalby panel rozciagniety przy nastepnym otwarciu.
+	_scroll.custom_minimum_size.y = 0
 	_build_content(building_id)
 	_refresh()
 	_bottom_spacer.custom_minimum_size.y = SafeArea.bottom_inset(get_viewport())
@@ -76,11 +79,17 @@ func open(building_id: String, picture: Texture2D = null) -> void:
 	_kill_tween()
 	show()
 	modulate.a = 0.0
-	# Jedna klatka, zeby kontenery policzyly wysokosc panelu przed animacja.
+	# Animacja wysuwania ustawia panelowi margines od gory, co zapamietuje jego
+	# wysokosc. Przed kolejnym otwarciem trzeba ja uwolnic, inaczej panel
+	# zostalby rozciagniety do rozmiaru z poprzedniego budynku.
+	_sheet.offset_top = 0.0
+	_sheet.offset_bottom = 0.0
 	await get_tree().process_frame
 	_limit_height()
 	await get_tree().process_frame
-	var shown_y := size.y - _sheet.size.y
+	# Wysokosc bierzemy z rozmiaru minimalnego, a nie z biezacego: reset_size()
+	# sciagnalby tez szerokosc i panel przestalby siegac krawedzi ekranu.
+	var shown_y := size.y - _sheet.get_combined_minimum_size().y
 	_sheet.position.y = size.y
 	_dim.modulate.a = 0.0
 	modulate.a = 1.0
@@ -91,6 +100,7 @@ func open(building_id: String, picture: Texture2D = null) -> void:
 
 ## Panel moze zajac najwyzej polowe ekranu; reszta listy sie przewija.
 func _limit_height() -> void:
+	_scrollable.reset_size()
 	var wanted := _scrollable.get_combined_minimum_size().y
 	_scroll.custom_minimum_size.y = minf(wanted, size.y * 0.5)
 
@@ -138,45 +148,109 @@ func _build_content(building_id: String) -> void:
 
 	match building_id:
 		"coop":
-			_add_row("PANEL_HENS", func() -> String: return str(Game.state.hen_count()))
-			_add_row("PANEL_FEED_LEFT", func() -> String: return _feed_text())
-			_add_progress("PANEL_NEXT_EGG", func() -> float: return _best_progress())
-			for breed: Dictionary in GameData.breeds():
-				var owned_id: String = breed.get("id", "")
-				var owned_name: String = tr(breed.get("name", ""))
-				var sell_price := FarmState.hen_sell_price(owned_id)
-				_add_action(false,
-						func() -> bool: return _owned(owned_id) > 0,
-						func() -> String: return tr("PANEL_SELL_HEN") % [owned_name, _owned(owned_id), sell_price],
-						func() -> void: _on_sell_hen(owned_id, owned_name),
-						func() -> bool: return _owned(owned_id) > 0)
-		"storage":
-			_add_row("PANEL_EGGS_STORED", func() -> String: return NumberFormat.grouped(Game.state.eggs))
-			_add_row("PANEL_EGGS_WORTH", func() -> String: return NumberFormat.grouped(Game.state.eggs_value()))
-			_add_row("PANEL_FEED_LEFT", func() -> String: return _feed_text())
-		"shop":
-			_add_action(true,
-					func() -> bool: return Game.state.eggs > 0,
-					func() -> String: return tr("PANEL_SELL_EGGS") % [Game.state.eggs, Game.state.eggs_value()],
-					_on_sell_eggs)
-			var economy: Dictionary = GameData.balance().get("economy", {})
-			var pack := int(economy.get("feed_pack_size", 0))
-			var pack_price := int(economy.get("feed_pack_price", 0))
-			_add_action(false,
-					func() -> bool: return Game.state.money >= pack_price,
-					func() -> String: return tr("PANEL_BUY_FEED") % [pack, pack_price],
-					_on_buy_feed)
-			for breed: Dictionary in GameData.breeds():
-				var breed_id: String = breed.get("id", "")
-				var price := int(breed.get("price", 0))
-				var breed_name: String = tr(breed.get("name", ""))
-				var rarity: String = tr(breed.get("rarity", ""))
-				_add_action(false,
-						func() -> bool: return Game.state.money >= price,
-						func() -> String: return tr("PANEL_BUY_HEN") % [breed_name, rarity, price],
-						func() -> void: _on_buy_hen(breed_id, breed_name))
+			_build_coop()
 		"incubator":
-			_add_row("PANEL_EGGS_STORED", func() -> String: return NumberFormat.grouped(Game.state.eggs))
+			_build_incubator()
+		"storage":
+			_build_storage()
+		"shop":
+			_build_shop()
+
+
+func _build_coop() -> void:
+	_add_row("PANEL_HENS", func() -> String: return str(Game.state.hen_count()))
+	_add_row("PANEL_CHICKS", func() -> String: return str(Game.state.chicks.size()))
+	_add_row("PANEL_FEED_LEFT", func() -> String: return _feed_text())
+	_add_row("PANEL_DAYS", func() -> String: return str(Game.state.days))
+	_add_progress("PANEL_NEXT_EGG", func() -> float: return _best_progress())
+	for breed: Dictionary in GameData.breeds():
+		var owned_id: String = breed.get("id", "")
+		var owned_name: String = tr(breed.get("name", ""))
+		var sell_price := FarmState.hen_sell_price(owned_id)
+		_add_action(false,
+				func() -> bool: return _owned(owned_id) > 0,
+				func() -> String: return tr("PANEL_SELL_HEN") % [owned_name, _owned(owned_id), sell_price],
+				func() -> void: _on_sell_hen(owned_id, owned_name),
+				func() -> bool: return _owned(owned_id) > 0)
+
+
+func _build_storage() -> void:
+	_add_row("PANEL_EGGS_STORED", func() -> String: return NumberFormat.grouped(Game.state.eggs))
+	_add_row("PANEL_EGGS_WORTH", func() -> String: return NumberFormat.grouped(Game.state.eggs_value()))
+	_add_row("PANEL_FEED_LEFT", func() -> String: return _feed_text())
+	_add_row("PANEL_FARM_CODE", func() -> String: return Cloud.player_id)
+	var note := Label.new()
+	note.theme_type_variation = &"NoteLabel"
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.text = tr("PANEL_CLOUD_ON") if Cloud.is_enabled() else tr("PANEL_CLOUD_OFF")
+	_rows.add_child(note)
+
+
+## Inkubator: postep wykluwania i wzrostu plus wkladanie jaj.
+func _build_incubator() -> void:
+	_add_row("PANEL_INCUBATOR_SLOTS",
+			func() -> String: return "%d / %d" % [Game.state.incubating.size(), Game.incubator_slots()])
+	_add_row("PANEL_EGGS_STORED", func() -> String: return NumberFormat.grouped(Game.state.eggs))
+
+	# Paski postepu dla kazdego miejsca w inkubatorze i dla kazdego pisklecia.
+	for slot in Game.incubator_slots():
+		var index := slot
+		_add_progress_dynamic(
+				func() -> String:
+					if index >= Game.state.incubating.size():
+						return ""
+					var batch: EggBatch = Game.state.incubating[index]
+					return tr("PANEL_HATCHING") % tr(GameData.breed(batch.breed_id).get("name", "")),
+				func() -> float:
+					if index >= Game.state.incubating.size():
+						return 0.0
+					return (Game.state.incubating[index] as EggBatch).progress())
+	for slot in 4:
+		var index := slot
+		_add_progress_dynamic(
+				func() -> String:
+					if index >= Game.state.chicks.size():
+						return ""
+					var chick: Chick = Game.state.chicks[index]
+					return tr("PANEL_GROWING") % tr(GameData.breed(chick.breed_id).get("name", "")),
+				func() -> float:
+					if index >= Game.state.chicks.size():
+						return 0.0
+					return (Game.state.chicks[index] as Chick).progress())
+
+	var cost := Game.eggs_per_chick()
+	for breed: Dictionary in GameData.breeds():
+		var breed_id: String = breed.get("id", "")
+		var breed_name: String = tr(breed.get("name", ""))
+		_add_action(false,
+				func() -> bool: return Game.can_incubate(breed_id),
+				func() -> String: return tr("PANEL_INCUBATE") % [cost, breed_name],
+				func() -> void: _on_incubate(breed_id),
+				func() -> bool: return Game.state.owns_breed(breed_id))
+
+	var hint := Label.new()
+	hint.theme_type_variation = &"NoteLabel"
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.text = tr("PANEL_NO_OWN_BREEDS")
+	_actions.add_child(hint)
+	_refreshers.append(func() -> void: hint.visible = Game.state.hens_by_breed().is_empty())
+
+
+## Sklep: jaja, pasza i karty ras ze zdjeciem.
+func _build_shop() -> void:
+	_add_action(true,
+			func() -> bool: return Game.state.eggs > 0,
+			func() -> String: return tr("PANEL_SELL_EGGS") % [Game.state.eggs, Game.state.eggs_value()],
+			_on_sell_eggs)
+	var economy: Dictionary = GameData.balance().get("economy", {})
+	var pack := int(economy.get("feed_pack_size", 0))
+	var pack_price := int(economy.get("feed_pack_price", 0))
+	_add_action(false,
+			func() -> bool: return Game.state.money >= pack_price,
+			func() -> String: return tr("PANEL_BUY_FEED") % [pack, pack_price],
+			_on_buy_feed)
+	for breed: Dictionary in GameData.breeds():
+		_add_breed_card(breed)
 
 
 func _add_row(label_key: String, value_provider: Callable) -> void:
@@ -278,3 +352,104 @@ func _on_sell_hen(breed_id: String, breed_name: String) -> void:
 ## Ile kur danej rasy ma gracz.
 func _owned(breed_id: String) -> int:
 	return int(Game.state.hens_by_breed().get(breed_id, 0))
+
+
+## Pasek postepu, ktory sam sie chowa, gdy nie ma czego pokazywac.
+func _add_progress_dynamic(label_provider: Callable, value_provider: Callable) -> void:
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	var label := Label.new()
+	label.theme_type_variation = &"NoteLabel"
+	var bar := ProgressBar.new()
+	bar.max_value = 1.0
+	bar.step = 0.001
+	bar.show_percentage = false
+	bar.custom_minimum_size.y = 30
+	box.add_child(label)
+	box.add_child(bar)
+	_rows.add_child(box)
+	_refreshers.append(func() -> void:
+		var text: String = label_provider.call()
+		box.visible = text != ""
+		if not box.visible:
+			return
+		label.text = text
+		bar.value = value_provider.call())
+
+
+## Karta rasy w sklepie: zdjecie (albo rysunek), nazwa, rzadkosc i przycisk.
+## Zdjecia realnych kur wrzuca sie do assets/photos/<id>.jpg — jesli pliku
+## nie ma, karta pokazuje rysunek z wybiegu, wiec sklep dziala od razu.
+func _add_breed_card(breed: Dictionary) -> void:
+	var breed_id: String = breed.get("id", "")
+	var breed_name: String = tr(breed.get("name", ""))
+	var price := int(breed.get("price", 0))
+
+	var card := HBoxContainer.new()
+	card.add_theme_constant_override("separation", 20)
+
+	var picture := TextureRect.new()
+	picture.custom_minimum_size = Vector2(150, 150)
+	picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	picture.texture = _breed_image(breed)
+	card.add_child(picture)
+
+	var texts := VBoxContainer.new()
+	texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	texts.add_theme_constant_override("separation", 4)
+	var title := Label.new()
+	title.text = breed_name
+	var subtitle := Label.new()
+	subtitle.theme_type_variation = &"NoteLabel"
+	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	texts.add_child(title)
+	texts.add_child(subtitle)
+	card.add_child(texts)
+
+	var button := Button.new()
+	button.pressed.connect(func() -> void: _on_buy_hen(breed_id, breed_name))
+	card.add_child(button)
+	_actions.add_child(card)
+
+	_refreshers.append(func() -> void:
+		var unlocked: bool = Game.state.is_unlocked(breed_id)
+		picture.modulate = Color(1, 1, 1, 1) if unlocked else Color(0.45, 0.45, 0.5, 0.9)
+		button.visible = unlocked
+		button.text = tr("PANEL_BUY_HEN") % price
+		button.disabled = Game.state.money < price
+		if unlocked:
+			subtitle.text = "%s · %s" % [tr(breed.get("rarity", "")), tr(breed.get("desc", ""))]
+		else:
+			subtitle.text = tr("PANEL_NEED") % _unlock_text(breed))
+
+
+## Grafika rasy: najpierw prawdziwe zdjecie, w razie jego braku rysunek.
+func _breed_image(breed: Dictionary) -> Texture2D:
+	var photo: String = breed.get("photo", "")
+	if photo != "" and ResourceLoader.exists(photo):
+		return load(photo) as Texture2D
+	return load(breed.get("sprite", "")) as Texture2D
+
+
+## Czego brakuje do odblokowania rasy, po przecinku.
+func _unlock_text(breed: Dictionary) -> String:
+	var need: Dictionary = breed.get("unlock", {})
+	var parts: Array[String] = []
+	if Game.state.money < int(need.get("money", 0)):
+		parts.append(tr("PANEL_NEED_MONEY") % int(need.get("money", 0)))
+	if Game.state.days < int(need.get("days", 0)):
+		parts.append(tr("PANEL_NEED_DAYS") % int(need.get("days", 0)))
+	if Game.state.hen_count() < int(need.get("hens", 0)):
+		parts.append(tr("PANEL_NEED_HENS") % int(need.get("hens", 0)))
+	if Game.state.feed < float(need.get("feed", 0)):
+		parts.append(tr("PANEL_NEED_FEED") % int(need.get("feed", 0)))
+	for required_id: String in need.get("breeds", []):
+		if not Game.state.owns_breed(required_id):
+			parts.append(tr("PANEL_NEED_BREED") % tr(GameData.breed(required_id).get("name", "")))
+	return ", ".join(parts)
+
+
+func _on_incubate(breed_id: String) -> void:
+	if Game.incubate(breed_id):
+		_flash(tr("PANEL_EGGS_IN"))
