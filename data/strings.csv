@@ -1,25 +1,37 @@
 keys,pl
 BUILDING_COOP_NAME,Kurnik
-BUILDING_COOP_DESC,"Tu mieszkają kury. Znoszą jaja na wybiegu, dopóki mają paszę."
+BUILDING_COOP_DESC,"Tu mieszka stado. Kury znoszą jaja na wybiegu, dopóki mają paszę."
 BUILDING_INCUBATOR_NAME,Inkubator
 BUILDING_INCUBATOR_DESC,"Z włożonych tu jaj wyklują się pisklęta. Dostępny w kolejnej wersji."
 BUILDING_STORAGE_NAME,Magazyn
 BUILDING_STORAGE_DESC,"Zebrane jaja i zapas paszy."
 BUILDING_SHOP_NAME,Sklep
-BUILDING_SHOP_DESC,"Sprzedasz tu jaja, kupisz paszę i nowe kury."
+BUILDING_SHOP_DESC,"Sprzedasz tu jaja, kupisz paszę i nowe rasy kur."
 BREED_LEGHORN_NAME,Leghorn
 BREED_LEGHORN_DESC,"Biała nioska. Znosi często, jaja tanie."
 BREED_RHODE_NAME,Rhode Island
 BREED_RHODE_DESC,"Ruda. Znosi wolniej, ale jaja są dużo cenniejsze."
+BREED_POLISH_NAME,Czubatka polska
+BREED_POLISH_DESC,"Pióropusz na głowie zasłania jej pół świata. Jaja wyjątkowo cenne."
+BREED_CEMANI_NAME,Ayam Cemani
+BREED_CEMANI_DESC,"Czarna od grzebienia po pazury. Znosi rzadko, ale każde jajko to majątek."
+RARITY_COMMON,pospolita
+RARITY_UNCOMMON,rzadsza
+RARITY_RARE,rzadka
+RARITY_LEGENDARY,wyjątkowa
 PANEL_HENS,Kury w stadzie
 PANEL_FEED_LEFT,Pasza
 PANEL_EGGS_STORED,Jaja w magazynie
 PANEL_EGGS_WORTH,Wartość jaj
 PANEL_NEXT_EGG,Najbliższe jajko
+PANEL_FLOCK,Twoje stado
 PANEL_SELL_EGGS,"Sprzedaj jaja (%d szt. za %d)"
 PANEL_BUY_FEED,"Kup paszę (%d szt. za %d)"
-PANEL_BUY_HEN,"Kup kurę: %s (%d)"
+PANEL_BUY_HEN,"%s — %s, kup za %d"
+PANEL_SELL_HEN,"Sprzedaj %s (%d szt.) za %d"
 PANEL_SOLD,"Sprzedano %d jaj za %d monet."
 PANEL_FEED_BOUGHT,"Pasza dosypana do magazynu."
 PANEL_HEN_BOUGHT,"%s dołączyła do stada."
+PANEL_HEN_SOLD,"Sprzedano kurę rasy %s za %d monet."
 HINT_NO_FEED,"Skończyła się pasza — kury przestały znosić. Kup ją w sklepie."
+HINT_WELCOME_BACK,"Pod twoją nieobecność kury zniosły %d jaj. Zbierz je z wybiegu."

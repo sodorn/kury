@@ -4,9 +4,11 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 3 zakonczony** (wersja 3.0). Nastepny: ETAP 4.
+- Aktualny etap: **ETAP 4 w czesci** (wersja 4.0): zapis gry i nadrabianie czasu
+  offline gotowe. Zostaje inkubacja i pisklęta.
 - Wersje grafiki: **1.0** plaski wektor (galaz `v1.0-grafika-plaska`, commit 6ea3a3c),
-  **2.1** pastelowa, miekkie kontury, zaokraglone sylwetki (galaz `main`) — aktualna.
+  **2.1** pastelowa, miekkie kontury, zaokraglone sylwetki — aktualna.
+- Wersje do cofniecia sie: `v1.0-grafika-plaska`, `v3.0-etap3` (galezie na GitHubie).
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -71,6 +73,23 @@ tests/       tests.tscn + run_tests.gd    logika, dane, scena farmy (headless)
 tools/       gen_ground.py          generator tla i przedniego plotu
 ```
 
+## Zapis gry (ETAP 4)
+
+- `core/save_game.gd`: caly zapis i odczyt. Plik `user://save.json`, pole
+  `version`, migracje w `_migrate`. Podnosic VERSION przy kazdej zmianie pol.
+- Odczyt jest odporny: brak pliku, uszkodzony JSON, zapis z nowszej wersji gry
+  i kura nieistniejacej juz rasy nie wywracaja gry (sa na to testy).
+- `Game` zapisuje co 8 s oraz przy pauzie i zamknieciu. W przegladarce
+  `user://` to IndexedDB, a Godot synchronizuje je dopiero w kolejnej klatce
+  po zapisie — dlatego nie opieramy sie wylacznie na zapisie przy wyjsciu,
+  bo zamykana karta moze nie zdazyc.
+- Nadrabianie czasu: `Game._catch_up` wola `Simulation.advance` z liczba sekund
+  od zapisu, przycieta do `offline.max_hours` z balance.json. Cofniety zegar
+  daje zero (ujemny czas jest obcinany).
+- Zapis jest lokalny dla przegladarki i urzadzenia: kazdy gracz ma swoja farme,
+  nikt nie widzi cudzej. Wspolna gra na wielu urzadzeniach wymagalaby serwera
+  i kont — swiadomie tego nie robimy.
+
 ## Jak dziala rozgrywka (ETAP 3)
 
 - `Simulation.advance(state, delta)` to jedyne miejsce liczace uplyw czasu.
@@ -86,7 +105,12 @@ tools/       gen_ground.py          generator tla i przedniego plotu
 - Pozycje jaj zyja tylko w scenie, stan gry trzyma sama liczbe. Po wczytaniu
   wybieg rozstawia je na nowo w losowych miejscach.
 - Panel budynku buduje swoja zawartosc w kodzie (`_build_content`), bo liczba
-  przyciskow zalezy od liczby ras w `breeds.json`.
+  przyciskow zalezy od liczby ras w `breeds.json`. Lista jest przewijana
+  i ograniczona do polowy ekranu, zeby kolejne rasy nie wypchnely jej poza widok.
+- Cztery rasy o rosnacej rzadkosci: leghorn, rhode, czubatka polska, ayam cemani.
+  Rzadsze znosza wolniej, ale ich jaja sa wyraznie cenniejsze i same kury
+  trzymaja wartosc przy sprzedazy (`sell_price` w breeds.json).
+- Kury mozna kupowac w sklepie i sprzedawac w kurniku.
 
 ## Wykonane
 
@@ -107,26 +131,33 @@ tools/       gen_ground.py          generator tla i przedniego plotu
 ## Weryfikacja ETAPU 2 (wykonana w srodowisku Claude, Linux)
 
 - Import projektu w Godot 4.7.2: bez bledow.
-- `tests/tests.tscn`: 90/90 OK (w tym: kazdy budynek z `buildings.json` jest
+- `tests/tests.tscn`: 131/131 OK (w tym: kazdy budynek z `buildings.json` jest
   w scenie farmy, ma grafike i wpis w danych).
-- `tests/smoke_ui.tscn` (xvfb, renderer programowy): scena sie renderuje,
-  kazdy z 4 budynkow otwiera panel i zamyka go dotkniecie tla, kury chodza,
-  jajko da sie zebrac dotknieciem, przyciski sklepu sprzedaja i kupuja,
-  komunikat o braku paszy sie pokazuje.
-  Test wylacza `Game._process` — przy wolnym renderze symulacja zdazylaby
+- `tests/smoke_ui.tscn` (xvfb, renderer programowy), 21 sprawdzen: scena sie
+  renderuje, kazdy z 4 budynkow otwiera panel i zamyka go dotkniecie tla,
+  kury chodza, jajko da sie zebrac dotknieciem, sklep sprzedaje i kupuje,
+  kurnik sprzedaje kure, komunikat o braku paszy sie pokazuje.
+- Zapis w przegladarce sprawdzony realnie (Chrome sterowany playwright-core):
+  po pierwszej sesji w IndexedDB lezy `save.json`, po ponownym wejsciu gra
+  wstaje z zapisanym stanem (mniej paszy, jaja z poprzedniej sesji na wybiegu).
+  UWAGA przy powtarzaniu takiego testu: `--virtual-time-budget` w Chrome ubija
+  strone przed synchronizacja IndexedDB i daje falszywy wynik negatywny.
+  Oba zestawy testow kasuja zapis na starcie i na koncu — inaczej kolejny bieg
+  dziedziczylby stado i jaja po poprzednim.
+  Test dymny wylacza `Game._process` — przy wolnym renderze symulacja zdazylaby
   znosic jaja w trakcie sprawdzen i wyniki bylyby losowe.
 - Edytor uruchomiony na farm.tscn: brak ostrzezen przy wezlach.
 - NIE sprawdzone: uruchomienie na Windows, na telefonie, wydajnosc, bezpieczny
   obszar na realnym urzadzeniu.
 
-## Nastepne zadania (ETAP 4)
+## Nastepne zadania
 
-- Zapis gry: `user://save.json` z polem `version` i migracjami, autosave
-  oraz zapis przy pauzie aplikacji.
-- Nadrabianie czasu offline przez `Simulation.advance` ze znacznikow czasu,
-  z limitem godzin w `balance.json`; cofniety zegar = zero postepu.
 - Inkubacja: wkladanie jaj do inkubatora, wykluwanie piskląt, wzrost w kury.
-- Po ETAPIE 4: krotki samouczek na start (3-4 kroki) i przycisk "?" z zasadami.
+- Krotki samouczek na start (3-4 kroki) i przycisk "?" z zasadami.
+- Zdjecia ras w panelu sklepu: wlasciciel dostarcza pliki, Claude nie ma
+  dostepu do sieci poza GitHubem i rejestrami pakietow, wiec sam ich nie pobierze.
+  Wymagania: PNG, jeden ptak na plik, licencja pozwalajaca na uzycie
+  (np. Wikimedia Commons), do tego plik z podpisami autorow do ekranu "o grze".
 
 ## Znane problemy / uwagi
 

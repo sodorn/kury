@@ -3,20 +3,48 @@
 		"id": "leghorn",
 		"name": "BREED_LEGHORN_NAME",
 		"desc": "BREED_LEGHORN_DESC",
+		"rarity": "RARITY_COMMON",
 		"sprite": "res://assets/sprites/animals/hen_white.svg",
 		"egg_seconds": 40,
 		"feed_per_minute": 0.5,
 		"egg_value": 5,
-		"price": 80
+		"price": 80,
+		"sell_price": 40
 	},
 	{
 		"id": "rhode",
 		"name": "BREED_RHODE_NAME",
 		"desc": "BREED_RHODE_DESC",
+		"rarity": "RARITY_UNCOMMON",
 		"sprite": "res://assets/sprites/animals/hen_brown.svg",
 		"egg_seconds": 65,
 		"feed_per_minute": 0.6,
 		"egg_value": 11,
-		"price": 260
+		"price": 260,
+		"sell_price": 160
+	},
+	{
+		"id": "polish",
+		"name": "BREED_POLISH_NAME",
+		"desc": "BREED_POLISH_DESC",
+		"rarity": "RARITY_RARE",
+		"sprite": "res://assets/sprites/animals/hen_polish.svg",
+		"egg_seconds": 95,
+		"feed_per_minute": 0.7,
+		"egg_value": 22,
+		"price": 700,
+		"sell_price": 520
+	},
+	{
+		"id": "cemani",
+		"name": "BREED_CEMANI_NAME",
+		"desc": "BREED_CEMANI_DESC",
+		"rarity": "RARITY_LEGENDARY",
+		"sprite": "res://assets/sprites/animals/hen_cemani.svg",
+		"egg_seconds": 135,
+		"feed_per_minute": 0.8,
+		"egg_value": 48,
+		"price": 1900,
+		"sell_price": 1500
 	}
 ]

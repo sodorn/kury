@@ -21,6 +21,12 @@ func _run() -> void:
 	if args.size() > 0:
 		_out_dir = args[0].trim_suffix("/") + "/"
 
+	# Gra wczytuje zapis przy starcie, wiec przed zbudowaniem sceny kasujemy go
+	# i zaczynamy od stanu poczatkowego — inaczej kolejne uruchomienia testu
+	# dziedziczylyby stado i jaja z poprzedniego.
+	SaveGame.clear()
+	Game.new_game()
+
 	_main = load("res://scenes/main/main.tscn").instantiate()
 	get_tree().root.add_child(_main)
 	await _frames(20)
@@ -34,8 +40,10 @@ func _run() -> void:
 	await _test_hens()
 	await _test_egg_pickup()
 	await _test_shop()
+	await _test_sell_hen()
 	await _test_no_feed_notice()
 
+	SaveGame.clear()
 	print("TEST DYMNY: %s" % ("OK" if _failed == 0 else "%d BLEDOW" % _failed))
 	get_tree().quit(1 if _failed > 0 else 0)
 
@@ -100,7 +108,7 @@ func _test_shop() -> void:
 	var shop: Node2D = _main.get_node("Farm/Objects/Shop")
 	await _tap(_canvas_point(shop, Vector2(0, -150)))
 	await _frames(30)
-	var actions: VBoxContainer = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Actions")
+	var actions: VBoxContainer = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Scrollable/Actions")
 	var buttons := actions.get_children()
 	_check(buttons.size() == 2 + GameData.breeds().size(), "sklep ma komplet przyciskow")
 	if buttons.is_empty():
@@ -122,6 +130,35 @@ func _test_shop() -> void:
 	_check(Game.state.hen_count() == hens_before + 1, "zakup kury dziala")
 	_check(_nodes_of_type("FarmChicken").size() == Game.state.hen_count(), "kupiona kura pojawila sie na wybiegu")
 	_shot("panel_po_zakupach.png")
+
+
+## Sprzedaz kury w kurniku: stado maleje, pieniedzy przybywa, kura znika z wybiegu.
+func _test_sell_hen() -> void:
+	var panel: Control = _main.get_node("Hud/Root/BuildingPanel")
+	if panel.visible:
+		panel.close()
+		await _frames(30)
+	var coop: Node2D = _main.get_node("Farm/Objects/Coop")
+	await _tap(_canvas_point(coop, Vector2(0, -150)))
+	await _frames(30)
+	_shot("panel_kurnik.png")
+
+	var actions: VBoxContainer = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Scrollable/Actions")
+	var sell_button: Button = null
+	for child in actions.get_children():
+		if (child as Button).visible:
+			sell_button = child
+			break
+	_check(sell_button != null, "kurnik pokazuje przycisk sprzedazy posiadanej rasy")
+	if sell_button == null:
+		return
+	var hens_before: int = Game.state.hen_count()
+	var money_before: int = Game.state.money
+	sell_button.emit_signal("pressed")
+	await _frames(60)
+	_check(Game.state.hen_count() == hens_before - 1, "sprzedaz zmniejsza stado")
+	_check(Game.state.money > money_before, "sprzedaz kury daje pieniadze")
+	_check(_nodes_of_type("FarmChicken").size() == Game.state.hen_count(), "sprzedana kura znika z wybiegu")
 
 
 ## Gdy skonczy sie pasza, gracz musi dostac komunikat — inaczej nie wie,

@@ -17,6 +17,10 @@ signal eggs_laid(count: int)
 @warning_ignore("unused_signal")
 signal hen_added(hen: Chicken)
 
+## Kura danej rasy opuscila stado — wybieg ma zabrac jedna z nich.
+@warning_ignore("unused_signal")
+signal hen_removed(breed_id: String)
+
 ## Krotki komunikat dla gracza (np. koniec paszy).
 @warning_ignore("unused_signal")
 signal notice(text: String)

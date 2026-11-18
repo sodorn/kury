@@ -75,6 +75,16 @@ func _peck(_delta: float) -> void:
 	_sprite.rotation = 0.22 * dip * _facing
 
 
+## Kura znika z wybiegu (sprzedana) — podskakuje i gasnie.
+func leave() -> void:
+	set_process(false)
+	var tween := create_tween().set_parallel()
+	tween.tween_property(_sprite, "position:y", _sprite.position.y - 120.0, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_sprite, "scale", Vector2(0.4, 0.4), 0.4)
+	tween.tween_property(_sprite, "modulate:a", 0.0, 0.4)
+	tween.chain().tween_callback(queue_free)
+
+
 func _random_point() -> Vector2:
 	return Vector2(
 		randf_range(_bounds.position.x, _bounds.end.x),

@@ -27,6 +27,19 @@ func hen_count() -> int:
 	return chickens.size()
 
 
+## Ile sztuk kazdej rasy jest w stadzie: {"leghorn": 3, "cemani": 1}.
+func hens_by_breed() -> Dictionary:
+	var counts := {}
+	for hen: Chicken in chickens:
+		counts[hen.breed_id] = int(counts.get(hen.breed_id, 0)) + 1
+	return counts
+
+
+## Kwota, jaka sklep placi za kure danej rasy.
+static func hen_sell_price(breed_id: String) -> int:
+	return int(GameData.breed(breed_id).get("sell_price", 0))
+
+
 ## Laczna wartosc zebranych jaj w monetach.
 func eggs_value() -> int:
 	# Jaja roznych ras trafiaja do wspolnego magazynu, wiec licze po sredniej

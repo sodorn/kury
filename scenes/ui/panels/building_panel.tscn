@@ -80,11 +80,20 @@ layout_mode = 2
 theme_type_variation = &"NoteLabel"
 autowrap_mode = 3
 
-[node name="Rows" type="VBoxContainer" parent="Sheet/Content"]
+[node name="Scroll" type="ScrollContainer" parent="Sheet/Content"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Scrollable" type="VBoxContainer" parent="Sheet/Content/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+
+[node name="Rows" type="VBoxContainer" parent="Sheet/Content/Scroll/Scrollable"]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="Actions" type="VBoxContainer" parent="Sheet/Content"]
+[node name="Actions" type="VBoxContainer" parent="Sheet/Content/Scroll/Scrollable"]
 layout_mode = 2
 theme_override_constants/separation = 18
 

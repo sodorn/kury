@@ -26,8 +26,10 @@ var _refreshers: Array[Callable] = []
 @onready var _picture: TextureRect = $Sheet/Content/Body/Picture
 @onready var _description: Label = $Sheet/Content/Body/Text/Description
 @onready var _status: Label = $Sheet/Content/Body/Text/Status
-@onready var _rows: VBoxContainer = $Sheet/Content/Rows
-@onready var _actions: VBoxContainer = $Sheet/Content/Actions
+@onready var _scroll: ScrollContainer = $Sheet/Content/Scroll
+@onready var _scrollable: VBoxContainer = $Sheet/Content/Scroll/Scrollable
+@onready var _rows: VBoxContainer = $Sheet/Content/Scroll/Scrollable/Rows
+@onready var _actions: VBoxContainer = $Sheet/Content/Scroll/Scrollable/Actions
 @onready var _bottom_spacer: Control = $Sheet/Content/BottomSpacer
 
 
@@ -76,6 +78,8 @@ func open(building_id: String, picture: Texture2D = null) -> void:
 	modulate.a = 0.0
 	# Jedna klatka, zeby kontenery policzyly wysokosc panelu przed animacja.
 	await get_tree().process_frame
+	_limit_height()
+	await get_tree().process_frame
 	var shown_y := size.y - _sheet.size.y
 	_sheet.position.y = size.y
 	_dim.modulate.a = 0.0
@@ -83,6 +87,12 @@ func open(building_id: String, picture: Texture2D = null) -> void:
 	_tween = create_tween().set_parallel()
 	_tween.tween_property(_sheet, "position:y", shown_y, SLIDE_TIME).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	_tween.tween_property(_dim, "modulate:a", 1.0, SLIDE_TIME)
+
+
+## Panel moze zajac najwyzej polowe ekranu; reszta listy sie przewija.
+func _limit_height() -> void:
+	var wanted := _scrollable.get_combined_minimum_size().y
+	_scroll.custom_minimum_size.y = minf(wanted, size.y * 0.5)
 
 
 func close() -> void:
@@ -131,19 +141,28 @@ func _build_content(building_id: String) -> void:
 			_add_row("PANEL_HENS", func() -> String: return str(Game.state.hen_count()))
 			_add_row("PANEL_FEED_LEFT", func() -> String: return _feed_text())
 			_add_progress("PANEL_NEXT_EGG", func() -> float: return _best_progress())
+			for breed: Dictionary in GameData.breeds():
+				var owned_id: String = breed.get("id", "")
+				var owned_name: String = tr(breed.get("name", ""))
+				var sell_price := FarmState.hen_sell_price(owned_id)
+				_add_action(false,
+						func() -> bool: return _owned(owned_id) > 0,
+						func() -> String: return tr("PANEL_SELL_HEN") % [owned_name, _owned(owned_id), sell_price],
+						func() -> void: _on_sell_hen(owned_id, owned_name),
+						func() -> bool: return _owned(owned_id) > 0)
 		"storage":
 			_add_row("PANEL_EGGS_STORED", func() -> String: return NumberFormat.grouped(Game.state.eggs))
 			_add_row("PANEL_EGGS_WORTH", func() -> String: return NumberFormat.grouped(Game.state.eggs_value()))
 			_add_row("PANEL_FEED_LEFT", func() -> String: return _feed_text())
 		"shop":
-			_add_action("PANEL_SELL_EGGS", true,
+			_add_action(true,
 					func() -> bool: return Game.state.eggs > 0,
 					func() -> String: return tr("PANEL_SELL_EGGS") % [Game.state.eggs, Game.state.eggs_value()],
 					_on_sell_eggs)
 			var economy: Dictionary = GameData.balance().get("economy", {})
 			var pack := int(economy.get("feed_pack_size", 0))
 			var pack_price := int(economy.get("feed_pack_price", 0))
-			_add_action("PANEL_BUY_FEED", false,
+			_add_action(false,
 					func() -> bool: return Game.state.money >= pack_price,
 					func() -> String: return tr("PANEL_BUY_FEED") % [pack, pack_price],
 					_on_buy_feed)
@@ -151,9 +170,10 @@ func _build_content(building_id: String) -> void:
 				var breed_id: String = breed.get("id", "")
 				var price := int(breed.get("price", 0))
 				var breed_name: String = tr(breed.get("name", ""))
-				_add_action("PANEL_BUY_HEN", false,
+				var rarity: String = tr(breed.get("rarity", ""))
+				_add_action(false,
 						func() -> bool: return Game.state.money >= price,
-						func() -> String: return tr("PANEL_BUY_HEN") % [breed_name, price],
+						func() -> String: return tr("PANEL_BUY_HEN") % [breed_name, rarity, price],
 						func() -> void: _on_buy_hen(breed_id, breed_name))
 		"incubator":
 			_add_row("PANEL_EGGS_STORED", func() -> String: return NumberFormat.grouped(Game.state.eggs))
@@ -189,8 +209,10 @@ func _add_progress(label_key: String, value_provider: Callable) -> void:
 	_refreshers.append(func() -> void: bar.value = value_provider.call())
 
 
-func _add_action(_key: String, primary: bool, enabled_provider: Callable,
-		text_provider: Callable, on_pressed: Callable) -> void:
+## `visible_provider` pozwala ukryc przycisk zupelnie (np. sprzedaz rasy,
+## ktorej gracz nie ma) zamiast pokazywac go wyszarzonego.
+func _add_action(primary: bool, enabled_provider: Callable, text_provider: Callable,
+		on_pressed: Callable, visible_provider: Callable = Callable()) -> void:
 	var button := Button.new()
 	if primary:
 		button.theme_type_variation = &"PrimaryButton"
@@ -198,6 +220,10 @@ func _add_action(_key: String, primary: bool, enabled_provider: Callable,
 	button.pressed.connect(on_pressed)
 	_actions.add_child(button)
 	_refreshers.append(func() -> void:
+		if visible_provider.is_valid():
+			button.visible = visible_provider.call()
+			if not button.visible:
+				return
 		button.text = text_provider.call()
 		button.disabled = not enabled_provider.call())
 
@@ -241,3 +267,14 @@ func _on_buy_feed() -> void:
 func _on_buy_hen(breed_id: String, breed_name: String) -> void:
 	if Game.buy_hen(breed_id):
 		_flash(tr("PANEL_HEN_BOUGHT") % breed_name)
+
+
+func _on_sell_hen(breed_id: String, breed_name: String) -> void:
+	var earned := Game.sell_hen(breed_id)
+	if earned > 0:
+		_flash(tr("PANEL_HEN_SOLD") % [breed_name, earned])
+
+
+## Ile kur danej rasy ma gracz.
+func _owned(breed_id: String) -> int:
+	return int(Game.state.hens_by_breed().get(breed_id, 0))

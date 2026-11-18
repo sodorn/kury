@@ -15,5 +15,8 @@
 	},
 	"run": {
 		"max_eggs_on_ground": 24
+	},
+	"offline": {
+		"max_hours": 8
 	}
 }

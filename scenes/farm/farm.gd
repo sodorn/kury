@@ -19,6 +19,7 @@ func _ready() -> void:
 	for i in Game.state.eggs_on_ground:
 		_add_egg()
 	Events.hen_added.connect(_add_hen)
+	Events.hen_removed.connect(_remove_hen)
 	Events.eggs_laid.connect(_on_eggs_laid)
 	get_viewport().size_changed.connect(_center_world)
 	_center_world()
@@ -32,6 +33,15 @@ func _add_hen(hen: Chicken) -> void:
 	var node: FarmChicken = CHICKEN_SCENE.instantiate()
 	_objects.add_child(node)
 	node.setup(hen.breed_id, RUN_AREA)
+
+
+## Zabiera z wybiegu jedna kure podanej rasy (po sprzedazy).
+func _remove_hen(breed_id: String) -> void:
+	for child in _objects.get_children():
+		var hen := child as FarmChicken
+		if hen != null and hen.breed_id == breed_id:
+			hen.leave()
+			return
 
 
 func _on_eggs_laid(count: int) -> void:
