@@ -14,7 +14,7 @@ from pathlib import Path
 W, H = 1080, 2400
 RUN = (120, 1090, 960, 1500)          # x0, y0, x1, y1 wybiegu
 GATE = (480, 600)                     # przerwa w plocie (gora i dol)
-OUTLINE = "#4A2D16"
+OUTLINE = "#7E4F2A"
 OUT_DIR = Path(__file__).resolve().parent.parent / "assets/sprites/world"
 
 # Strefy bez dekoracji: wybieg, sciezki, budynki (x0, y0, x1, y1).
@@ -26,9 +26,9 @@ BLOCKED = [
     (30, 1600, 510, 2080), (560, 1610, 1040, 2080),
 ]
 
-GRASS_TUFT = ("#4E9E32", "#5FAE3C", "#72BE४C".replace("४", "4"), "#8ACB5E")
-FLOWER = (("#FFFFFF", "#F7C948"), ("#FFD9EC", "#F2748F"),
-          ("#FFF6B0", "#F2A900"), ("#DCCBFF", "#8A6BD1"))
+GRASS_TUFT = ("#64BD45", "#78BF58", "#72BE४C".replace("४", "4"), "#9DCF7A")
+FLOWER = (("#F7F7F7", "#F2CE69"), ("#FDD8EB", "#EF8BA0"),
+          ("#FCF4B9", "#F6B827"), ("#DDCDFD", "#9D84D4"))
 
 
 def free(x, y, pad=0):
@@ -38,44 +38,44 @@ def free(x, y, pad=0):
 def defs():
     return f'''<defs>
 <linearGradient id="grass" x1="0" y1="0" x2="0" y2="{H}" gradientUnits="userSpaceOnUse">
-  <stop offset="0" stop-color="#9FDA6B"/>
-  <stop offset="0.35" stop-color="#8BCE57"/>
-  <stop offset="0.7" stop-color="#7CC24B"/>
-  <stop offset="1" stop-color="#6EB441"/>
+  <stop offset="0" stop-color="#ADDC84"/>
+  <stop offset="0.35" stop-color="#9DD175"/>
+  <stop offset="0.7" stop-color="#91C86B"/>
+  <stop offset="1" stop-color="#85C060"/>
 </linearGradient>
 <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
-  <stop offset="0" stop-color="#FFF7C4" stop-opacity="0.5"/>
-  <stop offset="0.6" stop-color="#FFF2A8" stop-opacity="0.18"/>
-  <stop offset="1" stop-color="#FFF2A8" stop-opacity="0"/>
+  <stop offset="0" stop-color="#FDF6C8" stop-opacity="0.5"/>
+  <stop offset="0.6" stop-color="#FCF1B2" stop-opacity="0.18"/>
+  <stop offset="1" stop-color="#FCF1B2" stop-opacity="0"/>
 </radialGradient>
 <radialGradient id="shade" cx="0.5" cy="0.5" r="0.5">
-  <stop offset="0" stop-color="#3C8E2B" stop-opacity="0.28"/>
-  <stop offset="1" stop-color="#3C8E2B" stop-opacity="0"/>
+  <stop offset="0" stop-color="#51B33D" stop-opacity="0.28"/>
+  <stop offset="1" stop-color="#51B33D" stop-opacity="0"/>
 </radialGradient>
 <linearGradient id="dirt" x1="0" y1="0" x2="0" y2="{H}" gradientUnits="userSpaceOnUse">
-  <stop offset="0" stop-color="#F0D9A6"/>
-  <stop offset="1" stop-color="#DFC287"/>
+  <stop offset="0" stop-color="#EFDCB2"/>
+  <stop offset="1" stop-color="#E0C99A"/>
 </linearGradient>
 <linearGradient id="sand" x1="{RUN[0]}" y1="{RUN[1]}" x2="{RUN[2]}" y2="{RUN[3]}" gradientUnits="userSpaceOnUse">
-  <stop offset="0" stop-color="#F0D6A0"/>
-  <stop offset="0.5" stop-color="#E3C184"/>
-  <stop offset="1" stop-color="#D2AC68"/>
+  <stop offset="0" stop-color="#EFD9AD"/>
+  <stop offset="0.5" stop-color="#E3C898"/>
+  <stop offset="1" stop-color="#D5B782"/>
 </linearGradient>
 <linearGradient id="post" x1="0" y1="0" x2="0" y2="62" gradientUnits="userSpaceOnUse">
-  <stop offset="0" stop-color="#FFF6DF"/>
-  <stop offset="1" stop-color="#E4CFA4"/>
+  <stop offset="0" stop-color="#FEF4DD"/>
+  <stop offset="1" stop-color="#E5D4B1"/>
 </linearGradient>
 </defs>'''
 
 
 def post(x, y_base, wide=16, tall=52):
     return (f'<rect x="{x - wide / 2:g}" y="{y_base - tall:g}" width="{wide}" height="{tall}" rx="6" '
-            f'fill="url(#post)" stroke="{OUTLINE}" stroke-width="4"/>')
+            f'fill="url(#post)" stroke="{OUTLINE}" stroke-width="3.4"/>')
 
 
 def rail(x0, x1, y):
     return (f'<rect x="{x0}" y="{y}" width="{x1 - x0}" height="11" rx="4" '
-            f'fill="#F3E3BD" stroke="{OUTLINE}" stroke-width="3"/>')
+            f'fill="#F2E4C4" stroke="{OUTLINE}" stroke-width="2.5"/>')
 
 
 def fence_row(y_base, post_xs):
@@ -109,30 +109,30 @@ def flower(x, y, rnd):
     out = [f'<circle cx="{x + dx * d:.0f}" cy="{y + dy * d:.0f}" r="{r:.1f}" fill="{petal}"/>'
            for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1))]
     out.append(f'<circle cx="{x}" cy="{y}" r="{r * 0.75:.1f}" fill="{middle}"/>')
-    out.append(f'<circle cx="{x - d:.0f}" cy="{y - 1}" r="{r * 0.3:.1f}" fill="#FFFFFF" fill-opacity="0.8"/>')
+    out.append(f'<circle cx="{x - d:.0f}" cy="{y - 1}" r="{r * 0.3:.1f}" fill="#F7F7F7" fill-opacity="0.8"/>')
     return "".join(out)
 
 
 def mushroom(x, y, rnd):
     h = rnd.uniform(0.85, 1.2)
-    return (f'<g stroke="{OUTLINE}" stroke-width="3" stroke-linejoin="round">'
-            f'<rect x="{x - 4:.0f}" y="{y - 12 * h:.0f}" width="8" height="{12 * h:.0f}" rx="4" fill="#FFF3DC"/>'
-            f'<path d="M{x - 14:.0f} {y - 10 * h:.0f}a14 10 0 0 1 28 0Z" fill="#E8553F"/>'
-            f'<circle cx="{x - 5:.0f}" cy="{y - 14 * h:.0f}" r="2.5" fill="#FFF3DC" stroke="none"/>'
-            f'<circle cx="{x + 4:.0f}" cy="{y - 16 * h:.0f}" r="2" fill="#FFF3DC" stroke="none"/></g>')
+    return (f'<g stroke="{OUTLINE}" stroke-width="2.5" stroke-linejoin="round">'
+            f'<rect x="{x - 4:.0f}" y="{y - 12 * h:.0f}" width="8" height="{12 * h:.0f}" rx="4" fill="#FDF1DA"/>'
+            f'<path d="M{x - 14:.0f} {y - 10 * h:.0f}a14 10 0 0 1 28 0Z" fill="#E67362"/>'
+            f'<circle cx="{x - 5:.0f}" cy="{y - 14 * h:.0f}" r="2.5" fill="#FDF1DA" stroke="none"/>'
+            f'<circle cx="{x + 4:.0f}" cy="{y - 16 * h:.0f}" r="2" fill="#FDF1DA" stroke="none"/></g>')
 
 
 def stone(x, y, rnd):
     rx = rnd.uniform(11, 19)
     ry = rx * rnd.uniform(0.55, 0.72)
-    return (f'<g stroke="{OUTLINE}" stroke-width="3">'
-            f'<ellipse cx="{x}" cy="{y}" rx="{rx:.0f}" ry="{ry:.0f}" fill="#BFC7CB"/>'
+    return (f'<g stroke="{OUTLINE}" stroke-width="2.5">'
+            f'<ellipse cx="{x}" cy="{y}" rx="{rx:.0f}" ry="{ry:.0f}" fill="#C7CDD0"/>'
             f'<path d="M{x - rx * 0.6:.0f} {y - ry * 0.3:.0f}a{rx * 0.6:.0f} {ry * 0.5:.0f} 0 0 1 {rx * 0.7:.0f} {-ry * 0.4:.0f}" '
-            f'fill="none" stroke="#E8EEF0" stroke-width="4"/></g>')
+            f'fill="none" stroke="#E7EDEF" stroke-width="3.4"/></g>')
 
 
 def butterfly(x, y, rnd):
-    col = rnd.choice(("#FFD152", "#FF9BC2", "#9BD8FF"))
+    col = rnd.choice(("#F9D570", "#FBA8C9", "#A8DBFB"))
     return (f'<g stroke="{OUTLINE}" stroke-width="2.5">'
             f'<ellipse cx="{x - 7}" cy="{y - 3}" rx="8" ry="10" fill="{col}" transform="rotate(-20 {x - 7} {y - 3})"/>'
             f'<ellipse cx="{x + 7}" cy="{y - 3}" rx="8" ry="10" fill="{col}" transform="rotate(20 {x + 7} {y - 3})"/>'
@@ -154,26 +154,26 @@ def scatter(rnd, count, pad, step=120):
 
 def feeder(x, y):
     """Podluzny karmnik z ziarnem."""
-    return (f'<g stroke="{OUTLINE}" stroke-width="5" stroke-linejoin="round">'
-            f'<ellipse cx="{x}" cy="{y + 26}" rx="62" ry="14" fill="#2d4a18" fill-opacity="0.22" stroke="none"/>'
-            f'<path d="M{x - 56} {y - 14}h112l-12 40h-88Z" fill="#C98A52"/>'
-            f'<path d="M{x - 56} {y - 14}h112l-6 14h-100Z" fill="#E0A96A"/>'
-            f'<g stroke="#8A5A2B" stroke-width="3">'
-            f'<ellipse cx="{x - 24}" cy="{y - 6}" rx="6" ry="4" fill="#F2C94C"/>'
-            f'<ellipse cx="{x - 4}" cy="{y - 2}" rx="6" ry="4" fill="#F7D96E"/>'
-            f'<ellipse cx="{x + 20}" cy="{y - 6}" rx="6" ry="4" fill="#F2C94C"/>'
-            f'<ellipse cx="{x + 36}" cy="{y - 1}" rx="6" ry="4" fill="#F7D96E"/>'
+    return (f'<g stroke="{OUTLINE}" stroke-width="4.2" stroke-linejoin="round">'
+            f'<ellipse cx="{x}" cy="{y + 26}" rx="62" ry="14" fill="#4F7D2D" fill-opacity="0.22" stroke="none"/>'
+            f'<path d="M{x - 56} {y - 14}h112l-12 40h-88Z" fill="#CD9C71"/>'
+            f'<path d="M{x - 56} {y - 14}h112l-6 14h-100Z" fill="#E0B583"/>'
+            f'<g stroke="#AF763D" stroke-width="2.5">'
+            f'<ellipse cx="{x - 24}" cy="{y - 6}" rx="6" ry="4" fill="#EECE6C"/>'
+            f'<ellipse cx="{x - 4}" cy="{y - 2}" rx="6" ry="4" fill="#F3DB86"/>'
+            f'<ellipse cx="{x + 20}" cy="{y - 6}" rx="6" ry="4" fill="#EECE6C"/>'
+            f'<ellipse cx="{x + 36}" cy="{y - 1}" rx="6" ry="4" fill="#F3DB86"/>'
             f'</g></g>')
 
 
 def waterer(x, y):
     """Miska z woda."""
-    return (f'<g stroke="{OUTLINE}" stroke-width="5" stroke-linejoin="round">'
-            f'<ellipse cx="{x}" cy="{y + 24}" rx="46" ry="12" fill="#2d4a18" fill-opacity="0.22" stroke="none"/>'
-            f'<path d="M{x - 42} {y - 10}h84l-10 34h-64Z" fill="#9FB4C0"/>'
-            f'<ellipse cx="{x}" cy="{y - 10}" rx="42" ry="13" fill="#79C8E8"/>'
+    return (f'<g stroke="{OUTLINE}" stroke-width="4.2" stroke-linejoin="round">'
+            f'<ellipse cx="{x}" cy="{y + 24}" rx="46" ry="12" fill="#4F7D2D" fill-opacity="0.22" stroke="none"/>'
+            f'<path d="M{x - 42} {y - 10}h84l-10 34h-64Z" fill="#ADBEC7"/>'
+            f'<ellipse cx="{x}" cy="{y - 10}" rx="42" ry="13" fill="#8FCEE7"/>'
             f'<ellipse cx="{x}" cy="{y - 10}" rx="42" ry="13" fill="none"/>'
-            f'<path d="M{x - 26} {y - 14}a26 9 0 0 1 24 -4" fill="none" stroke="#DCF4FF" stroke-width="5"/>'
+            f'<path d="M{x - 26} {y - 14}a26 9 0 0 1 24 -4" fill="none" stroke="#DAF2FD" stroke-width="4.2"/>'
             f'</g>')
 
 
@@ -192,32 +192,32 @@ def ground():
 
     # sciezki
     d = "M230 1005H850M540 1005V1090M540 1500V2400M230 2095H850"
-    s.append(f'<path d="{d}" fill="none" stroke="#C4A063" stroke-width="112" stroke-linecap="round" stroke-opacity="0.55"/>')
-    s.append(f'<path d="{d}" fill="none" stroke="url(#dirt)" stroke-width="92" stroke-linecap="round"/>')
+    s.append(f'<path d="{d}" fill="none" stroke="#CAAE7E" stroke-width="95.2" stroke-linecap="round" stroke-opacity="0.55"/>')
+    s.append(f'<path d="{d}" fill="none" stroke="url(#dirt)" stroke-width="78.2" stroke-linecap="round"/>')
     for _ in range(90):
         if rnd.random() < 0.5:
             x, y = rnd.randint(250, 830), rnd.choice([rnd.randint(975, 1035), rnd.randint(2065, 2125)])
         else:
             x, y = rnd.randint(510, 570), rnd.choice([rnd.randint(1005, 1090), rnd.randint(1500, 2390)])
         s.append(f'<ellipse cx="{x}" cy="{y}" rx="{rnd.randint(3, 7)}" ry="{rnd.randint(2, 4)}" '
-                 f'fill="#B8934F" fill-opacity="0.5"/>')
+                 f'fill="#C0A36E" fill-opacity="0.5"/>')
 
     # wybieg
     x0, y0, x1, y1 = RUN
     s.append(f'<rect x="{x0}" y="{y0}" width="{x1 - x0}" height="{y1 - y0}" rx="42" '
-             f'fill="url(#sand)" stroke="#BE9A5C" stroke-width="8"/>')
+             f'fill="url(#sand)" stroke="#C5A979" stroke-width="6.8"/>')
     for _ in range(90):
         x, y = rnd.randint(x0 + 30, x1 - 30), rnd.randint(y0 + 30, y1 - 30)
-        col = rnd.choice(("#D8B678", "#F3DEAE", "#CBA564", "#E9CF97"))
+        col = rnd.choice(("#DABF8E", "#F2E0B8", "#CFB27F", "#E9D4A6"))
         s.append(f'<ellipse cx="{x}" cy="{y}" rx="{rnd.randint(4, 11)}" ry="{rnd.randint(2, 6)}" fill="{col}"/>')
     for _ in range(14):  # zdzbla siana
         x, y = rnd.randint(x0 + 60, x1 - 60), rnd.randint(y0 + 60, y1 - 40)
         a = rnd.randint(-40, 40)
         s.append(f'<g transform="rotate({a} {x} {y})"><rect x="{x - 14}" y="{y - 2}" width="28" height="4" rx="2" '
-                 f'fill="#E8C66A" fill-opacity="0.9"/></g>')
+                 f'fill="#E7CC83" fill-opacity="0.9"/></g>')
     for _ in range(9):
         x, y = rnd.randint(x0 + 60, x1 - 60), rnd.randint(y0 + 60, y1 - 40)
-        s.append(tuft(x, y, rnd).replace('stroke="#4E9E32"', 'stroke="#9FC46A"'))
+        s.append(tuft(x, y, rnd).replace('stroke="#64BD45"', 'stroke="#ADCA84"'))
 
     # kamyki wzdluz sciezek
     for y in (1005, 2095):
@@ -225,7 +225,7 @@ def ground():
             for side, off in ((-1, 52), (1, 52)):
                 if rnd.random() < 0.5:
                     s.append(f'<ellipse cx="{x + rnd.randint(-8, 8)}" cy="{y + side * off:.0f}" '
-                             f'rx="{rnd.randint(5, 9)}" ry="{rnd.randint(3, 5)}" fill="#C2A469" fill-opacity="0.75"/>')
+                             f'rx="{rnd.randint(5, 9)}" ry="{rnd.randint(3, 5)}" fill="#C8B183" fill-opacity="0.75"/>')
 
     # dekoracje na trawie, rozlozone rownomiernie po calej mapie
     for x, y in scatter(rnd, 170, 10, step=100):
@@ -246,7 +246,7 @@ def ground():
     # plot: boki i tyl (przod jest osobnym sprite'em, zeby zaslanial kury)
     for x in (x0, x1):
         s.append(f'<rect x="{x - 5}" y="{y0 - 30}" width="11" height="{y1 - y0 + 10}" rx="4" '
-                 f'fill="#F3E3BD" stroke="{OUTLINE}" stroke-width="3"/>')
+                 f'fill="#F2E4C4" stroke="{OUTLINE}" stroke-width="2.5"/>')
         for y in range(y0 + 68, y1 - 20, 68):
             s.append(post(x, y))
     s += fence_row(y0 + 8, row_posts())

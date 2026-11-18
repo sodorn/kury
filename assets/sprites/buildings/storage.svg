@@ -1,101 +1,101 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="480" height="440" viewBox="0 0 480 440">
   <defs>
     <radialGradient id="sShadow" cx="244" cy="404" r="212" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 323) scale(1 0.2)">
-      <stop offset="0" stop-color="#2d4a18" stop-opacity="0.45"/>
-      <stop offset="0.7" stop-color="#2d4a18" stop-opacity="0.22"/>
-      <stop offset="1" stop-color="#2d4a18" stop-opacity="0"/>
+      <stop offset="0" stop-color="#4F7D2D" stop-opacity="0.45"/>
+      <stop offset="0.7" stop-color="#4F7D2D" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#4F7D2D" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="sWall" x1="70" y1="110" x2="300" y2="392" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#6FD0E8"/>
-      <stop offset="0.5" stop-color="#46A9C9"/>
-      <stop offset="1" stop-color="#2E80A0"/>
+      <stop offset="0" stop-color="#87D4E7"/>
+      <stop offset="0.5" stop-color="#68B4CD"/>
+      <stop offset="1" stop-color="#409DC1"/>
     </linearGradient>
     <linearGradient id="sSide" x1="300" y1="200" x2="352" y2="380" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#2F86A4"/>
-      <stop offset="1" stop-color="#1E6480"/>
+      <stop offset="0" stop-color="#43A1C2"/>
+      <stop offset="1" stop-color="#2F88AB"/>
     </linearGradient>
     <linearGradient id="sRoof" x1="60" y1="70" x2="280" y2="230" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#8E99B8"/>
-      <stop offset="0.5" stop-color="#5F6A8A"/>
-      <stop offset="1" stop-color="#454E6B"/>
+      <stop offset="0" stop-color="#A0A8C1"/>
+      <stop offset="0.5" stop-color="#77819F"/>
+      <stop offset="1" stop-color="#5D688B"/>
     </linearGradient>
     <linearGradient id="sRoofSide" x1="270" y1="60" x2="370" y2="200" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#4A5473"/>
-      <stop offset="1" stop-color="#333A52"/>
+      <stop offset="0" stop-color="#616D92"/>
+      <stop offset="1" stop-color="#4E5778"/>
     </linearGradient>
     <linearGradient id="sSilo" x1="338" y1="124" x2="438" y2="394" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#EDF2F5"/>
-      <stop offset="0.45" stop-color="#C6D2DA"/>
-      <stop offset="1" stop-color="#93A3AE"/>
+      <stop offset="0" stop-color="#EAF0F3"/>
+      <stop offset="0.45" stop-color="#CCD6DD"/>
+      <stop offset="1" stop-color="#A4B0B9"/>
     </linearGradient>
     <linearGradient id="sSiloTop" x1="338" y1="46" x2="438" y2="124" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#B7C4CD"/>
-      <stop offset="1" stop-color="#7E8E99"/>
+      <stop offset="0" stop-color="#C0CBD2"/>
+      <stop offset="1" stop-color="#939FA8"/>
     </linearGradient>
     <linearGradient id="sDoor" x1="118" y1="250" x2="242" y2="392" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFF8E6"/>
-      <stop offset="1" stop-color="#E8D6AE"/>
+      <stop offset="0" stop-color="#FEF6E2"/>
+      <stop offset="1" stop-color="#E8D9B8"/>
     </linearGradient>
     <linearGradient id="sSack" x1="20" y1="340" x2="90" y2="406" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#EBCB94"/>
-      <stop offset="1" stop-color="#C29A5E"/>
+      <stop offset="0" stop-color="#EAD0A4"/>
+      <stop offset="1" stop-color="#C8A97A"/>
     </linearGradient>
   </defs>
 
   <ellipse cx="244" cy="404" rx="212" ry="30" fill="url(#sShadow)"/>
 
-  <g stroke="#5A3720" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+  <g stroke="#885635" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round">
     <!-- silos -->
     <path d="M338 124h100v244a12 12 0 0 1-12 12h-76a12 12 0 0 1-12-12Z" fill="url(#sSilo)"/>
     <path d="M338 124q50-82 100 0Z" fill="url(#sSiloTop)"/>
-    <path d="M338 186h100M338 250h100M338 314h100" stroke-width="3" stroke-opacity="0.45" fill="none"/>
-    <path d="M356 142v234" stroke="#FFFFFF" stroke-width="9" stroke-opacity="0.55" fill="none"/>
-    <path d="M388 72v-22" stroke-width="4"/>
-    <circle cx="388" cy="46" r="8" fill="#F2C94C"/>
+    <path d="M338 186h100M338 250h100M338 314h100" stroke-width="2.5" stroke-opacity="0.45" fill="none"/>
+    <path d="M356 142v234" stroke="#F7F7F7" stroke-width="7.6" stroke-opacity="0.55" fill="none"/>
+    <path d="M388 72v-22" stroke-width="3.4"/>
+    <circle cx="388" cy="46" r="8" fill="#EECE6C"/>
 
     <!-- stodola: bok -->
     <path d="M300 214 352 192v176l-52 24Z" fill="url(#sSide)"/>
 
     <!-- stodola: front -->
-    <path d="M60 392V214l40-64 80-46 80 46 40 64v178Z" fill="url(#sWall)"/>
-    <path d="M62 300h58M242 300h58" stroke-width="3" stroke-opacity="0.4" fill="none"/>
-    <path d="M70 220 104 162" stroke="#BDEAF7" stroke-width="6" stroke-opacity="0.6" fill="none"/>
+    <path d="M60 392V214Q74 176 100 150Q140 118 180 104Q220 118 260 150Q286 176 300 214v178Z" fill="url(#sWall)"/>
+    <path d="M62 300h58M242 300h58" stroke-width="2.5" stroke-opacity="0.4" fill="none"/>
+    <path d="M70 220 104 162" stroke="#C3EAF5" stroke-width="5.1" stroke-opacity="0.6" fill="none"/>
 
     <!-- dach: boki -->
-    <path d="M180 84 234 62l88 50-54 22Z" fill="url(#sRoofSide)"/>
-    <path d="M268 134 322 112l48 78-54 22Z" fill="url(#sRoofSide)"/>
+    <path d="M180 84 234 62Q292 86 322 112l-54 22Q236 104 180 84Z" fill="url(#sRoofSide)"/>
+    <path d="M268 134 322 112Q352 152 370 190l-54 22Q298 170 268 134Z" fill="url(#sRoofSide)"/>
     <!-- dach: front -->
-    <path d="M180 84 92 134l-48 78 20 12 40-64 76-44 76 44 40 64 20-12-48-78Z" fill="url(#sRoof)"/>
-    <path d="M186 90 100 138" stroke="#C3CBE2" stroke-width="5" stroke-opacity="0.6" fill="none"/>
+    <path d="M180 84Q126 106 92 134Q58 172 44 212l20 12Q84 166 104 150Q140 120 180 106Q220 120 256 150Q276 166 296 224l20-12Q302 172 268 134Q234 106 180 84Z" fill="url(#sRoof)"/>
+    <path d="M186 90 100 138" stroke="#C9D0E3" stroke-width="4.2" stroke-opacity="0.6" fill="none"/>
 
     <!-- stryszek z sianem -->
-    <path d="M152 156h56v48h-56Z" fill="#23485A"/>
-    <path d="M180 156v48M152 180h56" stroke="#FFF3D6" stroke-width="4"/>
-    <g stroke="#E8B93F" stroke-width="5" fill="none">
+    <path d="M152 156h56v48h-56Z" fill="#396D87"/>
+    <path d="M180 156v48M152 180h56" stroke="#FDF2D6" stroke-width="3.4"/>
+    <g stroke="#E6C162" stroke-width="4.2" fill="none">
       <path d="M158 204q8 14 18 16M174 204q2 16 8 20M190 204q-2 14-4 18"/>
     </g>
 
     <!-- wrota -->
     <path d="M118 250h124v142H118Z" fill="url(#sDoor)"/>
-    <path d="M180 250v142M118 250l62 142M180 250l-62 142M180 250l62 142M242 250l-62 142" stroke="#3E8CA8" stroke-width="5" fill="none"/>
+    <path d="M180 250v142M118 250l62 142M180 250l-62 142M180 250l62 142M242 250l-62 142" stroke="#58A1BC" stroke-width="4.2" fill="none"/>
     <path d="M118 250h124v142H118Z" fill="none"/>
-    <circle cx="168" cy="326" r="6" fill="#5A3720" stroke="none"/>
-    <circle cx="192" cy="326" r="6" fill="#5A3720" stroke="none"/>
+    <circle cx="168" cy="326" r="6" fill="#885635" stroke="none"/>
+    <circle cx="192" cy="326" r="6" fill="#885635" stroke="none"/>
 
     <!-- worki z pasza -->
     <path d="M26 404q-10-46 8-64 24-13 46 0 19 18 9 64Z" fill="url(#sSack)"/>
-    <path d="M42 344q16 10 32 0" stroke-width="4" fill="none"/>
-    <path d="M58 356v24M48 366l10 8 10-8" stroke="#8A5A2B" stroke-width="4" fill="none"/>
-    <path d="M250 410q-8-38 6-54 19-11 38 0 15 17 6 54Z" fill="#E7CC9C"/>
-    <path d="M262 360q13 8 26 0" stroke-width="4" fill="none"/>
+    <path d="M42 344q16 10 32 0" stroke-width="3.4" fill="none"/>
+    <path d="M58 356v24M48 366l10 8 10-8" stroke="#AF763D" stroke-width="3.4" fill="none"/>
+    <path d="M250 410q-8-38 6-54 19-11 38 0 15 17 6 54Z" fill="#E7D1AA"/>
+    <path d="M262 360q13 8 26 0" stroke-width="3.4" fill="none"/>
 
     <!-- latarenka -->
-    <path d="M296 214v14" stroke-width="4"/>
-    <path d="M286 228h22l5 24h-32Z" fill="#FFE9A8"/>
-    <path d="M284 252h26" stroke-width="4"/>
+    <path d="M296 214v14" stroke-width="3.4"/>
+    <path d="M286 228h22l5 24h-32Z" fill="#FCE9B2"/>
+    <path d="M284 252h26" stroke-width="3.4"/>
 
     <!-- trawa -->
-    <path d="M100 398q4-20 10-4 4-22 10-4" fill="none" stroke="#5FAE3C" stroke-width="5"/>
-    <path d="M320 398q4-20 10-4 4-22 10-4" fill="none" stroke="#5FAE3C" stroke-width="5"/>
+    <path d="M100 398q4-20 10-4 4-22 10-4" fill="none" stroke="#78BF58" stroke-width="4.2"/>
+    <path d="M320 398q4-20 10-4 4-22 10-4" fill="none" stroke="#78BF58" stroke-width="4.2"/>
   </g>
 </svg>

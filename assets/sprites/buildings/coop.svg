@@ -1,107 +1,107 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="480" height="440" viewBox="0 0 480 440">
   <defs>
     <radialGradient id="cShadow" cx="248" cy="404" r="206" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 322) scale(1 0.2)">
-      <stop offset="0" stop-color="#2d4a18" stop-opacity="0.45"/>
-      <stop offset="0.7" stop-color="#2d4a18" stop-opacity="0.22"/>
-      <stop offset="1" stop-color="#2d4a18" stop-opacity="0"/>
+      <stop offset="0" stop-color="#4F7D2D" stop-opacity="0.45"/>
+      <stop offset="0.7" stop-color="#4F7D2D" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#4F7D2D" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="cWall" x1="90" y1="200" x2="330" y2="390" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#F6D49E"/>
-      <stop offset="0.55" stop-color="#E3AE69"/>
-      <stop offset="1" stop-color="#C98B46"/>
+      <stop offset="0" stop-color="#F4D8AB"/>
+      <stop offset="0.55" stop-color="#E3B983"/>
+      <stop offset="1" stop-color="#CD9D68"/>
     </linearGradient>
     <linearGradient id="cGable" x1="140" y1="96" x2="300" y2="206" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFE4B4"/>
-      <stop offset="1" stop-color="#EDBD7C"/>
+      <stop offset="0" stop-color="#FCE5BC"/>
+      <stop offset="1" stop-color="#EBC591"/>
     </linearGradient>
     <linearGradient id="cSide" x1="372" y1="200" x2="430" y2="370" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#C08A4C"/>
-      <stop offset="1" stop-color="#9A6531"/>
+      <stop offset="0" stop-color="#C69C6C"/>
+      <stop offset="1" stop-color="#BC7F43"/>
     </linearGradient>
     <linearGradient id="cRoof" x1="60" y1="40" x2="300" y2="230" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FF8E6B"/>
-      <stop offset="0.45" stop-color="#EF6044"/>
-      <stop offset="1" stop-color="#CF4530"/>
+      <stop offset="0" stop-color="#FAA084"/>
+      <stop offset="0.45" stop-color="#EC7C66"/>
+      <stop offset="1" stop-color="#D16756"/>
     </linearGradient>
     <linearGradient id="cRoofSide" x1="300" y1="40" x2="450" y2="200" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#D24F38"/>
-      <stop offset="1" stop-color="#A63425"/>
+      <stop offset="0" stop-color="#D46E5D"/>
+      <stop offset="1" stop-color="#C94635"/>
     </linearGradient>
     <radialGradient id="cGlow" cx="134" cy="286" r="40" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFF3C8"/>
-      <stop offset="1" stop-color="#F6C96A"/>
+      <stop offset="0" stop-color="#FDF2CB"/>
+      <stop offset="1" stop-color="#F2CF83"/>
     </radialGradient>
     <linearGradient id="cStone" x1="60" y1="360" x2="60" y2="404" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#CFC6AE"/>
-      <stop offset="1" stop-color="#9C9078"/>
+      <stop offset="0" stop-color="#D4CCB9"/>
+      <stop offset="1" stop-color="#AAA18E"/>
     </linearGradient>
   </defs>
 
   <ellipse cx="248" cy="404" rx="206" ry="30" fill="url(#cShadow)"/>
 
-  <g stroke="#5A3720" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+  <g stroke="#885635" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round">
     <!-- kamienna podmurowka -->
     <path d="M86 352h292v34a10 10 0 0 1-10 10H96a10 10 0 0 1-10-10Z" fill="url(#cStone)"/>
-    <path d="M110 352v44M152 352v44M196 352v44M240 352v44M284 352v44M328 352v44" stroke-width="3" stroke-opacity="0.55"/>
-    <path d="M86 374h292" stroke-width="3" stroke-opacity="0.45"/>
+    <path d="M110 352v44M152 352v44M196 352v44M240 352v44M284 352v44M328 352v44" stroke-width="2.5" stroke-opacity="0.55"/>
+    <path d="M86 374h292" stroke-width="2.5" stroke-opacity="0.45"/>
 
     <!-- sciana boczna -->
     <path d="M374 206 428 180v166l-54 26Z" fill="url(#cSide)"/>
-    <path d="M376 250 426 226M376 292 426 268M376 334 426 310" stroke-width="3" stroke-opacity="0.5" fill="none"/>
+    <path d="M376 250 426 226M376 292 426 268M376 334 426 310" stroke-width="2.5" stroke-opacity="0.5" fill="none"/>
 
     <!-- sciana frontowa -->
     <path d="M80 206h294v146H80Z" fill="url(#cWall)"/>
-    <path d="M82 248h290M82 290h290M82 332h290" stroke-width="3" stroke-opacity="0.45" fill="none"/>
+    <path d="M82 248h290M82 290h290M82 332h290" stroke-width="2.5" stroke-opacity="0.45" fill="none"/>
 
     <!-- szczyt -->
-    <path d="M226 98 92 206h268Z" fill="url(#cGable)"/>
+    <path d="M226 98Q148 156 92 206h268Q304 156 226 98Z" fill="url(#cGable)"/>
 
     <!-- dach: polac boczna -->
-    <path d="M226 50 288 26 466 170l-60 26Z" fill="url(#cRoofSide)"/>
+    <path d="M226 50 288 26Q402 94 466 170l-60 26Q336 114 226 50Z" fill="url(#cRoofSide)"/>
     <!-- dach: polac frontowa, z falowanym okapem -->
-    <path d="M226 50 406 196q-14 10-28 2-14 16-30 2-14 16-30 2-14 16-30 2-14 16-30 2-14 16-30 2-14 16-30 2-14 16-30 2-14 16-28-2L46 196Z" fill="url(#cRoof)"/>
-    <path d="M258 60 312 38M300 96 356 72M342 132 398 108" stroke="#8E2E20" stroke-width="4" stroke-opacity="0.5" fill="none"/>
-    <path d="M226 50 56 188" stroke="#FFC2A8" stroke-width="5" stroke-opacity="0.65" fill="none"/>
+    <path d="M226 50Q334 110 406 196q-14 10-28 2-14 16-30 2-14 16-30 2-14 16-30 2-14 16-30 2-14 16-30 2-14 16-30 2-14 16-30 2-14 16-28-2L46 196Q118 110 226 50Z" fill="url(#cRoof)"/>
+    <path d="M258 60 312 38M300 96 356 72M342 132 398 108" stroke="#B74130" stroke-width="3.4" stroke-opacity="0.5" fill="none"/>
+    <path d="M226 50 56 188" stroke="#FCC8B2" stroke-width="4.2" stroke-opacity="0.65" fill="none"/>
 
     <!-- kalenica z chorągiewka -->
-    <path d="M226 50v-26" stroke-width="5"/>
-    <path d="M226 24h40l-12 11 12 11h-40Z" fill="#F2C94C"/>
+    <path d="M226 50v-26" stroke-width="4.2"/>
+    <path d="M226 24h40l-12 11 12 11h-40Z" fill="#EECE6C"/>
 
     <!-- okraglo okienko w szczycie -->
-    <circle cx="226" cy="162" r="23" fill="#8C5A2E"/>
+    <circle cx="226" cy="162" r="23" fill="#B07540"/>
     <circle cx="226" cy="162" r="23" fill="none"/>
-    <path d="M226 139v46M203 162h46" stroke-width="4"/>
+    <path d="M226 139v46M203 162h46" stroke-width="3.4"/>
 
     <!-- gniazdo ze swiatlem -->
     <rect x="98" y="252" width="72" height="62" rx="10" fill="url(#cGlow)"/>
-    <ellipse cx="134" cy="302" rx="27" ry="10" fill="#D8A03F" stroke-width="4"/>
-    <ellipse cx="134" cy="287" rx="12" ry="15" fill="#FFFBF0" stroke-width="4"/>
+    <ellipse cx="134" cy="302" rx="27" ry="10" fill="#D9AD62" stroke-width="3.4"/>
+    <ellipse cx="134" cy="287" rx="12" ry="15" fill="#FEF9EA" stroke-width="3.4"/>
 
     <!-- okno z okiennicami i skrzynka na kwiaty -->
-    <rect x="276" y="252" width="70" height="62" rx="8" fill="#BFE6F2"/>
-    <path d="M276 252h70v24q-36 12-70 0Z" fill="#E6F6FB" stroke="none"/>
-    <path d="M311 252v62M276 283h70" stroke-width="4"/>
+    <rect x="276" y="252" width="70" height="62" rx="8" fill="#C5E7F1"/>
+    <path d="M276 252h70v24q-36 12-70 0Z" fill="#E3F4F9" stroke="none"/>
+    <path d="M311 252v62M276 283h70" stroke-width="3.4"/>
     <rect x="276" y="252" width="70" height="62" rx="8" fill="none"/>
-    <path d="M268 314h86v18a6 6 0 0 1-6 6h-74a6 6 0 0 1-6-6Z" fill="#A2662F"/>
-    <g stroke-width="3">
-      <circle cx="288" cy="312" r="7" fill="#FF7E9A"/>
-      <circle cx="311" cy="308" r="7" fill="#FFD152"/>
-      <circle cx="334" cy="312" r="7" fill="#FF7E9A"/>
+    <path d="M268 314h86v18a6 6 0 0 1-6 6h-74a6 6 0 0 1-6-6Z" fill="#C17F42"/>
+    <g stroke-width="2.5">
+      <circle cx="288" cy="312" r="7" fill="#FA92A9"/>
+      <circle cx="311" cy="308" r="7" fill="#F9D570"/>
+      <circle cx="334" cy="312" r="7" fill="#FA92A9"/>
     </g>
 
     <!-- drzwiczki i rampa -->
-    <path d="M186 352v-36a32 32 0 0 1 64 0v36Z" fill="#6B4322"/>
-    <path d="M196 352v-34a22 22 0 0 1 44 0v34Z" fill="#4A2D16" stroke="none"/>
-    <path d="M190 352h56l32 44H158Z" fill="#D9A159"/>
-    <path d="M184 364h68M176 376h84M168 388h100" stroke-width="3" stroke-opacity="0.5"/>
+    <path d="M186 352v-36a32 32 0 0 1 64 0v36Z" fill="#976236"/>
+    <path d="M196 352v-34a22 22 0 0 1 44 0v34Z" fill="#7E4F2A" stroke="none"/>
+    <path d="M190 352h56l32 44H158Z" fill="#DAAF76"/>
+    <path d="M184 364h68M176 376h84M168 388h100" stroke-width="2.5" stroke-opacity="0.5"/>
 
     <!-- latarenka -->
-    <path d="M396 206v16" stroke-width="4"/>
-    <path d="M384 222h24l6 26h-36Z" fill="#FFE9A8"/>
-    <path d="M382 248h28" stroke-width="4"/>
+    <path d="M396 206v16" stroke-width="3.4"/>
+    <path d="M384 222h24l6 26h-36Z" fill="#FCE9B2"/>
+    <path d="M382 248h28" stroke-width="3.4"/>
 
     <!-- kepki trawy przy podmurowce -->
-    <path d="M72 396q4-22 10-4 4-24 10-4 6-18 10-2" fill="none" stroke="#5FAE3C" stroke-width="5"/>
-    <path d="M386 398q4-20 10-4 4-22 10-4" fill="none" stroke="#5FAE3C" stroke-width="5"/>
+    <path d="M72 396q4-22 10-4 4-24 10-4 6-18 10-2" fill="none" stroke="#78BF58" stroke-width="4.2"/>
+    <path d="M386 398q4-20 10-4 4-22 10-4" fill="none" stroke="#78BF58" stroke-width="4.2"/>
   </g>
 </svg>

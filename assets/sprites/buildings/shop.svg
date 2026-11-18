@@ -1,82 +1,82 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="480" height="430" viewBox="0 0 480 430">
   <defs>
     <radialGradient id="pShadow" cx="246" cy="398" r="214" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 318) scale(1 0.2)">
-      <stop offset="0" stop-color="#2d4a18" stop-opacity="0.45"/>
-      <stop offset="0.7" stop-color="#2d4a18" stop-opacity="0.22"/>
-      <stop offset="1" stop-color="#2d4a18" stop-opacity="0"/>
+      <stop offset="0" stop-color="#4F7D2D" stop-opacity="0.45"/>
+      <stop offset="0.7" stop-color="#4F7D2D" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#4F7D2D" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="pCounter" x1="60" y1="270" x2="300" y2="394" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#EFA961"/>
-      <stop offset="0.55" stop-color="#D98F4A"/>
-      <stop offset="1" stop-color="#B06E32"/>
+      <stop offset="0" stop-color="#ECB57C"/>
+      <stop offset="0.55" stop-color="#DAA06B"/>
+      <stop offset="1" stop-color="#C5854B"/>
     </linearGradient>
     <linearGradient id="pSide" x1="400" y1="250" x2="442" y2="390" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#B2702F"/>
-      <stop offset="1" stop-color="#8C521F"/>
+      <stop offset="0" stop-color="#C88748"/>
+      <stop offset="1" stop-color="#B56E2F"/>
     </linearGradient>
     <linearGradient id="pTop" x1="50" y1="246" x2="450" y2="272" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFD9A0"/>
-      <stop offset="1" stop-color="#EDB069"/>
+      <stop offset="0" stop-color="#FCDCAC"/>
+      <stop offset="1" stop-color="#EBBB82"/>
     </linearGradient>
     <linearGradient id="pGoldA" x1="196" y1="298" x2="266" y2="368" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFE885"/>
-      <stop offset="1" stop-color="#E8A713"/>
+      <stop offset="0" stop-color="#FBE898"/>
+      <stop offset="1" stop-color="#E7B33D"/>
     </linearGradient>
     <linearGradient id="pSign" x1="184" y1="18" x2="296" y2="78" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFFBEC"/>
-      <stop offset="1" stop-color="#F3DFB4"/>
+      <stop offset="0" stop-color="#FEF9E7"/>
+      <stop offset="1" stop-color="#F2E1BD"/>
     </linearGradient>
     <linearGradient id="pYellow" x1="40" y1="70" x2="40" y2="150" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFDC63"/>
-      <stop offset="1" stop-color="#F0B429"/>
+      <stop offset="0" stop-color="#FADE7D"/>
+      <stop offset="1" stop-color="#ECBD51"/>
     </linearGradient>
     <linearGradient id="pCream" x1="40" y1="70" x2="40" y2="150" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFFDF4"/>
-      <stop offset="1" stop-color="#F6E9CF"/>
+      <stop offset="0" stop-color="#FEFBED"/>
+      <stop offset="1" stop-color="#F5E9D2"/>
     </linearGradient>
   </defs>
 
   <ellipse cx="246" cy="398" rx="214" ry="28" fill="url(#pShadow)"/>
 
-  <g stroke="#5A3720" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+  <g stroke="#885635" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round">
     <!-- slupki -->
-    <path d="M78 140v252M400 140v252" stroke-width="18" stroke="#A2662F"/>
-    <path d="M74 150v232" stroke-width="5" stroke="#C78B4D" stroke-opacity="0.8"/>
+    <path d="M78 140v252M400 140v252" stroke-width="15.3" stroke="#C17F42"/>
+    <path d="M74 150v232" stroke-width="4.2" stroke="#CC9D6D" stroke-opacity="0.8"/>
 
     <!-- lada: bok i front -->
     <path d="M400 270 442 248v124l-42 22Z" fill="url(#pSide)"/>
-    <path d="M60 270h340v124H60Z" fill="url(#pCounter)"/>
-    <path d="M128 272v120M196 272v120M264 272v120M332 272v120" stroke-width="3" stroke-opacity="0.45" fill="none"/>
+    <path d="M60 270h340v108a16 16 0 0 1-16 16H76a16 16 0 0 1-16-16Z" fill="url(#pCounter)"/>
+    <path d="M128 272v120M196 272v120M264 272v120M332 272v120" stroke-width="2.5" stroke-opacity="0.45" fill="none"/>
 
     <!-- towar na ladzie: skrzynka z jajami -->
-    <path d="M96 222h120v36H96Z" fill="#C9A878"/>
-    <path d="M96 222h120v12H96Z" fill="#E0C296" stroke="none"/>
-    <g stroke-width="4">
-      <ellipse cx="116" cy="216" rx="12" ry="15" fill="#FFFCF2"/>
-      <ellipse cx="144" cy="216" rx="12" ry="15" fill="#F6E2BE"/>
-      <ellipse cx="172" cy="216" rx="12" ry="15" fill="#FFFCF2"/>
-      <ellipse cx="200" cy="216" rx="12" ry="15" fill="#F6E2BE"/>
+    <path d="M96 222h120v36H96Z" fill="#CEB48E"/>
+    <path d="M96 222h120v12H96Z" fill="#E1C9A6" stroke="none"/>
+    <g stroke-width="3.4">
+      <ellipse cx="116" cy="216" rx="12" ry="15" fill="#FEFAEB"/>
+      <ellipse cx="144" cy="216" rx="12" ry="15" fill="#F4E3C4"/>
+      <ellipse cx="172" cy="216" rx="12" ry="15" fill="#FEFAEB"/>
+      <ellipse cx="200" cy="216" rx="12" ry="15" fill="#F4E3C4"/>
     </g>
 
     <!-- worek z pasza -->
-    <path d="M296 258q-10-46 6-62 24-13 48 0 16 16 6 62Z" fill="#E3BE86"/>
-    <path d="M310 200q16 10 32 0" stroke-width="4" fill="none"/>
-    <path d="M326 214v26M316 224l10 8 10-8" stroke="#8A5A2B" stroke-width="4" fill="none"/>
+    <path d="M296 258q-10-46 6-62 24-13 48 0 16 16 6 62Z" fill="#E3C699"/>
+    <path d="M310 200q16 10 32 0" stroke-width="3.4" fill="none"/>
+    <path d="M326 214v26M316 224l10 8 10-8" stroke="#AF763D" stroke-width="3.4" fill="none"/>
 
     <!-- blat -->
     <path d="M50 270 92 246h358l-42 24Z" fill="url(#pTop)"/>
 
     <!-- waga -->
-    <path d="M250 246v-30" stroke-width="4"/>
-    <path d="M228 216h44" stroke-width="4"/>
+    <path d="M250 246v-30" stroke-width="3.4"/>
+    <path d="M228 216h44" stroke-width="3.4"/>
     <path d="M230 218q10 14 20 0Z" fill="#E8E8E8"/>
     <path d="M250 218q10 14 20 0Z" fill="#E8E8E8"/>
 
     <!-- moneta -->
     <circle cx="230" cy="332" r="38" fill="url(#pGoldA)"/>
-    <circle cx="230" cy="332" r="25" fill="none" stroke="#B9830D" stroke-width="4"/>
-    <ellipse cx="230" cy="332" rx="11" ry="15" fill="#FFF0AE" stroke="#B9830D" stroke-width="3"/>
-    <path d="M212 316a24 24 0 0 1 14-9" stroke="#FFFBDC" stroke-width="5" fill="none"/>
+    <circle cx="230" cy="332" r="25" fill="none" stroke="#E1A219" stroke-width="3.4"/>
+    <ellipse cx="230" cy="332" rx="11" ry="15" fill="#FCEFB7" stroke="#E1A219" stroke-width="2.5"/>
+    <path d="M212 316a24 24 0 0 1 14-9" stroke="#FDF9DA" stroke-width="4.2" fill="none"/>
 
     <!-- markiza w falbanie -->
     <path d="M88 70h50l-34 80H36Z" fill="url(#pYellow)"/>
@@ -94,21 +94,21 @@
 
     <!-- szyld -->
     <path d="M182 16h112a16 16 0 0 1 16 16v30a16 16 0 0 1-16 16H182a16 16 0 0 1-16-16V32a16 16 0 0 1 16-16Z" fill="url(#pSign)"/>
-    <ellipse cx="238" cy="47" rx="16" ry="20" fill="#FFFFFF" stroke-width="4"/>
-    <path d="M228 40a12 12 0 0 1 6-8" stroke="#FFFFFF" stroke-width="4" fill="none"/>
+    <ellipse cx="238" cy="47" rx="16" ry="20" fill="#F7F7F7" stroke-width="3.4"/>
+    <path d="M228 40a12 12 0 0 1 6-8" stroke="#F7F7F7" stroke-width="3.4" fill="none"/>
 
     <!-- chorągiewki -->
-    <path d="M78 136q80 20 162 20t162-20" stroke-width="4" fill="none"/>
-    <g stroke-width="3">
-      <path d="M120 146l15 2 -6 16Z" fill="#FF8DA6"/>
-      <path d="M176 155l15 1 -7 16Z" fill="#8FE36B"/>
-      <path d="M232 158l15 0 -7 16Z" fill="#FFD152"/>
-      <path d="M288 155l15-1 -7 16Z" fill="#8ACBF5"/>
-      <path d="M344 148l15-3 -6 16Z" fill="#FF8DA6"/>
+    <path d="M78 136q80 20 162 20t162-20" stroke-width="3.4" fill="none"/>
+    <g stroke-width="2.5">
+      <path d="M120 146l15 2 -6 16Z" fill="#FB9EB2"/>
+      <path d="M176 155l15 1 -7 16Z" fill="#A1E384"/>
+      <path d="M232 158l15 0 -7 16Z" fill="#F9D570"/>
+      <path d="M288 155l15-1 -7 16Z" fill="#9CD0F2"/>
+      <path d="M344 148l15-3 -6 16Z" fill="#FB9EB2"/>
     </g>
 
     <!-- trawa -->
-    <path d="M60 398q4-20 10-4 4-22 10-4" fill="none" stroke="#5FAE3C" stroke-width="5"/>
-    <path d="M404 396q4-20 10-4 4-22 10-4" fill="none" stroke="#5FAE3C" stroke-width="5"/>
+    <path d="M60 398q4-20 10-4 4-22 10-4" fill="none" stroke="#78BF58" stroke-width="4.2"/>
+    <path d="M404 396q4-20 10-4 4-22 10-4" fill="none" stroke="#78BF58" stroke-width="4.2"/>
   </g>
 </svg>

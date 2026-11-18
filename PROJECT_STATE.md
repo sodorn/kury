@@ -6,7 +6,9 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 - Aktualny etap: **ETAP 2 zakonczony**. Nastepny: ETAP 3.
 - Wersje grafiki: **1.0** plaski wektor (galaz `v1.0-grafika-plaska`, commit 6ea3a3c),
-  **2.0** cieplejsza i bardziej basniowa (galaz `main`) — wlasciciel wybiera, ktora zostaje.
+  **2.1** pastelowa, miekkie kontury, zaokraglone sylwetki (galaz `main`) — aktualna.
+- Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
+  dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
 - Repo: `sodorn/kury`, galaz `main`. Claude pushuje, wlasciciel robi `git pull`.
 - APK jeszcze nie powstal. Srodowisko Claude nie ma dostepu do serwera Google
@@ -34,6 +36,11 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
   Styl 2.0: gradienty na kazdej duzej plaszczyznie, swiatlo z gory z lewej, miekkie
   cienie robione gradientem radialnym (nie filtrem — Godot renderuje SVG przez
   ThorVG, ktory filtrow nie obsluguje), cieplejsza paleta, wiecej drobiazgow.
+- Paleta 2.1: pastelowa, ale nadal nasycona. Mocniejsze zmiekczenie (nasycenie
+  x0.7, duze rozjasnienie) dalo obraz wyblakly i chorowity — nie powtarzac.
+  Kontury: jeden cieply odcien #8A6A55 zamiast prawie czarnego brazu; to one
+  decydowaly o wrazeniu "siermiezności". Przestrojenie zrobil jednorazowo
+  tools/pastel_pass.py, wartosci sa juz zapisane w zrodlach.
 - Rozmiary plotna i punkty zaczepienia sprite'ow sa stale — zmiana stylu nie rusza
   farm.tscn. Przy nowej grafice budynku trzymaj dotychczasowe wymiary.
 - Dotyk: obiekty reaguja na `InputEventScreenTouch`; na PC mysz jest
@@ -97,7 +104,10 @@ tools/       gen_ground.py          generator tla i przedniego plotu
 
 ## Znane problemy / uwagi
 
-- Kierunek graficzny do potwierdzenia: wlasciciel porownuje 1.0 i 2.0.
+- Docelowa grafika: wlasciciel chce poziomu renderowanej grafiki 2.5D z gier
+  mobilnych. Recznie pisanym SVG tego nie osiagniemy — droga to gotowa paczka
+  assetow albo obrazki generowane i wstawiane jako PNG z przezroczystoscia.
+  Na razie zostaje grafika wlasna 2.1.
 - Liczniki HUD mieszcza ok. 6 cyfr; skracanie duzych liczb (1,2 mln) w ETAPIE 5.
 - Eksport Android (ETAP 7): potwierdzic, ze `data/*.json` trafiaja do paczki
   (w razie potrzeby filtr `*.json` w presecie eksportu); potwierdzic wersje
@@ -108,6 +118,7 @@ tools/       gen_ground.py          generator tla i przedniego plotu
 
 ```
 tools/build_web.sh <katalog>          # wersja do przegladarki
+python3 tools/pastel_pass.py          # jednorazowe przestrojenie palety (juz wykonane)
 godot --headless --path . --import
 godot --headless --path . res://tests/tests.tscn
 godot --path . res://tests/smoke_ui.tscn -- <katalog_na_zrzuty>
