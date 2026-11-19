@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="130" viewBox="0 0 140 130">
+  <!-- Marans: ciemna, miedziano-czarna. Slynie z jaj w kolorze czekolady. -->
+  <defs>
+    <radialGradient id="maBody" cx="52" cy="56" r="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6E6460"/>
+      <stop offset="0.6" stop-color="#4C4441"/>
+      <stop offset="1" stop-color="#332D2B"/>
+    </radialGradient>
+    <linearGradient id="maHackle" x1="78" y1="18" x2="104" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#C98A4B"/>
+      <stop offset="1" stop-color="#8A5A2E"/>
+    </linearGradient>
+    <linearGradient id="maTail" x1="12" y1="26" x2="44" y2="70" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5A5350"/>
+      <stop offset="1" stop-color="#2B2624"/>
+    </linearGradient>
+    <linearGradient id="maBeak" x1="116" y1="38" x2="136" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E8C98E"/>
+      <stop offset="1" stop-color="#C79450"/>
+    </linearGradient>
+  </defs>
+
+  <g stroke="#8A6A55" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="64" cy="122" rx="42" ry="8" fill="#6B8F4E" fill-opacity="0.28" stroke="none"/>
+
+    <!-- ogon trzymany wysoko -->
+    <path d="M28 62Q8 44 16 22Q36 32 44 54Z" fill="url(#maTail)"/>
+    <path d="M22 72Q4 60 8 42Q24 50 34 64Z" fill="#6A615C"/>
+
+    <!-- nogi -->
+    <path d="M56 100v14M56 114h-9M56 114l-3 7" stroke="#D8C9A8" stroke-width="3.6"/>
+    <path d="M80 100v14M80 114h9M80 114l3 7" stroke="#D8C9A8" stroke-width="3.6"/>
+
+    <!-- tulow -->
+    <ellipse cx="62" cy="68" rx="42" ry="35" fill="url(#maBody)"/>
+
+    <!-- skrzydlo z miedzianym odblaskiem -->
+    <path d="M40 60Q64 48 82 68Q62 86 42 80Q33 70 40 60Z" fill="#574E4A"/>
+    <path d="M48 68Q62 62 74 70" fill="none" stroke="#9A7A52" stroke-width="3"/>
+
+    <!-- miedziana kryza na szyi, znak rasy -->
+    <path d="M80 24Q102 20 102 50Q86 58 76 46Z" fill="url(#maHackle)"/>
+    <circle cx="98" cy="38" r="22" fill="#3E3734"/>
+
+    <!-- grzebien -->
+    <path d="M86 20q4-11 9-2q5-10 11-1q4-8 7 1" fill="#D5615C"/>
+    <!-- korale -->
+    <path d="M106 56q7 2 7 9q-7 2-11-4Z" fill="#C9564F"/>
+    <!-- dziob -->
+    <path d="M118 42l16 5-16 6Z" fill="url(#maBeak)"/>
+
+    <!-- oko -->
+    <circle cx="108" cy="34" r="4.5" fill="#FFF3DF" stroke="none"/>
+    <circle cx="108.6" cy="34.4" r="2.4" fill="#2B2624" stroke="none"/>
+  </g>
+</svg>

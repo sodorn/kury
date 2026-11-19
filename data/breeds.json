@@ -20,15 +20,33 @@
 		"rarity": "RARITY_COMMON",
 		"sprite": "res://assets/sprites/animals/hen_brown.svg",
 		"photo": "res://assets/photos/rhode.jpg",
-		"egg_seconds": 48.0,
-		"egg_value": 0.45,
-		"price": 50,
-		"sell_price": 35,
-		"incubate_seconds": 70.0,
-		"grow_seconds": 100.0,
+		"egg_seconds": 46.0,
+		"egg_value": 0.44,
+		"price": 48,
+		"sell_price": 34,
+		"incubate_seconds": 66.0,
+		"grow_seconds": 98.0,
 		"unlock": {
 			"money": 250,
 			"days": 1
+		}
+	},
+	{
+		"id": "szabo",
+		"name": "BREED_SZABO_NAME",
+		"desc": "BREED_SZABO_DESC",
+		"rarity": "RARITY_COMMON",
+		"sprite": "res://assets/sprites/animals/hen_frizzle.svg",
+		"photo": "res://assets/photos/szabo.jpg",
+		"egg_seconds": 52.0,
+		"egg_value": 0.48,
+		"price": 65,
+		"sell_price": 46,
+		"incubate_seconds": 72.0,
+		"grow_seconds": 106.0,
+		"unlock": {
+			"money": 700,
+			"hens": 5
 		}
 	},
 	{
@@ -38,15 +56,34 @@
 		"rarity": "RARITY_UNCOMMON",
 		"sprite": "res://assets/sprites/animals/hen_naked_neck.svg",
 		"photo": "res://assets/photos/nagoszyja.jpg",
-		"egg_seconds": 56.0,
-		"egg_value": 0.5,
-		"price": 80,
-		"sell_price": 56,
-		"incubate_seconds": 80.0,
-		"grow_seconds": 120.0,
+		"egg_seconds": 58.0,
+		"egg_value": 0.52,
+		"price": 85,
+		"sell_price": 59,
+		"incubate_seconds": 78.0,
+		"grow_seconds": 114.0,
 		"unlock": {
-			"money": 900,
-			"hens": 6
+			"money": 1800,
+			"hens": 8
+		}
+	},
+	{
+		"id": "marans",
+		"name": "BREED_MARANS_NAME",
+		"desc": "BREED_MARANS_DESC",
+		"rarity": "RARITY_UNCOMMON",
+		"sprite": "res://assets/sprites/animals/hen_marans.svg",
+		"photo": "res://assets/photos/marans.jpg",
+		"egg_seconds": 62.0,
+		"egg_value": 0.56,
+		"price": 110,
+		"sell_price": 77,
+		"incubate_seconds": 84.0,
+		"grow_seconds": 124.0,
+		"egg_tint": "#8B5A3C",
+		"unlock": {
+			"money": 4000,
+			"days": 3
 		}
 	},
 	{
@@ -56,18 +93,17 @@
 		"rarity": "RARITY_UNCOMMON",
 		"sprite": "res://assets/sprites/animals/hen_araukana.svg",
 		"photo": "res://assets/photos/araukana.jpg",
-		"egg_seconds": 64.0,
+		"egg_seconds": 68.0,
 		"egg_value": 0.6,
-		"price": 140,
-		"sell_price": 98,
+		"price": 145,
+		"sell_price": 102,
 		"incubate_seconds": 90.0,
-		"grow_seconds": 140.0,
+		"grow_seconds": 134.0,
+		"egg_tint": "#A8DCD2",
 		"unlock": {
-			"money": 3000,
-			"days": 3,
-			"hens": 10
-		},
-		"egg_tint": "#A8DCD2"
+			"money": 8000,
+			"hens": 12
+		}
 	},
 	{
 		"id": "jedwabista",
@@ -76,20 +112,38 @@
 		"rarity": "RARITY_RARE",
 		"sprite": "res://assets/sprites/animals/hen_silkie.svg",
 		"photo": "res://assets/photos/jedwabista.jpg",
-		"egg_seconds": 72.0,
-		"egg_value": 0.65,
-		"price": 220,
-		"sell_price": 154,
-		"incubate_seconds": 100.0,
-		"grow_seconds": 160.0,
+		"egg_seconds": 74.0,
+		"egg_value": 0.64,
+		"price": 190,
+		"sell_price": 133,
+		"incubate_seconds": 96.0,
+		"grow_seconds": 144.0,
+		"egg_tint": "#F6E7CC",
 		"incubation_bonus": 0.5,
 		"unlock": {
-			"money": 8000,
+			"money": 16000,
 			"breeds": [
 				"araukana"
 			]
-		},
-		"egg_tint": "#F6E7CC"
+		}
+	},
+	{
+		"id": "serama",
+		"name": "BREED_SERAMA_NAME",
+		"desc": "BREED_SERAMA_DESC",
+		"rarity": "RARITY_RARE",
+		"sprite": "res://assets/sprites/animals/hen_serama.svg",
+		"photo": "res://assets/photos/serama.jpg",
+		"egg_seconds": 80.0,
+		"egg_value": 0.68,
+		"price": 250,
+		"sell_price": 175,
+		"incubate_seconds": 102.0,
+		"grow_seconds": 154.0,
+		"unlock": {
+			"money": 30000,
+			"hens": 16
+		}
 	},
 	{
 		"id": "brahma",
@@ -98,17 +152,17 @@
 		"rarity": "RARITY_RARE",
 		"sprite": "res://assets/sprites/animals/hen_brahma.svg",
 		"photo": "res://assets/photos/brahma.jpg",
-		"egg_seconds": 80.0,
-		"egg_value": 0.7,
-		"price": 350,
-		"sell_price": 245,
+		"egg_seconds": 86.0,
+		"egg_value": 0.72,
+		"price": 330,
+		"sell_price": 231,
 		"incubate_seconds": 110.0,
-		"grow_seconds": 180.0,
+		"grow_seconds": 168.0,
+		"egg_tint": "#F0DCC0",
 		"unlock": {
-			"money": 22000,
-			"hens": 16
-		},
-		"egg_tint": "#F0DCC0"
+			"money": 55000,
+			"days": 6
+		}
 	},
 	{
 		"id": "czubatka",
@@ -117,18 +171,35 @@
 		"rarity": "RARITY_RARE",
 		"sprite": "res://assets/sprites/animals/hen_polish.svg",
 		"photo": "res://assets/photos/czubatka.jpg",
-		"egg_seconds": 88.0,
-		"egg_value": 0.8,
-		"price": 600,
-		"sell_price": 420,
-		"incubate_seconds": 120.0,
-		"grow_seconds": 200.0,
+		"egg_seconds": 92.0,
+		"egg_value": 0.76,
+		"price": 450,
+		"sell_price": 315,
+		"incubate_seconds": 118.0,
+		"grow_seconds": 182.0,
 		"unlock": {
-			"money": 55000,
-			"days": 7,
+			"money": 95000,
 			"breeds": [
 				"jedwabista"
 			]
+		}
+	},
+	{
+		"id": "feniks",
+		"name": "BREED_FENIKS_NAME",
+		"desc": "BREED_FENIKS_DESC",
+		"rarity": "RARITY_EPIC",
+		"sprite": "res://assets/sprites/animals/hen_phoenix.svg",
+		"photo": "res://assets/photos/feniks.jpg",
+		"egg_seconds": 100.0,
+		"egg_value": 0.82,
+		"price": 650,
+		"sell_price": 455,
+		"incubate_seconds": 128.0,
+		"grow_seconds": 198.0,
+		"unlock": {
+			"money": 160000,
+			"hens": 20
 		}
 	},
 	{
@@ -138,18 +209,37 @@
 		"rarity": "RARITY_EPIC",
 		"sprite": "res://assets/sprites/animals/hen_sultan.svg",
 		"photo": "res://assets/photos/sultanka.jpg",
-		"egg_seconds": 100.0,
-		"egg_value": 0.9,
-		"price": 1400,
-		"sell_price": 980,
-		"incubate_seconds": 140.0,
-		"grow_seconds": 230.0,
+		"egg_seconds": 108.0,
+		"egg_value": 0.88,
+		"price": 950,
+		"sell_price": 665,
+		"incubate_seconds": 138.0,
+		"grow_seconds": 216.0,
 		"unlock": {
-			"money": 160000,
-			"hens": 24,
+			"money": 260000,
 			"breeds": [
 				"czubatka"
 			]
+		}
+	},
+	{
+		"id": "onagadori",
+		"name": "BREED_ONAGADORI_NAME",
+		"desc": "BREED_ONAGADORI_DESC",
+		"rarity": "RARITY_EPIC",
+		"sprite": "res://assets/sprites/animals/hen_onagadori.svg",
+		"photo": "res://assets/photos/onagadori.jpg",
+		"egg_seconds": 114.0,
+		"egg_value": 0.94,
+		"price": 1600,
+		"sell_price": 1120,
+		"incubate_seconds": 148.0,
+		"grow_seconds": 236.0,
+		"egg_tint": "#FFF6E4",
+		"unlock": {
+			"money": 350000,
+			"days": 12,
+			"hens": 24
 		}
 	},
 	{
@@ -161,18 +251,18 @@
 		"photo": "res://assets/photos/cemani.jpg",
 		"egg_seconds": 120.0,
 		"egg_value": 1.0,
-		"price": 6000,
-		"sell_price": 4200,
+		"price": 3000,
+		"sell_price": 2100,
 		"incubate_seconds": 160.0,
 		"grow_seconds": 260.0,
+		"egg_tint": "#E6D2B4",
 		"unlock": {
-			"money": 600000,
-			"days": 14,
-			"hens": 25,
+			"money": 520000,
+			"days": 16,
+			"hens": 28,
 			"breeds": [
 				"sultanka"
 			]
-		},
-		"egg_tint": "#E6D2B4"
+		}
 	}
 ]

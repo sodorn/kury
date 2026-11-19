@@ -47,6 +47,10 @@ func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> vo
 		_pressed_touch = -1
 		if touch.position.distance_to(_pressed_at) <= TAP_MAX_MOVE:
 			collect()
+			# Jajka potrafia na siebie zachodzic, a Godot rozsyla dotkniecie do
+			# kazdego obszaru pod palcem. Bez tego jedno dotkniecie zbieraloby
+			# dwa jajka naraz.
+			get_viewport().set_input_as_handled()
 
 
 ## Zbiera jajko: zglasza to do Game i odgrywa animacje znikniecia.

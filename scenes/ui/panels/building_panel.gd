@@ -556,8 +556,10 @@ func _add_breed_card(breed: Dictionary) -> void:
 				int(float(breed.get("egg_seconds", 0))),
 				owned]
 		else:
+			# Przy zablokowanej rasie pokazujemy osobno warunek i osobno cene,
+			# bo sam warunek ("3 000 zl") czyta sie jak cena kury.
 			subtitle.text = tr("PANEL_NEED") % _unlock_text(breed)
-			numbers.text = "")
+			numbers.text = tr("PANEL_LOCKED_PRICE") % NumberFormat.money(price))
 
 
 ## Grafika rasy: najpierw prawdziwe zdjecie, w razie jego braku rysunek.

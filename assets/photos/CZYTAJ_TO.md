@@ -8,12 +8,17 @@ z wybiegu — nic się nie psuje.
 
     leghorn.jpg
     rhode.jpg
+    szabo.jpg
     nagoszyja.jpg
+    marans.jpg
     araukana.jpg
     jedwabista.jpg
+    serama.jpg
     brahma.jpg
     czubatka.jpg
+    feniks.jpg
     sultanka.jpg
+    onagadori.jpg
     cemani.jpg
 
 ## Jakie zdjęcia
@@ -34,12 +39,17 @@ z wybiegu — nic się nie psuje.
 |------------------|-----------------------|-----------------------------|
 | leghorn.jpg      | Leghorn biały         | "leghorn chicken white"     |
 | rhode.jpg        | Rhode Island Red      | "rhode island red hen"      |
+| szabo.jpg        | Kura szabo            | "frizzle chicken"           |
 | nagoszyja.jpg    | Kura nagoszyja        | "transylvanian naked neck chicken" |
+| marans.jpg       | Marans                | "marans chicken copper black" |
 | araukana.jpg     | Araukana              | "araucana chicken"          |
 | jedwabista.jpg   | Kura jedwabista       | "silkie chicken"            |
+| serama.jpg       | Serama                | "serama chicken"            |
 | brahma.jpg       | Brahma olbrzymia      | "brahma chicken giant"      |
 | czubatka.jpg     | Czubatka polska       | "polish crested chicken"    |
+| feniks.jpg       | Feniks                | "phoenix chicken long tail" |
 | sultanka.jpg     | Sułtanka              | "sultan chicken breed"      |
+| onagadori.jpg    | Onagadori             | "onagadori long tail rooster" |
 | cemani.jpg       | Ayam Cemani           | "ayam cemani chicken"       |
 
 ## Co zrobić po wrzuceniu

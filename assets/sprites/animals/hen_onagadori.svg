@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="130" viewBox="0 0 220 130">
+  <!-- Onagadori: japonska rasa o ogonie, ktory rosnie cale zycie i bywa
+       dluzszy niz kilka metrow. Na wystawach stoi na wysokich slupkach. -->
+  <defs>
+    <radialGradient id="onBody" cx="126" cy="52" r="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF4DE"/>
+      <stop offset="0.55" stop-color="#F0DCB4"/>
+      <stop offset="1" stop-color="#C9A96E"/>
+    </radialGradient>
+    <radialGradient id="onHead" cx="156" cy="28" r="26" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF8EA"/>
+      <stop offset="1" stop-color="#DEC390"/>
+    </radialGradient>
+    <linearGradient id="onTail" x1="110" y1="30" x2="8" y2="122" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF6E4"/>
+      <stop offset="0.35" stop-color="#D9B477"/>
+      <stop offset="0.7" stop-color="#8E6128"/>
+      <stop offset="1" stop-color="#5A3C16"/>
+    </linearGradient>
+  </defs>
+
+  <g stroke="#8A6A55" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="128" cy="122" rx="48" ry="8" fill="#6B8F4E" fill-opacity="0.26" stroke="none"/>
+
+    <!-- ogon ciagnacy sie przez caly kadr i za niego -->
+    <path d="M106 48Q56 34 6 116Q44 86 72 62Q88 50 108 58Z" fill="url(#onTail)"/>
+    <path d="M108 58Q58 54 14 122Q54 96 80 74Q94 62 112 68Z" fill="#C79A55"/>
+    <path d="M110 68Q68 74 34 124Q68 104 90 86Q102 76 116 78Z" fill="#EDD7A8"/>
+    <path d="M112 78Q84 90 70 126Q92 108 104 96Z" fill="#B88B47"/>
+
+    <!-- nogi -->
+    <path d="M120 96v18M120 114h-9M120 114l-3 7" stroke="#EDA845" stroke-width="3.6"/>
+    <path d="M142 96v18M142 114h9M142 114l3 7" stroke="#EDA845" stroke-width="3.6"/>
+
+    <!-- tulow -->
+    <ellipse cx="128" cy="64" rx="33" ry="29" fill="url(#onBody)"/>
+    <path d="M113 58Q133 48 148 64Q132 80 115 76Q107 67 113 58Z" fill="#F7EAD0"/>
+
+    <!-- szyja i glowa -->
+    <path d="M146 48Q145 30 154 24" fill="none" stroke-width="12" stroke="#DEC390"/>
+    <circle cx="158" cy="30" r="21" fill="url(#onHead)"/>
+
+    <!-- grzebien -->
+    <path d="M148 10q4-10 9-1q5-9 10-1q4-7 6 1" fill="#E9867E"/>
+    <!-- korale -->
+    <path d="M166 46q7 2 7 9q-7 2-11-4Z" fill="#E4706A"/>
+    <!-- dziob -->
+    <path d="M176 30l15 5-15 5Z" fill="#EDA845"/>
+
+    <!-- oko -->
+    <circle cx="167" cy="25" r="4.2" fill="#5C4030" stroke="none"/>
+    <circle cx="168.4" cy="23.6" r="1.5" fill="#FFFFFF" stroke="none"/>
+  </g>
+</svg>

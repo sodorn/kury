@@ -4,14 +4,14 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 5 zakonczony** (wersja 6.1): ekonomia w zlotowkach,
+- Aktualny etap: **ETAP 5 zakonczony** (wersja 6.2): ekonomia w zlotowkach,
   dziewiec ras, glod, choroby, szczepienia, lis, handel kurami w sklepie,
   rozbudowa inkubatora i dwa warunki wygranej.
 - Wersje grafiki: **1.0** plaski wektor (galaz `v1.0-grafika-plaska`, commit 6ea3a3c),
   **2.1** pastelowa, miekkie kontury, zaokraglone sylwetki — aktualna.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
-  `v6.1-balans`.
+  `v6.1-balans`, `v6.2-rasy`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -238,17 +238,21 @@ python3 tools/gen_ground.py
 
 - Wszystkie kwoty sa w **zlotowkach, ulamkowo** (`money: float`), bo jajko moze
   kosztowac 40 groszy. Wyswietlanie wylacznie przez `NumberFormat.money`.
-- Ceny kur wziete z polskiego rynku (ogloszenia 2025-2026): nioska 36 zl,
-  Rhode Island 50 zl, nagoszyja 80 zl, araukana 140 zl, jedwabista 220 zl,
-  brahma 350 zl, czubatka 600 zl, sultanka 1400 zl, Ayam Cemani 6000 zl.
-  Gorny kraniec jest rozciagniety wzgledem typowych ogloszen (Cemani bez
-  rodowodu chodzi juz od ~100 zl), bo gra potrzebuje rozpietosci.
+- **Czternascie ras**, drabinka cen z krokiem okolo 1,3x: 36, 48, 65, 85,
+  110, 145, 190, 250, 330, 450, 650, 950, 1600, 3000 zl. Rownomierny krok
+  jest celowy — przy dziewieciu rasach skok z 1400 na 6000 zl wygladal jak
+  blad i mylil sie z progiem odblokowania.
+- Dolny i srodkowy odcinek zgadza sie z polskimi ogloszeniami (nioska 36 zl,
+  kochin miniaturowy 80 zl, karzelki 100 zl, silka 100 zl). Gorne rasy sa
+  rozciagniete wzgledem rynku, bo gra potrzebuje rozpietosci; Cemani
+  z rodowodem potrafi kosztowac i 6 tys. zl, wiec 3000 zl miesci sie
+  w realiach.
 - **Sprzedaz kury = 70% ceny zakupu** (czyli 30% taniej). Jest na to test,
   wiec przy zmianie ceny trzeba zmienic obie liczby. Jedna opcja sprzedazy,
   bez miesa: za **chora** kure skup placi `economy.sick_sell_share` tej kwoty.
   Sprzedaz bierze najpierw zdrowe sztuki, zeby kwota na przycisku zawsze
   zgadzala sie z tym, co gracz dostanie.
-- Jajka: od 0,40 zl (leghorn) do 1,00 zl (cemani). Celowo waski rozstrzal —
+- Jajka: od 0,40 zl (leghorn) do 1,00 zl (cemani), krok rowny miedzy rasami. Celowo waski rozstrzal —
   wartosc siedzi w kurze, nie w jajku. Drogie rasy nios a rzadziej, wiec na
   samych jajach wychodza **gorzej** od leghorna; zarabia sie na sprzedazy
   odchowanych mlodych.
@@ -259,8 +263,8 @@ python3 tools/gen_ground.py
 
 - `tools/balance_model.py` liczy oplacalnosc kazdej rasy i symuluje rozsadnego
   gracza. Uruchamiac po **kazdej** zmianie cen w `data/*.json`.
-- Stan na wersje 6.1: pelna kolekcja ras po ~15,8 h gry, milion zlotych po
-  ~17,7 h. Oba warunki wygranej wypadaja prawie rownoczesnie — o to chodzilo.
+- Stan na wersje 6.2: pelna kolekcja ras po ~20,6 h gry, milion zlotych po
+  ~23,5 h. Nowa rasa odblokowuje sie mniej wiecej co dwie godziny gry. Oba warunki wygranej wypadaja prawie rownoczesnie — o to chodzilo.
 - Model liczy takze lisa i szczepienia, bo jedno i drugie realnie spowalnia
   gre. Bez nich wychodzily liczby o kilka godzin za dobre.
 - Zarabia sie nie na jajach, tylko na **hodowli**: z 6 jaj wyklu wa sie pisklę,
@@ -318,6 +322,12 @@ python3 tools/gen_ground.py
 - `run.max_visible_hens` ogranicza liczbe rysowanych kur; przy wiekszym stadzie
   scena pokazuje proporcjonalna probke, ale po jednej sztuce kazdej rasy.
   Chore kury pokazywane sa zawsze, bo to one wymagaja reakcji.
+
+### Karta rasy zablokowanej
+
+- Warunek odblokowania i cena to **dwie osobne linijki**. Samo "3 000 zl"
+  w miejscu, gdzie inne karty maja "Kup za 80 zl", czyta sie jak cena kury —
+  Tomek tak to odczytal i zglosil jako bledny balans.
 
 ### Zdjecia ras w sklepie
 

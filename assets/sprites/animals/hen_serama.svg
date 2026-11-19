@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="130" viewBox="0 0 140 130">
+  <!-- Serama: najmniejsza kura swiata. Pierś wypięta, ogon postawiony
+       niemal pionowo, postawa jak u maszerujacego zolnierza. -->
+  <defs>
+    <radialGradient id="seBody" cx="66" cy="66" r="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFE7B8"/>
+      <stop offset="0.6" stop-color="#F0C272"/>
+      <stop offset="1" stop-color="#CE9340"/>
+    </radialGradient>
+    <radialGradient id="seHead" cx="88" cy="40" r="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFEFCC"/>
+      <stop offset="1" stop-color="#E7B45F"/>
+    </radialGradient>
+    <linearGradient id="seTail" x1="34" y1="16" x2="56" y2="62" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8C5E2A"/>
+      <stop offset="1" stop-color="#5E3C19"/>
+    </linearGradient>
+  </defs>
+
+  <g stroke="#8A6A55" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="68" cy="122" rx="30" ry="7" fill="#6B8F4E" fill-opacity="0.28" stroke="none"/>
+
+    <!-- ogon postawiony pionowo, wyzej niz glowa -->
+    <path d="M48 70Q36 34 44 12Q58 28 60 56Z" fill="url(#seTail)"/>
+    <path d="M42 68Q30 40 34 22Q46 36 52 62Z" fill="#9C6B33"/>
+
+    <!-- dlugie nogi, serama stoi wyprostowana -->
+    <path d="M62 100v16M62 116h-8M62 116l-3 6" stroke="#EDA845" stroke-width="3.4"/>
+    <path d="M80 100v16M80 116h8M80 116l3 6" stroke="#EDA845" stroke-width="3.4"/>
+
+    <!-- tulow maly i wypiety do przodu -->
+    <path d="M52 62Q58 36 80 44Q98 54 94 78Q88 100 68 100Q48 98 48 80Z" fill="url(#seBody)"/>
+    <path d="M60 64Q74 60 84 72" fill="none" stroke-width="3"/>
+
+    <!-- szyja wygieta w luk do tylu -->
+    <path d="M78 46Q72 30 86 24" fill="none" stroke-width="9" stroke="#E7B45F"/>
+    <circle cx="94" cy="34" r="19" fill="url(#seHead)"/>
+
+    <!-- grzebien -->
+    <path d="M84 16q4-10 9-1q5-9 10-1q4-7 6 1" fill="#E9867E"/>
+    <!-- korale -->
+    <path d="M100 50q6 2 6 8q-6 2-10-4Z" fill="#E4706A"/>
+    <!-- dziob -->
+    <path d="M110 34l14 5-14 5Z" fill="#EDA845"/>
+
+    <!-- oko -->
+    <circle cx="102" cy="29" r="4" fill="#5C4030" stroke="none"/>
+    <circle cx="103.4" cy="27.6" r="1.4" fill="#FFFFFF" stroke="none"/>
+  </g>
+</svg>

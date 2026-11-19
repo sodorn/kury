@@ -11,20 +11,30 @@ BREED_LEGHORN_NAME,Leghorn
 BREED_LEGHORN_DESC,"Biała nioska. Znosi najczęściej ze wszystkich, ale jaja są najtańsze."
 BREED_RHODE_NAME,Rhode Island
 BREED_RHODE_DESC,"Ruda i wytrzymała. Znosi wolniej, jaja warte wyraźnie więcej."
+BREED_SZABO_NAME,Kura szabo
+BREED_SZABO_DESC,"Pióra podwinięte na zewnątrz, jakby ją ktoś uczesał pod włos. Tania, a rzuca się w oczy."
 BREED_NAGOSZYJA_NAME,Kura nagoszyja
 BREED_NAGOSZYJA_DESC,"Goła szyja jak u indyka. Wygląda dziwnie i dlatego ma swoich wielbicieli."
+BREED_MARANS_NAME,Marans
+BREED_MARANS_DESC,"Ciemna, miedziano-czarna. Znosi jaja w kolorze czekolady — najciemniejsze ze wszystkich ras."
 BREED_ARAUKANA_NAME,Araukana
 BREED_ARAUKANA_DESC,"Znosi niebieskie jaja. Nie ma ogona, za to ma pierzaste baki przy uszach."
 BREED_JEDWABISTA_NAME,Kura jedwabista
 BREED_JEDWABISTA_DESC,"Pióra jak futro, czarna skóra. Uwielbia siedzieć na jajach — przyspiesza inkubator o połowę."
+BREED_SERAMA_NAME,Serama
+BREED_SERAMA_DESC,"Najmniejsza kura świata. Pierś wypięta, ogon do góry, chodzi jak na defiladzie."
 BREED_BRAHMA_NAME,Brahma olbrzymia
 BREED_BRAHMA_DESC,"Największa kura w grze, z opierzonymi nogami. Spokojna i mięsna."
 BREED_CZUBATKA_NAME,Czubatka polska
 BREED_CZUBATKA_DESC,"Pióropusz na głowie zasłania jej pół świata. Jaja wyraźnie cenniejsze."
+BREED_FENIKS_NAME,Feniks
+BREED_FENIKS_DESC,"Rasa długoogoniasta. Ogon spada kaskadą niemal do ziemi i rośnie latami."
 BREED_SULTANKA_NAME,Sułtanka
 BREED_SULTANKA_DESC,"Biała od czuba po opierzone nogi. Znosi rzadko, lecz każde jajko to majątek."
+BREED_ONAGADORI_NAME,Onagadori
+BREED_ONAGADORI_DESC,"Japoński skarb narodowy. Ogon rośnie przez całe życie i bywa dłuższy niż kilka metrów."
 BREED_CEMANI_NAME,Ayam Cemani
-BREED_CEMANI_DESC,"Czarna od grzebienia po kości. Najdroższa kura w grze i na świecie."
+BREED_CEMANI_DESC,"Czarna od grzebienia po kości. Najdroższa kura w grze — droga także dlatego, że wymaga wyjątkowych warunków."
 RARITY_COMMON,pospolita
 RARITY_UNCOMMON,rzadsza
 RARITY_RARE,rzadka
@@ -59,12 +69,13 @@ PANEL_SELL_HEN,"Sprzedaj za %s (masz %d szt.)"
 PANEL_SELL_HEN_SICK,"Sprzedaj chorą za %s (masz %d szt.)"
 PANEL_UPGRADE_INCUBATOR,"Rozbuduj inkubator do %d miejsc za %s"
 PANEL_LOCKED,Zablokowana
-PANEL_NEED,"Potrzebujesz: %s"
-PANEL_NEED_MONEY,"%s"
-PANEL_NEED_DAYS,"dzień %d"
-PANEL_NEED_HENS,"%d kur"
-PANEL_NEED_FEED,"%d kg paszy"
-PANEL_NEED_BREED,"rasa %s w stadzie"
+PANEL_LOCKED_PRICE,"Cena po odblokowaniu: %s"
+PANEL_NEED,"🔒 Zablokowana. Odblokujesz, gdy: %s"
+PANEL_NEED_MONEY,"uzbierasz %s"
+PANEL_NEED_DAYS,"minie dzień %d"
+PANEL_NEED_HENS,"będziesz mieć %d kur"
+PANEL_NEED_FEED,"będziesz mieć %d kg paszy"
+PANEL_NEED_BREED,"kupisz rasę %s"
 PANEL_INCUBATE,"Włóż %d jaj — pisklę rasy %s (masz %d)"
 PANEL_INCUBATOR_SLOTS,"Zajęte miejsca"
 PANEL_HATCHING,"Wykluwa się: %s"
