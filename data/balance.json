@@ -11,11 +11,12 @@
 		]
 	},
 	"economy": {
-		"_opis": "Worek paszy 25 kg za 60 zl to 2,40 zl/kg - tyle kosztuje pasza dla niosek w Polsce.",
+		"_opis": "Worek paszy 25 kg za 60 zl to 2,40 zl/kg - tyle kosztuje pasza dla niosek w Polsce. sick_sell_share: za chora kure skup placi tyle z normalnej ceny sprzedazy.",
 		"feed_pack_size": 25,
 		"feed_pack_price": 60,
 		"feed_per_hen_minute": 0.085,
-		"chick_feed_multiplier": 0.5
+		"chick_feed_multiplier": 0.5,
+		"sick_sell_share": 0.35
 	},
 	"run": {
 		"_opis": "area to obszar, po ktorym chodza kury i na ktorym lezą jaja (wspolrzedne swiata 1080x2400).",
@@ -60,17 +61,17 @@
 		"offline_max_share": 0.5
 	},
 	"disease": {
-		"_opis": "chance_per_hen_hour: srednia liczba zachorowan na kure na godzine. Chora kura nie znosi jaj i po death_minutes pada.",
-		"chance_per_hen_hour": 0.05,
+		"_opis": "chance_per_hen_hour: srednia liczba zachorowan na kure na godzine. Chora kura nie znosi jaj i po death_minutes pada. Szczepienie placi sie od kury, wiec rosnie razem ze stadem.",
+		"chance_per_hen_hour": 0.15,
 		"death_minutes": 7.0,
-		"medicine_price": 140,
-		"vaccine_price": 1200,
-		"vaccine_price_per_hen": 45
+		"medicine_price": 80,
+		"vaccine_price": 0,
+		"vaccine_price_per_hen": 60
 	},
 	"fox": {
 		"_opis": "Lis przychodzi raz na kilka godzin i porywa od min_share do max_share stada.",
-		"min_hours": 2.0,
-		"max_hours": 5.0,
+		"min_hours": 3.0,
+		"max_hours": 8.0,
 		"min_share": 0.2,
 		"max_share": 0.9,
 		"min_hens": 5,

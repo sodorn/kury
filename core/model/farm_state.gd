@@ -121,14 +121,17 @@ func has_full_collection() -> bool:
 	return true
 
 
-## Kwota, jaka sklep placi za kure hodowlana (polowa ceny zakupu).
-static func hen_sell_price(breed_id: String) -> float:
-	return float(GameData.breed(breed_id).get("sell_price", 0))
-
-
-## Kwota za kure oddana na mieso. Niska, ale przyjmuja takze chore sztuki.
-static func hen_meat_price(breed_id: String) -> float:
-	return float(GameData.breed(breed_id).get("meat_price", 0))
+## Kwota, jaka skup placi za kure. Cena z breeds.json to 70% ceny zakupu,
+## wiec odsprzedanie kupionej kury zawsze jest strata — zarabia sie na
+## odchowanych mlodych, nie na obracaniu tym samym ptakiem.
+## Za chora kure skup placi ulamek tej kwoty (`economy.sick_sell_share`):
+## nikt nie kupi do hodowli ptaka, ktory za chwile padnie.
+static func hen_sell_price(breed_id: String, sick: bool = false) -> float:
+	var price := float(GameData.breed(breed_id).get("sell_price", 0))
+	if not sick:
+		return price
+	var share := float(GameData.balance().get("economy", {}).get("sick_sell_share", 0.35))
+	return maxf(1.0, round(price * share))
 
 
 static func egg_value(breed_id: String) -> float:

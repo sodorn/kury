@@ -16,6 +16,11 @@ const MAX_STEP := 10.0
 
 ## Przesuwa stan o `delta` sekund. Zwraca podsumowanie tego, co sie wydarzylo.
 ## `offline` wlacza bezpiecznik, ktory ogranicza straty z glodu.
+## `offline` ma dwa skutki: wlacza bezpiecznik strat i kieruje zniesione jaja
+## prosto do magazynu zamiast na wybieg. Bez tego nadrabianie czasu nie mialoby
+## sensu — wybieg miesci `run.max_eggs_on_ground` jaj, wiec po kilkunastu
+## minutach nieobecnosci kury przestawalyby niesc i caly nocny urobek
+## przepadalby. Zbieranie jaj palcem zostaje dla gry na zywo.
 static func advance(state: FarmState, delta: float, offline: bool = false) -> Dictionary:
 	var summary := {
 		"eggs_laid": 0,
@@ -40,7 +45,7 @@ static func advance(state: FarmState, delta: float, offline: bool = false) -> Di
 		loss_budget = int(floor(state.hen_count() * clampf(share, 0.0, 1.0)))
 	while remaining > 0.0:
 		var step := minf(remaining, step_size)
-		_step(state, step, summary, loss_budget)
+		_step(state, step, summary, loss_budget, offline)
 		remaining -= step
 	return summary
 
@@ -50,7 +55,8 @@ static func _losses(out: Dictionary) -> int:
 	return int(out["died_hunger"]) + int(out["died_disease"]) + int(out["fox_took"])
 
 
-static func _step(state: FarmState, step: float, out: Dictionary, loss_budget: int) -> void:
+static func _step(state: FarmState, step: float, out: Dictionary, loss_budget: int,
+		offline: bool = false) -> void:
 	out["days_passed"] = int(out["days_passed"]) + _advance_days(state, step)
 	out["hatched"] = int(out["hatched"]) + _advance_incubator(state, step)
 	out["grown_up"] = int(out["grown_up"]) + _advance_chicks(state, step)
@@ -76,7 +82,7 @@ static func _step(state: FarmState, step: float, out: Dictionary, loss_budget: i
 	if state.feed <= 0.0:
 		# Glodne stado nie znosi jaj; samo czekanie na karme to juz kara.
 		return
-	_lay_eggs(state, step, out)
+	_lay_eggs(state, step, out, offline)
 
 
 ## Licznik dni gospodarstwa. Dlugosc dnia siedzi w balance.json.
@@ -214,7 +220,7 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 
 
 ## Znoszenie jaj. Chore kury nie znosza, a pelny wybieg wstrzymuje reszte.
-static func _lay_eggs(state: FarmState, step: float, out: Dictionary) -> void:
+static func _lay_eggs(state: FarmState, step: float, out: Dictionary, offline: bool) -> void:
 	var capacity := int(GameData.balance().get("run", {}).get("max_eggs_on_ground", 30))
 	for hen: Chicken in state.chickens:
 		if hen.sick:
@@ -224,6 +230,12 @@ static func _lay_eggs(state: FarmState, step: float, out: Dictionary) -> void:
 			continue
 		hen.since_last_egg += step
 		if hen.since_last_egg < seconds:
+			continue
+		if offline:
+			# Pod nieobecnosc gracza jaja trafiaja od razu do magazynu.
+			hen.since_last_egg -= seconds
+			state.add_egg(hen.breed_id)
+			out["eggs_laid"] = int(out["eggs_laid"]) + 1
 			continue
 		if state.eggs_on_ground.size() >= capacity:
 			# Wybieg pelny: kura czeka ze zniesieniem, postep stoi na maksimum.

@@ -439,13 +439,6 @@ func _on_sell_hen(breed_id: String, breed_name: String) -> void:
 		_flash(tr("PANEL_HEN_SOLD") % [breed_name, NumberFormat.money(earned)])
 
 
-## Kura oddana na mieso. Placa mniej, ale biora takze chore sztuki.
-func _on_sell_meat(breed_id: String, breed_name: String) -> void:
-	var earned := Game.sell_hen_meat(breed_id)
-	if earned > 0.0:
-		_flash(tr("PANEL_MEAT_SOLD") % [breed_name, NumberFormat.money(earned)])
-
-
 func _on_buy_medicine() -> void:
 	if not Game.buy_medicine():
 		_flash(tr("PANEL_NO_MONEY"))
@@ -540,11 +533,6 @@ func _add_breed_card(breed: Dictionary) -> void:
 	sell.pressed.connect(func() -> void: _on_sell_hen(breed_id, breed_name))
 	card.add_child(sell)
 
-	var meat := Button.new()
-	meat.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	meat.pressed.connect(func() -> void: _on_sell_meat(breed_id, breed_name))
-	card.add_child(meat)
-
 	_actions.add_child(card)
 
 	_refreshers.append(func() -> void:
@@ -555,11 +543,12 @@ func _add_breed_card(breed: Dictionary) -> void:
 		buy.text = tr("PANEL_BUY_HEN") % NumberFormat.money(price)
 		buy.disabled = Game.state.money < price
 		sell.visible = owned > 0
-		sell.text = tr("PANEL_SELL_HEN") % [
-			NumberFormat.money(FarmState.hen_sell_price(breed_id)), owned]
-		sell.disabled = Game.state.hens_of_breed(breed_id, true) == 0
-		meat.visible = owned > 0
-		meat.text = tr("PANEL_SELL_MEAT") % NumberFormat.money(FarmState.hen_meat_price(breed_id))
+		# Najpierw sprzedaja sie zdrowe sztuki; gdy zostana same chore,
+		# przycisk sam pokazuje nizsza kwote i dopisek.
+		var sick_sale: bool = owned > 0 and Game.next_sale_is_sick(breed_id)
+		var key := "PANEL_SELL_HEN_SICK" if sick_sale else "PANEL_SELL_HEN"
+		sell.text = tr(key) % [
+			NumberFormat.money(FarmState.hen_sell_price(breed_id, sick_sale)), owned]
 		if unlocked:
 			subtitle.text = "%s · %s" % [tr(breed.get("rarity", "")), tr(breed.get("desc", ""))]
 			numbers.text = tr("PANEL_BREED_NUMBERS") % [

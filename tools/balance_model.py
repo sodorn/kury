@@ -85,6 +85,14 @@ def simulate(verbose: bool = True) -> dict:
     pack_size = BALANCE["economy"]["feed_pack_size"]
     pack_price = BALANCE["economy"]["feed_pack_price"]
     goal = BALANCE["win"]["money"]
+    disease = BALANCE["disease"]
+    fox = BALANCE["fox"]
+    vaccine_per_hen = disease["vaccine_price_per_hen"]
+    vaccinated = 0
+    fox_timer = (fox["min_hours"] + fox["max_hours"]) / 2 * 3600
+    fox_share = (fox["min_share"] + fox["max_share"]) / 2
+    fox_visits = 0
+    vaccine_spent = 0.0
 
     history = []
     starved = 0
@@ -154,6 +162,30 @@ def simulate(verbose: bool = True) -> dict:
                 hens[breed_id] -= 1
                 money += BREEDS[breed_id]["sell_price"]
 
+        # --- szczepienie nowych kur w stadzie ----------------------------
+        # Model zaklada gracza, ktory szczepi to, co zatrzymuje. Kury
+        # odchowane na sprzedaz ida dalej od razu, wiec ich nie szczepi.
+        if total_hens > vaccinated and money > vaccine_per_hen * (total_hens - vaccinated):
+            cost = vaccine_per_hen * (total_hens - vaccinated)
+            money -= cost
+            vaccine_spent += cost
+            vaccinated = total_hens
+        vaccinated = min(vaccinated, total_hens)
+
+        # --- lis ---------------------------------------------------------
+        fox_timer -= STEP
+        if fox_timer <= 0:
+            fox_timer = (fox["min_hours"] + fox["max_hours"]) / 2 * 3600
+            if total_hens >= fox["min_hens"]:
+                taken = max(1, min(int(round(total_hens * fox_share)), total_hens - 1))
+                fox_visits += 1
+                left = taken
+                for breed_id in sorted(hens, key=lambda b: BREEDS[b]["sell_price"]):
+                    while left > 0 and hens[breed_id] > 0:
+                        hens[breed_id] -= 1
+                        left -= 1
+                vaccinated = max(0, vaccinated - taken)
+
         # --- rozbudowa inkubatora ---------------------------------------
         while upgrades and money >= upgrades[0]["price"] * 2:
             upgrade = upgrades.pop(0)
@@ -174,23 +206,26 @@ def simulate(verbose: bool = True) -> dict:
                 unlocked.add(breed_id)
                 history.append((seconds / 3600.0, "odblokowana %s" % breed_id))
         for breed_id in sorted(unlocked, key=lambda b: -BREEDS[b]["price"]):
-            if breed_id not in owned_ever and money >= BREEDS[breed_id]["price"] * 2:
-                money -= BREEDS[breed_id]["price"]
-                hens[breed_id] = hens.get(breed_id, 0) + 1
+            if hens.get(breed_id, 0) > 0 or money < BREEDS[breed_id]["price"] * 2:
+                continue
+            money -= BREEDS[breed_id]["price"]
+            hens[breed_id] = hens.get(breed_id, 0) + 1
+            if breed_id not in owned_ever:
                 owned_ever.add(breed_id)
                 history.append((seconds / 3600.0,
                                 "kupiona pierwsza %s za %d zl" % (breed_id, BREEDS[breed_id]["price"])))
 
         # --- warunki wygranej -------------------------------------------
+        extra = {"fox_visits": fox_visits, "vaccine_spent": vaccine_spent, "starved": starved}
         if money >= goal:
-            return {"hours": seconds / 3600.0, "history": history, "hens": dict(hens),
-                    "money": money, "won": True, "by": "milion zlotych", "starved": starved}
+            return dict(hours=seconds / 3600.0, history=history, hens=dict(hens),
+                        money=money, won=True, by="milion zlotych", **extra)
         if BALANCE["win"].get("collection") and all(hens.get(b, 0) > 0 for b in BREEDS):
-            return {"hours": seconds / 3600.0, "history": history, "hens": dict(hens),
-                    "money": money, "won": True, "by": "pelna kolekcja", "starved": starved}
+            return dict(hours=seconds / 3600.0, history=history, hens=dict(hens),
+                        money=money, won=True, by="pelna kolekcja", **extra)
 
-    return {"hours": MAX_HOURS, "history": history, "hens": dict(hens),
-            "money": money, "won": False, "starved": starved}
+    return dict(hours=MAX_HOURS, history=history, hens=dict(hens), money=money,
+                won=False, fox_visits=fox_visits, vaccine_spent=vaccine_spent, starved=starved)
 
 
 if __name__ == "__main__":
@@ -214,5 +249,7 @@ if __name__ == "__main__":
     else:
         print("  BRAK WYGRANEJ w %d h, konto %.0f zl — ekonomia za wolna" % (
             MAX_HOURS, result["money"]))
+    print("  lis przyszedl %d razy, szczepienia kosztowaly %.0f zl"
+          % (result["fox_visits"], result["vaccine_spent"]))
     if result["starved"]:
         print("  uwaga: %d sekund bez paszy" % result["starved"])

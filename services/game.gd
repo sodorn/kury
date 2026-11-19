@@ -7,6 +7,11 @@ extends Node
 const AUTOSAVE_SECONDS := 8.0
 ## Ile czekamy na odpowiedz serwera przy starcie, zanim ruszymy z lokalnym zapisem.
 const CLOUD_WAIT_SECONDS := 6.0
+## Najdluzszy odstep miedzy klatkami, ktory jeszcze uznajemy za normalna gre.
+## Wiekszy oznacza, ze petla stanela (uspiony laptop, zawieszona karta) —
+## wtedy nie ufamy roznicy zegara i bierzemy delte klatki, a reszte nadrobi
+## zapis przy nastepnym wczytaniu.
+const MAX_LIVE_STEP := 30.0
 
 var state: FarmState
 
@@ -14,6 +19,10 @@ var _reported_no_feed := false
 var _shown_feed := -1
 var _autosave_left := AUTOSAVE_SECONDS
 var _started := false
+## Zegar scienny z poprzedniej klatki.
+var _last_tick := 0.0
+## Czas uzbierany, gdy okno bylo nieaktywne. Rozliczany po powrocie.
+var _away_seconds := 0.0
 
 
 func _ready() -> void:
@@ -32,7 +41,31 @@ func _process(delta: float) -> void:
 	if state == null:
 		return
 
-	var result := Simulation.advance(state, delta)
+	# Symulacje prowadzi zegar scienny, a nie delta klatki. Przegladarka
+	# zwalnia petle gry w karcie, ktora jest w tle, wiec delta bywa kilka razy
+	# mniejsza niz czas, ktory naprawde uplynal. Zmierzone w Chrome: po stu
+	# sekundach w tle gra naliczala sobie 21% tego czasu.
+	var now := Time.get_unix_time_from_system()
+	var elapsed := now - _last_tick
+	_last_tick = now
+	# Cofniety zegar systemowy albo pierwsza klatka: bierzemy delte.
+	if elapsed <= 0.0 or elapsed > MAX_LIVE_STEP:
+		elapsed = maxf(delta, 0.0)
+
+	# Karta w tle to ten sam przypadek co zamknieta gra: jaja ida do magazynu
+	# zamiast na wybieg, bo nie ma komu ich zbierac, i obowiazuje bezpiecznik
+	# strat. Czas zbieramy do kupy i rozliczamy jednym wywolaniem po powrocie —
+	# inaczej odstepy ponizej sekundy przepadalyby, a komunikat powitalny
+	# wyskakiwalby raz za razem do pustego ekranu.
+	if not DisplayServer.window_is_focused():
+		_away_seconds += elapsed
+		return
+	if _away_seconds > 0.0:
+		var away := _away_seconds
+		_away_seconds = 0.0
+		_apply_elapsed(away)
+
+	var result := Simulation.advance(state, elapsed)
 	_report(result)
 
 	var feed_now := int(floor(state.feed))
@@ -128,13 +161,17 @@ func _apply_loaded(loaded: Dictionary) -> void:
 	state = loaded["state"]
 	_reported_no_feed = false
 	_shown_feed = -1
-	_catch_up(float(loaded["elapsed"]))
+	_away_seconds = 0.0
+	_last_tick = Time.get_unix_time_from_system()
+	_apply_elapsed(float(loaded["elapsed"]))
 	Events.resources_changed.emit()
 
 
 func new_game() -> void:
 	_reported_no_feed = false
 	_shown_feed = -1
+	_away_seconds = 0.0
+	_last_tick = Time.get_unix_time_from_system()
 	state = FarmState.from_start_config(GameData.balance().get("start", {}))
 	Events.resources_changed.emit()
 
@@ -154,8 +191,9 @@ func reset() -> void:
 	save()
 
 
-## Dolicza produkcje z czasu, kiedy gra byla zamknieta.
-func _catch_up(elapsed: float) -> void:
+## Dolicza produkcje z czasu, ktorego petla gry nie policzyla: gra byla
+## zamknieta albo karta wisiala w tle.
+func _apply_elapsed(elapsed: float) -> void:
 	var max_hours := float(GameData.balance().get("offline", {}).get("max_hours", 12.0))
 	var seconds := clampf(elapsed, 0.0, max_hours * 3600.0)
 	if seconds < 1.0:
@@ -239,13 +277,19 @@ func buy_hen(breed_id: String) -> bool:
 	return true
 
 
-## Sprzedaje jedna zdrowa kure danej rasy do dalszej hodowli — polowa ceny
-## zakupu. Chorych nikt do hodowli nie kupi. Zwraca uzyskana kwote albo 0.
+## Sprzedaje jedna kure danej rasy. Najpierw idzie zdrowa, bo za nia skup
+## placi pelna stawke; chora dopiero wtedy, gdy zdrowej juz nie ma. Dzieki
+## temu kwota na przycisku zawsze zgadza sie z tym, co gracz dostanie.
+## Zwraca uzyskana kwote albo 0, gdy nie ma czego sprzedac.
 func sell_hen(breed_id: String) -> float:
+	var sick := false
 	var index := _find_hen(breed_id, false)
 	if index < 0:
+		index = _find_hen(breed_id, true)
+		sick = true
+	if index < 0:
 		return 0.0
-	var price := FarmState.hen_sell_price(breed_id)
+	var price := FarmState.hen_sell_price(breed_id, sick)
 	state.chickens.remove_at(index)
 	state.money += price
 	Events.hen_removed.emit(breed_id)
@@ -253,20 +297,10 @@ func sell_hen(breed_id: String) -> float:
 	return price
 
 
-## Oddaje kure na mieso. Placa mniej niz za hodowlana, ale biora takze chore —
-## to jedyny sposob, zeby cos odzyskac z kury, ktora i tak padnie.
-func sell_hen_meat(breed_id: String) -> float:
-	var index := _find_hen(breed_id, true)
-	if index < 0:
-		index = _find_hen(breed_id, false)
-	if index < 0:
-		return 0.0
-	var price := FarmState.hen_meat_price(breed_id)
-	state.chickens.remove_at(index)
-	state.money += price
-	Events.hen_removed.emit(breed_id)
-	Events.resources_changed.emit()
-	return price
+## Czy kolejna sprzedaz tej rasy dotyczy chorej sztuki (bo zdrowych juz nie ma).
+## UI pyta o to, zeby pokazac wlasciwa kwote.
+func next_sale_is_sick(breed_id: String) -> bool:
+	return _find_hen(breed_id, false) < 0 and _find_hen(breed_id, true) >= 0
 
 
 ## Indeks pierwszej kury danej rasy w zadanym stanie zdrowia; -1, gdy nie ma.

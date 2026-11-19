@@ -28,9 +28,10 @@ func _ready() -> void:
 	_test_hunger()
 	_test_disease()
 	_test_fox()
-	_test_vet_and_meat()
+	_test_vet_and_selling()
 	_test_incubator_upgrade()
 	_test_win()
+	_test_offline_eggs()
 	_test_money_format()
 	SaveGame.clear()
 	print("TESTY: %d OK, %d BLEDOW" % [_passed, _failed])
@@ -546,7 +547,7 @@ func _test_fox() -> void:
 
 
 ## Weterynaria i sprzedaz na mieso.
-func _test_vet_and_meat() -> void:
+func _test_vet_and_selling() -> void:
 	Game.new_game()
 	Game.state.chickens.clear()
 	Game.state.chickens.append(Chicken.create("leghorn"))
@@ -566,23 +567,31 @@ func _test_vet_and_meat() -> void:
 			cured_cemani = false
 	_check(cured_cemani, "lek ratuje najdrozsza chora kure")
 
-	# Sprzedaz na mieso bierze chora sztuke przed zdrowa.
-	Game.state.chickens.append(Chicken.create("leghorn"))
-	var meat := Game.sell_hen_meat("leghorn")
-	_check(is_equal_approx(meat, FarmState.hen_meat_price("leghorn")), "mieso placi stawke z breeds.json")
-	_check(Game.state.sick_count() == 0, "na mieso idzie najpierw chora kura")
-	_check(FarmState.hen_meat_price("leghorn") < FarmState.hen_sell_price("leghorn"),
-			"mieso placi mniej niz sprzedaz hodowlana")
 	_check(FarmState.hen_sell_price("leghorn") < float(GameData.breed("leghorn").get("price", 0)),
-			"sprzedaz hodowlana jest tansza od zakupu")
+			"sprzedaz jest tansza od zakupu")
+	_check(FarmState.hen_sell_price("leghorn", true) < FarmState.hen_sell_price("leghorn"),
+			"za chora kure skup placi mniej")
+	_check(FarmState.hen_sell_price("cemani", true) > FarmState.hen_sell_price("leghorn", true),
+			"chora kura drogiej rasy wciaz warta wiecej niz chora tania")
 
-	# Chorej kury nikt nie kupi do hodowli.
+	# Jeden przycisk sprzedazy: najpierw ida zdrowe sztuki, dopiero potem chore.
 	Game.state.chickens.clear()
+	var healthy := Chicken.create("rhode")
 	var ill := Chicken.create("rhode")
 	ill.sick = true
 	Game.state.chickens.append(ill)
-	_check(is_zero_approx(Game.sell_hen("rhode")), "chorej kury nie da sie sprzedac hodowlanej")
-	_check(Game.sell_hen_meat("rhode") > 0.0, "chora kure przyjmuja na mieso")
+	Game.state.chickens.append(healthy)
+	_check(not Game.next_sale_is_sick("rhode"), "dopoki jest zdrowa, sprzedaz dotyczy zdrowej")
+	var full_price := Game.sell_hen("rhode")
+	_check(is_equal_approx(full_price, FarmState.hen_sell_price("rhode")), "zdrowa idzie za pelna stawke")
+	_check(Game.state.sick_count() == 1, "chora zostala w stadzie")
+	_check(Game.next_sale_is_sick("rhode"), "zostala sama chora — sprzedaz dotyczy chorej")
+	var sick_price := Game.sell_hen("rhode")
+	_check(is_equal_approx(sick_price, FarmState.hen_sell_price("rhode", true)),
+			"chora idzie za obnizona stawke")
+	_check(sick_price < full_price, "za chora skup placi mniej niz za zdrowa")
+	_check(Game.state.chickens.is_empty(), "stado puste po obu sprzedazach")
+	_check(is_zero_approx(Game.sell_hen("rhode")), "nie ma czego sprzedac")
 
 	# Szczepienie obejmuje tylko kury zyjace w chwili szczepienia.
 	Game.new_game()
@@ -666,7 +675,33 @@ func _test_money_format() -> void:
 	# Ceny jaj musza siedziec w widelkach, ktore ustalilismy dla balansu.
 	for breed: Dictionary in GameData.breeds():
 		var value := float(breed.get("egg_value", 0))
-		_check(value >= 0.4 and value <= 3.0,
-				"cena jajka rasy '%s' w widelkach 0,40-3,00 zl" % breed.get("id", ""))
-		_check(is_equal_approx(float(breed.get("sell_price", 0)) * 2.0, float(breed.get("price", 0))),
-				"sprzedaz kury rasy '%s' to polowa ceny zakupu" % breed.get("id", ""))
+		_check(value >= 0.4 and value <= 1.0,
+				"cena jajka rasy '%s' w widelkach 0,40-1,00 zl" % breed.get("id", ""))
+		_check(absf(float(breed.get("sell_price", 0)) - round(float(breed.get("price", 0)) * 0.7)) < 0.51,
+				"sprzedaz kury rasy '%s' to 70%% ceny zakupu" % breed.get("id", ""))
+
+
+## Pod nieobecnosc gracza jaja omijaja wybieg i ida prosto do magazynu.
+func _test_offline_eggs() -> void:
+	var capacity := int(GameData.balance().get("run", {}).get("max_eggs_on_ground", 30))
+	var hens: Array[String] = []
+	for i in 10:
+		hens.append("leghorn")
+
+	# Na zywo: wybieg ma limit i po jego zapelnieniu kury przestaja niesc.
+	var live := _fresh_state(hens, 100000.0)
+	var live_result := Simulation.advance(live, 3.0 * 3600.0)
+	_check(live.eggs_on_ground.size() <= capacity, "na zywo wybieg nie przekracza limitu")
+	_check(live.egg_count() == 0, "na zywo jaja czekaja na wybiegu, nie w magazynie")
+	_check(int(live_result["eggs_laid"]) == capacity, "na zywo limit wybiegu wstrzymuje znoszenie")
+
+	# Offline: te same kury przez ten sam czas odkladaja o wiele wiecej.
+	var away := _fresh_state(hens, 100000.0)
+	var away_result := Simulation.advance(away, 3.0 * 3600.0, true)
+	_check(away.eggs_on_ground.is_empty(), "offline nic nie laduje na wybiegu")
+	_check(away.egg_count() > capacity, "offline magazyn zbiera wiecej, niz miesci wybieg")
+	_check(int(away_result["eggs_laid"]) == away.egg_count(), "licznik zgadza sie z magazynem")
+	_check(away.egg_count() > int(live_result["eggs_laid"]) * 3,
+			"nieobecnosc nie marnuje nocnej produkcji")
+	_check(int(away.eggs.get("leghorn", 0)) == away.egg_count(), "jaja zapisane pod wlasciwa rasa")
+	Game.new_game()

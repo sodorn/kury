@@ -4,13 +4,14 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 5 zakonczony** (wersja 6.0): ekonomia w zlotowkach,
+- Aktualny etap: **ETAP 5 zakonczony** (wersja 6.1): ekonomia w zlotowkach,
   dziewiec ras, glod, choroby, szczepienia, lis, handel kurami w sklepie,
   rozbudowa inkubatora i dwa warunki wygranej.
 - Wersje grafiki: **1.0** plaski wektor (galaz `v1.0-grafika-plaska`, commit 6ea3a3c),
   **2.1** pastelowa, miekkie kontury, zaokraglone sylwetki — aktualna.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
-  `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`.
+  `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
+  `v6.1-balans`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -242,13 +243,15 @@ python3 tools/gen_ground.py
   brahma 350 zl, czubatka 600 zl, sultanka 1400 zl, Ayam Cemani 6000 zl.
   Gorny kraniec jest rozciagniety wzgledem typowych ogloszen (Cemani bez
   rodowodu chodzi juz od ~100 zl), bo gra potrzebuje rozpietosci.
-- **Sprzedaz kury = dokladnie polowa ceny zakupu.** Jest na to test, wiec
-  przy zmianie ceny trzeba zmienic obie liczby.
-- **Mieso** (`meat_price`) jest zawsze tansze od sprzedazy hodowlanej i tez
-  ma test. Sens miesa: skupuje takze **chore** kury, ktorych nikt nie kupi
-  do hodowli. To jedyny sposob, zeby cos odzyskac z kury, ktora i tak padnie.
-- Jajka: od 0,40 zl (leghorn) do 3,00 zl (cemani). Cena jajka jest kotwica
-  calego balansu — od niej liczy sie reszta.
+- **Sprzedaz kury = 70% ceny zakupu** (czyli 30% taniej). Jest na to test,
+  wiec przy zmianie ceny trzeba zmienic obie liczby. Jedna opcja sprzedazy,
+  bez miesa: za **chora** kure skup placi `economy.sick_sell_share` tej kwoty.
+  Sprzedaz bierze najpierw zdrowe sztuki, zeby kwota na przycisku zawsze
+  zgadzala sie z tym, co gracz dostanie.
+- Jajka: od 0,40 zl (leghorn) do 1,00 zl (cemani). Celowo waski rozstrzal —
+  wartosc siedzi w kurze, nie w jajku. Drogie rasy nios a rzadziej, wiec na
+  samych jajach wychodza **gorzej** od leghorna; zarabia sie na sprzedazy
+  odchowanych mlodych.
 - Pasza: worek 25 kg za 60 zl (2,40 zl/kg, tyle co naprawde). **Kazda kura
   zjada tyle samo**, niezaleznie od rasy; pisklę polowe porcji.
 
@@ -256,8 +259,10 @@ python3 tools/gen_ground.py
 
 - `tools/balance_model.py` liczy oplacalnosc kazdej rasy i symuluje rozsadnego
   gracza. Uruchamiac po **kazdej** zmianie cen w `data/*.json`.
-- Stan na wersje 6.0: pelna kolekcja ras po ~19,5 h gry, milion zlotych po
-  ~21,7 h. Oba warunki wygranej wypadaja prawie rownoczesnie — o to chodzilo.
+- Stan na wersje 6.1: pelna kolekcja ras po ~15,8 h gry, milion zlotych po
+  ~17,7 h. Oba warunki wygranej wypadaja prawie rownoczesnie — o to chodzilo.
+- Model liczy takze lisa i szczepienia, bo jedno i drugie realnie spowalnia
+  gre. Bez nich wychodzily liczby o kilka godzin za dobre.
 - Zarabia sie nie na jajach, tylko na **hodowli**: z 6 jaj wyklu wa sie pisklę,
   ktore po odchowaniu sprzedaje sie za polowe ceny rasy. Dlatego droga rasa
   oplaca sie mimo tej samej paszy. Jaja same w sobie ledwie pokrywaja pasze.
@@ -280,6 +285,22 @@ python3 tools/gen_ground.py
 - **Bezpiecznik offline**: przy nadrabianiu czasu laczne straty (glod +
   choroby + lis) nie moga przekroczyc `hunger.offline_max_share` stada.
   Bez tego powrot po dobie oznaczalby pusty wybieg i koniec zabawy.
+
+### Uplyw czasu — trzy przypadki, jeden mechanizm
+
+- Symulacje prowadzi **zegar scienny**, nie delta klatki. Przegladarka zwalnia
+  petle gry w karcie w tle: zmierzone w Chrome, po stu sekundach w tle gra
+  naliczala sobie 21% tego czasu. Po poprawce 99%.
+- Gra zamknieta: `_apply_elapsed` z roznicy wzgledem `saved_at`, limit
+  `offline.max_hours`.
+- Karta w tle (`DisplayServer.window_is_focused()` = false): czas zbiera sie
+  w `_away_seconds` i rozlicza jednym wywolaniem po powrocie. Nie wolno
+  rozliczac go co klatke — odstepy ponizej sekundy przepadaja, a komunikat
+  powitalny leci w kolko.
+- **Offline jaja ida prosto do magazynu**, z pominieciem wybiegu. Wybieg
+  miesci `run.max_eggs_on_ground` jaj, wiec bez tego po kilkunastu minutach
+  nieobecnosci kury przestawalyby niesc i caly nocny urobek przepadalby.
+  Zbieranie jaj palcem zostaje dla gry na zywo.
 
 ### Wygrana
 
