@@ -32,6 +32,7 @@ static func advance(state: FarmState, delta: float, offline: bool = false) -> Di
 		"died_disease": 0,
 		"got_sick": 0,
 		"fox_took": 0,
+		"fox_arrived": 0,
 		"rotted": 0,
 	}
 	var remaining := maxf(delta, 0.0)
@@ -61,7 +62,7 @@ static func _step(state: FarmState, step: float, out: Dictionary, loss_budget: i
 	out["hatched"] = int(out["hatched"]) + _advance_incubator(state, step)
 	out["grown_up"] = int(out["grown_up"]) + _advance_chicks(state, step)
 	out["rotted"] = int(out["rotted"]) + _advance_corpses(state, step)
-	_advance_fox(state, step, out, loss_budget)
+	_advance_fox(state, step, out, loss_budget, offline)
 
 	# Karmienie rozliczamy przed sprawdzeniem, czy stado istnieje: inaczej
 	# po stracie ostatniej kury licznik glodu zostalby zamrozony.
@@ -121,7 +122,8 @@ static func _advance_incubator(state: FarmState, step: float) -> int:
 
 
 ## Pisklęta rosna i dolaczaja do stada jako dorosle kury. Mlode nie dziedzicza
-## szczepienia — trzeba zaszczepic je osobno.
+## szczepienia — trzeba zaszczepic je osobno. Gdy kurnik jest pelny, podrosniete
+## pisklę czeka przy inkubatorze, zamiast znikac.
 static func _advance_chicks(state: FarmState, step: float) -> int:
 	if state.chicks.is_empty():
 		return 0
@@ -130,6 +132,11 @@ static func _advance_chicks(state: FarmState, step: float) -> int:
 	for chick: Chick in state.chicks:
 		chick.grown += step
 		if chick.grown < chick.total_seconds():
+			still_small.append(chick)
+			continue
+		if not state.coop_has_room():
+			# Brak miejsca: pisklę czeka, a licznik stoi na koncu wzrostu.
+			chick.grown = chick.total_seconds()
 			still_small.append(chick)
 			continue
 		state.chickens.append(Chicken.create(chick.breed_id))
@@ -197,8 +204,23 @@ static func _advance_disease(state: FarmState, step: float, out: Dictionary, bud
 
 
 ## Lis: przychodzi raz na kilka godzin i porywa czesc stada.
-static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget: int) -> void:
+##
+## Wizyta ma dwa etapy. Najpierw lis przez `visit_seconds` biega po wybiegu
+## i nikogo jeszcze nie zabiera — wtedy gracz moze go przegonic. Dopiero gdy
+## czas minie, zabiera to, co sobie upatrzyl. Pod nieobecnosc gracza nie ma
+## kogo czekac, wiec strata liczy sie od razu.
+static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget: int,
+		offline: bool) -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})
+
+	if state.fox_visit_left > 0.0:
+		state.fox_visit_left -= step
+		if state.fox_visit_left > 0.0:
+			return
+		state.fox_visit_left = 0.0
+		_fox_takes(state, out, budget)
+		return
+
 	if state.fox_timer < 0.0:
 		state.reset_fox_timer()
 		return
@@ -208,9 +230,21 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 	state.reset_fox_timer()
 	if state.chickens.size() < int(fox.get("min_hens", 5)):
 		return
+
 	var share := randf_range(float(fox.get("min_share", 0.2)), float(fox.get("max_share", 0.9)))
-	var taken := clampi(int(round(state.chickens.size() * share)), 1, state.chickens.size() - 1)
-	taken = mini(taken, maxi(0, budget - _losses(out)))
+	state.fox_pending = clampi(int(round(state.chickens.size() * share)), 1, state.chickens.size() - 1)
+	if offline:
+		_fox_takes(state, out, budget)
+		return
+	state.fox_visit_left = maxf(1.0, float(fox.get("visit_seconds", 7.0)))
+	out["fox_arrived"] = int(out["fox_arrived"]) + 1
+
+
+## Koniec wizyty: lis zabiera upatrzone kury, o ile nikt go nie przegonil.
+static func _fox_takes(state: FarmState, out: Dictionary, budget: int) -> void:
+	var taken := mini(state.fox_pending, maxi(0, budget - _losses(out)))
+	taken = mini(taken, maxi(0, state.chickens.size() - 1))
+	state.fox_pending = 0
 	if taken <= 0:
 		return
 	for i in taken:

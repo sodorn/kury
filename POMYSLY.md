@@ -10,7 +10,7 @@ uszeregowane od tych, które dają najwięcej za najmniej roboty.
 
 ---
 
-## 1. Lisa da się przegonić, a pod nieobecność broni pies
+## 1. Lisa da się przegonić, a pod nieobecność broni pies — ZROBIONE (7.0)
 
 **Problem:** lis jest dziś czystą karą. Nie da się go uniknąć, nie da się
 przygotować, nie da się zareagować. Losowa strata bez żadnej odpowiedzi
@@ -31,7 +31,7 @@ i licznik trafień.
 
 ---
 
-## 2. Kurnik ma pojemność, którą się rozbudowuje
+## 2. Kurnik ma pojemność, którą się rozbudowuje — ZROBIONE (7.0)
 
 **Problem:** dziś stado może rosnąć w nieskończoność. Nie ma żadnego
 powodu, żeby cokolwiek budować — a „co rozbudować jako następne" to
@@ -119,13 +119,12 @@ Gra dostaje rytm, a plan „co robić teraz" zmienia się w czasie.
 
 ---
 
-## Co bym zrobił najpierw
+## Co dalej
 
-**1 i 2** — razem, w jednym etapie. Lis z możliwością obrony naprawia
-najgorszy element gry, a pojemność kurnika daje powód, żeby budować.
-Obie rzeczy są tanie i od razu zmieniają odczucie z gry.
+Pomysły 1 i 2 weszły w wersji 7.0, razem z trzecim budynkiem (magazyn
+z hurtem na paszę).
 
-Potem **3** (zamówienia), bo daje grze cel na krótką metę.
+Następny w kolejce: **3** (zamówienia), bo daje grze cel na krótką metę.
 
 **4** (genetyka) to osobny, duży etap. Jeśli gra ma mieć jedną rzecz,
 która sprawia, że wraca się do niej miesiącami, to właśnie ta — ale nie

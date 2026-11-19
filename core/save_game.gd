@@ -11,7 +11,7 @@ extends RefCounted
 
 const PATH := "user://save.json"
 ## Numer formatu zapisu. Podnosic przy KAZDEJ zmianie ukladu pol.
-const VERSION := 3
+const VERSION := 4
 
 
 ## Zamienia stan gry na slownik gotowy do zapisu.
@@ -43,7 +43,12 @@ static func to_dict(state: FarmState) -> Dictionary:
 		"chicks": chicks,
 		"corpses": corpses,
 		"incubator_level": state.incubator_level,
+		"coop_level": state.coop_level,
+		"storage_level": state.storage_level,
+		"guard_level": state.guard_level,
 		"fox_timer": state.fox_timer,
+		"fox_visit_left": state.fox_visit_left,
+		"fox_pending": state.fox_pending,
 		"hunger_seconds": state.hunger_seconds,
 		"won": state.won,
 		"win_reason": state.win_reason,
@@ -67,7 +72,14 @@ static func from_dict(data: Dictionary) -> Dictionary:
 	state.days = int(data.get("days", 0))
 	state.day_fraction = clampf(float(data.get("day_fraction", 0.0)), 0.0, 1.0)
 	state.incubator_level = maxi(0, int(data.get("incubator_level", 0)))
+	state.coop_level = maxi(0, int(data.get("coop_level", 0)))
+	state.storage_level = maxi(0, int(data.get("storage_level", 0)))
+	state.guard_level = maxi(0, int(data.get("guard_level", 0)))
 	state.fox_timer = float(data.get("fox_timer", -1.0))
+	# Wizyty lisa nie przenosimy przez zapis: gracz, ktory wylaczyl gre
+	# w trakcie, nie ma czego przeganiac po powrocie.
+	state.fox_visit_left = 0.0
+	state.fox_pending = 0
 	state.hunger_seconds = maxf(0.0, float(data.get("hunger_seconds", 0.0)))
 	state.won = bool(data.get("won", false))
 	state.win_reason = String(data.get("win_reason", ""))
@@ -176,4 +188,11 @@ static func _migrate(data: Dictionary, from_version: int) -> Dictionary:
 		data["incubator_level"] = 0
 		data["won"] = false
 		data["version"] = 3
+	if from_version < 4:
+		# Wersja 4: poziomy kurnika, magazynu i obrony przed lisem. Stare
+		# zapisy zaczynaja od poziomu poczatkowego kazdego budynku.
+		data["coop_level"] = 0
+		data["storage_level"] = 0
+		data["guard_level"] = 0
+		data["version"] = 4
 	return data

@@ -93,6 +93,13 @@ def simulate(verbose: bool = True) -> dict:
     fox_share = (fox["min_share"] + fox["max_share"]) / 2
     fox_visits = 0
     vaccine_spent = 0.0
+    buildings = BALANCE["buildings"]
+    coop_up = list(buildings["coop"]["upgrades"])
+    store_up = list(buildings["storage"]["upgrades"])
+    guard_up = list(buildings["guard"]["upgrades"])
+    capacity = buildings["coop"]["capacity"]
+    guard_mult = 1.0
+    fox_timer *= guard_mult
 
     history = []
     starved = 0
@@ -103,6 +110,26 @@ def simulate(verbose: bool = True) -> dict:
         total_hens = sum(hens.values())
         best = max((b for b in hens if hens[b] > 0),
                    key=lambda b: BREEDS[b]["sell_price"], default=None)
+
+        # --- rozbudowa budynkow ------------------------------------------
+        # Gracz doklada budynek, gdy stac go z zapasem. Kurnik ma
+        # pierwszenstwo, bo bez miejsca stado nie urosnie.
+        crowded = total_hens + len(growing) >= capacity - 2
+        while coop_up and crowded and money >= coop_up[0]["price"] * 2:
+            up = coop_up.pop(0)
+            money -= up["price"]
+            capacity = up["capacity"]
+            history.append((seconds / 3600.0, "kurnik na %d kur" % capacity))
+        while store_up and money >= store_up[0]["price"] * 3:
+            up = store_up.pop(0)
+            money -= up["price"]
+            pack_size, pack_price = up["pack_size"], up["pack_price"]
+            history.append((seconds / 3600.0, "magazyn: worek %d kg" % pack_size))
+        while guard_up and money >= guard_up[0]["price"] * 4:
+            up = guard_up.pop(0)
+            money -= up["price"]
+            guard_mult = up["fox_multiplier"]
+            history.append((seconds / 3600.0, "obrona przed lisem x%.1f" % guard_mult))
 
         # --- pasza -------------------------------------------------------
         need = total_hens * feed_rate * 15  # zapas na 15 minut
@@ -128,9 +155,12 @@ def simulate(verbose: bool = True) -> dict:
                 eggs[breed_id] = eggs.get(breed_id, 0) + 1
 
         # --- inkubator ---------------------------------------------------
+        occupied = total_hens
         for breed_id in sorted(hens, key=lambda b: -BREEDS[b]["sell_price"]):
             while (len(incubating) + len(growing) < slots
+                   and occupied < capacity
                    and eggs.get(breed_id, 0) >= per_chick and hens[breed_id] > 0):
+                occupied += 1
                 eggs[breed_id] -= per_chick
                 incubating.append([breed_id, BREEDS[breed_id]["incubate_seconds"]])
         for batch in list(incubating):
@@ -175,7 +205,7 @@ def simulate(verbose: bool = True) -> dict:
         # --- lis ---------------------------------------------------------
         fox_timer -= STEP
         if fox_timer <= 0:
-            fox_timer = (fox["min_hours"] + fox["max_hours"]) / 2 * 3600
+            fox_timer = (fox["min_hours"] + fox["max_hours"]) / 2 * 3600 * guard_mult
             if total_hens >= fox["min_hens"]:
                 taken = max(1, min(int(round(total_hens * fox_share)), total_hens - 1))
                 fox_visits += 1
@@ -207,6 +237,8 @@ def simulate(verbose: bool = True) -> dict:
                 history.append((seconds / 3600.0, "odblokowana %s" % breed_id))
         for breed_id in sorted(unlocked, key=lambda b: -BREEDS[b]["price"]):
             if hens.get(breed_id, 0) > 0 or money < BREEDS[breed_id]["price"] * 2:
+                continue
+            if sum(hens.values()) >= capacity:
                 continue
             money -= BREEDS[breed_id]["price"]
             hens[breed_id] = hens.get(breed_id, 0) + 1
@@ -251,5 +283,6 @@ if __name__ == "__main__":
             MAX_HOURS, result["money"]))
     print("  lis przyszedl %d razy, szczepienia kosztowaly %.0f zl"
           % (result["fox_visits"], result["vaccine_spent"]))
+    print("  stado na koncu: %d kur" % sum(result["hens"].values()))
     if result["starved"]:
         print("  uwaga: %d sekund bez paszy" % result["starved"])

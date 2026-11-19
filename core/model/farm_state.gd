@@ -34,6 +34,16 @@ var hunger_next_death: float = 0.0
 var incubator_level: int = 0
 ## Sekundy do nastepnej wizyty lisa. Losowane po kazdej wizycie.
 var fox_timer: float = -1.0
+## Trwajaca wizyta lisa: ile sekund jeszcze biega po wybiegu. Dopoki trwa,
+## kury sa tylko zagrozone — zabiera je dopiero na koniec wizyty. Dzieki temu
+## gracz, ktory akurat patrzy na ekran, ma szanse go przegonic.
+var fox_visit_left: float = 0.0
+## Ile kur lis zabierze, jesli nikt go nie przegoni.
+var fox_pending: int = 0
+## Poziomy rozbudowy budynkow: kurnik, magazyn i obrona przed lisem.
+var coop_level: int = 0
+var storage_level: int = 0
+var guard_level: int = 0
 ## Czy gra jest wygrana i z jakiego powodu ("money" albo "collection").
 var won: bool = false
 var win_reason: String = ""
@@ -207,9 +217,90 @@ func next_incubator_upgrade() -> Dictionary:
 	return upgrades[incubator_level]
 
 
-## Losuje czas do nastepnej wizyty lisa.
+## Losuje czas do nastepnej wizyty lisa, z uwzglednieniem plotu i psa.
 func reset_fox_timer() -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})
 	var low := float(fox.get("min_hours", 2.0)) * 3600.0
 	var high := float(fox.get("max_hours", 5.0)) * 3600.0
-	fox_timer = randf_range(low, maxf(low, high))
+	fox_timer = randf_range(low, maxf(low, high)) * fox_interval_multiplier()
+
+
+# --- budynki ------------------------------------------------------------
+
+
+## Wspolny odczyt poziomu budynku: 0 to stan poczatkowy.
+func building_level(building_id: String) -> int:
+	match building_id:
+		"coop":
+			return coop_level
+		"storage":
+			return storage_level
+		"guard":
+			return guard_level
+	return 0
+
+
+func set_building_level(building_id: String, level: int) -> void:
+	match building_id:
+		"coop":
+			coop_level = level
+		"storage":
+			storage_level = level
+		"guard":
+			guard_level = level
+
+
+## Opis nastepnego ulepszenia budynku albo pusty slownik, gdy to juz maksimum.
+func next_building_upgrade(building_id: String) -> Dictionary:
+	var upgrades: Array = GameData.balance().get("buildings", {}) \
+			.get(building_id, {}).get("upgrades", [])
+	var level := building_level(building_id)
+	if level >= upgrades.size():
+		return {}
+	return upgrades[level]
+
+
+## Wpis opisujacy obecny poziom budynku; pusty przy poziomie poczatkowym.
+func current_building_upgrade(building_id: String) -> Dictionary:
+	var upgrades: Array = GameData.balance().get("buildings", {}) \
+			.get(building_id, {}).get("upgrades", [])
+	var level := building_level(building_id)
+	if level <= 0 or upgrades.is_empty():
+		return {}
+	return upgrades[mini(level, upgrades.size()) - 1]
+
+
+## Ile kur miesci kurnik. Liczy sie stado razem z tym, co dopiero dorasta.
+func coop_capacity() -> int:
+	var coop: Dictionary = GameData.balance().get("buildings", {}).get("coop", {})
+	var upgrade := current_building_upgrade("coop")
+	if upgrade.is_empty():
+		return int(coop.get("capacity", 15))
+	return int(upgrade.get("capacity", coop.get("capacity", 15)))
+
+
+## Ile miejsc w kurniku jest zajete. Licza sie wylacznie dorosle kury —
+## pisklęta siedza jeszcze przy inkubatorze. Gdy zabraknie miejsca, podrosniete
+## pisklę po prostu czeka, az gracz zwolni kojec.
+func coop_occupied() -> int:
+	return chickens.size()
+
+
+func coop_has_room(extra: int = 1) -> bool:
+	return coop_occupied() + extra <= coop_capacity()
+
+
+## Worek paszy: rozmiar i cena przy obecnym poziomie magazynu.
+func feed_pack() -> Dictionary:
+	var economy: Dictionary = GameData.balance().get("economy", {})
+	var upgrade := current_building_upgrade("storage")
+	return {
+		"size": float(upgrade.get("pack_size", economy.get("feed_pack_size", 25))),
+		"price": float(upgrade.get("pack_price", economy.get("feed_pack_price", 60))),
+	}
+
+
+## Ile razy rzadziej przychodzi lis dzieki plotowi albo psu.
+func fox_interval_multiplier() -> float:
+	var upgrade := current_building_upgrade("guard")
+	return maxf(1.0, float(upgrade.get("fox_multiplier", 1.0)))

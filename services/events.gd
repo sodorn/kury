@@ -29,9 +29,18 @@ signal breed_unlocked(breed_id: String)
 @warning_ignore("unused_signal")
 signal notice(text: String)
 
-## Lis odwiedzil wybieg i porwal `count` kur — scena ma to pokazac.
+## Lis wszedl na wybieg i upatrzyl sobie `count` kur. Scena ma go pokazac;
+## gracz ma `seconds` na przegonienie go.
+@warning_ignore("unused_signal")
+signal fox_arrived(count: int, seconds: float)
+
+## Lis odszedl z lupem — `count` kur zniknelo ze stada.
 @warning_ignore("unused_signal")
 signal fox_visited(count: int)
+
+## Gracz przegonil lisa, zanim ten cokolwiek zabral.
+@warning_ignore("unused_signal")
+signal fox_scared()
 
 ## Gra zostala wygrana; `reason` to "money" albo "collection".
 @warning_ignore("unused_signal")

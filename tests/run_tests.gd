@@ -32,6 +32,8 @@ func _ready() -> void:
 	_test_incubator_upgrade()
 	_test_win()
 	_test_offline_eggs()
+	_test_time_gap()
+	_test_buildings()
 	_test_money_format()
 	SaveGame.clear()
 	print("TESTY: %d OK, %d BLEDOW" % [_passed, _failed])
@@ -311,9 +313,10 @@ func _test_offline() -> void:
 	var capacity := int(GameData.balance().get("run", {}).get("max_eggs_on_ground", 24))
 	_check(laid == mini(int(7200.0 / seconds), capacity), "produkcja przez 2 godziny z limitem wybiegu")
 
-	# Limit: doba nieobecnosci liczy sie jak `max_hours`, nie jak doba.
+	# Limit: nieobecnosc dluzsza niz `max_hours` liczy sie jak `max_hours`.
 	var long_state := _fresh_state(["leghorn"], 10000.0)
-	var clamped := clampf(86400.0, 0.0, max_hours * 3600.0)
+	var over_limit := (max_hours + 48.0) * 3600.0
+	var clamped := clampf(over_limit, 0.0, max_hours * 3600.0)
 	_check(clamped == max_hours * 3600.0, "czas offline jest przycinany do limitu")
 	Simulation.advance(long_state, clamped)
 	_check(long_state.eggs_on_ground.size() <= capacity,
@@ -518,18 +521,30 @@ func _test_disease() -> void:
 	Game.new_game()
 
 
-## Lis: przychodzi po wyznaczonym czasie i zabiera czesc stada, nie calosc.
+## Lis: przychodzi, daje graczowi chwile na reakcje i dopiero potem zabiera
+## czesc stada — nigdy calosci.
 func _test_fox() -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})
+	var visit := float(fox.get("visit_seconds", 7.0))
 	var hens: Array[String] = []
 	for i in 20:
 		hens.append("leghorn")
 
+	# Etap pierwszy: lis jest na wybiegu, ale jeszcze nic nie zabral.
 	var state := _fresh_state(hens, 100000.0)
 	state.fox_timer = 5.0
-	var result := Simulation.advance(state, 10.0)
+	var arrival := Simulation.advance(state, 6.0)
+	_check(int(arrival["fox_arrived"]) == 1, "lis przychodzi, gdy minie jego czas")
+	_check(int(arrival["fox_took"]) == 0, "po wejsciu lis jeszcze nic nie zabiera")
+	_check(state.hen_count() == 20, "stado na razie w komplecie")
+	_check(state.fox_pending > 0, "lis ma juz upatrzony lup")
+	_check(state.fox_visit_left > 0.0, "trwa okno na przegonienie lisa")
+
+	# Etap drugi: nikt nie zareagowal, wiec lis zabiera lup.
+	var pending := state.fox_pending
+	var result := Simulation.advance(state, visit + 1.0)
 	var taken := int(result["fox_took"])
-	_check(taken > 0, "lis zabiera kury, gdy minie jego czas")
+	_check(taken == pending, "po wizycie lis zabiera to, co upatrzyl")
 	_check(state.hen_count() == 20 - taken, "stado maleje dokladnie o lup lisa")
 	_check(state.hen_count() > 0, "lis nigdy nie zabiera calego stada")
 	_check(float(taken) / 20.0 >= float(fox.get("min_share", 0.2)) - 0.08, "lup nie mniejszy niz minimum")
@@ -537,11 +552,45 @@ func _test_fox() -> void:
 	_check(state.fox_timer > 0.0, "po wizycie losuje sie nowy czas")
 	_check(state.corpses.is_empty(), "lis zabiera kury ze soba, zwlok nie ma")
 
+	# Przegoniony lis odchodzi z niczym.
+	Game.new_game()
+	Game.state.chickens.clear()
+	for i in 20:
+		Game.state.chickens.append(Chicken.create("leghorn"))
+	Game.state.feed = 100000.0
+	Game.state.fox_timer = 1.0
+	_check(not Game.scare_fox(), "bez lisa nie ma kogo przeganiac")
+	Simulation.advance(Game.state, 2.0)
+	_check(Game.state.fox_visit_left > 0.0, "lis wszedl na wybieg")
+	_check(Game.scare_fox(), "lisa da sie przegonic w trakcie wizyty")
+	_check(Game.state.fox_pending == 0 and is_zero_approx(Game.state.fox_visit_left),
+			"po przegonieniu nie ma ani lupu, ani wizyty")
+	var after := Simulation.advance(Game.state, visit + 2.0)
+	_check(int(after["fox_took"]) == 0, "przegoniony lis nie zabiera nic")
+	_check(Game.state.hen_count() == 20, "stado w komplecie po przegonieniu")
+
+	# Pod nieobecnosc gracza nie ma kogo czekac: strata liczy sie od razu.
+	var away := _fresh_state(hens, 100000.0)
+	away.fox_timer = 5.0
+	var offline := Simulation.advance(away, 6.0, true)
+	_check(int(offline["fox_took"]) > 0, "offline lis zabiera od razu")
+	_check(int(offline["fox_arrived"]) == 0, "offline nie ma okna na reakcje")
+
+	# Obrona wydluza przerwy miedzy wizytami.
+	var guarded := _fresh_state(hens, 100000.0)
+	_check(is_equal_approx(guarded.fox_interval_multiplier(), 1.0), "bez obrony mnoznik wynosi 1")
+	guarded.guard_level = 1
+	_check(guarded.fox_interval_multiplier() > 1.0, "plot wydluza przerwe miedzy wizytami")
+	guarded.guard_level = 2
+	var with_dog := guarded.fox_interval_multiplier()
+	guarded.guard_level = 1
+	_check(with_dog > guarded.fox_interval_multiplier(), "pies dziala lepiej niz sam plot")
+
 	# Male stado lis zostawia w spokoju.
 	var tiny := _fresh_state(["leghorn", "leghorn"], 100.0)
 	tiny.fox_timer = 1.0
 	var tiny_result := Simulation.advance(tiny, 5.0)
-	_check(int(tiny_result["fox_took"]) == 0, "przy malym stadzie lis nie przychodzi")
+	_check(int(tiny_result["fox_arrived"]) == 0, "przy malym stadzie lis nie przychodzi")
 	_check(tiny.hen_count() == 2, "male stado zostaje nietkniete")
 	Game.new_game()
 
@@ -574,21 +623,21 @@ func _test_vet_and_selling() -> void:
 	_check(FarmState.hen_sell_price("cemani", true) > FarmState.hen_sell_price("leghorn", true),
 			"chora kura drogiej rasy wciaz warta wiecej niz chora tania")
 
-	# Jeden przycisk sprzedazy: najpierw ida zdrowe sztuki, dopiero potem chore.
+	# Jeden przycisk sprzedazy: chora kura idzie pierwsza, bo i tak by padla.
 	Game.state.chickens.clear()
 	var healthy := Chicken.create("rhode")
 	var ill := Chicken.create("rhode")
 	ill.sick = true
-	Game.state.chickens.append(ill)
 	Game.state.chickens.append(healthy)
-	_check(not Game.next_sale_is_sick("rhode"), "dopoki jest zdrowa, sprzedaz dotyczy zdrowej")
-	var full_price := Game.sell_hen("rhode")
-	_check(is_equal_approx(full_price, FarmState.hen_sell_price("rhode")), "zdrowa idzie za pelna stawke")
-	_check(Game.state.sick_count() == 1, "chora zostala w stadzie")
-	_check(Game.next_sale_is_sick("rhode"), "zostala sama chora — sprzedaz dotyczy chorej")
+	Game.state.chickens.append(ill)
+	_check(Game.next_sale_is_sick("rhode"), "dopoki jest chora, sprzedaz dotyczy chorej")
 	var sick_price := Game.sell_hen("rhode")
 	_check(is_equal_approx(sick_price, FarmState.hen_sell_price("rhode", true)),
-			"chora idzie za obnizona stawke")
+			"chora idzie pierwsza, za obnizona stawke")
+	_check(Game.state.sick_count() == 0, "chora zniknela ze stada")
+	_check(not Game.next_sale_is_sick("rhode"), "zostala sama zdrowa")
+	var full_price := Game.sell_hen("rhode")
+	_check(is_equal_approx(full_price, FarmState.hen_sell_price("rhode")), "zdrowa idzie za pelna stawke")
 	_check(sick_price < full_price, "za chora skup placi mniej niz za zdrowa")
 	_check(Game.state.chickens.is_empty(), "stado puste po obu sprzedazach")
 	_check(is_zero_approx(Game.sell_hen("rhode")), "nie ma czego sprzedac")
@@ -704,4 +753,123 @@ func _test_offline_eggs() -> void:
 	_check(away.egg_count() > int(live_result["eggs_laid"]) * 3,
 			"nieobecnosc nie marnuje nocnej produkcji")
 	_check(int(away.eggs.get("leghorn", 0)) == away.egg_count(), "jaja zapisane pod wlasciwa rasa")
+	Game.new_game()
+
+
+## Rozliczanie czasu miedzy klatkami. Zminimalizowana przegladarka na telefonie
+## zamraza strone calkiem, wiec po powrocie przychodzi jedna klatka z wielka
+## dziura — i ta dziura musi sie policzyc jak czas offline, a nie wyladowac
+## w koszu.
+func _test_time_gap() -> void:
+	var capacity := int(GameData.balance().get("run", {}).get("max_eggs_on_ground", 30))
+
+	# Zwykla klatka: jaja ladu ja na wybiegu, bo gracz patrzy.
+	Game.new_game()
+	Game.state.feed = 100000.0
+	for i in 10:
+		# Kury tuz przed zniesieniem, zeby jedna krotka klatka wystarczyla.
+		Game.state.chickens.append(Chicken.create("leghorn", 39.0))
+	_check(not Game.apply_gap(5.0, true), "krotka przerwa idzie zwykla sciezka")
+	_check(Game.state.eggs_on_ground.size() > 0, "przy graczu jaja ladu ja na wybiegu")
+	_check(Game.state.egg_count() == 0, "przy graczu magazyn zostaje pusty")
+
+	# Dziura dluzsza niz krok na zywo: liczymy ja jak czas offline.
+	Game.new_game()
+	Game.state.feed = 100000.0
+	for i in 10:
+		Game.state.chickens.append(Chicken.create("leghorn"))
+	_check(Game.apply_gap(3.0 * 3600.0, true), "dluga dziura idzie sciezka offline")
+	_check(Game.state.egg_count() > capacity, "po dlugiej dziurze magazyn ma wiecej, niz miesci wybieg")
+	_check(Game.state.eggs_on_ground.is_empty(), "po dlugiej dziurze nic nie lezy na wybiegu")
+
+	# Okno nieaktywne: czas zbiera sie i rozlicza dopiero po powrocie.
+	Game.new_game()
+	Game.state.feed = 100000.0
+	for i in 10:
+		Game.state.chickens.append(Chicken.create("leghorn"))
+	var feed_before := Game.state.feed
+	_check(not Game.apply_gap(3.0 * 3600.0, false), "przy nieaktywnym oknie nic sie nie rozlicza od razu")
+	_check(is_equal_approx(Game.state.feed, feed_before), "czas czeka, pasza stoi")
+	_check(Game.apply_gap(1.0, true), "po powrocie uzbierany czas rozlicza sie naraz")
+	_check(Game.state.feed < feed_before, "pasza zeszla za caly czas nieobecnosci")
+	_check(Game.state.egg_count() > 0, "jaja z nieobecnosci czekaja w magazynie")
+
+	# Poza gra czas plynie wolniej, zeby noc nie przewracala gospodarstwa.
+	var divider := float(GameData.balance().get("offline", {}).get("speed_divider", 1.0))
+	_check(divider > 1.0, "spowolnienie czasu poza gra jest wlaczone")
+	var away_state := _fresh_state(["leghorn"], 100000.0)
+	var live_state := _fresh_state(["leghorn"], 100000.0)
+	var window := 2.0 * 3600.0
+	var away_result := Simulation.advance(away_state, window / divider, true)
+	var live_result := Simulation.advance(live_state, window)
+	_check(int(away_result["eggs_laid"]) * 2 < int(live_result["eggs_laid"]),
+			"ten sam czas poza gra daje duzo mniej niz przy graczu")
+	Game.new_game()
+
+
+## Rozbudowa kurnika, magazynu i obrony przed lisem.
+func _test_buildings() -> void:
+	Game.new_game()
+	Game.state.money = 1000000.0
+
+	# Kurnik ma pojemnosc, ktorej nie da sie przekroczyc.
+	var capacity := Game.state.coop_capacity()
+	_check(capacity > 0, "kurnik ma pojemnosc")
+	_check(Game.state.coop_occupied() == Game.state.hen_count(), "zajete miejsca to stado")
+	Game.state.chickens.clear()
+	for i in capacity:
+		Game.state.chickens.append(Chicken.create("leghorn"))
+	_check(not Game.state.coop_has_room(), "pelny kurnik nie ma miejsca")
+	_check(not Game.buy_hen("leghorn"), "do pelnego kurnika nie kupisz kury")
+
+	# Inkubator wolno nabic, ale podrosniete pisklę czeka na miejsce.
+	Game.state.eggs = {"leghorn": Game.eggs_per_chick()}
+	_check(Game.can_incubate("leghorn"), "jaja mozna wstawic mimo pelnego kurnika")
+	var waiting := Chick.create("leghorn")
+	waiting.grown = waiting.total_seconds()
+	Game.state.chicks.append(waiting)
+	Simulation.advance(Game.state, 5.0)
+	_check(Game.state.chicks.size() == 1, "pisklę czeka, gdy kurnik jest pelny")
+	_check(Game.state.hen_count() == capacity, "stado nie przekracza pojemnosci")
+	Game.state.chickens.resize(capacity - 1)
+	Simulation.advance(Game.state, 2.0)
+	_check(Game.state.chicks.is_empty(), "po zwolnieniu miejsca pisklę dolacza do stada")
+	_check(Game.state.hen_count() == capacity, "zwolnione miejsce zajmuje odchowana kura")
+
+	var before := Game.state.coop_capacity()
+	_check(Game.upgrade_building("coop"), "rozbudowa kurnika udaje sie przy pelnej kasie")
+	_check(Game.state.coop_capacity() > before, "po rozbudowie miejsc jest wiecej")
+
+	# Magazyn: wiekszy worek i nizsza cena za kilogram.
+	var pack := Game.state.feed_pack()
+	var per_kg := float(pack["price"]) / float(pack["size"])
+	_check(Game.upgrade_building("storage"), "rozbudowa magazynu udaje sie")
+	var better := Game.state.feed_pack()
+	_check(float(better["size"]) > float(pack["size"]), "worek jest wiekszy")
+	_check(float(better["price"]) / float(better["size"]) < per_kg, "kilogram paszy tanieje")
+	var feed_before := Game.state.feed
+	_check(Game.buy_feed(), "zakup paszy dziala po rozbudowie")
+	_check(is_equal_approx(Game.state.feed, feed_before + float(better["size"])),
+			"do magazynu trafia worek w nowym rozmiarze")
+
+	# Obrona przed lisem.
+	_check(is_equal_approx(Game.state.fox_interval_multiplier(), 1.0), "na starcie brak obrony")
+	_check(Game.upgrade_building("guard"), "plot da sie postawic")
+	_check(Game.state.fox_interval_multiplier() > 1.0, "plot wydluza przerwy miedzy wizytami")
+
+	# Bez pieniedzy nie ma rozbudowy.
+	Game.state.money = 0.0
+	_check(not Game.upgrade_building("coop"), "bez pieniedzy kurnika nie rozbudujesz")
+
+	# Poziomy przezywaja zapis.
+	Game.state.money = 500.0
+	SaveGame.save_state(Game.state)
+	var loaded := SaveGame.load_state()
+	_check(not loaded.is_empty(), "zapis z budynkami sie wczytuje")
+	var back: FarmState = loaded["state"]
+	_check(back.coop_level == Game.state.coop_level
+			and back.storage_level == Game.state.storage_level
+			and back.guard_level == Game.state.guard_level, "poziomy budynkow przezywaja zapis")
+	_check(back.coop_capacity() == Game.state.coop_capacity(), "pojemnosc po odczycie sie zgadza")
+	SaveGame.clear()
 	Game.new_game()

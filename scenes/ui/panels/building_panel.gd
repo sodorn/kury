@@ -159,15 +159,23 @@ func _build_content(building_id: String) -> void:
 
 func _build_coop() -> void:
 	_add_row("PANEL_HENS", func() -> String: return str(Game.state.hen_count()))
+	_add_row("PANEL_COOP_SPACE",
+			func() -> String: return "%d / %d" % [Game.state.coop_occupied(), Game.state.coop_capacity()])
+	_add_row("PANEL_FOX_GUARD",
+			func() -> String: return tr(_guard_name(Game.state.guard_level)))
 	_add_row("PANEL_SICK", func() -> String: return str(Game.state.sick_count()))
 	_add_row("PANEL_CHICKS", func() -> String: return str(Game.state.chicks.size()))
 	_add_row("PANEL_VACCINATED",
 			func() -> String: return "%d / %d" % [
 				Game.state.hen_count() - Game.state.unvaccinated_count(), Game.state.hen_count()])
 	_add_row("PANEL_FEED_LEFT", func() -> String: return _feed_text())
+	# Zuzycie podajemy na dzien gospodarstwa, a nie na godzine zegarowa:
+	# dzien w grze trwa kilka minut, wiec "kg/godz." brzmialoby absurdalnie.
 	_add_row("PANEL_FEED_BURN",
-			func() -> String: return tr("PANEL_FEED_BURN_VALUE") % NumberFormat.amount_only(
-				Game.state.feed_per_minute() * 60.0))
+			func() -> String:
+				var day := float(GameData.balance().get("day", {}).get("seconds", 600.0))
+				return tr("PANEL_FEED_BURN_VALUE") % NumberFormat.amount_only(
+					Game.state.feed_per_minute() * day / 60.0))
 	_add_row("PANEL_DAYS", func() -> String: return str(Game.state.days))
 	_add_progress("PANEL_NEXT_EGG", func() -> float: return _best_progress())
 
@@ -179,6 +187,29 @@ func _build_coop() -> void:
 				func() -> String: return breed_name if _owned(breed_id) > 0 else "",
 				func() -> String: return tr("PANEL_FLOCK_LINE") % [
 					_owned(breed_id), NumberFormat.money(FarmState.egg_value(breed_id))])
+
+	_add_action(true,
+			func() -> bool: return Game.state.money >= float(
+					Game.state.next_building_upgrade("coop").get("price", 0)),
+			func() -> String:
+				var upgrade := Game.state.next_building_upgrade("coop")
+				return tr("PANEL_UPGRADE_COOP") % [
+					int(upgrade.get("capacity", 0)),
+					NumberFormat.money(float(upgrade.get("price", 0)))],
+			func() -> void: _on_upgrade("coop"),
+			func() -> bool: return not Game.state.next_building_upgrade("coop").is_empty())
+
+	_add_action(false,
+			func() -> bool: return Game.state.money >= float(
+					Game.state.next_building_upgrade("guard").get("price", 0)),
+			func() -> String:
+				var upgrade := Game.state.next_building_upgrade("guard")
+				return tr("PANEL_UPGRADE_GUARD") % [
+					tr(_guard_name(Game.state.guard_level + 1)),
+					NumberFormat.money(float(upgrade.get("price", 0))),
+					NumberFormat.amount_only(float(upgrade.get("fox_multiplier", 1.0)))],
+			func() -> void: _on_upgrade("guard"),
+			func() -> bool: return not Game.state.next_building_upgrade("guard").is_empty())
 
 	var hint := Label.new()
 	hint.theme_type_variation = &"NoteLabel"
@@ -201,6 +232,25 @@ func _build_storage() -> void:
 				func() -> String: return tr("PANEL_EGG_LINE") % [
 					int(Game.state.eggs.get(breed_id, 0)),
 					NumberFormat.money(int(Game.state.eggs.get(breed_id, 0)) * FarmState.egg_value(breed_id))])
+
+	_add_row("PANEL_FEED_PRICE",
+			func() -> String:
+				var pack := Game.state.feed_pack()
+				return tr("PANEL_FEED_PRICE_VALUE") % [
+					int(pack["size"]),
+					NumberFormat.money(float(pack["price"]) / maxf(1.0, float(pack["size"])))])
+	_add_action(true,
+			func() -> bool: return Game.state.money >= float(
+					Game.state.next_building_upgrade("storage").get("price", 0)),
+			func() -> String:
+				var upgrade := Game.state.next_building_upgrade("storage")
+				var size := float(upgrade.get("pack_size", 1))
+				return tr("PANEL_UPGRADE_STORAGE") % [
+					NumberFormat.money(float(upgrade.get("price", 0))),
+					int(size),
+					NumberFormat.money(float(upgrade.get("pack_price", 0)) / maxf(1.0, size))],
+			func() -> void: _on_upgrade("storage"),
+			func() -> bool: return not Game.state.next_building_upgrade("storage").is_empty())
 
 	_add_row("PANEL_FARM_CODE", func() -> String: return Cloud.player_id)
 	var note := Label.new()
@@ -282,12 +332,12 @@ func _build_shop() -> void:
 				Game.state.egg_count(), NumberFormat.money(Game.state.eggs_value())],
 			_on_sell_eggs)
 
-	var economy: Dictionary = GameData.balance().get("economy", {})
-	var pack := int(economy.get("feed_pack_size", 0))
-	var pack_price := float(economy.get("feed_pack_price", 0))
 	_add_action(false,
-			func() -> bool: return Game.state.money >= pack_price,
-			func() -> String: return tr("PANEL_BUY_FEED") % [pack, NumberFormat.money(pack_price)],
+			func() -> bool: return Game.state.money >= float(Game.state.feed_pack()["price"]),
+			func() -> String:
+				var pack := Game.state.feed_pack()
+				return tr("PANEL_BUY_FEED") % [
+					int(pack["size"]), NumberFormat.money(float(pack["price"]))],
 			_on_buy_feed)
 
 	# Weterynaria: lek ratuje jedna chora kure, szczepienie chroni cale stado.
@@ -452,6 +502,21 @@ func _on_buy_vaccine() -> void:
 func _on_upgrade_incubator() -> void:
 	if not Game.upgrade_incubator():
 		_flash(tr("PANEL_NO_MONEY"))
+
+
+func _on_upgrade(building_id: String) -> void:
+	if not Game.upgrade_building(building_id):
+		_flash(tr("PANEL_NO_MONEY"))
+
+
+## Nazwa obrony przed lisem na danym poziomie: nic, plot albo pies.
+func _guard_name(level: int) -> String:
+	match level:
+		1:
+			return "PANEL_FOX_GUARD_FENCE"
+		2:
+			return "PANEL_FOX_GUARD_DOG"
+	return "PANEL_FOX_GUARD_NONE"
 
 
 ## Ile kur danej rasy ma gracz.

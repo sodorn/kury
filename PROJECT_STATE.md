@@ -4,14 +4,14 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 5 zakonczony** (wersja 6.2): ekonomia w zlotowkach,
+- Aktualny etap: **ETAP 6 zakonczony** (wersja 7.0): ekonomia w zlotowkach,
   dziewiec ras, glod, choroby, szczepienia, lis, handel kurami w sklepie,
   rozbudowa inkubatora i dwa warunki wygranej.
 - Wersje grafiki: **1.0** plaski wektor (galaz `v1.0-grafika-plaska`, commit 6ea3a3c),
   **2.1** pastelowa, miekkie kontury, zaokraglone sylwetki — aktualna.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
-  `v6.1-balans`, `v6.2-rasy`.
+  `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -263,8 +263,10 @@ python3 tools/gen_ground.py
 
 - `tools/balance_model.py` liczy oplacalnosc kazdej rasy i symuluje rozsadnego
   gracza. Uruchamiac po **kazdej** zmianie cen w `data/*.json`.
-- Stan na wersje 6.2: pelna kolekcja ras po ~20,6 h gry, milion zlotych po
-  ~23,5 h. Nowa rasa odblokowuje sie mniej wiecej co dwie godziny gry. Oba warunki wygranej wypadaja prawie rownoczesnie — o to chodzilo.
+- Stan na wersje 7.0: pelna kolekcja ras po ~23,5 h gry, milion zlotych po
+  ~26,3 h. Nowa rasa odblokowuje sie mniej wiecej co dwie godziny gry.
+  Rozbudowy budynkow kosztuja lacznie okolo 150 tys. zl i to one daja
+  pieniadzom drugie zastosowanie obok kupowania kolejnych ras. Oba warunki wygranej wypadaja prawie rownoczesnie — o to chodzilo.
 - Model liczy takze lisa i szczepienia, bo jedno i drugie realnie spowalnia
   gre. Bez nich wychodzily liczby o kilka godzin za dobre.
 - Zarabia sie nie na jajach, tylko na **hodowli**: z 6 jaj wyklu wa sie pisklę,
@@ -290,13 +292,43 @@ python3 tools/gen_ground.py
   choroby + lis) nie moga przekroczyc `hunger.offline_max_share` stada.
   Bez tego powrot po dobie oznaczalby pusty wybieg i koniec zabawy.
 
+### Budynki i ich rozbudowa
+
+- Kazdy budynek na mapie ma swoja sciezke rozbudowy w `balance.json`
+  (`buildings`), a inkubator swoja wlasna (`incubator.upgrades`):
+  - **kurnik** — pojemnosc stada, 20 -> 40 -> 70 -> 120. Liczy **tylko
+    dorosle kury**; pisklęta siedza przy inkubatorze. Gdy kurnik jest pelny,
+    podrosniete pisklę czeka, zamiast znikac. Pierwotnie liczylem do limitu
+    takze jaja w inkubatorze — to wiazalo gracza podwojnie i wydluzalo gre
+    o kilka godzin bez zadnego zysku dla rozgrywki.
+  - **magazyn** — hurt na pasze: wiekszy worek i nizsza cena za kilogram.
+  - **obrona przed lisem** — plot, potem pies. Mnozy przerwe miedzy wizytami.
+- Rozbudowy sa opcjonalne, ale bez kurnika stado staje w miejscu.
+
+### Lis: wizyta z oknem na reakcje
+
+- Wizyta ma dwa etapy. Przez `fox.visit_seconds` lis biega po wybiegu
+  i **jeszcze nic nie zabiera** — wtedy gracz moze go przegonic, trafiajac
+  w niego `fox.scare_taps` razy. Dopiero po tym czasie zabiera lup.
+- Pod nieobecnosc gracza nie ma kogo czekac, wiec strata liczy sie od razu.
+- Dzieki temu lis przestal byc kara bez odpowiedzi, a obecnosc przy grze
+  zaczela cos znaczyc.
+
 ### Uplyw czasu — trzy przypadki, jeden mechanizm
 
 - Symulacje prowadzi **zegar scienny**, nie delta klatki. Przegladarka zwalnia
   petle gry w karcie w tle: zmierzone w Chrome, po stu sekundach w tle gra
   naliczala sobie 21% tego czasu. Po poprawce 99%.
 - Gra zamknieta: `_apply_elapsed` z roznicy wzgledem `saved_at`, limit
-  `offline.max_hours`.
+  `offline.max_hours` (72 h **rzeczywiste**).
+- **Poza gra czas plynie `offline.speed_divider` razy wolniej** (60x), zeby
+  noc nie zmieniala gospodarstwa nie do poznania: stado nie pada z glodu
+  i lis nie wynosi polowy kurnika, ale tez nie ma co liczyc na kokosy
+  z samego czekania. Osiem godzin snu to okolo osmiu minut gry.
+- Dziura dluzsza niz `MAX_LIVE_STEP` (30 s) idzie ta sama sciezka co gra
+  zamknieta. Wczesniej byla po prostu wyrzucana — i to byl blad, ktory
+  Tomek zobaczyl na telefonie: po zminimalizowaniu przegladarki strona
+  zamraza sie calkiem, a po powrocie nic sie nie dzialo.
 - Karta w tle (`DisplayServer.window_is_focused()` = false): czas zbiera sie
   w `_away_seconds` i rozlicza jednym wywolaniem po powrocie. Nie wolno
   rozliczac go co klatke — odstepy ponizej sekundy przepadaja, a komunikat

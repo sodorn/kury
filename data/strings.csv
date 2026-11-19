@@ -41,13 +41,23 @@ RARITY_RARE,rzadka
 RARITY_EPIC,bardzo rzadka
 RARITY_LEGENDARY,wyjątkowa
 PANEL_HENS,Kury w stadzie
+PANEL_COOP_SPACE,Miejsce w kurniku
+PANEL_FOX_GUARD,Ochrona przed lisem
+PANEL_FOX_GUARD_NONE,brak
+PANEL_FOX_GUARD_FENCE,mocny płot
+PANEL_FOX_GUARD_DOG,pies podwórzowy
+PANEL_UPGRADE_COOP,"Rozbuduj kurnik do %d miejsc za %s"
+PANEL_UPGRADE_GUARD,"Postaw %s za %s — lis będzie przychodził %s razy rzadziej"
+PANEL_UPGRADE_STORAGE,"Większy magazyn za %s — worek %d kg po %s za kg"
+PANEL_FEED_PRICE,Cena paszy
+PANEL_FEED_PRICE_VALUE,"worek %d kg · %s/kg"
 PANEL_SICK,Chore kury
 PANEL_VACCINATED,Zaszczepione
 PANEL_CHICKS,Pisklęta
 PANEL_CHICKS_MORE,"Dalsze pisklęta"
 PANEL_FEED_LEFT,"Pasza (kg)"
 PANEL_FEED_BURN,Zużycie paszy
-PANEL_FEED_BURN_VALUE,"%s kg/godz."
+PANEL_FEED_BURN_VALUE,"%s kg na dzień"
 PANEL_DAYS,Dzień gospodarstwa
 PANEL_EGGS_STORED,Jaja w magazynie
 PANEL_EGGS_WORTH,Wartość jaj
@@ -56,7 +66,7 @@ PANEL_FARM_CODE,Kod farmy
 PANEL_FLOCK_LINE,"%d szt. · jajko %s"
 PANEL_EGG_LINE,"%d szt. · %s"
 PANEL_BREED_NUMBERS,"Jajko %s · znosi co %d s · masz %d szt."
-PANEL_COOP_HINT,"Kury kupujesz i sprzedajesz w sklepie. Każda zjada tyle samo paszy, niezależnie od rasy. Za chorą skup płaci dużo mniej — opłaca się ją wyleczyć albo sprzedać, zanim padnie."
+PANEL_COOP_HINT,"Pisklęta i jaja w inkubatorze też zajmują miejsce w kurniku. Kury kupujesz i sprzedajesz w sklepie, a każda zjada tyle samo paszy, niezależnie od rasy."
 PANEL_CLOUD_ON,"Zapis na serwerze: włączony"
 PANEL_CLOUD_OFF,"Zapis na serwerze: wyłączony (gra zapisuje się w tej przeglądarce)"
 PANEL_SELL_EGGS,"Sprzedaj jaja (%d szt. za %s)"
@@ -95,7 +105,13 @@ HINT_CLOUD_LOADED,"Wczytano farmę z serwera."
 HINT_SICK,"Zachorowało %d kur. Wylecz je w sklepie albo sprzedaj, zanim padną."
 HINT_DIED_DISEASE,"Z choroby padło %d kur."
 HINT_DIED_HUNGER,"Z głodu padło %d kur. Dosyp paszy!"
+HINT_FOX_HERE,"LIS NA WYBIEGU! Stukaj w niego, zanim porwie kury!"
+HINT_FOX_SCARED,"Lis uciekł z pustymi łapami. Dobra robota."
 HINT_FOX,"Lis wszedł na wybieg i porwał %d kur!"
+HINT_COOP_FULL,"Kurnik pełny (%d miejsc). Rozbuduj go albo sprzedaj kilka kur."
+HINT_BUILDING_UPGRADED_COOP,"Kurnik rozbudowany."
+HINT_BUILDING_UPGRADED_STORAGE,"Magazyn rozbudowany — pasza idzie teraz hurtem."
+HINT_BUILDING_UPGRADED_GUARD,"Wybieg lepiej pilnowany. Lis będzie przychodził rzadziej."
 HINT_CURED,"%s wyleczona."
 HINT_VACCINATED,"Zaszczepiono %d kur."
 HINT_INCUBATOR_UPGRADED,"Inkubator ma teraz %d miejsc."

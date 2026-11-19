@@ -42,41 +42,21 @@ func _process(delta: float) -> void:
 		return
 
 	# Symulacje prowadzi zegar scienny, a nie delta klatki. Przegladarka
-	# zwalnia petle gry w karcie, ktora jest w tle, wiec delta bywa kilka razy
-	# mniejsza niz czas, ktory naprawde uplynal. Zmierzone w Chrome: po stu
-	# sekundach w tle gra naliczala sobie 21% tego czasu.
+	# zwalnia petle gry w karcie w tle, a telefon potrafi zamrozic strone
+	# calkiem. Zmierzone w Chrome: po stu sekundach w tle gra naliczala sobie
+	# 21% tego czasu.
 	var now := Time.get_unix_time_from_system()
 	var elapsed := now - _last_tick
 	_last_tick = now
 	# Cofniety zegar systemowy albo pierwsza klatka: bierzemy delte.
-	if elapsed <= 0.0 or elapsed > MAX_LIVE_STEP:
+	if elapsed <= 0.0:
 		elapsed = maxf(delta, 0.0)
-
-	# Karta w tle to ten sam przypadek co zamknieta gra: jaja ida do magazynu
-	# zamiast na wybieg, bo nie ma komu ich zbierac, i obowiazuje bezpiecznik
-	# strat. Czas zbieramy do kupy i rozliczamy jednym wywolaniem po powrocie —
-	# inaczej odstepy ponizej sekundy przepadalyby, a komunikat powitalny
-	# wyskakiwalby raz za razem do pustego ekranu.
-	if not DisplayServer.window_is_focused():
-		_away_seconds += elapsed
-		return
-	if _away_seconds > 0.0:
-		var away := _away_seconds
-		_away_seconds = 0.0
-		_apply_elapsed(away)
-
-	var result := Simulation.advance(state, elapsed)
-	_report(result)
+	apply_gap(elapsed)
 
 	var feed_now := int(floor(state.feed))
 	if feed_now != _shown_feed:
 		_shown_feed = feed_now
 		Events.resources_changed.emit()
-
-	var hungry := bool(result["out_of_feed"]) and not state.chickens.is_empty()
-	if hungry and not _reported_no_feed:
-		Events.notice.emit(tr("HINT_NO_FEED"))
-	_reported_no_feed = hungry
 
 	_check_unlocks()
 	_check_win()
@@ -87,8 +67,43 @@ func _process(delta: float) -> void:
 		save()
 
 
+## Rozlicza czas, ktory uplynal od poprzedniej klatki. Wydzielone z `_process`,
+## zeby dalo sie to przetestowac bez uruchamiania calej gry.
+##
+## Trzy przypadki:
+##  - okno nieaktywne: czas zbiera sie w `_away_seconds` i czeka na powrot.
+##    Rozliczanie go co klatke gubiloby odstepy ponizej sekundy, a komunikat
+##    powitalny lecialby w kolko do pustego ekranu;
+##  - dziura dluzsza niz `MAX_LIVE_STEP`: petla gry stanela (zminimalizowana
+##    przegladarka na telefonie zamraza strone calkiem). Taki czas rozliczamy
+##    jak offline. Wczesniej byl po prostu wyrzucany, przez co po powrocie do
+##    gry nic sie nie dzialo, a jaja ladowaly na wybiegu zamiast w magazynie;
+##  - zwykla klatka: normalny krok symulacji.
+##
+## `focused` wstrzykuje sie w testach; w grze bierze sie z okna.
+## Zwraca true, gdy czas poszedl sciezka offline.
+func apply_gap(elapsed: float, focused: bool = DisplayServer.window_is_focused()) -> bool:
+	if not focused:
+		_away_seconds += elapsed
+		return false
+	var pending := _away_seconds + elapsed
+	_away_seconds = 0.0
+	if pending > MAX_LIVE_STEP:
+		_apply_elapsed(pending)
+		return true
+	_report(Simulation.advance(state, pending))
+	return false
+
+
 ## Zglasza do UI, co przyniosl ostatni krok symulacji.
 func _report(result: Dictionary) -> void:
+	# Ostrzezenie o braku paszy pokazujemy raz, przy przejsciu w glod,
+	# a nie co klatke.
+	var hungry := bool(result["out_of_feed"]) and not state.chickens.is_empty()
+	if hungry and not _reported_no_feed:
+		Events.notice.emit(tr("HINT_NO_FEED"))
+	_reported_no_feed = hungry
+
 	var laid := int(result["eggs_laid"])
 	if laid > 0:
 		Events.eggs_laid.emit(laid)
@@ -107,6 +122,10 @@ func _report(result: Dictionary) -> void:
 	if died_hunger > 0:
 		Events.notice.emit(tr("HINT_DIED_HUNGER") % died_hunger)
 		Events.resources_changed.emit()
+	var arrived := int(result["fox_arrived"])
+	if arrived > 0:
+		Events.fox_arrived.emit(state.fox_pending, state.fox_visit_left)
+		Events.notice.emit(tr("HINT_FOX_HERE"))
 	var fox := int(result["fox_took"])
 	if fox > 0:
 		Events.fox_visited.emit(fox)
@@ -194,8 +213,14 @@ func reset() -> void:
 ## Dolicza produkcje z czasu, ktorego petla gry nie policzyla: gra byla
 ## zamknieta albo karta wisiala w tle.
 func _apply_elapsed(elapsed: float) -> void:
-	var max_hours := float(GameData.balance().get("offline", {}).get("max_hours", 12.0))
-	var seconds := clampf(elapsed, 0.0, max_hours * 3600.0)
+	var offline: Dictionary = GameData.balance().get("offline", {})
+	var max_hours := float(offline.get("max_hours", 72.0))
+	var real_seconds := clampf(elapsed, 0.0, max_hours * 3600.0)
+	# Poza gra czas plynie wolniej, zeby noc nie zmieniala gospodarstwa nie do
+	# poznania: stado nie pada z glodu, lis nie wynosi polowy kurnika, ale tez
+	# nie ma co liczyc na kokosy z samego czekania.
+	var divider := maxf(1.0, float(offline.get("speed_divider", 1.0)))
+	var seconds := real_seconds / divider
 	if seconds < 1.0:
 		return
 	var result := Simulation.advance(state, seconds, true)
@@ -247,12 +272,12 @@ func sell_eggs() -> float:
 
 ## Kupuje jedna paczke paszy. Zwraca false przy braku pieniedzy.
 func buy_feed() -> bool:
-	var economy: Dictionary = GameData.balance().get("economy", {})
-	var price := float(economy.get("feed_pack_price", 0))
+	var pack := state.feed_pack()
+	var price := float(pack["price"])
 	if state.money < price:
 		return false
 	state.money -= price
-	state.feed += float(economy.get("feed_pack_size", 0))
+	state.feed += float(pack["size"])
 	_reported_no_feed = false
 	Events.resources_changed.emit()
 	return true
@@ -269,6 +294,9 @@ func buy_hen(breed_id: String) -> bool:
 	var price := float(def.get("price", 0))
 	if state.money < price:
 		return false
+	if not state.coop_has_room():
+		Events.notice.emit(tr("HINT_COOP_FULL") % state.coop_capacity())
+		return false
 	state.money -= price
 	var hen := Chicken.create(breed_id)
 	state.chickens.append(hen)
@@ -277,16 +305,16 @@ func buy_hen(breed_id: String) -> bool:
 	return true
 
 
-## Sprzedaje jedna kure danej rasy. Najpierw idzie zdrowa, bo za nia skup
-## placi pelna stawke; chora dopiero wtedy, gdy zdrowej juz nie ma. Dzieki
-## temu kwota na przycisku zawsze zgadza sie z tym, co gracz dostanie.
+## Sprzedaje jedna kure danej rasy. **Najpierw idzie chora** — i tak by padla,
+## wiec pozbycie sie jej jest pierwszym, co gracz chce zrobic; skup placi za
+## nia mniej. Zdrowe sztuki ida dopiero, gdy chorych nie ma.
 ## Zwraca uzyskana kwote albo 0, gdy nie ma czego sprzedac.
 func sell_hen(breed_id: String) -> float:
-	var sick := false
-	var index := _find_hen(breed_id, false)
+	var sick := true
+	var index := _find_hen(breed_id, true)
 	if index < 0:
-		index = _find_hen(breed_id, true)
-		sick = true
+		index = _find_hen(breed_id, false)
+		sick = false
 	if index < 0:
 		return 0.0
 	var price := FarmState.hen_sell_price(breed_id, sick)
@@ -297,10 +325,10 @@ func sell_hen(breed_id: String) -> float:
 	return price
 
 
-## Czy kolejna sprzedaz tej rasy dotyczy chorej sztuki (bo zdrowych juz nie ma).
-## UI pyta o to, zeby pokazac wlasciwa kwote.
+## Czy kolejna sprzedaz tej rasy dotyczy chorej sztuki. UI pyta o to, zeby
+## kwota na przycisku zgadzala sie z tym, co gracz faktycznie dostanie.
 func next_sale_is_sick(breed_id: String) -> bool:
-	return _find_hen(breed_id, false) < 0 and _find_hen(breed_id, true) >= 0
+	return _find_hen(breed_id, true) >= 0
 
 
 ## Indeks pierwszej kury danej rasy w zadanym stanie zdrowia; -1, gdy nie ma.
@@ -376,6 +404,39 @@ func buy_vaccine() -> bool:
 	return true
 
 
+## Przegania lisa, ktory wlasnie jest na wybiegu. Zwraca false, gdy nie ma
+## kogo przeganiac — wtedy scena nie ma po co reagowac na dotkniecie.
+func scare_fox() -> bool:
+	if state.fox_visit_left <= 0.0:
+		return false
+	state.fox_visit_left = 0.0
+	state.fox_pending = 0
+	Events.fox_scared.emit()
+	Events.notice.emit(tr("HINT_FOX_SCARED"))
+	return true
+
+
+# --- budynki ------------------------------------------------------------
+
+
+## Kupuje kolejny poziom budynku ("coop", "storage", "guard").
+func upgrade_building(building_id: String) -> bool:
+	var upgrade := state.next_building_upgrade(building_id)
+	if upgrade.is_empty():
+		return false
+	var price := float(upgrade.get("price", 0))
+	if state.money < price:
+		return false
+	state.money -= price
+	state.set_building_level(building_id, state.building_level(building_id) + 1)
+	if building_id == "guard":
+		# Nowy plot albo pies dziala od zaraz, a nie dopiero po nastepnej wizycie.
+		state.reset_fox_timer()
+	Events.resources_changed.emit()
+	Events.notice.emit(tr("HINT_BUILDING_UPGRADED_%s" % building_id.to_upper()))
+	return true
+
+
 # --- inkubator ----------------------------------------------------------
 
 
@@ -398,6 +459,9 @@ func can_incubate(breed_id: String) -> bool:
 func incubate(breed_id: String) -> bool:
 	if not can_incubate(breed_id):
 		return false
+	if not state.coop_has_room():
+		# Wstawic jaja mozna, ale warto uprzedzic, ze nie ma gdzie wypuscic.
+		Events.notice.emit(tr("HINT_COOP_FULL") % state.coop_capacity())
 	state.take_eggs(breed_id, eggs_per_chick())
 	state.incubating.append(EggBatch.create(breed_id, 1))
 	Events.resources_changed.emit()
