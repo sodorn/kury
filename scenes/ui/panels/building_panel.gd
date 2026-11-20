@@ -164,6 +164,9 @@ func _build_coop() -> void:
 	_add_row("PANEL_FOX_GUARD",
 			func() -> String: return tr(_guard_name(Game.state.guard_level)))
 	_add_row("PANEL_FARM_CODE", func() -> String: return Cloud.player_id)
+	_add_dynamic_row(
+			func() -> String: return tr("PANEL_SERVER") if Cloud.is_enabled() else "",
+			func() -> String: return tr("PANEL_SERVER_OK") if Cloud.online else tr("PANEL_SERVER_DOWN"))
 	_add_row("PANEL_SICK", func() -> String: return str(Game.state.sick_count()))
 	_add_row("PANEL_CHICKS", func() -> String: return str(Game.state.chicks.size()))
 	_add_row("PANEL_VACCINATED",

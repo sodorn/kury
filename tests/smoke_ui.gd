@@ -371,7 +371,7 @@ func _test_farm_code_restore() -> void:
 	await _frames(10)
 	_check(Game.restore_from_code("abcd efgh 2345"), "kod przyjety mimo malych liter i spacji")
 	_check(Cloud.player_id == CODE, "kod farmy przestawiony")
-	await _frames(240)
+	await get_tree().create_timer(3.0).timeout
 	_check(is_equal_approx(Game.state.money, MONEY),
 			"wczytano farme z serwera (konto %.0f zl)" % Game.state.money)
 	_check(Game.state.hen_count() > 0, "stado przyszlo razem z zapisem")
@@ -380,6 +380,35 @@ func _test_farm_code_restore() -> void:
 	var local := SaveGame.load_state()
 	_check(not local.is_empty() and is_equal_approx((local["state"] as FarmState).money, MONEY),
 			"przejeta farma zapisala sie lokalnie")
+
+	# --- wyscig, przez ktory wczytywanie farmy nie dzialalo ---------------
+	# 1. Autozapis w trakcie czekania na odpowiedz. Kod farmy jest juz
+	#    przestawiony, wiec push wrzucilby nasz lokalny stan na cudze miejsce
+	#    i skasowal farme, po ktora gracz wlasnie siegnal.
+	Cloud.set_player_id(own_code)
+	SaveGame.clear()
+	Game.new_game()
+	Game.state.money = 1.0
+	await _frames(10)
+	_check(Game.restore_from_code(CODE), "kod przyjety po raz drugi")
+	Game.save()                      # tak jak zrobilby autozapis
+	await get_tree().create_timer(3.0).timeout
+	_check(is_equal_approx(Game.state.money, MONEY),
+			"autozapis nie przykryl cudzej farmy (konto %.0f zl)" % Game.state.money)
+
+	# 2. Startowe pobranie w locie, a gracz wpisuje kod. Spozniona odpowiedz
+	#    nie moze ani skasowac oczekiwania, ani podmienic stanu.
+	Cloud.set_player_id(own_code)
+	SaveGame.clear()
+	Game.new_game()
+	Game.state.money = 2.0
+	Game.save()
+	await _frames(10)
+	Cloud.pull()                     # zapytanie o wlasna farme, jeszcze w locie
+	_check(Game.restore_from_code(CODE), "kod przyjety mimo trwajacego zapytania")
+	await get_tree().create_timer(3.0).timeout
+	_check(is_equal_approx(Game.state.money, MONEY),
+			"farma wczytana mimo wyscigu z pobraniem startowym (konto %.0f zl)" % Game.state.money)
 
 	Cloud.set_player_id(own_code)
 	SaveGame.clear()

@@ -13,7 +13,10 @@ extends Node
 ## Protokol jest zgodny z REST-em Supabase, ale to zwykly HTTP, wiec pod ten
 ## sam adres mozna podstawic dowolny wlasny serwer (tak tez jest testowany).
 
-signal pulled(payload: Dictionary, ok: bool)
+## `for_player` mowi, ktorego kodu farmy dotyczy odpowiedz. Bez tego nie da
+## sie odroznic spoznionej odpowiedzi na startowe pobranie od tej, na ktora
+## gracz czeka po wpisaniu kodu.
+signal pulled(payload: Dictionary, ok: bool, for_player: String)
 signal pushed(ok: bool)
 signal status_changed(online: bool)
 
@@ -27,6 +30,8 @@ var _config: Dictionary = {}
 var _push_http: HTTPRequest
 var _pull_http: HTTPRequest
 var _busy_push := false
+## Kod farmy, o ktory pytamy w trwajacym zapytaniu.
+var _pulling_for := ""
 
 
 func _ready() -> void:
@@ -124,14 +129,19 @@ func push(payload: Dictionary) -> void:
 ## Pobiera stan z serwera. Wynik przychodzi sygnalem `pulled`.
 func pull() -> void:
 	if not is_enabled():
-		pulled.emit({}, false)
+		pulled.emit({}, false, player_id)
 		return
+	_pulling_for = player_id
 	var url := "%s/rest/v1/%s?player_id=eq.%s&select=payload,updated_at" % [
 			_base_url(), _table(), player_id.uri_encode()]
+	# Jedno zapytanie na raz. Bez tego drugie wolanie (gracz wpisuje kod,
+	# a startowe pobranie jeszcze trwa) dostawalo ERR_BUSY i konczylo sie
+	# komunikatem "nie znalazlem farmy o takim kodzie", mimo ze farma byla.
+	_pull_http.cancel_request()
 	var err := _pull_http.request(url, _headers(), HTTPClient.METHOD_GET)
 	if err != OK:
 		_set_online(false)
-		pulled.emit({}, false)
+		pulled.emit({}, false, _pulling_for)
 
 
 func _on_push_done(result: int, code: int, _headers: PackedStringArray, _body: PackedByteArray) -> void:
@@ -144,21 +154,21 @@ func _on_push_done(result: int, code: int, _headers: PackedStringArray, _body: P
 func _on_pull_done(result: int, code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
 	if result != HTTPRequest.RESULT_SUCCESS or code < 200 or code >= 300:
 		_set_online(false)
-		pulled.emit({}, false)
+		pulled.emit({}, false, _pulling_for)
 		return
 	_set_online(true)
 	var json := JSON.new()
 	if json.parse(body.get_string_from_utf8()) != OK or typeof(json.data) != TYPE_ARRAY:
-		pulled.emit({}, false)
+		pulled.emit({}, false, _pulling_for)
 		return
 	var rows: Array = json.data
 	if rows.is_empty():
 		# Serwer odpowiedzial, ale tej farmy jeszcze na nim nie ma.
-		pulled.emit({}, true)
+		pulled.emit({}, true, _pulling_for)
 		return
 	var row: Dictionary = rows[0]
 	var payload: Variant = row.get("payload", {})
-	pulled.emit(payload if typeof(payload) == TYPE_DICTIONARY else {}, true)
+	pulled.emit(payload if typeof(payload) == TYPE_DICTIONARY else {}, true, _pulling_for)
 
 
 func _set_online(value: bool) -> void:

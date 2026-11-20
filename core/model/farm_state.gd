@@ -44,6 +44,9 @@ var fox_pending: int = 0
 var coop_level: int = 0
 var storage_level: int = 0
 var guard_level: int = 0
+## Czy gracz widzial juz ekran powitalny. Dzieki temu pokazuje sie raz,
+## takze komus, kto zalozyl farme przed jego dodaniem.
+var intro_seen: bool = false
 ## Czy gra jest wygrana i z jakiego powodu ("money" albo "collection").
 var won: bool = false
 var win_reason: String = ""

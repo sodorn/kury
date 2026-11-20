@@ -30,6 +30,9 @@ var _force_pull := false
 ## Na tym urzadzeniu nie bylo jeszcze zadnego zapisu. Ekran powitalny
 ## sprawdza to przy starcie i pyta: nowa farma czy wczytanie po kodzie.
 var is_new_player := false
+## Kod, po ktory wlasnie siegnelismy. Odpowiedzi serwera na starsze
+## zapytania moga przyjsc pozniej, wiec sprawdzamy, ze dotycza tego kodu.
+var _restore_code := ""
 
 
 func _ready() -> void:
@@ -169,6 +172,20 @@ func load_or_start() -> void:
 		Cloud.pull()
 
 
+## Czy pokazac ekran powitalny. Nowy gracz widzi go zawsze, a ten, kto
+## zalozyl farme przed jego dodaniem — raz, z przyciskiem "Graj dalej".
+func should_show_intro() -> bool:
+	return is_new_player or (state != null and not state.intro_seen)
+
+
+## Zamyka sprawe ekranu powitalnego, zeby wiecej nie wyskakiwal.
+func mark_intro_seen() -> void:
+	is_new_player = false
+	if state != null and not state.intro_seen:
+		state.intro_seen = true
+		save()
+
+
 ## Wstrzymuje gospodarstwo na czas ekranu powitalnego — inaczej kury
 ## zaczynaly by jesc i znosic, zanim gracz w ogole zobaczy wybieg.
 func pause_simulation(paused: bool) -> void:
@@ -180,17 +197,26 @@ func pause_simulation(paused: bool) -> void:
 
 
 ## Serwer odpowiedzial. Jesli ma nowszy zapis niz lokalny, bierzemy jego.
-func _on_cloud_pulled(payload: Dictionary, ok: bool) -> void:
+func _on_cloud_pulled(payload: Dictionary, ok: bool, for_player: String) -> void:
+	# Odpowiedz na startowe pobranie moze przyjsc juz po tym, jak gracz
+	# wpisal kod. Taka spozniona odpowiedz nie moze ani skasowac oczekiwania
+	# na wlasciwa farme, ani podmienic stanu gry.
+	if _force_pull and for_player != _restore_code:
+		return
 	var forced := _force_pull
 	_force_pull = false
+	_restore_code = ""
 	if not ok or payload.is_empty():
 		if forced:
-			Events.notice.emit(tr("HINT_CODE_NOT_FOUND"))
+			# Rozrozniamy dwa zupelnie rozne klopoty: serwer nie odpowiada
+			# (brak sieci, brak tabeli, zly klucz) kontra serwer odpowiedzial,
+			# ale farmy o takim kodzie u niego nie ma.
+			Events.notice.emit(tr("HINT_CODE_NOT_FOUND") if ok else tr("HINT_SERVER_DOWN"))
 		return
 	var remote := SaveGame.from_dict(payload)
 	if remote.is_empty():
 		if forced:
-			Events.notice.emit(tr("HINT_CODE_NOT_FOUND"))
+			Events.notice.emit(tr("HINT_SAVE_BROKEN"))
 		return
 	var local_saved_at := 0.0
 	var local := SaveGame.load_state()
@@ -210,6 +236,7 @@ func start_new_farm() -> void:
 	SaveGame.clear()
 	Cloud.new_player_id()
 	new_game()
+	state.intro_seen = true
 	save()
 
 
@@ -227,6 +254,7 @@ func restore_from_code(raw_code: String) -> bool:
 		Events.notice.emit(tr("HINT_CODE_SAME"))
 		return false
 	_force_pull = true
+	_restore_code = code
 	Cloud.set_player_id(code)
 	Cloud.pull()
 	Events.resources_changed.emit()
@@ -256,7 +284,10 @@ func save() -> void:
 	if state == null:
 		return
 	SaveGame.save_state(state)
-	if Cloud.is_enabled():
+	# Dopoki czekamy na farme spod przepisanego kodu, nie wolno nic wyslac:
+	# kod farmy jest juz przestawiony, wiec autozapis wrzucilby nasz lokalny
+	# stan na cudze miejsce i skasowal farme, po ktora gracz wlasnie siegnal.
+	if Cloud.is_enabled() and not _force_pull:
 		Cloud.push(SaveGame.to_dict(state))
 
 

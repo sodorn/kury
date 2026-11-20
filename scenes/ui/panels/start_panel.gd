@@ -12,6 +12,7 @@ const FADE_TIME := 0.3
 @onready var _sheet: PanelContainer = $Sheet
 @onready var _choice: VBoxContainer = $Sheet/Content/Choice
 @onready var _created: VBoxContainer = $Sheet/Content/Created
+@onready var _continue_button: Button = $Sheet/Content/Choice/Continue
 @onready var _new_button: Button = $Sheet/Content/Choice/NewFarm
 @onready var _code_field: LineEdit = $Sheet/Content/Choice/CodeRow/Code
 @onready var _load_button: Button = $Sheet/Content/Choice/CodeRow/Load
@@ -21,6 +22,7 @@ const FADE_TIME := 0.3
 
 func _ready() -> void:
 	hide()
+	_continue_button.pressed.connect(_close)
 	_new_button.pressed.connect(_on_new_farm)
 	_load_button.pressed.connect(_on_load)
 	_play_button.pressed.connect(_close)
@@ -28,14 +30,25 @@ func _ready() -> void:
 	# Wczytanie farmy po kodzie konczy sie odpowiedzia serwera, a nie
 	# nacisnieciem przycisku — dlatego czekamy na nia tutaj.
 	Cloud.pulled.connect(_on_pulled)
-	if Game.is_new_player:
+	if Game.should_show_intro():
 		_open()
+
+
+var _confirm_wipe := false
 
 
 func _open() -> void:
 	Game.pause_simulation(true)
 	_choice.show()
 	_created.hide()
+	# Gracz, ktory ma juz farme, widzi ten ekran raz. Nie wolno mu wtedy
+	# podsunac "Nowej farmy" jako pierwszego przycisku — strata gospodarstwa
+	# jednym dotknieciem bylaby nie do cofniecia.
+	var has_farm := not Game.is_new_player
+	_continue_button.visible = has_farm
+	_new_button.theme_type_variation = &"" if has_farm else &"PrimaryButton"
+	_new_button.text = tr("START_NEW_OTHER") if has_farm else tr("START_NEW")
+	_confirm_wipe = false
 	_code_field.editable = Cloud.is_enabled()
 	_load_button.disabled = not Cloud.is_enabled()
 	show()
@@ -49,6 +62,11 @@ func _open() -> void:
 
 
 func _on_new_farm() -> void:
+	# Przy istniejacej farmie pytamy drugi raz — tym razem wprost.
+	if not Game.is_new_player and not _confirm_wipe:
+		_confirm_wipe = true
+		_new_button.text = tr("START_NEW_CONFIRM")
+		return
 	Game.start_new_farm()
 	_code_label.text = Cloud.player_id
 	_choice.hide()
@@ -63,18 +81,17 @@ func _on_load() -> void:
 
 
 ## Serwer odpowiedzial na proste o farme spod wpisanego kodu.
-func _on_pulled(payload: Dictionary, ok: bool) -> void:
+func _on_pulled(payload: Dictionary, ok: bool, _for_player: String) -> void:
 	if not visible or not _choice.visible:
 		return
 	_load_button.disabled = false
 	if ok and not payload.is_empty():
 		# Game juz podmienil stan; nie ma po co pokazywac kodu, gracz go zna.
-		Game.is_new_player = false
 		_close()
 
 
 func _close() -> void:
-	Game.is_new_player = false
+	Game.mark_intro_seen()
 	Game.pause_simulation(false)
 	var tween := create_tween()
 	tween.tween_property(self, "modulate:a", 0.0, FADE_TIME * 0.7)

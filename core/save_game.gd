@@ -50,6 +50,7 @@ static func to_dict(state: FarmState) -> Dictionary:
 		"fox_visit_left": state.fox_visit_left,
 		"fox_pending": state.fox_pending,
 		"hunger_seconds": state.hunger_seconds,
+		"intro_seen": state.intro_seen,
 		"won": state.won,
 		"win_reason": state.win_reason,
 	}
@@ -81,6 +82,7 @@ static func from_dict(data: Dictionary) -> Dictionary:
 	state.fox_visit_left = 0.0
 	state.fox_pending = 0
 	state.hunger_seconds = maxf(0.0, float(data.get("hunger_seconds", 0.0)))
+	state.intro_seen = bool(data.get("intro_seen", false))
 	state.won = bool(data.get("won", false))
 	state.win_reason = String(data.get("win_reason", ""))
 	# Jaja liczone wedlug rasy kury, ktora je zniosla.
