@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="130" viewBox="0 0 140 130">
+  <!-- Totleger ("deathlayer"): biala w czarne cetki, postawa wyprostowana,
+       ogon postawiony wysoko. Niesie az do ostatniego dnia zycia. -->
+  <defs>
+    <radialGradient id="dlBody" cx="56" cy="56" r="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.6" stop-color="#F3EFE6"/>
+      <stop offset="1" stop-color="#D2CBBD"/>
+    </radialGradient>
+    <radialGradient id="dlHead" cx="98" cy="36" r="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E6E0D4"/>
+    </radialGradient>
+  </defs>
+
+  <g stroke="#8A6A55" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="64" cy="122" rx="42" ry="8" fill="#6B8F4E" fill-opacity="0.28" stroke="none"/>
+
+    <!-- ogon sierpowy, postawiony wysoko -->
+    <path d="M30 56Q10 30 22 10Q40 24 46 50Z" fill="#EDE8DD"/>
+    <path d="M22 64Q4 44 10 24Q28 38 36 58Z" fill="#D6CFC1"/>
+
+    <!-- nogi, lupkowe jak u rasy -->
+    <path d="M56 100v16M56 116h-9M56 116l-3 6" stroke="#8E9AA3" stroke-width="3.6"/>
+    <path d="M80 100v16M80 116h9M80 116l3 6" stroke="#8E9AA3" stroke-width="3.6"/>
+
+    <!-- tulow -->
+    <ellipse cx="62" cy="68" rx="41" ry="33" fill="url(#dlBody)"/>
+    <path d="M42 62Q62 52 80 68Q60 84 44 80Q35 71 42 62Z" fill="#F7F4EC"/>
+
+    <!-- czarne cetki na calym ciele -->
+    <g fill="#3A3430" stroke="none">
+      <ellipse cx="40" cy="56" rx="3.6" ry="4.6"/>
+      <ellipse cx="56" cy="48" rx="3.6" ry="4.6"/>
+      <ellipse cx="72" cy="56" rx="3.6" ry="4.6"/>
+      <ellipse cx="48" cy="72" rx="3.6" ry="4.6"/>
+      <ellipse cx="66" cy="76" rx="3.6" ry="4.6"/>
+      <ellipse cx="84" cy="66" rx="3.6" ry="4.6"/>
+      <ellipse cx="34" cy="70" rx="3.2" ry="4"/>
+      <ellipse cx="58" cy="90" rx="3.2" ry="4"/>
+      <ellipse cx="78" cy="86" rx="3.2" ry="4"/>
+      <ellipse cx="94" cy="46" rx="3" ry="3.8"/>
+      <ellipse cx="90" cy="30" rx="2.8" ry="3.6"/>
+    </g>
+
+    <!-- glowa -->
+    <circle cx="98" cy="38" r="21" fill="url(#dlHead)"/>
+    <!-- grzebien rozetowy, niski i szeroki -->
+    <path d="M84 20q10-9 22-4q10 4 8 10q-4-5-12-3q-10 2-18-3Z" fill="#E9867E"/>
+    <path d="M114 26l8-4" stroke="#E4706A" stroke-width="4"/>
+    <!-- korale -->
+    <path d="M106 52q7 2 7 9q-7 2-11-4Z" fill="#E4706A"/>
+    <!-- dziob -->
+    <path d="M118 36l15 5-15 5Z" fill="#C9BBA2"/>
+
+    <!-- oko, u tej rasy ciemne i wyraziste -->
+    <circle cx="108" cy="32" r="4.6" fill="#FFF8E8" stroke="none"/>
+    <circle cx="108.4" cy="32.2" r="2.6" fill="#2B2420" stroke="none"/>
+  </g>
+</svg>

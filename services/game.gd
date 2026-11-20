@@ -23,6 +23,10 @@ var _started := false
 var _last_tick := 0.0
 ## Czas uzbierany, gdy okno bylo nieaktywne. Rozliczany po powrocie.
 var _away_seconds := 0.0
+## Gracz przepisal kod farmy z innego urzadzenia. Wtedy zapis z serwera
+## wygrywa niezaleznie od tego, co lezy lokalnie — inaczej swiezy zapis
+## nowego telefonu przykrylby farme, po ktora gracz wlasnie siegnal.
+var _force_pull := false
 
 
 func _ready() -> void:
@@ -161,19 +165,46 @@ func load_or_start() -> void:
 
 ## Serwer odpowiedzial. Jesli ma nowszy zapis niz lokalny, bierzemy jego.
 func _on_cloud_pulled(payload: Dictionary, ok: bool) -> void:
+	var forced := _force_pull
+	_force_pull = false
 	if not ok or payload.is_empty():
+		if forced:
+			Events.notice.emit(tr("HINT_CODE_NOT_FOUND"))
 		return
 	var remote := SaveGame.from_dict(payload)
 	if remote.is_empty():
+		if forced:
+			Events.notice.emit(tr("HINT_CODE_NOT_FOUND"))
 		return
 	var local_saved_at := 0.0
 	var local := SaveGame.load_state()
 	if not local.is_empty():
 		local_saved_at = float(local["saved_at"])
-	if float(remote["saved_at"]) <= local_saved_at:
+	if not forced and float(remote["saved_at"]) <= local_saved_at:
 		return
 	_apply_loaded(remote)
-	Events.notice.emit(tr("HINT_CLOUD_LOADED"))
+	save()
+	Events.notice.emit(tr("HINT_CODE_RESTORED") if forced else tr("HINT_CLOUD_LOADED"))
+
+
+## Przejmuje farme spod kodu przepisanego z innego urzadzenia.
+## Zwraca false, gdy kod jest niepoprawny albo serwer jest wylaczony.
+func restore_from_code(raw_code: String) -> bool:
+	if not Cloud.is_enabled():
+		Events.notice.emit(tr("HINT_CLOUD_OFF"))
+		return false
+	var code := Cloud.normalize_code(raw_code)
+	if code.is_empty():
+		Events.notice.emit(tr("HINT_CODE_BAD"))
+		return false
+	if code == Cloud.player_id:
+		Events.notice.emit(tr("HINT_CODE_SAME"))
+		return false
+	_force_pull = true
+	Cloud.set_player_id(code)
+	Cloud.pull()
+	Events.resources_changed.emit()
+	return true
 
 
 func _apply_loaded(loaded: Dictionary) -> void:

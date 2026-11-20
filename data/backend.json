@@ -1,9 +1,9 @@
 {
 	"_opis": "Zapis gry po stronie serwera. Dopoki enabled = false, gra zapisuje sie tylko lokalnie w przegladarce. Po wpisaniu url i api_key gra zaczyna trzymac stan na serwerze, a lokalny zapis zostaje jako kopia na czas braku sieci.",
-	"_jak_wlaczyc": "Zalozyc darmowy projekt w Supabase, utworzyc tabele wg pliku tools/supabase_setup.sql, wkleic ponizej adres projektu i klucz anon, ustawic enabled na true.",
-	"enabled": false,
-	"url": "",
-	"api_key": "",
+	"_jak_wlaczyc": "Zalozyc darmowy projekt w Supabase, utworzyc tabele wg pliku tools/supabase_setup.sql, wkleic ponizej adres projektu i klucz publikowalny (sb_publishable_... albo starszy anon), ustawic enabled na true. Klucz publikowalny jest przeznaczony do siedzenia w aplikacji u gracza — klucza sb_secret_... nie wolno tu wpisywac.",
+	"enabled": true,
+	"url": "https://xrhehgxmaspopvvflcrn.supabase.co",
+	"api_key": "sb_publishable_0aXf0Dby-fL_aOqkylCMcA_kUz7VG93",
 	"table": "saves",
 	"timeout_seconds": 8
 }

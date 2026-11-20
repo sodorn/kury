@@ -1,6 +1,6 @@
 # Zdjęcia kur do sklepu
 
-Wrzuć tutaj zdjęcia prawdziwych kur ozdobnych. Gra sama je podmieni
+Wrzuć tutaj zdjęcia prawdziwych kur ozdobnych. Pokazują się w sklepie i w okienku „nowa rasa odblokowana”. Gra sama je podmieni
 w kartach ras w sklepie. Dopóki pliku nie ma, karta pokazuje rysunek
 z wybiegu — nic się nie psuje.
 
@@ -16,9 +16,12 @@ z wybiegu — nic się nie psuje.
     serama.jpg
     brahma.jpg
     czubatka.jpg
+    pavlovskaya.jpg
     feniks.jpg
+    deathlayer.jpg
     sultanka.jpg
     onagadori.jpg
+    dongtao.jpg
     cemani.jpg
 
 ## Jakie zdjęcia
@@ -47,9 +50,12 @@ z wybiegu — nic się nie psuje.
 | serama.jpg       | Serama                | "serama chicken"            |
 | brahma.jpg       | Brahma olbrzymia      | "brahma chicken giant"      |
 | czubatka.jpg     | Czubatka polska       | "polish crested chicken"    |
+| pavlovskaya.jpg  | Kura pawłowska        | "pavlovskaya chicken"       |
 | feniks.jpg       | Feniks                | "phoenix chicken long tail" |
+| deathlayer.jpg   | Totleger              | "westfalische totleger chicken" |
 | sultanka.jpg     | Sułtanka              | "sultan chicken breed"      |
 | onagadori.jpg    | Onagadori             | "onagadori long tail rooster" |
+| dongtao.jpg      | Dong Tao              | "dong tao chicken dragon legs" |
 | cemani.jpg       | Ayam Cemani           | "ayam cemani chicken"       |
 
 ## Co zrobić po wrzuceniu

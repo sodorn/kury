@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="140" viewBox="0 0 150 140">
+  <!-- Dong Tao: wietnamski "smoczy kurczak". Nogi grube, czerwone
+       i pokryte luska - to one sa znakiem rozpoznawczym rasy. -->
+  <defs>
+    <radialGradient id="dtBody" cx="58" cy="48" r="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F6DCC0"/>
+      <stop offset="0.55" stop-color="#D9A878"/>
+      <stop offset="1" stop-color="#A9764A"/>
+    </radialGradient>
+    <radialGradient id="dtHead" cx="100" cy="32" r="26" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F2CFAC"/>
+      <stop offset="1" stop-color="#C08A58"/>
+    </radialGradient>
+    <linearGradient id="dtLeg" x1="54" y1="86" x2="78" y2="134" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E88A62"/>
+      <stop offset="0.5" stop-color="#C9603C"/>
+      <stop offset="1" stop-color="#9E4529"/>
+    </linearGradient>
+  </defs>
+
+  <g stroke="#8A6A55" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="70" cy="132" rx="46" ry="8" fill="#6B8F4E" fill-opacity="0.28" stroke="none"/>
+
+    <!-- krotki, zadarty ogon -->
+    <path d="M30 56Q12 42 20 22Q38 32 44 52Z" fill="#9E7148"/>
+
+    <!-- NOGI: grube, lus kowate, caly sens tej rasy -->
+    <path d="M50 84q-10 20-6 38q14 4 20-6q-2-18 2-32Z" fill="url(#dtLeg)"/>
+    <path d="M84 84q10 20 6 38q-14 4-20-6q2-18-2-32Z" fill="url(#dtLeg)"/>
+    <!-- luska -->
+    <g fill="none" stroke="#9E4529" stroke-width="2.6">
+      <path d="M46 96q8 3 15 0M45 106q9 3 17 0M46 116q9 3 17 0"/>
+      <path d="M88 96q-8 3-15 0M89 106q-9 3-17 0M88 116q-9 3-17 0"/>
+    </g>
+    <!-- palce -->
+    <path d="M52 122l-9 8M58 124l-2 9M64 122l7 8" stroke="#9E4529" stroke-width="4"/>
+    <path d="M82 122l9 8M76 124l2 9" stroke="#9E4529" stroke-width="4"/>
+
+    <!-- mocarny tulow -->
+    <ellipse cx="66" cy="62" rx="42" ry="33" fill="url(#dtBody)"/>
+    <path d="M46 56Q68 46 86 62Q66 80 48 76Q39 66 46 56Z" fill="#E7BE92"/>
+
+    <!-- gruba szyja i glowa -->
+    <path d="M90 48Q92 30 100 26" fill="none" stroke-width="16" stroke="#C08A58"/>
+    <circle cx="104" cy="32" r="22" fill="url(#dtHead)"/>
+
+    <!-- grzebien orzechowy: niski, bulwiasty, typowy dla rasy -->
+    <path d="M92 14q10-8 20-2q6 4 2 9q-10-6-22-1Z" fill="#C4524A"/>
+    <!-- korale -->
+    <path d="M112 48q8 3 8 10q-8 2-12-5Z" fill="#C4524A"/>
+    <!-- dziob -->
+    <path d="M124 32l16 5-16 6Z" fill="#E0B071"/>
+
+    <!-- oko -->
+    <circle cx="114" cy="27" r="4.4" fill="#5C4030" stroke="none"/>
+    <circle cx="115.5" cy="25.5" r="1.6" fill="#FFFFFF" stroke="none"/>
+  </g>
+</svg>

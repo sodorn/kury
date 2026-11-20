@@ -27,6 +27,14 @@ func _run() -> void:
 	SaveGame.clear()
 	Game.new_game()
 
+	# Przy wlaczonym serwerze odpowiedz na startowy pull przychodzi po chwili
+	# i podmienia stan gry. Czekamy na nia tutaj, zeby nie wpadla w srodek
+	# ktoregos testu i nie sprzatnela mu jaj z wybiegu.
+	if Cloud.is_enabled():
+		await get_tree().create_timer(3.0).timeout
+		SaveGame.clear()
+		Game.new_game()
+
 	_main = load("res://scenes/main/main.tscn").instantiate()
 	get_tree().root.add_child(_main)
 	await _frames(20)
@@ -43,6 +51,8 @@ func _run() -> void:
 	await _test_incubator_panel()
 	await _test_sell_hen()
 	await _test_no_feed_notice()
+	await _test_unlock_popup()
+	await _test_farm_code_restore()
 
 	SaveGame.clear()
 	print("TEST DYMNY: %s" % ("OK" if _failed == 0 else "%d BLEDOW" % _failed))
@@ -290,3 +300,82 @@ func _frames(count: int) -> void:
 
 func _shot(file_name: String) -> void:
 	get_tree().root.get_texture().get_image().save_png(_out_dir + file_name)
+
+
+## Okienko "nowa rasa odblokowana": zlota ramka, historia rasy, przycisk.
+func _test_unlock_popup() -> void:
+	var panel: Control = _main.get_node("Hud/Root/BuildingPanel")
+	if panel.visible:
+		panel.close()
+		await _frames(30)
+
+	var popup: Control = _main.get_node("Hud/Root/UnlockPanel")
+	_check(not popup.visible, "okienko rasy jest schowane, dopoki nic sie nie odblokuje")
+
+	# Rasa z konca drabinki, zeby bylo widac i historie, i wysoka cene.
+	Events.breed_unlocked.emit("cemani")
+	await _frames(45)
+	_check(popup.visible, "okienko pokazuje sie po odblokowaniu rasy")
+	var lore: Label = popup.get_node("Sheet/Content/Lore")
+	var breed_name: Label = popup.get_node("Sheet/Content/Name")
+	_check(breed_name.text == tr(GameData.breed("cemani").get("name", "")), "nazwa rasy w naglowku")
+	_check(lore.text.length() > 80, "historia rasy jest wypelniona")
+	_check(not lore.text.begins_with("BREED_"), "historia ma tlumaczenie, a nie goly klucz")
+	_check((popup.get_node("Sheet/Content/Frame/Portrait") as TextureRect).texture != null,
+			"portret rasy jest ustawiony")
+	_shot("okienko_rasy.png")
+
+	# Druga rasa czeka w kolejce i pokazuje sie po zamknieciu pierwszej.
+	Events.breed_unlocked.emit("dongtao")
+	await _frames(10)
+	_check(breed_name.text == tr(GameData.breed("cemani").get("name", "")),
+			"druga rasa czeka, nie podmienia pierwszej")
+	(popup.get_node("Sheet/Content/Close") as Button).emit_signal("pressed")
+	await _frames(60)
+	_check(popup.visible, "po zamknieciu pokazuje sie kolejna rasa z kolejki")
+	_check(breed_name.text == tr(GameData.breed("dongtao").get("name", "")), "teraz druga rasa")
+	(popup.get_node("Sheet/Content/Close") as Button).emit_signal("pressed")
+	await _frames(60)
+	_check(not popup.visible, "po pustej kolejce okienko sie chowa")
+
+
+## Przejecie farmy po kodzie przepisanym z innego urzadzenia.
+##
+## Uruchamia sie tylko przeciwko atrapie serwera na localhost — nie chcemy,
+## zeby test dymny pukal do prawdziwej bazy gracza.
+func _test_farm_code_restore() -> void:
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/backend.json"))
+	var config: Dictionary = parsed if parsed is Dictionary else {}
+	var url := String(config.get("url", ""))
+	if not Cloud.is_enabled() or not url.begins_with("http://localhost"):
+		return
+
+	const CODE := "ABCD-EFGH-2345"
+	const MONEY := 777777.0
+	var own_code := Cloud.player_id
+	_check(own_code != CODE, "wlasny kod rozni sie od przepisywanego")
+
+	# Zly kod ma zostac odrzucony, zanim cokolwiek poleci do serwera.
+	_check(not Game.restore_from_code("za krotki"), "niepoprawny kod odrzucony")
+	_check(Cloud.player_id == own_code, "po zlym kodzie farma sie nie zmienia")
+	_check(not Game.restore_from_code(own_code), "wlasny kod nie ma czego wczytywac")
+
+	# Farma z serwera wygrywa, chociaz lokalny zapis jest swiezszy.
+	Game.state.money = 1.0
+	Game.save()
+	await _frames(10)
+	_check(Game.restore_from_code("abcd efgh 2345"), "kod przyjety mimo malych liter i spacji")
+	_check(Cloud.player_id == CODE, "kod farmy przestawiony")
+	await _frames(240)
+	_check(is_equal_approx(Game.state.money, MONEY),
+			"wczytano farme z serwera (konto %.0f zl)" % Game.state.money)
+	_check(Game.state.hen_count() > 0, "stado przyszlo razem z zapisem")
+
+	# Po przejeciu farmy zapis lokalny ma juz nowy stan.
+	var local := SaveGame.load_state()
+	_check(not local.is_empty() and is_equal_approx((local["state"] as FarmState).money, MONEY),
+			"przejeta farma zapisala sie lokalnie")
+
+	Cloud.set_player_id(own_code)
+	SaveGame.clear()
+	Game.new_game()

@@ -4,14 +4,14 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 6 zakonczony** (wersja 7.0): ekonomia w zlotowkach,
+- Aktualny etap: **ETAP 6 zakonczony** (wersja 8.0): ekonomia w zlotowkach,
   dziewiec ras, glod, choroby, szczepienia, lis, handel kurami w sklepie,
   rozbudowa inkubatora i dwa warunki wygranej.
 - Wersje grafiki: **1.0** plaski wektor (galaz `v1.0-grafika-plaska`, commit 6ea3a3c),
   **2.1** pastelowa, miekkie kontury, zaokraglone sylwetki — aktualna.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
-  `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`.
+  `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -238,15 +238,13 @@ python3 tools/gen_ground.py
 
 - Wszystkie kwoty sa w **zlotowkach, ulamkowo** (`money: float`), bo jajko moze
   kosztowac 40 groszy. Wyswietlanie wylacznie przez `NumberFormat.money`.
-- **Czternascie ras**, drabinka cen z krokiem okolo 1,3x: 36, 48, 65, 85,
-  110, 145, 190, 250, 330, 450, 650, 950, 1600, 3000 zl. Rownomierny krok
-  jest celowy — przy dziewieciu rasach skok z 1400 na 6000 zl wygladal jak
-  blad i mylil sie z progiem odblokowania.
-- Dolny i srodkowy odcinek zgadza sie z polskimi ogloszeniami (nioska 36 zl,
-  kochin miniaturowy 80 zl, karzelki 100 zl, silka 100 zl). Gorne rasy sa
-  rozciagniete wzgledem rynku, bo gra potrzebuje rozpietosci; Cemani
-  z rodowodem potrafi kosztowac i 6 tys. zl, wiec 3000 zl miesci sie
-  w realiach.
+- **Siedemnascie ras**, drabinka cen z rownym krokiem okolo 1,4x: 40, 55,
+  80, 110, 150, 210, 290, 400, 550, 750, 1050, 1450, 2000, 2800, 4000,
+  5600, 8000 zl.
+- Gorna polka opiera sie na cenach swiatowych, nie polskich ogloszeniach:
+  dorosly Ayam Cemani chodzi po 1200-3000 USD, a Dong Tao po 1000-2500 USD
+  za pare. Srodek drabinki (Pavlovskaya ~86 USD, Orust ~100 USD, Totleger
+  100-250 USD) tez pochodzi z cennikow hodowcow.
 - **Sprzedaz kury = 70% ceny zakupu** (czyli 30% taniej). Jest na to test,
   wiec przy zmianie ceny trzeba zmienic obie liczby. Jedna opcja sprzedazy,
   bez miesa: za **chora** kure skup placi `economy.sick_sell_share` tej kwoty.
@@ -263,8 +261,8 @@ python3 tools/gen_ground.py
 
 - `tools/balance_model.py` liczy oplacalnosc kazdej rasy i symuluje rozsadnego
   gracza. Uruchamiac po **kazdej** zmianie cen w `data/*.json`.
-- Stan na wersje 7.0: pelna kolekcja ras po ~23,5 h gry, milion zlotych po
-  ~26,3 h. Nowa rasa odblokowuje sie mniej wiecej co dwie godziny gry.
+- Stan na wersje 8.0: pelna kolekcja ras po ~21,6 h gry, poltora miliona
+  zlotych po ~23,2 h. Nowa rasa odblokowuje sie mniej wiecej co dwie godziny gry.
   Rozbudowy budynkow kosztuja lacznie okolo 150 tys. zl i to one daja
   pieniadzom drugie zastosowanie obok kupowania kolejnych ras. Oba warunki wygranej wypadaja prawie rownoczesnie — o to chodzilo.
 - Model liczy takze lisa i szczepienia, bo jedno i drugie realnie spowalnia
@@ -360,6 +358,40 @@ python3 tools/gen_ground.py
 - Warunek odblokowania i cena to **dwie osobne linijki**. Samo "3 000 zl"
   w miejscu, gdzie inne karty maja "Kup za 80 zl", czyta sie jak cena kury —
   Tomek tak to odczytal i zglosil jako bledny balans.
+
+### Okienko "nowa rasa odblokowana"
+
+- `scenes/ui/panels/unlock_panel.tscn`: zlota ramka, obracajace sie promienie,
+  iskry, portret rasy i kawalek jej historii z `BREED_*_LORE`.
+- Odblokowania potrafia trafic sie po dwa naraz (gracz przekroczyl prog
+  pieniedzy i liczbe kur w tej samej klatce), wiec rasy czekaja w kolejce
+  i pokazuja sie jedna po drugiej.
+
+### Teksty: pulapka z cudzyslowami
+
+- W `data/strings.csv` pole ujete w cudzyslowy konczy sie na pierwszym
+  znaku `"`. Polski cudzyslow **zamykajacy** to `”`, nie `"` — uzycie
+  prostego apostrofu w srodku opisu wciagnelo cztery kolejne klucze do
+  opisu Ayam Cemani i gracz zobaczyl je jako gole nazwy.
+- Pilnuje tego teraz `_test_strings`: kazdy klucz uzywany przez UI musi miec
+  tlumaczenie, zadne pole nie moze zawierac nowej linii ani golego klucza.
+
+### Zapis na serwerze (ETAP 6, wersja 8.0)
+
+- `data/backend.json` wskazuje na projekt Supabase gracza. Klucz jest
+  **publikowalny** (`sb_publishable_...`) — z zalozenia siedzi w aplikacji
+  u gracza; klucza `sb_secret_...` nie wolno tam wpisywac.
+- `services/cloud.gd` wysyla klucz w naglowkach `apikey` i `Authorization`,
+  tak jak robi to biblioteka Supabase. Nowy format kluczy nie wymagal zmian
+  w kodzie.
+- **Gra dziala tak samo, gdy serwer nie odpowiada** — sprawdzone w Chrome
+  z wylaczona atrapa: zapis leci do przegladarki, zero bledow na stronie.
+- **Kod farmy** w magazynie: gracz moze przepisac kod z innego urzadzenia
+  i przejac tamta farme. Przy takim przejeciu zapis z serwera wygrywa
+  niezaleznie od tego, co lezy lokalnie (`_force_pull`) — inaczej swiezy
+  zapis nowego telefonu przykrylby farme, po ktora gracz wlasnie siegnal.
+- Test dymny przejmuje farme przez prawdziwy HTTP, ale **tylko przeciwko
+  atrapie na localhost** — zeby nie pukac do bazy gracza.
 
 ### Zdjecia ras w sklepie
 

@@ -258,6 +258,8 @@ func _build_storage() -> void:
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	note.text = tr("PANEL_CLOUD_ON") if Cloud.is_enabled() else tr("PANEL_CLOUD_OFF")
 	_rows.add_child(note)
+	if Cloud.is_enabled():
+		_add_code_entry()
 
 
 ## Inkubator: postep wykluwania i wzrostu, wkladanie jaj, rozbudowa.
@@ -507,6 +509,33 @@ func _on_upgrade_incubator() -> void:
 func _on_upgrade(building_id: String) -> void:
 	if not Game.upgrade_building(building_id):
 		_flash(tr("PANEL_NO_MONEY"))
+
+
+## Pole do przepisania kodu farmy z innego urzadzenia. To jedyna droga
+## powrotu do swojej gry po wyczyszczeniu danych przegladarki, wiec siedzi
+## w magazynie, tuz pod kodem wlasnej farmy.
+func _add_code_entry() -> void:
+	var hint := Label.new()
+	hint.theme_type_variation = &"NoteLabel"
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.text = tr("PANEL_CODE_HINT")
+	_actions.add_child(hint)
+
+	var field := LineEdit.new()
+	field.placeholder_text = tr("PANEL_CODE_PLACEHOLDER")
+	field.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	field.max_length = 20
+	_actions.add_child(field)
+
+	var button := Button.new()
+	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	button.text = tr("PANEL_CODE_LOAD")
+	button.pressed.connect(func() -> void:
+		if Game.restore_from_code(field.text):
+			field.text = "")
+	_actions.add_child(button)
+	# Enter na klawiaturze telefonu robi to samo co przycisk.
+	field.text_submitted.connect(func(_text: String) -> void: button.emit_signal("pressed"))
 
 
 ## Nazwa obrony przed lisem na danym poziomie: nic, plot albo pies.

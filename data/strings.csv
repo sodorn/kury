@@ -27,12 +27,18 @@ BREED_BRAHMA_NAME,Brahma olbrzymia
 BREED_BRAHMA_DESC,"Największa kura w grze, z opierzonymi nogami. Spokojna i mięsna."
 BREED_CZUBATKA_NAME,Czubatka polska
 BREED_CZUBATKA_DESC,"Pióropusz na głowie zasłania jej pół świata. Jaja wyraźnie cenniejsze."
+BREED_PAVLOVSKAYA_NAME,Kura pawłowska
+BREED_PAVLOVSKAYA_DESC,"Korona z piór na głowie i opierzone nogi jak buciki. Rosyjska rzadkość."
 BREED_FENIKS_NAME,Feniks
 BREED_FENIKS_DESC,"Rasa długoogoniasta. Ogon spada kaskadą niemal do ziemi i rośnie latami."
+BREED_DEATHLAYER_NAME,Totleger
+BREED_DEATHLAYER_DESC,"Biała w czarne cętki. Znosi jaja codziennie, do ostatniego dnia życia."
 BREED_SULTANKA_NAME,Sułtanka
 BREED_SULTANKA_DESC,"Biała od czuba po opierzone nogi. Znosi rzadko, lecz każde jajko to majątek."
 BREED_ONAGADORI_NAME,Onagadori
 BREED_ONAGADORI_DESC,"Japoński skarb narodowy. Ogon rośnie przez całe życie i bywa dłuższy niż kilka metrów."
+BREED_DONGTAO_NAME,Dong Tao
+BREED_DONGTAO_DESC,"Wietnamski smoczy kurczak. Nogi grubsze niż nadgarstek człowieka."
 BREED_CEMANI_NAME,Ayam Cemani
 BREED_CEMANI_DESC,"Czarna od grzebienia po kości. Najdroższa kura w grze — droga także dlatego, że wymaga wyjątkowych warunków."
 RARITY_COMMON,pospolita
@@ -63,6 +69,9 @@ PANEL_EGGS_STORED,Jaja w magazynie
 PANEL_EGGS_WORTH,Wartość jaj
 PANEL_NEXT_EGG,Najbliższe jajko
 PANEL_FARM_CODE,Kod farmy
+PANEL_CODE_HINT,"Kod to twoja farma. Przepisz go na drugim urządzeniu, żeby grać tą samą grą — albo żeby odzyskać farmę po wyczyszczeniu przeglądarki. Zapisz go sobie gdzieś poza telefonem."
+PANEL_CODE_PLACEHOLDER,"XXXX-XXXX-XXXX"
+PANEL_CODE_LOAD,"Wczytaj farmę z tego kodu"
 PANEL_FLOCK_LINE,"%d szt. · jajko %s"
 PANEL_EGG_LINE,"%d szt. · %s"
 PANEL_BREED_NUMBERS,"Jajko %s · znosi co %d s · masz %d szt."
@@ -102,6 +111,11 @@ HINT_WELCOME_BACK,"Pod twoją nieobecność kury zniosły %d jaj — czekają w 
 HINT_LOST_WHILE_AWAY,"Pod twoją nieobecność padło albo zginęło %d kur."
 HINT_BREED_UNLOCKED,"Nowa rasa w sklepie: %s"
 HINT_CLOUD_LOADED,"Wczytano farmę z serwera."
+HINT_CODE_RESTORED,"Farma wczytana z serwera. To teraz ta sama gra co na drugim urządzeniu."
+HINT_CODE_NOT_FOUND,"Nie znalazłem farmy o takim kodzie. Sprawdź, czy przepisałeś go dokładnie."
+HINT_CODE_BAD,"Kod farmy składa się z 12 znaków, na przykład 7K73-ABGC-63CK."
+HINT_CODE_SAME,"To kod tej farmy — nie ma czego wczytywać."
+HINT_CLOUD_OFF,"Zapis na serwerze jest wyłączony."
 HINT_SICK,"Zachorowało %d kur. Wylecz je w sklepie albo sprzedaj, zanim padną."
 HINT_DIED_DISEASE,"Z choroby padło %d kur."
 HINT_DIED_HUNGER,"Z głodu padło %d kur. Dosyp paszy!"
@@ -119,3 +133,24 @@ WIN_TITLE,"Gratulacje!"
 WIN_MONEY,"Zarobiłeś milion złotych. Twoja farma to już legenda okolicy."
 WIN_COLLECTION,"Zebrałeś po jednej kurze każdej rasy w grze — pełna kolekcja!"
 WIN_CONTINUE,"Graj dalej"
+BREED_LEGHORN_LORE,"Pochodzi z okolic Livorno we Włoszech — angielscy hodowcy przekręcili nazwę miasta na „Leghorn” i tak już zostało. To od niej wywodzi się większość kur nioskowych na świecie: potrafi znieść ponad 300 jaj rocznie. Jeśli widziałeś białą kurę na opakowaniu jajek, to prawie na pewno ona."
+BREED_RHODE_LORE,"Wyhodowana w Rhode Island pod koniec XIX wieku ze skrzyżowania kur jawajskich z kogutami z Szanghaju. Jest oficjalnym ptakiem stanu Rhode Island i ma tam swój pomnik. Znosi mniej niż leghorn, ale jest twarda jak but i znosi polską zimę bez narzekania."
+BREED_SZABO_LORE,"Pióra rosną jej odwrotnie — podwijają się na zewnątrz zamiast przylegać do ciała. Odpowiada za to jeden gen, a hodowcy opisywali takie ptaki już w XVIII wieku. Wygląda, jakby właśnie wyszła z suszarki, i dokładnie za to jest ceniona na wystawach."
+BREED_NAGOSZYJA_LORE,"Z Siedmiogrodu w Rumunii, choć rozsławili ją Niemcy. Goła szyja to nie choroba, tylko jeden dominujący gen — ptak ma o połowę mniej piór niż zwykła kura i dużo lepiej znosi upały. Po niemiecku mówi się na nią „Truthuhn”, czyli kuroindyk."
+BREED_MARANS_LORE,"Z portowego miasteczka Marans nad Atlantykiem. Znosi najciemniejsze jaja ze wszystkich kur — czekoladowobrązowe, czasem prawie bordowe. Hodowcy oceniają je w skali od 1 do 9 i za jajka z górnej półki potrafią zapłacić krocie. Podobno to właśnie jaj marans żądał w książkach James Bond."
+BREED_ARAUKANA_LORE,"Z Chile, od ludu Mapuche. Znosi jaja błękitne na wylot — kolor siedzi w skorupce, nie w barwniku, więc nie da się go zmyć. Nie ma kupra, przez co chodzi jak kaczka, a przy uszach ma pierzaste baki. W Ameryce nazywają ją „kurą wielkanocną”."
+BREED_JEDWABISTA_LORE,"Marco Polo opisał ją w XIII wieku jako kurę „z futrem zamiast piór”. Pióra nie mają haczyków, więc rozsypują się jak włosy. Pod spodem ma czarną skórę, czarne kości i pięć palców u nóg zamiast czterech. Jest najlepszą kwoką świata — wysiedzi każde jajo, które jej podłożysz, także kacze."
+BREED_SERAMA_LORE,"Najmniejsza kura świata — dorosły kogut waży tyle co jabłko. Wyhodowana w Malezji w latach 70., nazwana podobno na cześć króla Ramy. Na wystawach ocenia się ją za postawę: pierś wypięta do przodu, ogon pionowo w górę, a całość ma wyglądać jak dumny żołnierz na warcie."
+BREED_BRAHMA_LORE,"Nazywano ją „królem kur”. W połowie XIX wieku wywołała w Anglii i Ameryce prawdziwą gorączkę — nazwano ją „Hen Fever” i ludzie płacili za ptaki równowartość kilku miesięcznych pensji. Kogut dorasta do 5 kg i pół metra wzrostu, a mimo to jest spokojny jak baranek."
+BREED_CZUBATKA_LORE,"Mimo nazwy prawdopodobnie przywędrowała z Holandii, a nie z Polski. Pióropusz wyrasta z wybrzuszenia na czaszce i zasłania jej pół świata, przez co czubatki łatwo spłoszyć — trzeba podchodzić do nich od przodu i mówić do nich wcześniej. Malowali je już XVII-wieczni mistrzowie holenderscy."
+BREED_PAVLOVSKAYA_LORE,"Najstarsza rosyjska rasa ozdobna, z wioski Pawłowo. W latach 80. XX wieku uznano ją za wymarłą — odtworzono ją z pojedynczych ptaków znalezionych po wsiach i z dawnych rycin. Rosyjska legenda głosi, że powstała ze skrzyżowania kury z cietrzewiem. Znosi niecałe sto jaj rocznie, więc trzyma się ją dla urody, nie dla zysku."
+BREED_FENIKS_LORE,"Niemiecka wersja japońskich kur długoogoniastych. Pióra ogona nie wypadają co roku jak u zwykłych kur, tylko rosną dalej — u dobrego koguta ciągną się ponad metr. Na wystawach prezentuje się je na wysokich słupkach, żeby ogon mógł swobodnie opaść."
+BREED_DEATHLAYER_LORE,"Po niemiecku Westfälische Totleger — „westfalska znosząca do śmierci”. Nazwa nie jest przesadzona: zwykła kura przestaje nieść po dwóch, trzech latach, a totleger znosi niemal codziennie przez całe dziesięć lat życia. Rasa ma ponad 400 lat i niewiele brakowało, żeby zniknęła po wojnie."
+BREED_SULTANKA_LORE,"Trzymano ją w ogrodach sułtanów w Stambule wyłącznie dla ozdoby — stąd turecka nazwa „Serai-Taook”, czyli kura pałacowa. Biała od czuba po opierzone nogi, z pięcioma palcami i brodą. Do Europy trafiła w 1854 roku, gdy Angielka Elizabeth Watts sprowadziła kilka sztuk prosto z pałacu."
+BREED_ONAGADORI_LORE,"Japoński skarb narodowy, chroniony prawem od 1952 roku. Ogon koguta rośnie przez całe życie i nigdy nie wypada — rekordowe okazy przekroczyły trzynaście metrów. Ptaki trzyma się w specjalnych wysokich klatkach, a hodowca codziennie ręcznie zwija im ogon. W Polsce praktycznie nie do zdobycia."
+BREED_DONGTAO_LORE,"Z jednej wioski pod Hanoi, przez wieki hodowana wyłącznie na stół cesarski. Nogi dorosłego koguta są grubsze niż nadgarstek człowieka i pokryte czerwoną łuską jak u smoka. Przed wietnamskim Nowym Rokiem ceny szaleją, a najlepsze okazy startują w konkursach piękności i idą za kilka tysięcy dolarów."
+BREED_CEMANI_LORE,"Z wyspy Jawa. Mutacja zwana fibromelanozą sprawia, że czarne jest wszystko: pióra, skóra, dziób, mięso, a nawet kości i narządy. Jedyne, co nie jest czarne, to jaja — te wychodzą kremowe. W Indonezji przypisuje się jej moc magiczną, a na Zachodzie nazwano ją „kurą Lamborghini”. Dorosły ptak z rodowodem to wydatek rzędu kilku tysięcy dolarów."
+UNLOCK_TITLE,"NOWA RASA ODBLOKOWANA!"
+UNLOCK_PRICE,"Cena w sklepie: %s"
+UNLOCK_EGG,"Jajko: %s · znosi co %d s"
+UNLOCK_CLOSE,"Do sklepu!"

@@ -48,6 +48,27 @@ func is_enabled() -> bool:
 			and String(_config.get("api_key", "")) != ""
 
 
+## Znaki, z ktorych skladaja sie kody farm. Bez liter i cyfr, ktore latwo
+## pomylic przy przepisywaniu (0/O, 1/I).
+const ALPHABET := "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+## Dlugosc kodu bez myslnikow.
+const CODE_LENGTH := 12
+
+
+## Sprowadza kod wpisany przez gracza do postaci XXXX-XXXX-XXXX albo zwraca
+## pusty napis, gdy to nie jest poprawny kod. Wielkosc liter, myslniki
+## i spacje nie maja znaczenia — przepisywanie z drugiego telefonu i tak
+## jest zmudne.
+static func normalize_code(raw: String) -> String:
+	var letters := ""
+	for character in raw.to_upper():
+		if ALPHABET.contains(character):
+			letters += character
+	if letters.length() != CODE_LENGTH:
+		return ""
+	return "%s-%s-%s" % [letters.substr(0, 4), letters.substr(4, 4), letters.substr(8, 4)]
+
+
 ## Przestawia gre na inna farme (kod przepisany z drugiego urzadzenia).
 func set_player_id(new_id: String) -> void:
 	var trimmed := new_id.strip_edges()

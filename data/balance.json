@@ -81,7 +81,7 @@
 		"scare_taps": 3
 	},
 	"win": {
-		"money": 1000000,
+		"money": 1500000,
 		"collection": true
 	},
 	"buildings": {

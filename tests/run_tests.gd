@@ -34,6 +34,8 @@ func _ready() -> void:
 	_test_offline_eggs()
 	_test_time_gap()
 	_test_buildings()
+	_test_farm_code()
+	_test_strings()
 	_test_money_format()
 	SaveGame.clear()
 	print("TESTY: %d OK, %d BLEDOW" % [_passed, _failed])
@@ -176,9 +178,14 @@ func _test_simulation() -> void:
 	_check(int(hungry_result["eggs_laid"]) == 0, "brak paszy = brak jaj")
 	_check(bool(hungry_result["out_of_feed"]), "brak paszy jest raportowany")
 
-	# Wynik nie zalezy od tego, czy liczymy jednym duzym krokiem czy wieloma malymi.
+	# Wynik nie zalezy od tego, czy liczymy jednym duzym krokiem czy wieloma
+	# malymi. Kury szczepimy, zeby losowe choroby nie rozjechaly obu przebiegow
+	# — ten test pilnuje calkowania czasu, a nie zdarzen losowych.
 	var big := _fresh_state(["leghorn", "rhode"])
 	var small := _fresh_state(["leghorn", "rhode"])
+	for pair: FarmState in [big, small]:
+		for bird: Chicken in pair.chickens:
+			bird.vaccinated = true
 	Simulation.advance(big, 600.0)
 	for i in 600:
 		Simulation.advance(small, 1.0)
@@ -307,14 +314,20 @@ func _test_offline() -> void:
 	var max_hours := float(GameData.balance().get("offline", {}).get("max_hours", 8.0))
 	_check(max_hours > 0.0, "balance.json ma limit godzin offline")
 
-	# Dwie godziny nieobecnosci przy duzym zapasie paszy.
+	# Dwie godziny nieobecnosci przy duzym zapasie paszy. Kura zaszczepiona,
+	# bo inaczej moze w tym czasie zachorowac i przestac niesc — test
+	# sprawdza limit wybiegu, a nie choroby.
 	var away := _fresh_state(["leghorn"], 10000.0)
+	for hen: Chicken in away.chickens:
+		hen.vaccinated = true
 	var laid := int(Simulation.advance(away, 7200.0)["eggs_laid"])
 	var capacity := int(GameData.balance().get("run", {}).get("max_eggs_on_ground", 24))
 	_check(laid == mini(int(7200.0 / seconds), capacity), "produkcja przez 2 godziny z limitem wybiegu")
 
 	# Limit: nieobecnosc dluzsza niz `max_hours` liczy sie jak `max_hours`.
 	var long_state := _fresh_state(["leghorn"], 10000.0)
+	for hen: Chicken in long_state.chickens:
+		hen.vaccinated = true
 	var over_limit := (max_hours + 48.0) * 3600.0
 	var clamped := clampf(over_limit, 0.0, max_hours * 3600.0)
 	_check(clamped == max_hours * 3600.0, "czas offline jest przycinany do limitu")
@@ -873,3 +886,55 @@ func _test_buildings() -> void:
 	_check(back.coop_capacity() == Game.state.coop_capacity(), "pojemnosc po odczycie sie zgadza")
 	SaveGame.clear()
 	Game.new_game()
+
+
+## Teksty: kazdy klucz uzywany przez UI musi miec tlumaczenie, a zadne pole
+## nie moze wciagnac sasiednich wierszy.
+##
+## Ten test powstal po konkretnej wpadce: w opisie rasy uzylem polskiego
+## cudzyslowu otwierajacego, ale zamykajacego juz ASCII ("). W pliku CSV
+## taki znak konczy pole, wiec cztery kolejne klucze wsiakly w tekst
+## o Ayam Cemani i wyswietlily sie graczowi jako gole nazwy.
+func _test_strings() -> void:
+	var keys: Array[String] = [
+		"UNLOCK_TITLE", "UNLOCK_PRICE", "UNLOCK_EGG", "UNLOCK_CLOSE",
+		"WIN_TITLE", "WIN_MONEY", "WIN_COLLECTION", "WIN_CONTINUE",
+		"PANEL_SELL_HEN", "PANEL_SELL_HEN_SICK", "PANEL_BUY_HEN",
+		"PANEL_UPGRADE_COOP", "PANEL_UPGRADE_GUARD", "PANEL_UPGRADE_STORAGE",
+		"PANEL_COOP_SPACE", "PANEL_FOX_GUARD", "PANEL_LOCKED_PRICE",
+		"HINT_FOX_HERE", "HINT_FOX_SCARED", "HINT_COOP_FULL",
+	]
+	for breed: Dictionary in GameData.breeds():
+		keys.append(String(breed.get("name", "")))
+		keys.append(String(breed.get("desc", "")))
+		keys.append(String(breed.get("lore", "")))
+		keys.append(String(breed.get("rarity", "")))
+
+	for key: String in keys:
+		var text := tr(key)
+		_check(text != key, "klucz '%s' ma tlumaczenie" % key)
+		_check(not text.contains("\n"), "tekst '%s' nie wciagnal sasiednich wierszy" % key)
+		# Wciagniety wiersz zostawia w tekscie wzorzec KLUCZ, — tego nie moze byc.
+		_check(not text.contains("_LORE,") and not text.contains("_NAME,")
+				and not text.contains("UNLOCK_") and not text.contains("PANEL_"),
+				"tekst '%s' nie zawiera golego klucza" % key)
+
+	# Historie ras maja byc czyms wiecej niz jednym zdaniem.
+	for breed: Dictionary in GameData.breeds():
+		var lore := tr(String(breed.get("lore", "")))
+		_check(lore.length() > 120, "historia rasy '%s' jest napisana" % breed.get("id", ""))
+
+
+## Kod farmy: normalizacja tego, co gracz przepisze z drugiego urzadzenia.
+func _test_farm_code() -> void:
+	_check(Cloud.normalize_code("7K73-ABGC-63CK") == "7K73-ABGC-63CK", "poprawny kod przechodzi bez zmian")
+	_check(Cloud.normalize_code("7k73abgc63ck") == "7K73-ABGC-63CK", "male litery i brak myslnikow")
+	_check(Cloud.normalize_code("  7K73 ABGC 63CK  ") == "7K73-ABGC-63CK", "spacje nie przeszkadzaja")
+	_check(Cloud.normalize_code("7K73_ABGC_63CK") == "7K73-ABGC-63CK", "inny separator tez przejdzie")
+	_check(Cloud.normalize_code("") == "", "pusty kod odrzucony")
+	_check(Cloud.normalize_code("7K73-ABGC") == "", "za krotki kod odrzucony")
+	_check(Cloud.normalize_code("7K73-ABGC-63CK-9999") == "", "za dlugi kod odrzucony")
+	# Znaki spoza alfabetu sa odsiewane, wiec kod z zerem i jedynka nie przejdzie.
+	_check(Cloud.normalize_code("0K73-ABGC-63CK") == "", "znaki spoza alfabetu nie licza sie do dlugosci")
+	_check(Cloud.player_id.length() == 14, "wlasny kod farmy ma postac XXXX-XXXX-XXXX")
+	_check(Cloud.normalize_code(Cloud.player_id) == Cloud.player_id, "wlasny kod przechodzi walidacje")
