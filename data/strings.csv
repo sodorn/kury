@@ -55,7 +55,7 @@ PANEL_FOX_GUARD_FENCE,mocny płot
 PANEL_FOX_GUARD_DOG,pies podwórzowy
 PANEL_FOX_GUARD_PACK,"pies i nocne światła"
 PANEL_UPGRADE_COOP,"Rozbuduj kurnik do %d miejsc za %s"
-PANEL_UPGRADE_GUARD,"Postaw %s za %s — lis będzie przychodził %s razy rzadziej"
+PANEL_UPGRADE_GUARD,"Postaw %s za %s — lis odejdzie z niczym w %d%% podejść"
 PANEL_UPGRADE_STORAGE,"Większy magazyn za %s — worek %d kg po %s za kg"
 PANEL_FEED_PRICE,Cena paszy
 PANEL_FEED_PRICE_VALUE,"worek %d kg · %s/kg"
@@ -183,3 +183,9 @@ PANEL_ROOSTER_BOUGHT,"Kogut rasy %s dołączył do stada."
 PANEL_ROOSTER_SOLD,"Kogut rasy %s sprzedany za %s."
 PANEL_NO_ROOSTER,"Bez koguta tej rasy te kury nie zniosą ani jednego jajka."
 PANEL_FLOCK_LINE_NO_ROOSTER,"%d szt. · brak koguta, nie znoszą"
+PANEL_COOP_LEFT,Wolne miejsca w kurniku
+PANEL_COOP_LEFT_PENDING,"%d (w drodze: %d)"
+PANEL_INCUBATE_NO_ROOM,"%s — brak miejsca w kurniku"
+ALERT_COOP_FULL_TITLE,"Kurnik pełny"
+ALERT_COOP_FULL_BODY,"W kurniku nie ma już miejsca (%d ptaków). Pisklę nie miałoby gdzie wyjść, więc inkubator nie przyjmie jaj. Rozbuduj kurnik albo sprzedaj kilka sztuk."
+HINT_FOX_BLOCKED,"Lis powęszył przy zagrodzie i odszedł z niczym."

@@ -164,18 +164,18 @@
 			]
 		},
 		"guard": {
-			"_opis": "Obrona przed lisem: mnoznik przerwy miedzy wizytami. Dziala takze pod nieobecnosc gracza.",
+			"_opis": "block_chance to szansa, ze obrona zawroci lisa przy samej zagrodzie. Losuje sie przy kazdym podejsciu, wiec nawet pelna obrona kiedys przepusci. Wczesniej obrona rozciagala przerwe miedzy wizytami i przy cenie 600 zl bylo to praktycznie niewidoczne dla gracza. Gorny prog to 0.99 — `fox_block_chance` i tak przycina wyzsze wartosci, a przycisk w panelu pokazuje liczbe z pliku, wiec 0.995 wyswietlaloby klamliwe 100%.",
 			"upgrades": [
 				{
-					"fox_multiplier": 1.7,
+					"block_chance": 0.9,
 					"price": 600
 				},
 				{
-					"fox_multiplier": 3.0,
+					"block_chance": 0.97,
 					"price": 2500
 				},
 				{
-					"fox_multiplier": 5.0,
+					"block_chance": 0.99,
 					"price": 9000
 				}
 			]

@@ -4,7 +4,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 8 zakonczony** (wersja 10.0): kury i koguty. Kura
+- Aktualny etap: **ETAP 8 zakonczony** (wersja 10.1): kury i koguty. Kura
   znosi jaja tylko wtedy, gdy na farmie jest kogut jej rasy. Do tego duzo
   tansze rozbudowy, kurnik do 260 ptakow, trzy jaja na pisklę zamiast
   szesciu, szczepienie za stala setke i czesciej przychodzacy lis.
@@ -15,7 +15,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -177,6 +177,17 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## Weryfikacja wersji 10.1 (wykonana w srodowisku Claude, Linux)
+
+- `tests/tests.tscn`: **832/832 OK**. Doszly `_test_coop_limit` (pelny kurnik
+  blokuje wyleg, nie zjada jaj, pisklę czeka i wchodzi po zwolnieniu miejsca)
+  oraz pomiar plotu: na sto podejsc zawraca ponad siedemdziesiat, a przy
+  braku plotu nie zawraca ani jednego.
+- `tests/smoke_ui.tscn`: **OK**, trzy biegi pod rzad.
+- Zrzut panelu sklepu obejrzany: suwak przewijania jest widoczny i gruby,
+  licznik w pasku pokazuje 6/20.
+- `tools/balance_model.py`: wygrana po 12,8 h.
 
 ## Weryfikacja wersji 10.0 (wykonana w srodowisku Claude, Linux)
 
@@ -473,6 +484,37 @@ python3 tools/gen_ground.py
   poprawek w `assets/sprites/animals/rooster_*.svg` nie wprowadzac — zgina
   przy nastepnym przebiegu. Plotno 170x130, stopy na y=118, tak samo jak
   u kur, zeby `Sprite2D` z `offset = (4, -53)` postawil je na ziemi.
+
+### Obrona przed lisem: zawracanie, nie odwlekanie (wersja 10.1)
+
+- Plot, pies i nocne swiatla **nie wydluzaja juz przerwy** miedzy wizytami.
+  Zamiast tego przy kazdym podejsciu losuje sie, czy lis w ogole wejdzie:
+  `FarmState.fox_block_chance()` to 0,90 / 0,97 / 0,99.
+- Wlasciciel odrzucil poprzednia wersje wprost: plot za 600 zl, ktory wydluza
+  przerwe 1,7 raza, jest w grze niezauwazalny. Zawracanie widac od razu.
+- Zawrocony lis zglasza sie napisem (`HINT_FOX_BLOCKED`), inaczej gracz nie
+  wie, za co zaplacil.
+- Gorny prog to 0,99, a nie 0,995: `fox_block_chance` i tak przycina wyzsze
+  wartosci, a przycisk pokazuje liczbe prosto z pliku i wyszloby klamliwe 100%.
+  Pelnej nietykalnosci nie ma i byc nie powinno — pilnuje tego test.
+
+### Pelny kurnik: widac go i blokuje wyleg (wersja 10.1)
+
+- Licznik kur w gornym pasku pokazuje **"37/40"**, a nie samo "37". Przy
+  dwoch wolnych miejscach robi sie pomaranczowy, przy zerze czerwony.
+- Inkubator **odmawia** przyjecia jaj, gdy pisklę nie mialoby gdzie wyjsc.
+  Wolne miejsce liczy sie razem z tym, co juz w drodze (`coop_free()` odejmuje
+  jaja w inkubatorze i pisklęta na odchowie), inaczej dalo sie nabic kolejke,
+  ktora stoi bez slowa wyjasnienia. Wyszarzony przycisk mowi, czego brakuje.
+- Pisklę nigdy nie przepadalo — czekalo. Wlasciciel podejrzewal, ze znika,
+  bo nic tego nie pokazywalo. Zachowanie zostaje, doszla informacja.
+
+### Pasek przewijania (wersja 10.1)
+
+- Domyslny suwak Godota jest cienki jak wlos; na telefonie przewijalo sie
+  wylacznie przeciaganiem zawartosci i latwo bylo przypadkiem nacisnac
+  przycisk pod palcem. `UiTheme._apply_scrollbar` daje tor i chwytliwy suwak
+  o szerokosci `SCROLLBAR_WIDTH * 2` = 52 px widoku.
 
 ### Kolejka do znoszenia: kto dostaje miejsce na wybiegu
 

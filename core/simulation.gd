@@ -33,6 +33,7 @@ static func advance(state: FarmState, delta: float, offline: bool = false) -> Di
 		"got_sick": 0,
 		"fox_took": 0,
 		"fox_arrived": 0,
+		"fox_blocked": 0,
 		"rotted": 0,
 	}
 	var remaining := maxf(delta, 0.0)
@@ -229,6 +230,14 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 		return
 	state.reset_fox_timer()
 	if state.chickens.size() < int(fox.get("min_hens", 5)):
+		return
+
+	# Plot, pies i nocne swiatla nie odwlekaja wizyty — po prostu zawracaja
+	# lisa od zagrody. Losujemy przy KAZDYM podejsciu, wiec nawet najlepsza
+	# obrona kiedys przepusci. Wczesniej obrona rozciagala przerwe miedzy
+	# wizytami, co przy cenie 600 zl bylo za malo odczuwalne.
+	if randf() < state.fox_block_chance():
+		out["fox_blocked"] = int(out["fox_blocked"]) + 1
 		return
 
 	var share := randf_range(float(fox.get("min_share", 0.2)), float(fox.get("max_share", 0.9)))

@@ -33,6 +33,7 @@ func _ready() -> void:
 	_test_win()
 	_test_offline_eggs()
 	_test_roosters()
+	_test_coop_limit()
 	_test_lay_fairness()
 	_test_time_gap()
 	_test_buildings()
@@ -633,15 +634,35 @@ func _test_fox() -> void:
 	_check(int(offline["fox_took"]) > 0, "offline lis zabiera od razu")
 	_check(int(offline["fox_arrived"]) == 0, "offline nie ma okna na reakcje")
 
-	# Obrona wydluza przerwy miedzy wizytami.
+	# Obrona zawraca lisa przy zagrodzie, zamiast odwlekac jego przyjscie.
 	var guarded := _fresh_state(hens, 100000.0)
-	_check(is_equal_approx(guarded.fox_interval_multiplier(), 1.0), "bez obrony mnoznik wynosi 1")
+	_check(is_equal_approx(guarded.fox_block_chance(), 0.0), "bez obrony nic nie zatrzymuje lisa")
 	guarded.guard_level = 1
-	_check(guarded.fox_interval_multiplier() > 1.0, "plot wydluza przerwe miedzy wizytami")
+	_check(guarded.fox_block_chance() > 0.8, "plot zawraca zdecydowana wiekszosc podejsc")
 	guarded.guard_level = 2
-	var with_dog := guarded.fox_interval_multiplier()
+	var with_dog := guarded.fox_block_chance()
 	guarded.guard_level = 1
-	_check(with_dog > guarded.fox_interval_multiplier(), "pies dziala lepiej niz sam plot")
+	_check(with_dog > guarded.fox_block_chance(), "pies dziala lepiej niz sam plot")
+	# Nawet pelna obrona musi czasem przepuscic — gra bez lisa to nie jest gra.
+	guarded.guard_level = 3
+	_check(guarded.fox_block_chance() < 1.0, "zadna obrona nie daje pelnej nietykalnosci")
+
+	# Plot w dzialaniu: przy stu podejsciach wiekszosc konczy sie zawroceniem,
+	# a bez plotu nie zawraca ani jedno.
+	var blocked := 0
+	var walked_in := 0
+	for i in 100:
+		var yard := _fresh_state(hens, 100000.0)
+		yard.guard_level = 1
+		yard.fox_timer = 0.5
+		var tally := Simulation.advance(yard, 1.0)
+		blocked += int(tally["fox_blocked"])
+		walked_in += int(tally["fox_arrived"])
+	_check(blocked > 70 and walked_in > 0,
+			"plot zawrocil %d na 100 podejsc, wszedl %d razy" % [blocked, walked_in])
+	var bare := _fresh_state(hens, 100000.0)
+	bare.fox_timer = 0.5
+	_check(int(Simulation.advance(bare, 1.0)["fox_blocked"]) == 0, "bez plotu nikt lisa nie zawraca")
 
 	# Male stado lis zostawia w spokoju.
 	var tiny := _fresh_state(["leghorn", "leghorn"], 100.0)
@@ -790,6 +811,44 @@ func _test_money_format() -> void:
 
 
 ## Pod nieobecnosc gracza jaja omijaja wybieg i ida prosto do magazynu.
+## Pelny kurnik: inkubator ma odmowic, a nie przyjac jaja i zatrzymac pisklę
+## w kolejce bez slowa wyjasnienia.
+func _test_coop_limit() -> void:
+	Game.new_game()
+	Game.state.money = 1000000.0
+	var capacity := Game.state.coop_capacity()
+	while Game.state.coop_occupied() < capacity:
+		Game.state.chickens.append(Chicken.create("leghorn"))
+	Game.state.eggs["leghorn"] = 100
+	_check(Game.state.coop_free() == 0, "kurnik zapelniony do ostatniego miejsca")
+	_check(not Game.can_incubate("leghorn"), "pelny kurnik blokuje wkladanie jaj")
+	_check(Game.incubation_blocked_by_coop("leghorn"), "powodem jest wlasnie brak miejsca")
+	_check(not Game.incubate("leghorn"), "proba wylegu konczy sie odmowa")
+	_check(int(Game.state.eggs.get("leghorn", 0)) == 100, "odmowa nie zjada jaj")
+
+	# Jedno wolne miejsce wystarczy na jedna partie, ale nie na dwie.
+	Game.state.chickens.remove_at(0)
+	_check(Game.state.coop_free() == 1, "zwolnilo sie jedno miejsce")
+	_check(Game.incubate("leghorn"), "na wolne miejsce wyleg rusza")
+	_check(Game.state.coop_free() == 0, "partia w inkubatorze rezerwuje to miejsce")
+	_check(not Game.can_incubate("leghorn"), "druga partia nie ma juz gdzie wyjsc")
+
+	# Pisklę i tak nie przepada: czeka, az miejsce sie znajdzie.
+	var waiting := _fresh_state(["leghorn"], 1000.0)
+	waiting.coop_level = 0
+	while waiting.coop_occupied() < waiting.coop_capacity():
+		waiting.chickens.append(Chicken.create("leghorn"))
+	var chick := Chick.create("leghorn")
+	chick.grown = chick.total_seconds()
+	waiting.chicks.append(chick)
+	Simulation.advance(waiting, 60.0)
+	_check(waiting.chicks.size() == 1, "pisklę czeka na miejsce, nie znika")
+	waiting.chickens.remove_at(0)
+	Simulation.advance(waiting, 2.0)
+	_check(waiting.chicks.is_empty(), "po zwolnieniu miejsca pisklę wchodzi do kurnika")
+	Game.new_game()
+
+
 ## Kogut: warunek znoszenia, osobny towar w sklepie i migracja starych zapisow.
 func _test_roosters() -> void:
 	var seconds := float(GameData.breed("leghorn").get("egg_seconds", 0.0))
@@ -981,9 +1040,10 @@ func _test_buildings() -> void:
 	_check(not Game.state.coop_has_room(), "pelny kurnik nie ma miejsca")
 	_check(not Game.buy_hen("leghorn"), "do pelnego kurnika nie kupisz kury")
 
-	# Inkubator wolno nabic, ale podrosniete pisklę czeka na miejsce.
+	# Przy pelnym kurniku inkubator odmawia — od wersji 10.1, zeby gracz nie
+	# wkladal jaj, ktore i tak nie maja dokad sie wykluc.
 	Game.state.eggs = {"leghorn": Game.eggs_per_chick()}
-	_check(Game.can_incubate("leghorn"), "jaja mozna wstawic mimo pelnego kurnika")
+	_check(not Game.can_incubate("leghorn"), "pelny kurnik blokuje wkladanie jaj")
 	var waiting := Chick.create("leghorn")
 	waiting.grown = waiting.total_seconds()
 	Game.state.chicks.append(waiting)
@@ -1012,9 +1072,9 @@ func _test_buildings() -> void:
 			"do magazynu trafia worek w nowym rozmiarze")
 
 	# Obrona przed lisem.
-	_check(is_equal_approx(Game.state.fox_interval_multiplier(), 1.0), "na starcie brak obrony")
+	_check(is_equal_approx(Game.state.fox_block_chance(), 0.0), "na starcie brak obrony")
 	_check(Game.upgrade_building("guard"), "plot da sie postawic")
-	_check(Game.state.fox_interval_multiplier() > 1.0, "plot wydluza przerwy miedzy wizytami")
+	_check(Game.state.fox_block_chance() > 0.8, "plot zawraca lisa od zagrody")
 
 	# Bez pieniedzy nie ma rozbudowy.
 	Game.state.money = 0.0

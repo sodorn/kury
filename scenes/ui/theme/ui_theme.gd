@@ -10,6 +10,10 @@ const GOLD := Color("FFD98A")
 const GOLD_DARK := Color("E8A94A")
 const GREEN := Color("A8DE8C")
 
+## Polowa szerokosci suwaka przewijania w pikselach widoku (1080 px szerokosci).
+## Caly pasek wychodzi dwa razy szerszy, czyli okolo 2,5 mm na telefonie.
+const SCROLLBAR_WIDTH := 26
+
 const FONT_BODY: Font = preload("res://assets/fonts/Baloo2-600.ttf")
 const FONT_TITLE: Font = preload("res://assets/fonts/Baloo2-800.ttf")
 
@@ -44,11 +48,40 @@ static func build() -> Theme:
 
 	_apply_line_edit(theme)
 
+	_apply_scrollbar(theme)
+
 	theme.set_stylebox("background", "ProgressBar", _bar(Color("EFE3CC")))
 	theme.set_stylebox("fill", "ProgressBar", _bar(GOLD_DARK))
 	theme.set_color("font_color", "ProgressBar", INK)
 	theme.set_font_size("font_size", "ProgressBar", 28)
 	return theme
+
+
+## Pasek przewijania w panelach. Domyslny jest cienki jak wlos i na telefonie
+## nie da sie go zlapac palcem — przewijanie szlo wylacznie przeciaganiem
+## zawartosci, przez co latwo bylo przypadkiem nacisnac przycisk pod palcem.
+## Suwak ma wiec szerokosc kciuka i widoczny tor, zeby bylo w co celowac.
+static func _apply_scrollbar(theme: Theme) -> void:
+	var track := StyleBoxFlat.new()
+	track.bg_color = Color("EFE3CC")
+	track.set_corner_radius_all(SCROLLBAR_WIDTH / 2)
+	track.content_margin_left = SCROLLBAR_WIDTH
+	track.content_margin_right = SCROLLBAR_WIDTH
+
+	var grabber := StyleBoxFlat.new()
+	grabber.bg_color = Color("C9A57C")
+	grabber.set_corner_radius_all(SCROLLBAR_WIDTH / 2)
+	grabber.set_border_width_all(2)
+	grabber.border_color = Color(INK_SOFT, 0.45)
+
+	var grabber_pressed := grabber.duplicate() as StyleBoxFlat
+	grabber_pressed.bg_color = GOLD_DARK
+
+	for bar in ["VScrollBar", "HScrollBar"]:
+		theme.set_stylebox("scroll", bar, track)
+		theme.set_stylebox("grabber", bar, grabber)
+		theme.set_stylebox("grabber_highlight", bar, grabber_pressed)
+		theme.set_stylebox("grabber_pressed", bar, grabber_pressed)
 
 
 ## Pole tekstowe (wpisywanie kodu farmy). Bez tego Godot rysuje swoje

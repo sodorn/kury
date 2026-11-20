@@ -132,6 +132,10 @@ func _report(result: Dictionary) -> void:
 	if died_hunger > 0:
 		Events.notice.emit(tr("HINT_DIED_HUNGER") % died_hunger)
 		Events.resources_changed.emit()
+	# Zawrocony lis tez zasluguje na slowo — inaczej gracz nie widzi,
+	# za co zaplacil za plot.
+	if int(result["fox_blocked"]) > 0:
+		Events.notice.emit(tr("HINT_FOX_BLOCKED"))
 	var arrived := int(result["fox_arrived"])
 	if arrived > 0:
 		Events.fox_arrived.emit(state.fox_pending, state.fox_visit_left)
@@ -554,18 +558,31 @@ func eggs_per_chick() -> int:
 
 ## Czy da sie wstawic jaja danej rasy do inkubatora. Potrzebne sa jaja
 ## wlasnie tej rasy — z jaj leghorna nie wyklu je sie cemani.
+## Wylegu nie wolno zaczynac, gdy pisklę nie bedzie mialo gdzie wyjsc.
+## Liczymy razem doroslego ptaka, jajo w inkubatorze i pisklę na odchowie —
+## inaczej dalo sie nabic kolejke, ktora stoi i czeka bez slowa wyjasnienia.
 func can_incubate(breed_id: String) -> bool:
 	return state.owns_breed(breed_id) \
+			and state.incubating.size() < incubator_slots() \
+			and state.coop_free() > 0 \
+			and int(state.eggs.get(breed_id, 0)) >= eggs_per_chick()
+
+
+## Czy wyleg blokuje wylacznie brak miejsca w kurniku. UI pyta o to, zeby
+## napisac na wyszarzonym przycisku, czego naprawde brakuje.
+func incubation_blocked_by_coop(breed_id: String) -> bool:
+	return state.coop_free() <= 0 \
+			and state.owns_breed(breed_id) \
 			and state.incubating.size() < incubator_slots() \
 			and int(state.eggs.get(breed_id, 0)) >= eggs_per_chick()
 
 
 func incubate(breed_id: String) -> bool:
 	if not can_incubate(breed_id):
+		if incubation_blocked_by_coop(breed_id):
+			Events.alert.emit(tr("ALERT_COOP_FULL_TITLE"),
+					tr("ALERT_COOP_FULL_BODY") % state.coop_capacity())
 		return false
-	if not state.coop_has_room():
-		# Wstawic jaja mozna, ale warto uprzedzic, ze nie ma gdzie wypuscic.
-		Events.notice.emit(tr("HINT_COOP_FULL") % state.coop_capacity())
 	state.take_eggs(breed_id, eggs_per_chick())
 	state.incubating.append(EggBatch.create(breed_id, 1))
 	Events.resources_changed.emit()

@@ -110,8 +110,7 @@ def simulate(verbose: bool = True) -> dict:
     store_up = list(buildings["storage"]["upgrades"])
     guard_up = list(buildings["guard"]["upgrades"])
     capacity = buildings["coop"]["capacity"]
-    guard_mult = 1.0
-    fox_timer *= guard_mult
+    guard_block = 0.0
 
     history = []
     starved = 0
@@ -141,8 +140,9 @@ def simulate(verbose: bool = True) -> dict:
         while guard_up and money >= guard_up[0]["price"] * 4:
             up = guard_up.pop(0)
             money -= up["price"]
-            guard_mult = up["fox_multiplier"]
-            history.append((seconds / 3600.0, "obrona przed lisem x%.1f" % guard_mult))
+            guard_block = up["block_chance"]
+            history.append((seconds / 3600.0,
+                            "obrona przed lisem: zawraca %d%% podejsc" % round(guard_block * 100)))
 
         # --- pasza -------------------------------------------------------
         need = total_birds * feed_rate * 15  # zapas na 15 minut
@@ -218,8 +218,11 @@ def simulate(verbose: bool = True) -> dict:
         # --- lis ---------------------------------------------------------
         fox_timer -= STEP
         if fox_timer <= 0:
-            fox_timer = (fox["min_hours"] + fox["max_hours"]) / 2 * 3600 * guard_mult
-            if random.random() < SCARE_RATE:
+            fox_timer = (fox["min_hours"] + fox["max_hours"]) / 2 * 3600
+            if random.random() < guard_block:
+                # Plot, pies albo swiatla zawrocily lisa od zagrody.
+                pass
+            elif random.random() < SCARE_RATE:
                 # Gracz patrzacy na ekran zdazy w lisa stuknac trzy razy.
                 pass
             elif total_birds >= fox["min_hens"]:

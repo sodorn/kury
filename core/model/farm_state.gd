@@ -282,7 +282,9 @@ func reset_fox_timer() -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})
 	var low := float(fox.get("min_hours", 2.0)) * 3600.0
 	var high := float(fox.get("max_hours", 5.0)) * 3600.0
-	fox_timer = randf_range(low, maxf(low, high)) * fox_interval_multiplier()
+	# Przerwa miedzy podejsciami lisa nie zalezy od obrony — obrona rozstrzyga
+	# sie dopiero przy samej zagrodzie, w `fox_block_chance`.
+	fox_timer = randf_range(low, maxf(low, high))
 
 
 # --- budynki ------------------------------------------------------------
@@ -350,6 +352,18 @@ func coop_has_room(extra: int = 1) -> bool:
 	return coop_occupied() + extra <= coop_capacity()
 
 
+## Ptaki, ktore sa juz w drodze: jaja w inkubatorze i pisklęta na odchowie.
+## Kazde z nich bedzie chcialo miejsca w kurniku.
+func coop_reserved() -> int:
+	return chicks.size() + incubating.size()
+
+
+## Ile jeszcze ptakow zmiesci sie w kurniku, liczac to, co juz w drodze.
+## Moze wyjsc zero albo mniej, gdy gracz zdazyl dokupic kury.
+func coop_free() -> int:
+	return coop_capacity() - coop_occupied() - coop_reserved()
+
+
 ## Worek paszy: rozmiar i cena przy obecnym poziomie magazynu.
 func feed_pack() -> Dictionary:
 	var economy: Dictionary = GameData.balance().get("economy", {})
@@ -361,6 +375,8 @@ func feed_pack() -> Dictionary:
 
 
 ## Ile razy rzadziej przychodzi lis dzieki plotowi albo psu.
-func fox_interval_multiplier() -> float:
+## Szansa, ze obrona zawroci lisa od zagrody, zanim ten w ogole wejdzie.
+## Losowana przy kazdym podejsciu, wiec nawet pelna obrona kiedys przepusci.
+func fox_block_chance() -> float:
 	var upgrade := current_building_upgrade("guard")
-	return maxf(1.0, float(upgrade.get("fox_multiplier", 1.0)))
+	return clampf(float(upgrade.get("block_chance", 0.0)), 0.0, 0.99)

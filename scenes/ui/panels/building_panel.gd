@@ -217,7 +217,7 @@ func _build_coop() -> void:
 				return tr("PANEL_UPGRADE_GUARD") % [
 					tr(_guard_name(Game.state.guard_level + 1)),
 					NumberFormat.money(float(upgrade.get("price", 0))),
-					NumberFormat.amount_only(float(upgrade.get("fox_multiplier", 1.0)))],
+					int(round(float(upgrade.get("block_chance", 0.0)) * 100.0))],
 			func() -> void: _on_upgrade("guard"),
 			func() -> bool: return not Game.state.next_building_upgrade("guard").is_empty())
 
@@ -279,6 +279,13 @@ func _build_incubator() -> void:
 	_add_row("PANEL_INCUBATOR_SLOTS",
 			func() -> String: return "%d / %d" % [Game.state.incubating.size(), Game.incubator_slots()])
 	_add_row("PANEL_EGGS_STORED", func() -> String: return NumberFormat.grouped(Game.state.egg_count()))
+	# Pisklę nie wyjdzie z inkubatora, dopoki nie ma dla niego miejsca
+	# w kurniku, wiec wolne miejsca licza sie tu razem z tym, co juz w drodze.
+	_add_row("PANEL_COOP_LEFT", func() -> String:
+		var free := maxi(Game.state.coop_free(), 0)
+		if Game.state.coop_reserved() > 0:
+			return tr("PANEL_COOP_LEFT_PENDING") % [free, Game.state.coop_reserved()]
+		return str(free))
 
 	# Paski postepu: tyle, ile moze miec inkubator po pelnej rozbudowie —
 	# nadmiarowe same sie chowaja, wiec panel nie wymaga przebudowy po zakupie.
@@ -316,8 +323,13 @@ func _build_incubator() -> void:
 		var breed_name: String = tr(breed.get("name", ""))
 		_add_action(false,
 				func() -> bool: return Game.can_incubate(breed_id),
-				func() -> String: return tr("PANEL_INCUBATE") % [
-					cost, breed_name, int(Game.state.eggs.get(breed_id, 0))],
+				func() -> String:
+					# Wyszarzony przycisk ma powiedziec, czego brakuje: jaj czy
+					# miejsca w kurniku. Samo "nie da sie" niczego nie tlumaczy.
+					if Game.incubation_blocked_by_coop(breed_id):
+						return tr("PANEL_INCUBATE_NO_ROOM") % breed_name
+					return tr("PANEL_INCUBATE") % [
+						cost, breed_name, int(Game.state.eggs.get(breed_id, 0))],
 				func() -> void: _on_incubate(breed_id),
 				func() -> bool: return Game.state.owns_breed(breed_id))
 
