@@ -50,16 +50,26 @@ func _sync_livestock() -> void:
 		return
 	var healthy := {}
 	var sick := {}
+	var healthy_roosters := {}
+	var sick_roosters := {}
 	for hen: Chicken in Game.state.chickens:
-		var bucket := sick if hen.sick else healthy
+		var bucket := {}
+		if hen.is_rooster:
+			bucket = sick_roosters if hen.sick else healthy_roosters
+		else:
+			bucket = sick if hen.sick else healthy
 		bucket[hen.breed_id] = int(bucket.get(hen.breed_id, 0)) + 1
 	var cap := int(GameData.balance().get("run", {}).get("max_visible_hens", 26))
-	# Chore kury pokazujemy zawsze — to one wymagaja reakcji gracza.
+	# Chore kury pokazujemy zawsze — to one wymagaja reakcji gracza. Koguty tez
+	# zawsze: jest ich po jednym na rase, a od nich zalezy, czy stado niesie.
 	var shown_sick := sick
-	var budget := maxi(1, cap - _total(shown_sick))
-	_sync_animals(false, true, shown_sick)
-	_sync_animals(false, false, _clamp_visible(healthy, budget))
-	_sync_animals(true, false, _clamp_visible(_chicks_by_breed(), maxi(4, cap / 3)))
+	var always := _total(shown_sick) + _total(healthy_roosters) + _total(sick_roosters)
+	var budget := maxi(1, cap - always)
+	_sync_animals(false, true, shown_sick, false)
+	_sync_animals(false, true, sick_roosters, true)
+	_sync_animals(false, false, healthy_roosters, true)
+	_sync_animals(false, false, _clamp_visible(healthy, budget), false)
+	_sync_animals(true, false, _clamp_visible(_chicks_by_breed(), maxi(4, cap / 3)), false)
 	_sync_eggs(Game.ground_eggs_by_breed())
 	_sync_corpses()
 
@@ -100,11 +110,12 @@ func _chicks_by_breed() -> Dictionary:
 
 
 ## Ustawia liczbe kur (piskląt, chorych kur) kazdej rasy zgodnie ze stanem gry.
-func _sync_animals(chicks: bool, sick: bool, wanted: Dictionary) -> void:
+func _sync_animals(chicks: bool, sick: bool, wanted: Dictionary, roosters: bool) -> void:
 	var present := {}
 	for child in _objects.get_children():
 		var animal := child as FarmChicken
-		if animal == null or animal.is_chick != chicks or animal.is_sick != sick or animal.leaving:
+		if animal == null or animal.is_chick != chicks or animal.is_sick != sick \
+				or animal.is_rooster != roosters or animal.leaving:
 			continue
 		present[animal.breed_id] = int(present.get(animal.breed_id, 0)) + 1
 
@@ -113,13 +124,13 @@ func _sync_animals(chicks: bool, sick: bool, wanted: Dictionary) -> void:
 		for i in maxi(missing, 0):
 			# Kura, ktora wlasnie zachorowala, ma zostac na swoim miejscu —
 			# przestawiamy jej znacznik, zamiast podmieniac caly wezel.
-			if not _flip_existing(breed_id, chicks, not sick, sick):
-				_add_animal(breed_id, chicks, sick)
+			if not _flip_existing(breed_id, chicks, not sick, sick, roosters):
+				_add_animal(breed_id, chicks, sick, roosters)
 
 	for breed_id: String in present:
 		var extra := int(present[breed_id]) - int(wanted.get(breed_id, 0))
 		for i in maxi(extra, 0):
-			_remove_animal(breed_id, chicks, sick)
+			_remove_animal(breed_id, chicks, sick, roosters)
 
 
 ## Przerabia zdrowa kure na chora bez podmiany wezla, zeby zostala na swoim
@@ -129,12 +140,13 @@ func _sync_animals(chicks: bool, sick: bool, wanted: Dictionary) -> void:
 ## pokazywaly: najpierw uzgadnialismy chore (zdrowy wezel stawal sie chory),
 ## a zaraz potem uzgadnialismy zdrowe, ktorych nagle brakowalo — i ten sam
 ## wezel wracal do zdrowia. Wyzdrowienie obsluguje zwykle dodanie i usuniecie.
-func _flip_existing(breed_id: String, chicks: bool, from_sick: bool, to_sick: bool) -> bool:
+func _flip_existing(breed_id: String, chicks: bool, from_sick: bool, to_sick: bool,
+		roosters: bool) -> bool:
 	if chicks or from_sick == to_sick or not to_sick:
 		return false
 	for child in _objects.get_children():
 		var animal := child as FarmChicken
-		if animal == null or animal.leaving or animal.is_chick:
+		if animal == null or animal.leaving or animal.is_chick or animal.is_rooster != roosters:
 			continue
 		if animal.breed_id == breed_id and animal.is_sick == from_sick:
 			animal.set_sick(to_sick)
@@ -142,18 +154,19 @@ func _flip_existing(breed_id: String, chicks: bool, from_sick: bool, to_sick: bo
 	return false
 
 
-func _add_animal(breed_id: String, chick: bool, sick: bool = false) -> void:
+func _add_animal(breed_id: String, chick: bool, sick: bool = false, rooster: bool = false) -> void:
 	var node: FarmChicken = CHICKEN_SCENE.instantiate()
 	_objects.add_child(node)
-	node.setup(breed_id, _run, chick, sick)
+	node.setup(breed_id, _run, chick, sick, rooster)
 
 
-func _remove_animal(breed_id: String, chick: bool, sick: bool) -> void:
+func _remove_animal(breed_id: String, chick: bool, sick: bool, rooster: bool = false) -> void:
 	for child in _objects.get_children():
 		var animal := child as FarmChicken
 		if animal == null or animal.leaving:
 			continue
-		if animal.breed_id == breed_id and animal.is_chick == chick and animal.is_sick == sick:
+		if animal.breed_id == breed_id and animal.is_chick == chick and animal.is_sick == sick \
+				and animal.is_rooster == rooster:
 			animal.leave()
 			return
 

@@ -118,7 +118,9 @@ func _test_egg_pickup() -> void:
 	await _tap(_canvas_point(eggs[0], Vector2(0, -38)))
 	await _frames(40)
 	_check(Game.state.egg_count() == stored_before + 1, "dotkniecie jajka zwieksza stan magazynu")
-	_check(_nodes_of_type("GroundEgg").size() == 1, "zebrane jajko znika z wybiegu")
+	# Zebrane jajko gasnie animacja, wiec wezel znika dopiero po chwili.
+	var left := await _wait_for_nodes("GroundEgg", 1)
+	_check(left.size() == 1, "zebrane jajko znika z wybiegu (zostalo %d)" % left.size())
 
 
 func _test_shop() -> void:
@@ -160,6 +162,28 @@ func _test_shop() -> void:
 	_check(Game.state.hen_count() == hens_before + 1, "zakup kury dziala")
 	_check(_nodes_of_type("FarmChicken").size() == Game.state.hen_count(), "kupiona kura pojawila sie na wybiegu")
 	_shot("panel_po_zakupach.png")
+
+	# Kogut: kupiony przez sklep ma stanac na wybiegu z wlasna grafika.
+	var cocks_before := Game.state.rooster_count()
+	Game.state.money = 100000.0
+	_check(Game.buy_hen("rhode", true), "sklep sprzedaje koguta")
+	_check(Game.state.rooster_count() == cocks_before + 1, "kogut doliczony do stada")
+	# Pierwsza sztuka rasy rhode, wiec wyskakuje okienko z jej historia —
+	# dopoki stoi otwarte, blokuje dotkniecia kolejnych budynkow.
+	await _frames(30)
+	await _dismiss_unlock_popup()
+	var cocks := await _wait_for_nodes("FarmChicken", Game.state.hen_count())
+	var rooster_nodes := 0
+	for node in cocks:
+		if (node as FarmChicken).is_rooster:
+			rooster_nodes += 1
+	_check(rooster_nodes == Game.state.rooster_count(), "koguty stoja na wybiegu (jest %d)" % rooster_nodes)
+	# Zdjecie samego wybiegu, bez panelu sklepu na wierzchu.
+	var shop_panel: Control = _main.get_node("Hud/Root/BuildingPanel")
+	if shop_panel.visible:
+		shop_panel.close()
+		await _frames(30)
+	_shot("wybieg_z_kogutem.png")
 
 
 ## Inkubator: wlozenie jaj, wyklucie pisklecia i jego dorosniecie.

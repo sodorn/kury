@@ -8,6 +8,9 @@
 			"leghorn",
 			"leghorn",
 			"leghorn"
+		],
+		"roosters": [
+			"leghorn"
 		]
 	},
 	"economy": {
@@ -39,21 +42,30 @@
 	},
 	"incubator": {
 		"slots": 3,
-		"eggs_per_chick": 6,
+		"eggs_per_chick": 3,
 		"upgrades": [
 			{
 				"slots": 6,
-				"price": 1200
+				"price": 350
 			},
 			{
 				"slots": 10,
-				"price": 12000
+				"price": 1200
 			},
 			{
-				"slots": 15,
-				"price": 90000
+				"slots": 16,
+				"price": 3000
+			},
+			{
+				"slots": 24,
+				"price": 8000
+			},
+			{
+				"slots": 34,
+				"price": 20000
 			}
-		]
+		],
+		"_opis": "slots to liczba partii grzanych naraz; kazda partia to jedno pisklę. eggs_per_chick jaj danej rasy robi jedno pisklę tej rasy."
 	},
 	"hunger": {
 		"_opis": "Po grace_minutes bez paszy kury zaczynaja padac - jedna na death_interval_seconds. offline_max_share ogranicza straty przy nadrabianiu czasu, zeby powrot do gry nie oznaczal pustego wybiegu.",
@@ -63,20 +75,20 @@
 		"offline_max_share": 0.5
 	},
 	"disease": {
-		"_opis": "chance_per_hen_hour: srednia liczba zachorowan na kure na godzine. Chora kura nie znosi jaj i po death_minutes pada. Szczepienie placi sie od kury, wiec rosnie razem ze stadem.",
-		"chance_per_hen_hour": 0.45,
+		"_opis": "chance_per_hen_hour: srednia liczba zachorowan na kure na godzine. Chora kura nie znosi jaj i po death_minutes pada. Szczepienie to jedna oplata za cale stado, ale chroni tylko ptaki zyjace w chwili szczepienia - mlode wyklute pozniej trzeba zaszczepic ponownie.",
+		"chance_per_hen_hour": 1.2,
 		"death_minutes": 7.0,
 		"medicine_price": 80,
-		"vaccine_price": 0,
-		"vaccine_price_per_hen": 60
+		"vaccine_price": 100,
+		"vaccine_price_per_hen": 0
 	},
 	"fox": {
-		"_opis": "Lis przychodzi raz na kilka godzin i porywa od min_share do max_share stada. Przez visit_seconds biega po wybiegu — jesli gracz zdazy w niego trafic scare_taps razy, ucieka z niczym.",
-		"min_hours": 1.0,
-		"max_hours": 3.0,
-		"min_share": 0.2,
+		"_opis": "Lis przychodzi co 15-36 minut gry i porywa od min_share do max_share stada. Przez visit_seconds biega po wybiegu - jesli gracz zdazy w niego trafic scare_taps razy, ucieka z niczym. Czesciej niz co 15 minut farma nie nadaza odbudowac stada: przy 6-18 minutach model nie konczy gry nawet w 300 godzin, jesli gracz nie przegania lisa.",
+		"min_hours": 0.25,
+		"max_hours": 0.6,
+		"min_share": 0.3,
 		"max_share": 0.9,
-		"min_hens": 5,
+		"min_hens": 4,
 		"visit_seconds": 7.0,
 		"scare_taps": 3
 	},
@@ -88,20 +100,36 @@
 	"buildings": {
 		"_opis": "Ulepszenia budynkow. Poziom 0 to stan poczatkowy, kazdy kolejny to wpis z upgrades.",
 		"coop": {
-			"_opis": "Pojemnosc kurnika liczona w doroslych kurach. Ponad limit nie kupisz kury, a podrosniete pisklę czeka przy inkubatorze.",
+			"_opis": "Pojemnosc kurnika liczona we wszystkich doroslych ptakach, razem z kogutami. Ponad limit nie kupisz ptaka, a podrosniete pisklę czeka przy inkubatorze. Drabinka siega 260, zeby przy siedemnastu rasach zmiescilo sie po kilka sztuk kazdej.",
 			"capacity": 20,
 			"upgrades": [
 				{
 					"capacity": 40,
-					"price": 1800
+					"price": 500
 				},
 				{
-					"capacity": 70,
-					"price": 12000
+					"capacity": 60,
+					"price": 1400
 				},
 				{
-					"capacity": 120,
-					"price": 55000
+					"capacity": 80,
+					"price": 3200
+				},
+				{
+					"capacity": 110,
+					"price": 7000
+				},
+				{
+					"capacity": 150,
+					"price": 15000
+				},
+				{
+					"capacity": 200,
+					"price": 30000
+				},
+				{
+					"capacity": 260,
+					"price": 60000
 				}
 			]
 		},
@@ -111,17 +139,27 @@
 				{
 					"pack_size": 60,
 					"pack_price": 132,
-					"price": 1200
+					"price": 350
 				},
 				{
 					"pack_size": 150,
 					"pack_price": 300,
-					"price": 9000
+					"price": 1200
 				},
 				{
 					"pack_size": 400,
 					"pack_price": 720,
-					"price": 42000
+					"price": 4000
+				},
+				{
+					"pack_size": 1000,
+					"pack_price": 1700,
+					"price": 12000
+				},
+				{
+					"pack_size": 2500,
+					"pack_price": 4000,
+					"price": 30000
 				}
 			]
 		},
@@ -130,11 +168,15 @@
 			"upgrades": [
 				{
 					"fox_multiplier": 1.7,
-					"price": 2500
+					"price": 600
 				},
 				{
 					"fox_multiplier": 3.0,
-					"price": 16000
+					"price": 2500
+				},
+				{
+					"fox_multiplier": 5.0,
+					"price": 9000
 				}
 			]
 		}

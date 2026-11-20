@@ -373,7 +373,9 @@ func buy_feed() -> bool:
 
 
 ## Kupuje kure podanej rasy. Rasa musi byc odblokowana.
-func buy_hen(breed_id: String) -> bool:
+## Kupuje jednego ptaka danej rasy. `rooster` decyduje o plci; cena jest ta sama,
+## bo kogut je tyle samo i zajmuje tyle samo miejsca co kura.
+func buy_hen(breed_id: String, rooster: bool = false) -> bool:
 	var def := GameData.breed(breed_id)
 	if def.is_empty() or not state.is_unlocked(breed_id):
 		return false
@@ -384,9 +386,14 @@ func buy_hen(breed_id: String) -> bool:
 		Events.notice.emit(tr("HINT_COOP_FULL") % state.coop_capacity())
 		return false
 	state.money -= price
-	var hen := Chicken.create(breed_id)
+	var hen := Chicken.create_rooster(breed_id) if rooster else Chicken.create(breed_id)
 	state.chickens.append(hen)
 	Events.hen_added.emit(hen)
+	# Kura bez koguta swojej rasy nie zniesie ani jednego jajka. Lepiej
+	# powiedziec to od razu, niz pozwolic graczowi myslec, ze gra jest zepsuta.
+	if not rooster and not state.has_rooster(breed_id):
+		Events.alert.emit(tr("ALERT_NO_ROOSTER_TITLE"),
+				tr("ALERT_NO_ROOSTER_BODY") % tr(String(def.get("name", ""))))
 	# Pierwsza sztuka danej rasy to wydarzenie: pokazujemy jej historie.
 	if not state.has_ever_owned(breed_id):
 		state.mark_owned(breed_id)
@@ -399,11 +406,11 @@ func buy_hen(breed_id: String) -> bool:
 ## wiec pozbycie sie jej jest pierwszym, co gracz chce zrobic; skup placi za
 ## nia mniej. Zdrowe sztuki ida dopiero, gdy chorych nie ma.
 ## Zwraca uzyskana kwote albo 0, gdy nie ma czego sprzedac.
-func sell_hen(breed_id: String) -> float:
+func sell_hen(breed_id: String, rooster: bool = false) -> float:
 	var sick := true
-	var index := _find_hen(breed_id, true)
+	var index := _find_hen(breed_id, true, rooster)
 	if index < 0:
-		index = _find_hen(breed_id, false)
+		index = _find_hen(breed_id, false, rooster)
 		sick = false
 	if index < 0:
 		return 0.0
@@ -412,20 +419,25 @@ func sell_hen(breed_id: String) -> float:
 	state.money += price
 	Events.hen_removed.emit(breed_id)
 	Events.resources_changed.emit()
+	# Sprzedany kogut moze byc ostatnim kogutem swojej rasy — wtedy cala
+	# reszta tej rasy przestaje niesc i gracz musi o tym wiedziec.
+	if rooster and state.hens_of_breed(breed_id) > 0 and not state.has_rooster(breed_id):
+		Events.alert.emit(tr("ALERT_NO_ROOSTER_TITLE"),
+				tr("ALERT_NO_ROOSTER_BODY") % tr(String(GameData.breed(breed_id).get("name", ""))))
 	return price
 
 
 ## Czy kolejna sprzedaz tej rasy dotyczy chorej sztuki. UI pyta o to, zeby
 ## kwota na przycisku zgadzala sie z tym, co gracz faktycznie dostanie.
-func next_sale_is_sick(breed_id: String) -> bool:
-	return _find_hen(breed_id, true) >= 0
+func next_sale_is_sick(breed_id: String, rooster: bool = false) -> bool:
+	return _find_hen(breed_id, true, rooster) >= 0
 
 
-## Indeks pierwszej kury danej rasy w zadanym stanie zdrowia; -1, gdy nie ma.
-func _find_hen(breed_id: String, sick: bool) -> int:
+## Indeks pierwszego ptaka danej rasy, plci i stanu zdrowia; -1, gdy nie ma.
+func _find_hen(breed_id: String, sick: bool, rooster: bool = false) -> int:
 	for i in state.chickens.size():
 		var hen: Chicken = state.chickens[i]
-		if hen.breed_id == breed_id and hen.sick == sick:
+		if hen.breed_id == breed_id and hen.sick == sick and hen.is_rooster == rooster:
 			return i
 	return -1
 
@@ -437,12 +449,14 @@ func medicine_price() -> float:
 	return float(GameData.balance().get("disease", {}).get("medicine_price", 140))
 
 
-## Cena zaszczepienia calego stada: oplata stala plus stawka od kury,
-## ktora szczepienia jeszcze nie ma.
+## Cena zaszczepienia calego stada. Jedna kwota za cale stado, niezaleznie od
+## jego wielkosci: stawka od kury rosla razem ze stadem i w praktyce nikt tego
+## nie kupowal. Stawka `vaccine_price_per_hen` zostaje w pliku balansu na wypadek
+## powrotu do rozliczania od sztuki — teraz wynosi zero.
 func vaccine_price() -> float:
 	var disease: Dictionary = GameData.balance().get("disease", {})
-	var base := float(disease.get("vaccine_price", 1200))
-	var per_hen := float(disease.get("vaccine_price_per_hen", 45))
+	var base := float(disease.get("vaccine_price", 100))
+	var per_hen := float(disease.get("vaccine_price_per_hen", 0))
 	return base + per_hen * state.unvaccinated_count()
 
 

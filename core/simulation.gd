@@ -253,30 +253,63 @@ static func _fox_takes(state: FarmState, out: Dictionary, budget: int) -> void:
 	out["fox_took"] = int(out["fox_took"]) + taken
 
 
-## Znoszenie jaj. Chore kury nie znosza, a pelny wybieg wstrzymuje reszte.
+## Znoszenie jaj. Nie znosza: koguty, chore kury i kury rasy, ktora nie ma
+## na farmie koguta. Pelny wybieg wstrzymuje reszte.
+##
+## Miejsca na wybiegu dostaja kury, ktore **najdluzej czekaja** z gotowym
+## jajkiem, a nie te stojace najwczesniej w tablicy stada. Wczesniej decydowala
+## kolejnosc zakupu i przy pelnym wybiegu rasy kupione pozniej nie znosily
+## w ogole (pomiar: 20 leghornow 292 jaja, cemani 0; po poprawce 161 i 7,
+## czyli tyle, ile wynosi rowny podzial miejsc miedzy wszystkie kury).
 static func _lay_eggs(state: FarmState, step: float, out: Dictionary, offline: bool) -> void:
 	var capacity := int(GameData.balance().get("run", {}).get("max_eggs_on_ground", 30))
+	var count := state.chickens.size()
+	if count <= 0:
+		return
+	# Rasy z kogutem zbieramy raz na krok. Pytanie `has_rooster` osobno dla
+	# kazdej kury dawaloby koszt kwadratowy — przy 260 ptakach to odczuwalne.
+	var with_rooster := {}
+	for bird: Chicken in state.chickens:
+		if bird.is_rooster:
+			with_rooster[bird.breed_id] = true
+	if with_rooster.is_empty():
+		return
+	# Krok pierwszy: zegary chodza kazdej kurze, niezaleznie od kolejnosci.
+	var ready: Array[Chicken] = []
 	for hen: Chicken in state.chickens:
-		if hen.sick:
+		if hen.is_rooster or hen.sick or not with_rooster.has(hen.breed_id):
 			continue
 		var seconds := float(GameData.breed(hen.breed_id).get("egg_seconds", 0.0))
 		if seconds <= 0.0:
 			continue
 		hen.since_last_egg += step
-		if hen.since_last_egg < seconds:
-			continue
-		if offline:
-			# Pod nieobecnosc gracza jaja trafiaja od razu do magazynu.
-			hen.since_last_egg -= seconds
-			state.add_egg(hen.breed_id)
-			out["eggs_laid"] = int(out["eggs_laid"]) + 1
-			continue
-		if state.eggs_on_ground.size() >= capacity:
-			# Wybieg pelny: kura czeka ze zniesieniem, postep stoi na maksimum.
+		if hen.since_last_egg >= seconds:
+			ready.append(hen)
+	if ready.is_empty():
+		return
+	# Krok drugi: pierwsze wolne miejsce dostaje kura, ktora czeka najdluzej
+	# z gotowym jajkiem. Kolejnosc w tablicy stada nie moze o niczym decydowac:
+	# wczesniej braly ja zawsze ptaki kupione najdawniej i przy pelnym wybiegu
+	# rasy kupione pozniej nie znosily nic (20 leghornow 292 jaja, cemani 0).
+	# Licznik oczekiwania jest odporny na to, ze sklad gotowych kur zmienia sie
+	# z kroku na krok — numer pozycji w tablicy nie byl.
+	ready.sort_custom(func(a: Chicken, b: Chicken) -> bool:
+		return a.waiting_seconds > b.waiting_seconds)
+	for hen: Chicken in ready:
+		var seconds := float(GameData.breed(hen.breed_id).get("egg_seconds", 0.0))
+		if not offline and state.eggs_on_ground.size() >= capacity:
+			# Wybieg pelny: kura czeka z gotowym jajkiem. Licznik znoszenia stoi
+			# na maksimum, zeby po zwolnieniu miejsca nie wysypala serii jaj.
 			hen.since_last_egg = seconds
+			hen.waiting_seconds += step
 			continue
 		hen.since_last_egg -= seconds
-		state.eggs_on_ground.append(hen.breed_id)
+		hen.waiting_seconds = 0.0
+		if offline:
+			# Pod nieobecnosc gracza jaja trafiaja od razu do magazynu.
+			state.add_egg(hen.breed_id)
+		else:
+			state.eggs_on_ground.append(hen.breed_id)
 		out["eggs_laid"] = int(out["eggs_laid"]) + 1
 
 

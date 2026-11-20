@@ -45,8 +45,5 @@
     <!-- oko -->
     <circle cx="104" cy="36" r="4.5" fill="#3A3744" stroke="none"/>
     <circle cx="105.6" cy="34.4" r="1.6" fill="#FFFFFF" stroke="none"/>
-
-    <!-- niebieskie jajko przy nodze, zeby rasa byla rozpoznawalna -->
-    <ellipse cx="104" cy="112" rx="11" ry="14" fill="#9FD9D2" stroke-width="3"/>
   </g>
 </svg>

@@ -158,7 +158,8 @@ func _build_content(building_id: String) -> void:
 
 
 func _build_coop() -> void:
-	_add_row("PANEL_HENS", func() -> String: return str(Game.state.hen_count()))
+	_add_row("PANEL_HENS", func() -> String: return str(Game.state.laying_hen_count()))
+	_add_row("PANEL_ROOSTERS", func() -> String: return str(Game.state.rooster_count()))
 	_add_row("PANEL_COOP_SPACE",
 			func() -> String: return "%d / %d" % [Game.state.coop_occupied(), Game.state.coop_capacity()])
 	_add_row("PANEL_FOX_GUARD",
@@ -189,8 +190,13 @@ func _build_coop() -> void:
 		var breed_name: String = tr(breed.get("name", ""))
 		_add_dynamic_row(
 				func() -> String: return breed_name if _owned(breed_id) > 0 else "",
-				func() -> String: return tr("PANEL_FLOCK_LINE") % [
-					_owned(breed_id), NumberFormat.money(FarmState.egg_value(breed_id))])
+				func() -> String:
+					# Bez koguta rasa stoi bezproduktywnie — widac to od razu
+					# w spisie stada, a nie dopiero po braku jaj w magazynie.
+					if not Game.state.has_rooster(breed_id):
+						return tr("PANEL_FLOCK_LINE_NO_ROOSTER") % _owned(breed_id)
+					return tr("PANEL_FLOCK_LINE") % [
+						_owned(breed_id), NumberFormat.money(FarmState.egg_value(breed_id))])
 
 	_add_action(true,
 			func() -> bool: return Game.state.money >= float(
@@ -486,15 +492,17 @@ func _on_buy_feed() -> void:
 		_flash(tr("PANEL_FEED_BOUGHT"))
 
 
-func _on_buy_hen(breed_id: String, breed_name: String) -> void:
-	if Game.buy_hen(breed_id):
-		_flash(tr("PANEL_HEN_BOUGHT") % breed_name)
+func _on_buy_hen(breed_id: String, breed_name: String, rooster: bool = false) -> void:
+	if Game.buy_hen(breed_id, rooster):
+		var key := "PANEL_ROOSTER_BOUGHT" if rooster else "PANEL_HEN_BOUGHT"
+		_flash(tr(key) % breed_name)
 
 
-func _on_sell_hen(breed_id: String, breed_name: String) -> void:
-	var earned := Game.sell_hen(breed_id)
+func _on_sell_hen(breed_id: String, breed_name: String, rooster: bool = false) -> void:
+	var earned := Game.sell_hen(breed_id, rooster)
 	if earned > 0.0:
-		_flash(tr("PANEL_HEN_SOLD") % [breed_name, NumberFormat.money(earned)])
+		var key := "PANEL_ROOSTER_SOLD" if rooster else "PANEL_HEN_SOLD"
+		_flash(tr(key) % [breed_name, NumberFormat.money(earned)])
 
 
 func _on_buy_medicine() -> void:
@@ -553,6 +561,8 @@ func _guard_name(level: int) -> String:
 			return "PANEL_FOX_GUARD_FENCE"
 		2:
 			return "PANEL_FOX_GUARD_DOG"
+		3:
+			return "PANEL_FOX_GUARD_PACK"
 	return "PANEL_FOX_GUARD_NONE"
 
 
@@ -624,23 +634,46 @@ func _add_breed_card(breed: Dictionary) -> void:
 	top.add_child(texts)
 	card.add_child(top)
 
+	# Ostrzezenie widoczne tylko wtedy, gdy kury tej rasy stoja bez koguta
+	# i przez to nie znosza ani jednego jajka.
+	var no_rooster := Label.new()
+	no_rooster.theme_type_variation = &"NoteLabel"
+	no_rooster.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	no_rooster.text = tr("PANEL_NO_ROOSTER")
+	card.add_child(no_rooster)
+
 	var buy := Button.new()
 	buy.theme_type_variation = &"PrimaryButton"
 	buy.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	buy.pressed.connect(func() -> void: _on_buy_hen(breed_id, breed_name))
 	card.add_child(buy)
 
+	var buy_rooster := Button.new()
+	buy_rooster.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	buy_rooster.pressed.connect(func() -> void: _on_buy_hen(breed_id, breed_name, true))
+	card.add_child(buy_rooster)
+
 	var sell := Button.new()
 	sell.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	sell.pressed.connect(func() -> void: _on_sell_hen(breed_id, breed_name))
 	card.add_child(sell)
 
+	var sell_rooster := Button.new()
+	sell_rooster.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	sell_rooster.pressed.connect(func() -> void: _on_sell_hen(breed_id, breed_name, true))
+	card.add_child(sell_rooster)
+
 	_actions.add_child(card)
 
 	_refreshers.append(func() -> void:
 		var owned := _owned(breed_id)
+		var cocks := Game.state.hens_of_breed(breed_id, false, true)
+		var poor := Game.state.money < price
 		buy.text = tr("PANEL_BUY_HEN") % NumberFormat.money(price)
-		buy.disabled = Game.state.money < price
+		buy.disabled = poor
+		buy_rooster.text = tr("PANEL_BUY_ROOSTER") % [NumberFormat.money(price), cocks]
+		buy_rooster.disabled = poor
+		no_rooster.visible = owned > 0 and cocks == 0
 		sell.visible = owned > 0
 		# Najpierw sprzedaja sie zdrowe sztuki; gdy zostana same chore,
 		# przycisk sam pokazuje nizsza kwote i dopisek.
@@ -648,6 +681,10 @@ func _add_breed_card(breed: Dictionary) -> void:
 		var key := "PANEL_SELL_HEN_SICK" if sick_sale else "PANEL_SELL_HEN"
 		sell.text = tr(key) % [
 			NumberFormat.money(FarmState.hen_sell_price(breed_id, sick_sale)), owned]
+		sell_rooster.visible = cocks > 0
+		var sick_cock: bool = cocks > 0 and Game.next_sale_is_sick(breed_id, true)
+		sell_rooster.text = tr("PANEL_SELL_ROOSTER") % [
+			NumberFormat.money(FarmState.hen_sell_price(breed_id, sick_cock)), cocks]
 		subtitle.text = "%s · %s" % [tr(breed.get("rarity", "")), tr(breed.get("desc", ""))]
 		numbers.text = tr("PANEL_BREED_NUMBERS") % [
 			NumberFormat.money(FarmState.egg_value(breed_id)),

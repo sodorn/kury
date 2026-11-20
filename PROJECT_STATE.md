@@ -4,16 +4,18 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 7 zakonczony** (wersja 9.0): sklep bez blokad —
-  siedemnascie ras do kupienia od pierwszej minuty, a hamulcem balansu jest
-  czas odchowu, nie prog odblokowania. Do tego czesciej choroby i lis,
-  okienko ostrzegawcze, zgnilozielone chore kury z mgielka i krew po napasci.
+- Aktualny etap: **ETAP 8 zakonczony** (wersja 10.0): kury i koguty. Kura
+  znosi jaja tylko wtedy, gdy na farmie jest kogut jej rasy. Do tego duzo
+  tansze rozbudowy, kurnik do 260 ptakow, trzy jaja na pisklę zamiast
+  szesciu, szczepienie za stala setke i czesciej przychodzacy lis.
+- Wersja 9.0: sklep bez blokad — siedemnascie ras do kupienia od pierwszej
+  minuty, a hamulcem balansu jest czas odchowu, nie prog odblokowania.
 - Wersje grafiki: **1.0** plaski wektor (galaz `v1.0-grafika-plaska`, commit 6ea3a3c),
   **2.1** pastelowa, miekkie kontury, zaokraglone sylwetki — aktualna.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -175,6 +177,20 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## Weryfikacja wersji 10.0 (wykonana w srodowisku Claude, Linux)
+
+- `tests/tests.tscn`: **818/818 OK**. Doszly `_test_roosters` (kury bez koguta
+  nie znosza nic, sam kogut tez nie, kogut innej rasy nie pomaga, kupno
+  i sprzedaz w sklepie, migracja starego zapisu) i `_test_lay_fairness`.
+- `tests/smoke_ui.tscn` (xvfb): **OK**, cztery biegi pod rzad. Doszlo kupno
+  koguta w sklepie i sprawdzenie, ze staje na wybiegu z wlasna grafika.
+- Wersja przegladarkowa zbudowana i otwarta w prawdziwym Chrome: sklep
+  pokazuje "Kup koguta", "Sprzedaj koguta" i "Zaszczep stado za 100 zl".
+- `tools/balance_model.py`: wygrana po 13,6 h; przebieg przez wszystkie
+  siedemnascie ras i wszystkie rozbudowy wypisany w konsoli.
+- **NIE sprawdzone:** rozgrywka na telefonie wlasciciela i polaczenie
+  z prawdziwym Supabase (proxy w srodowisku Claude odrzuca `supabase.co`).
 
 ## Weryfikacja wersji 9.0 (wykonana w srodowisku Claude, Linux)
 
@@ -372,6 +388,31 @@ python3 tools/gen_ground.py
   scena pokazuje proporcjonalna probke, ale po jednej sztuce kazdej rasy.
   Chore kury pokazywane sa zawsze, bo to one wymagaja reakcji.
 
+### Ceny i tempo (wersja 10.0)
+
+- Rozbudowy sa duzo tansze niz w 9.0, bo wlasciciel nie kupowal ich w ogole.
+  Kurnik: 40/500, 60/1400, 80/3200, 110/7000, 150/15000, 200/30000, 260/60000 —
+  drabinka siega 260 ptakow, zeby przy siedemnastu rasach zmiescilo sie po
+  kilka sztuk kazdej razem z kogutami. Magazyn ma piec poziomow, do worka
+  2500 kg, inkubator piec, do 34 miejsc.
+- **Trzy jaja na pisklę** zamiast szesciu (`incubator.eggs_per_chick`).
+- Szczepienie: **stala setka za cale stado**, bez stawki od sztuki. Stawka
+  rosla razem ze stadem i w praktyce nikt tego nie kupowal. Pole
+  `vaccine_price_per_hen` zostaje w pliku balansu na wypadek powrotu do
+  rozliczania od sztuki — teraz wynosi zero.
+  **Uwaga na przyszlosc:** przy stalej setce choroba przestaje byc zagrozeniem
+  dla kogos, kto pamieta o ponownym szczepieniu po kazdym wykluciu. Jesli ma
+  gryzc, trzeba albo wprowadzic wygasanie szczepienia, albo wrocic do stawki
+  od sztuki.
+- Lis: co **15–36 minut** gry, zabiera 30–90% stada. Czesciej sie nie da.
+  Model przy 6–18 minutach nie konczy gry nawet w 300 godzin, jesli gracz
+  nie przegania lisa: stado zostaje na trzech kurach, bo odbudowa nie nadaza
+  za strata 60% co kwadrans. Sprawdzone `SCARE_RATE` w `tools/balance_model.py`.
+- Obrona przed lisem ma trzy poziomy: plot 600 (x1,7), pies 2500 (x3,0),
+  pies i nocne swiatla 9000 (x5,0).
+- Model calej gry: **wygrana po 13,6 h** (bylo 18,7 h w 9.0). Wlasciciel
+  swiadomie zgodzil sie na szybsze tempo na czas testow.
+
 ### Sklep bez blokad (wersja 9.0)
 
 - **Zadnych progow odblokowania.** Rasa ma jedna cene za sztuke, taka sama
@@ -405,6 +446,47 @@ python3 tools/gen_ground.py
 - Odblokowania potrafia trafic sie po dwa naraz (gracz przekroczyl prog
   pieniedzy i liczbe kur w tej samej klatce), wiec rasy czekaja w kolejce
   i pokazuja sie jedna po drugiej.
+
+### Kury i koguty (wersja 10.0)
+
+- **Kura znosi jaja tylko wtedy, gdy na farmie jest kogut jej rasy.** Kogut
+  sam nie znosi, je tyle samo co kura, zajmuje miejsce w kurniku i kosztuje
+  tyle samo. Da sie go sprzedac na tych samych zasadach.
+- Plec siedzi w `Chicken.is_rooster`; `Chicken.create_rooster()` to jedyny
+  sposob, zeby ja ustawic. `FarmState` liczy osobno `laying_hen_count()`
+  i `rooster_count()`, a `hen_count()` dalej znaczy **wszystkie ptaki** —
+  tyle je paszy, tyle zajmuje miejsc i sposrod tylu wybiera lis.
+- `hens_by_breed()` pomija koguty, bo sluzy do spisu niosek w kurniku
+  i do liczb na kartach w sklepie. Koguty liczy `hens_of_breed(id, false, true)`.
+- Pisklęta wykluwaja sie **zawsze jako kury**. Dzieki temu koguta kupuje sie
+  raz na rase i gracz nie musi zgadywac, co mu sie wykluje.
+- Ostrzezenia sa w trzech miejscach, bo cisza wygladalaby jak zepsuta gra:
+  okienko `AlertPanel` przy kupnie pierwszej kury rasy bez koguta i przy
+  sprzedazy ostatniego koguta, dopisek na karcie w sklepie i czerwony wpis
+  w spisie stada w Kurniku.
+- **Migracja zapisu (wersja 5).** Stare zapisy nie znaly kogutow, wiec po
+  aktualizacji cale stado stanelo by w miejscu. `_migrate` dokleja jednego
+  koguta do kazdej rasy, ktora gracz juz mial — zaszczepionego, jesli
+  zaszczepione byly jego kury. Nowa farma dostaje koguta z `start.roosters`.
+- Grafiki kogutow generuje `tools/gen_roosters.py` z jednego szablonu
+  (wysoka sylwetka, duzy grzebien, sierpowy ogon) i palety na rase. Recznych
+  poprawek w `assets/sprites/animals/rooster_*.svg` nie wprowadzac — zgina
+  przy nastepnym przebiegu. Plotno 170x130, stopy na y=118, tak samo jak
+  u kur, zeby `Sprite2D` z `offset = (4, -53)` postawil je na ziemi.
+
+### Kolejka do znoszenia: kto dostaje miejsce na wybiegu
+
+- Wybieg miesci `run.max_eggs_on_ground` jaj. Gdy jest pelny, wolne miejsce
+  dostaje kura, ktora **najdluzej czeka z gotowym jajkiem** (`waiting_seconds`).
+- Wczesniej decydowala kolejnosc w tablicy stada, czyli kolejnosc zakupu.
+  Pomiar: 20 leghornow i po jednej cemani i araukanie, pol godziny, wybieg
+  pelny — leghorny 292 jaja, araukana 1, cemani **0**. Po poprawce 161 / 6 / 7,
+  czyli dokladnie rowny podzial miejsc miedzy wszystkie kury.
+- Probowalem tez kursora przesuwanego o jeden na krok czasu. Nie dziala:
+  rytm zbierania jaj przez gracza rezonuje z krokiem kursora (przy zbieraniu
+  co 6 s kursor trafial tylko w co trzecia pozycje) i cemani dalej nie
+  znosila nic. Licznik oczekiwania jest na to odporny.
+- Pilnuje tego `_test_lay_fairness` w `tests/run_tests.gd`.
 
 ### Choroba i lis: oprawa (wersja 9.0)
 

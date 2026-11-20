@@ -32,6 +32,8 @@ func _ready() -> void:
 	_test_incubator_upgrade()
 	_test_win()
 	_test_offline_eggs()
+	_test_roosters()
+	_test_lay_fairness()
 	_test_time_gap()
 	_test_buildings()
 	_test_farm_code()
@@ -51,12 +53,31 @@ func _check(condition: bool, label: String) -> void:
 
 
 ## Stan oderwany od autoloadu Game, zeby testy nie zaleznialy od siebie.
+## Stado samych kur, BEZ kogutow. Uwaga: takie stado nie zniesie ani jednego
+## jajka — od wersji 10.0 kura potrzebuje koguta swojej rasy. Do testow
+## produkcji jaj sluzy `_laying_state`.
 func _fresh_state(hens: Array[String] = ["leghorn"], feed := 100.0) -> FarmState:
 	var state := FarmState.new()
 	state.money = 100
 	state.feed = feed
 	for breed_id in hens:
 		state.chickens.append(Chicken.create(breed_id))
+	return state
+
+
+## To samo stado plus jeden kogut kazdej wystepujacej rasy, czyli stado, ktore
+## faktycznie niesie. Koguty sa zaszczepione, zeby nie chorowaly w testach,
+## ktore mierza co innego.
+func _laying_state(hens: Array[String] = ["leghorn"], feed := 100.0) -> FarmState:
+	var state := _fresh_state(hens, feed)
+	var added := {}
+	for breed_id in hens:
+		if added.has(breed_id):
+			continue
+		added[breed_id] = true
+		var rooster := Chicken.create_rooster(breed_id)
+		rooster.vaccinated = true
+		state.chickens.append(rooster)
 	return state
 
 
@@ -74,7 +95,12 @@ func _test_farm_state() -> void:
 	_check(state.egg_count() == 0, "brakujace pole = 0")
 	_check(state.hen_count() == 2, "hen_count")
 	_check(is_equal_approx(state.feed, 20.0), "feed z configu")
-	_check(Game.state != null and Game.state.hen_count() == 3, "Game wystartowal z 3 kurami z balance.json")
+	_check(Game.state != null and Game.state.laying_hen_count() == 3,
+			"Game wystartowal z 3 kurami z balance.json")
+	# Nowa farma musi dostac koguta razem z kurami, inaczej nie zniosla by
+	# ani jednego jajka i gra wygladalaby na zepsuta od pierwszej minuty.
+	_check(Game.state != null and Game.state.has_rooster("leghorn"),
+			"nowa farma ma koguta, wiec kury maja dla kogo niesc")
 
 
 func _test_data_files() -> void:
@@ -151,7 +177,7 @@ func _test_simulation() -> void:
 	var seconds := float(GameData.breed("leghorn").get("egg_seconds", 0.0))
 
 	# Jedna kura po czasie znoszenia daje dokladnie jedno jajko.
-	var state := _fresh_state()
+	var state := _laying_state()
 	var result := Simulation.advance(state, seconds)
 	_check(int(result["eggs_laid"]) == 1, "jedna kura, jedno jajko po %.0f s" % seconds)
 	_check(state.eggs_on_ground.size() == 1, "jajko wyladowalo na wybiegu")
@@ -163,7 +189,7 @@ func _test_simulation() -> void:
 	_check(int(Simulation.advance(early, seconds - 5.0)["eggs_laid"]) == 0, "przed czasem brak jaja")
 
 	# Trzy kury przez trzy cykle: dziewiec jaj.
-	var flock := _fresh_state(["leghorn", "leghorn", "leghorn"])
+	var flock := _laying_state(["leghorn", "leghorn", "leghorn"])
 	_check(int(Simulation.advance(flock, seconds * 3.0)["eggs_laid"]) == 9, "3 kury x 3 cykle = 9 jaj")
 
 	# Pasza sie zuzywa.
@@ -317,7 +343,7 @@ func _test_offline() -> void:
 	# Dwie godziny nieobecnosci przy duzym zapasie paszy. Kura zaszczepiona,
 	# bo inaczej moze w tym czasie zachorowac i przestac niesc — test
 	# sprawdza limit wybiegu, a nie choroby.
-	var away := _fresh_state(["leghorn"], 10000.0)
+	var away := _laying_state(["leghorn"], 10000.0)
 	for hen: Chicken in away.chickens:
 		hen.vaccinated = true
 	var laid := int(Simulation.advance(away, 7200.0)["eggs_laid"])
@@ -601,7 +627,7 @@ func _test_fox() -> void:
 	_check(Game.state.hen_count() == 20, "stado w komplecie po przegonieniu")
 
 	# Pod nieobecnosc gracza nie ma kogo czekac: strata liczy sie od razu.
-	var away := _fresh_state(hens, 100000.0)
+	var away := _laying_state(hens, 100000.0)
 	away.fox_timer = 5.0
 	var offline := Simulation.advance(away, 6.0, true)
 	_check(int(offline["fox_took"]) > 0, "offline lis zabiera od razu")
@@ -764,6 +790,106 @@ func _test_money_format() -> void:
 
 
 ## Pod nieobecnosc gracza jaja omijaja wybieg i ida prosto do magazynu.
+## Kogut: warunek znoszenia, osobny towar w sklepie i migracja starych zapisow.
+func _test_roosters() -> void:
+	var seconds := float(GameData.breed("leghorn").get("egg_seconds", 0.0))
+
+	# Same kury, bez koguta: przez dziesiec pelnych cykli ani jednego jajka.
+	var lonely := _fresh_state(["leghorn", "leghorn"], 10000.0)
+	for hen: Chicken in lonely.chickens:
+		hen.vaccinated = true
+	_check(int(Simulation.advance(lonely, seconds * 10.0)["eggs_laid"]) == 0,
+			"bez koguta stado nie znosi nic")
+	var missing := lonely.breeds_without_rooster()
+	_check(missing.size() == 1 and missing[0] == "leghorn", "stan wskazuje rase bez koguta")
+
+	# Dokladamy koguta i te same kury zaczynaja niesc.
+	lonely.chickens.append(Chicken.create_rooster("leghorn"))
+	_check(lonely.has_rooster("leghorn"), "kogut jest w stadzie")
+	_check(int(Simulation.advance(lonely, seconds)["eggs_laid"]) > 0,
+			"z kogutem te same kury juz nioska")
+	_check(lonely.breeds_without_rooster().is_empty(), "nie brakuje juz zadnego koguta")
+
+	# Kogut nie znosi, nawet gdy zostanie sam.
+	var only_cocks := FarmState.new()
+	only_cocks.feed = 1000.0
+	only_cocks.chickens.append(Chicken.create_rooster("leghorn"))
+	only_cocks.chickens[0].vaccinated = true
+	_check(int(Simulation.advance(only_cocks, seconds * 5.0)["eggs_laid"]) == 0,
+			"sam kogut nie zniesie jajka")
+
+	# Kogut jednej rasy nie obsluguje kur innej rasy.
+	var mixed := _fresh_state(["rhode"], 10000.0)
+	mixed.chickens[0].vaccinated = true
+	mixed.chickens.append(Chicken.create_rooster("leghorn"))
+	var rhode_seconds := float(GameData.breed("rhode").get("egg_seconds", 0.0))
+	_check(int(Simulation.advance(mixed, rhode_seconds * 4.0)["eggs_laid"]) == 0,
+			"kogut leghorna nie pomaga kurom rhode")
+
+	# Liczenie: kogut jest ptakiem w kurniku, ale nie kura w statystyce.
+	var counted := _laying_state(["leghorn", "leghorn"])
+	_check(counted.hen_count() == 3, "kurnik liczy koguta razem z kurami")
+	_check(counted.laying_hen_count() == 2 and counted.rooster_count() == 1,
+			"kury i koguty licza sie osobno")
+	_check(counted.hens_of_breed("leghorn", false, true) == 1, "kogut danej rasy policzony")
+	_check(int(counted.hens_by_breed().get("leghorn", 0)) == 2,
+			"spis stada wedlug ras pomija koguty")
+
+	# Sklep: kupno i sprzedaz koguta, cena taka sama jak za kure.
+	Game.new_game()
+	Game.state.money = 100000.0
+	var cocks_before := Game.state.rooster_count()
+	_check(Game.buy_hen("rhode", true), "kogut do kupienia w sklepie")
+	_check(Game.state.rooster_count() == cocks_before + 1, "kupiony kogut trafil do stada")
+	_check(Game.state.has_rooster("rhode"), "to kogut wlasciwej rasy")
+	_check(Game.sell_hen("rhode", true) > 0.0, "koguta da sie sprzedac")
+	_check(not Game.state.has_rooster("rhode"), "sprzedany kogut zniknal ze stada")
+	Game.new_game()
+
+	# Migracja: zapis sprzed wersji 5 nie znal kogutow, wiec wczytana farma
+	# dostaje po jednym na kazda posiadana rase — inaczej stanelaby w miejscu.
+	var old_save := {
+		"version": 4,
+		"money": 10.0,
+		"feed": 5.0,
+		"chickens": [
+			{"breed": "leghorn", "vax": true},
+			{"breed": "leghorn", "vax": true},
+			{"breed": "cemani", "vax": false},
+		],
+	}
+	var loaded: Dictionary = SaveGame.from_dict(old_save)
+	var migrated: FarmState = loaded.get("state")
+	_check(migrated != null and migrated.has_rooster("leghorn") and migrated.has_rooster("cemani"),
+			"stary zapis dostaje koguta kazdej posiadanej rasy")
+	_check(migrated != null and migrated.laying_hen_count() == 3,
+			"migracja nie zmienia liczby kur")
+	_check(migrated != null and migrated.rooster_count() == 2,
+			"migracja dodaje dokladnie jednego koguta na rase")
+
+
+## Przy pelnym wybiegu wolne miejsca musza krazyc po stadzie. Wczesniej brala
+## je zawsze kura z poczatku tablicy i rasy kupione pozniej nie znosily nic:
+## pomiar dal 292 jaja leghorna i 0 cemani.
+func _test_lay_fairness() -> void:
+	var hens: Array[String] = []
+	for i in 20:
+		hens.append("leghorn")
+	hens.append("cemani")
+	var state := _laying_state(hens, 100000.0)
+	for bird: Chicken in state.chickens:
+		bird.vaccinated = true
+	# Wybieg zostaje pelny: zbieramy po jednym jajku na szesc sekund.
+	for i in 1800:
+		Simulation.advance(state, 1.0)
+		if i % 6 == 0 and not state.eggs_on_ground.is_empty():
+			var breed_id: String = state.eggs_on_ground[0]
+			state.eggs_on_ground.remove_at(0)
+			state.add_egg(breed_id)
+	var cemani := int(state.eggs.get("cemani", 0)) + state.eggs_on_ground.count("cemani")
+	_check(cemani > 0, "przy pelnym wybiegu cemani tez znosi (zniosla %d)" % cemani)
+
+
 func _test_offline_eggs() -> void:
 	var capacity := int(GameData.balance().get("run", {}).get("max_eggs_on_ground", 30))
 	var hens: Array[String] = []
@@ -771,14 +897,14 @@ func _test_offline_eggs() -> void:
 		hens.append("leghorn")
 
 	# Na zywo: wybieg ma limit i po jego zapelnieniu kury przestaja niesc.
-	var live := _fresh_state(hens, 100000.0)
+	var live := _laying_state(hens, 100000.0)
 	var live_result := Simulation.advance(live, 3.0 * 3600.0)
 	_check(live.eggs_on_ground.size() <= capacity, "na zywo wybieg nie przekracza limitu")
 	_check(live.egg_count() == 0, "na zywo jaja czekaja na wybiegu, nie w magazynie")
 	_check(int(live_result["eggs_laid"]) == capacity, "na zywo limit wybiegu wstrzymuje znoszenie")
 
 	# Offline: te same kury przez ten sam czas odkladaja o wiele wiecej.
-	var away := _fresh_state(hens, 100000.0)
+	var away := _laying_state(hens, 100000.0)
 	var away_result := Simulation.advance(away, 3.0 * 3600.0, true)
 	_check(away.eggs_on_ground.is_empty(), "offline nic nie laduje na wybiegu")
 	_check(away.egg_count() > capacity, "offline magazyn zbiera wiecej, niz miesci wybieg")
@@ -830,8 +956,8 @@ func _test_time_gap() -> void:
 	# Poza gra czas plynie wolniej, zeby noc nie przewracala gospodarstwa.
 	var divider := float(GameData.balance().get("offline", {}).get("speed_divider", 1.0))
 	_check(divider > 1.0, "spowolnienie czasu poza gra jest wlaczone")
-	var away_state := _fresh_state(["leghorn"], 100000.0)
-	var live_state := _fresh_state(["leghorn"], 100000.0)
+	var away_state := _laying_state(["leghorn"], 100000.0)
+	var live_state := _laying_state(["leghorn"], 100000.0)
 	var window := 2.0 * 3600.0
 	var away_result := Simulation.advance(away_state, window / divider, true)
 	var live_result := Simulation.advance(live_state, window)

@@ -11,7 +11,7 @@ extends RefCounted
 
 const PATH := "user://save.json"
 ## Numer formatu zapisu. Podnosic przy KAZDEJ zmianie ukladu pol.
-const VERSION := 4
+const VERSION := 5
 
 
 ## Zamienia stan gry na slownik gotowy do zapisu.
@@ -197,4 +197,26 @@ static func _migrate(data: Dictionary, from_version: int) -> Dictionary:
 		data["storage_level"] = 0
 		data["guard_level"] = 0
 		data["version"] = 4
+	if from_version < 5:
+		# Wersja 5 dzieli stado na kury i koguty, a kura bez koguta swojej rasy
+		# nie znosi jaj. W starym zapisie kogutow nie bylo wcale, wiec gra
+		# zatrzymalaby sie w miejscu: kazda rasa dostaje jednego koguta
+		# w prezencie, zeby wczytana farma dzialala tak jak przed aktualizacja.
+		var birds: Array = data.get("chickens", [])
+		var vaccinated_breeds := {}
+		for entry: Dictionary in birds:
+			var breed_id := String(entry.get("breed", ""))
+			if breed_id.is_empty():
+				continue
+			# Kogut przychodzi zaszczepiony, jesli choc jedna kura tej rasy byla —
+			# inaczej aktualizacja sama wpuscilaby choroby do zdrowego stada.
+			if not vaccinated_breeds.has(breed_id) or bool(entry.get("vax", false)):
+				vaccinated_breeds[breed_id] = bool(entry.get("vax", false))
+		var gifted: Array = []
+		for breed_id: String in vaccinated_breeds:
+			var rooster := Chicken.create_rooster(breed_id)
+			rooster.vaccinated = bool(vaccinated_breeds[breed_id])
+			gifted.append(rooster.to_dict())
+		data["chickens"] = birds + gifted
+		data["version"] = 5
 	return data

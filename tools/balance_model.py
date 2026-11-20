@@ -13,6 +13,7 @@ Nie zastepuje grania, ale wylapuje liczby bez sensu: rase, ktora nigdy sie
 nie zwraca, albo milion osiagalny w kwadrans.
 """
 import json
+import random
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -64,6 +65,10 @@ def hens_to_saturate(breed_id: str, slots: int) -> int:
     return max(3, int(needed) + 1)
 
 
+## Jaka czesc wizyt lisa gracz przegania, zanim porwie kury.
+SCARE_RATE = 0.0
+
+
 def simulate(verbose: bool = True) -> dict:
     money = float(BALANCE["start"]["money"])
     feed = float(BALANCE["start"]["feed"])
@@ -88,6 +93,13 @@ def simulate(verbose: bool = True) -> dict:
     disease = BALANCE["disease"]
     fox = BALANCE["fox"]
     vaccine_per_hen = disease["vaccine_price_per_hen"]
+    vaccine_flat = disease["vaccine_price"]
+    # Kazda rasa, ktora gracz trzyma, potrzebuje jednego koguta. Kogut
+    # kosztuje tyle co kura, je tyle co kura i zajmuje miejsce w kurniku,
+    # ale nie znosi — to staly podatek od wejscia w nowa rase.
+    roosters: dict[str, int] = {}
+    for breed_id in BALANCE["start"].get("roosters", []):
+        roosters[breed_id] = roosters.get(breed_id, 0) + 1
     vaccinated = 0
     fox_timer = (fox["min_hours"] + fox["max_hours"]) / 2 * 3600
     fox_share = (fox["min_share"] + fox["max_share"]) / 2
@@ -108,13 +120,14 @@ def simulate(verbose: bool = True) -> dict:
         seconds += STEP
         day = int(seconds / day_seconds)
         total_hens = sum(hens.values())
+        total_birds = total_hens + sum(roosters.values())
         best = max((b for b in hens if hens[b] > 0),
                    key=lambda b: BREEDS[b]["sell_price"], default=None)
 
         # --- rozbudowa budynkow ------------------------------------------
         # Gracz doklada budynek, gdy stac go z zapasem. Kurnik ma
         # pierwszenstwo, bo bez miejsca stado nie urosnie.
-        crowded = total_hens + len(growing) >= capacity - 2
+        crowded = total_birds + len(growing) >= capacity - 2
         while coop_up and crowded and money >= coop_up[0]["price"] * 2:
             up = coop_up.pop(0)
             money -= up["price"]
@@ -132,11 +145,11 @@ def simulate(verbose: bool = True) -> dict:
             history.append((seconds / 3600.0, "obrona przed lisem x%.1f" % guard_mult))
 
         # --- pasza -------------------------------------------------------
-        need = total_hens * feed_rate * 15  # zapas na 15 minut
+        need = total_birds * feed_rate * 15  # zapas na 15 minut
         while feed < need and money >= pack_price:
             money -= pack_price
             feed += pack_size
-        burn = total_hens * feed_rate * STEP / 60.0
+        burn = total_birds * feed_rate * STEP / 60.0
         if feed >= burn:
             feed -= burn
         else:
@@ -146,7 +159,7 @@ def simulate(verbose: bool = True) -> dict:
 
         # --- znoszenie jaj ----------------------------------------------
         for breed_id, count in hens.items():
-            if count == 0:
+            if count == 0 or roosters.get(breed_id, 0) == 0:
                 continue
             timers[breed_id] += STEP * count
             interval = BREEDS[breed_id]["egg_seconds"]
@@ -155,7 +168,7 @@ def simulate(verbose: bool = True) -> dict:
                 eggs[breed_id] = eggs.get(breed_id, 0) + 1
 
         # --- inkubator ---------------------------------------------------
-        occupied = total_hens
+        occupied = total_birds
         for breed_id in sorted(hens, key=lambda b: -BREEDS[b]["sell_price"]):
             while (len(incubating) + len(growing) < slots
                    and occupied < capacity
@@ -195,19 +208,22 @@ def simulate(verbose: bool = True) -> dict:
         # --- szczepienie nowych kur w stadzie ----------------------------
         # Model zaklada gracza, ktory szczepi to, co zatrzymuje. Kury
         # odchowane na sprzedaz ida dalej od razu, wiec ich nie szczepi.
-        if total_hens > vaccinated and money > vaccine_per_hen * (total_hens - vaccinated):
-            cost = vaccine_per_hen * (total_hens - vaccinated)
+        if total_birds > vaccinated and money > vaccine_flat + vaccine_per_hen * (total_hens - vaccinated):
+            cost = vaccine_flat + vaccine_per_hen * (total_birds - vaccinated)
             money -= cost
             vaccine_spent += cost
-            vaccinated = total_hens
-        vaccinated = min(vaccinated, total_hens)
+            vaccinated = total_birds
+        vaccinated = min(vaccinated, total_birds)
 
         # --- lis ---------------------------------------------------------
         fox_timer -= STEP
         if fox_timer <= 0:
             fox_timer = (fox["min_hours"] + fox["max_hours"]) / 2 * 3600 * guard_mult
-            if total_hens >= fox["min_hens"]:
-                taken = max(1, min(int(round(total_hens * fox_share)), total_hens - 1))
+            if random.random() < SCARE_RATE:
+                # Gracz patrzacy na ekran zdazy w lisa stuknac trzy razy.
+                pass
+            elif total_birds >= fox["min_hens"]:
+                taken = max(1, min(int(round(total_birds * fox_share)), total_hens - 1))
                 fox_visits += 1
                 left = taken
                 for breed_id in sorted(hens, key=lambda b: BREEDS[b]["sell_price"]):
@@ -238,10 +254,15 @@ def simulate(verbose: bool = True) -> dict:
         for breed_id in sorted(unlocked, key=lambda b: -BREEDS[b]["price"]):
             if hens.get(breed_id, 0) > 0 or money < BREEDS[breed_id]["price"] * 2:
                 continue
-            if sum(hens.values()) >= capacity:
+            if total_birds + 2 > capacity:
                 continue
             money -= BREEDS[breed_id]["price"]
             hens[breed_id] = hens.get(breed_id, 0) + 1
+            # Bez koguta tej rasy kury nie zniosa nic, wiec gracz kupuje go
+            # razem z pierwsza kura. To podwaja koszt wejscia w rase.
+            if roosters.get(breed_id, 0) == 0 and money >= BREEDS[breed_id]["price"]:
+                money -= BREEDS[breed_id]["price"]
+                roosters[breed_id] = 1
             if breed_id not in owned_ever:
                 owned_ever.add(breed_id)
                 history.append((seconds / 3600.0,

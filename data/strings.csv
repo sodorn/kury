@@ -47,11 +47,13 @@ RARITY_RARE,rzadka
 RARITY_EPIC,bardzo rzadka
 RARITY_LEGENDARY,wyjątkowa
 PANEL_HENS,Kury w stadzie
+PANEL_ROOSTERS,Koguty w stadzie
 PANEL_COOP_SPACE,Miejsce w kurniku
 PANEL_FOX_GUARD,Ochrona przed lisem
 PANEL_FOX_GUARD_NONE,brak
 PANEL_FOX_GUARD_FENCE,mocny płot
 PANEL_FOX_GUARD_DOG,pies podwórzowy
+PANEL_FOX_GUARD_PACK,"pies i nocne światła"
 PANEL_UPGRADE_COOP,"Rozbuduj kurnik do %d miejsc za %s"
 PANEL_UPGRADE_GUARD,"Postaw %s za %s — lis będzie przychodził %s razy rzadziej"
 PANEL_UPGRADE_STORAGE,"Większy magazyn za %s — worek %d kg po %s za kg"
@@ -125,6 +127,8 @@ HINT_SICK,"Zachorowało %d kur."
 ALERT_OK,"Rozumiem"
 ALERT_SICK_TITLE,"Uwaga, choroba!"
 ALERT_SICK_BODY,"W stadzie zachorowało %d kur. Poznasz je po zgniłozielonej poświacie — ledwo się wloką i przestały znosić. Kup lek w sklepie albo sprzedaj je, zanim padną."
+ALERT_NO_ROOSTER_TITLE,"Brakuje koguta"
+ALERT_NO_ROOSTER_BODY,"Kury rasy %s nie zniosą ani jednego jajka, dopóki na farmie nie ma koguta tej samej rasy. Kogut jest w sklepie, w tej samej cenie co kura."
 HINT_DIED_DISEASE,"Z choroby padło %d kur."
 HINT_DIED_HUNGER,"Z głodu padło %d kur. Dosyp paszy!"
 HINT_FOX_HERE,"Ojej, do twojego kurnika zakrada się chytry lisek! Stukaj w niego, zanim porwie kury!"
@@ -173,3 +177,9 @@ START_LOAD,"Wczytaj farmę z tego kodu"
 START_CODE_TITLE,"Twój kod farmy"
 START_CODE_NOTE,"Zapisz go sobie gdzieś poza telefonem. Wpisując ten kod na innym urządzeniu wejdziesz do tej samej gry, a po wyczyszczeniu przeglądarki odzyskasz farmę."
 START_PLAY,"Zaczynamy!"
+PANEL_BUY_ROOSTER,"Kup koguta za %s (masz %d)"
+PANEL_SELL_ROOSTER,"Sprzedaj koguta za %s (masz %d)"
+PANEL_ROOSTER_BOUGHT,"Kogut rasy %s dołączył do stada."
+PANEL_ROOSTER_SOLD,"Kogut rasy %s sprzedany za %s."
+PANEL_NO_ROOSTER,"Bez koguta tej rasy te kury nie zniosą ani jednego jajka."
+PANEL_FLOCK_LINE_NO_ROOSTER,"%d szt. · brak koguta, nie znoszą"

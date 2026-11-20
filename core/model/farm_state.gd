@@ -17,6 +17,7 @@ var days: int = 0
 ## tak samo przy grze na zywo i przy nadrabianiu czasu.
 var day_fraction: float = 0.0
 
+## Cale stado: kury i koguty razem. `Chicken.is_rooster` rozstrzyga, kto jest kim.
 var chickens: Array[Chicken] = []
 var incubating: Array[EggBatch] = []
 var chicks: Array[Chick] = []
@@ -59,6 +60,10 @@ static func from_start_config(start: Dictionary) -> FarmState:
 	state.feed = float(start.get("feed", 0))
 	for breed_id: String in start.get("hens", []):
 		state.chickens.append(Chicken.create(breed_id))
+	# Bez koguta stado nie zniesie ani jednego jajka, wiec nowa farma dostaje go
+	# razem z kurami. Inaczej gra wygladalaby na zepsuta od pierwszej minuty.
+	for breed_id: String in start.get("roosters", []):
+		state.chickens.append(Chicken.create_rooster(breed_id))
 	var starting_eggs := int(start.get("eggs", 0))
 	if starting_eggs > 0 and not state.chickens.is_empty():
 		state.eggs[state.chickens[0].breed_id] = starting_eggs
@@ -88,25 +93,63 @@ func mark_owned(breed_id: String) -> void:
 		unlocked_breeds.append(breed_id)
 
 
+## Cale stado razem z kogutami. Tyle ptakow je pasze, tyle zajmuje miejsc
+## w kurniku i tyle lis ma do wyboru.
 func hen_count() -> int:
 	return chickens.size()
 
 
-## Ile sztuk kazdej rasy jest w stadzie: {"leghorn": 3, "cemani": 1}.
+## Ile w stadzie jest kur, a ile kogutow.
+func laying_hen_count() -> int:
+	var count := 0
+	for bird: Chicken in chickens:
+		if not bird.is_rooster:
+			count += 1
+	return count
+
+
+func rooster_count() -> int:
+	return chickens.size() - laying_hen_count()
+
+
+## Czy na farmie jest kogut tej rasy. Bez niego kury tej rasy nie znosza jaj.
+## Chory kogut dalej sie liczy — choruje, ale zyje.
+func has_rooster(breed_id: String) -> bool:
+	for bird: Chicken in chickens:
+		if bird.is_rooster and bird.breed_id == breed_id:
+			return true
+	return false
+
+
+## Rasy, ktore maja kury, ale nie maja koguta — czyli stoja bezproduktywnie.
+func breeds_without_rooster() -> Array[String]:
+	var missing: Array[String] = []
+	for bird: Chicken in chickens:
+		if bird.is_rooster or missing.has(bird.breed_id):
+			continue
+		if not has_rooster(bird.breed_id):
+			missing.append(bird.breed_id)
+	return missing
+
+
+## Ile sztuk kazdej rasy jest w stadzie, bez kogutow: {"leghorn": 3, "cemani": 1}.
 func hens_by_breed() -> Dictionary:
 	var counts := {}
-	for hen: Chicken in chickens:
-		counts[hen.breed_id] = int(counts.get(hen.breed_id, 0)) + 1
+	for bird: Chicken in chickens:
+		if bird.is_rooster:
+			continue
+		counts[bird.breed_id] = int(counts.get(bird.breed_id, 0)) + 1
 	return counts
 
 
-## Ile sztuk danej rasy, z podzialem na zdrowe i chore.
-func hens_of_breed(breed_id: String, only_healthy: bool = false) -> int:
+## Ile sztuk danej rasy i danej plci; `only_healthy` pomija chore.
+func hens_of_breed(breed_id: String, only_healthy: bool = false,
+		roosters: bool = false) -> int:
 	var count := 0
-	for hen: Chicken in chickens:
-		if hen.breed_id != breed_id:
+	for bird: Chicken in chickens:
+		if bird.breed_id != breed_id or bird.is_rooster != roosters:
 			continue
-		if only_healthy and hen.sick:
+		if only_healthy and bird.sick:
 			continue
 		count += 1
 	return count

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="170" height="130" viewBox="0 0 170 130">
+  <!-- Kogut rasy czubatka. Plik generowany przez tools/gen_roosters.py -
+       recznych poprawek nie wprowadzac, bo zginą przy nastepnym przebiegu. -->
+  <defs>
+    <radialGradient id="bczu" cx="62" cy="62" r="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4C4C58"/>
+      <stop offset="0.55" stop-color="#33333D"/>
+      <stop offset="1" stop-color="#1C1C24"/>
+    </radialGradient>
+    <radialGradient id="hczu" cx="108" cy="34" r="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4C4C58"/>
+      <stop offset="1" stop-color="#33333D"/>
+    </radialGradient>
+    <linearGradient id="kczu" x1="130" y1="40" x2="152" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFD98A"/>
+      <stop offset="1" stop-color="#EDA845"/>
+    </linearGradient>
+  </defs>
+
+  <g stroke="#8A6A55" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="78" cy="122" rx="40" ry="8" fill="#6B8F4E" fill-opacity="0.28" stroke="none"/>
+
+    <!-- siep: dlugie piora ogona wygiete w luk wysoko nad grzbietem.
+         To one odrozniaja koguta od kury na pierwszy rzut oka. -->
+    <path d="M48 62Q18 34 30 4Q38 32 56 48Z" fill="#F2EEE4"/>
+    <path d="M44 68Q6 44 6 12Q24 42 50 56Z" fill="#1C1C24"/>
+    <path d="M42 76Q2 62 2 34Q22 58 46 66Z" fill="#F2EEE4"/>
+    <path d="M44 84Q8 88 8 62Q28 74 48 70Z" fill="#1C1C24"/>
+
+    <!-- nogi: kogut stoi wyzej od kury -->
+    <path d="M70 102v16M70 118h-10M70 118h10" stroke="#EDA845"/>
+    <path d="M94 102v16M94 118h-10M94 118h10" stroke="#EDA845"/>
+
+    <!-- tulow -->
+    <ellipse cx="76" cy="74" rx="40" ry="33" fill="url(#bczu)"/>
+
+    <!-- skrzydlo -->
+    <path d="M58 66Q82 56 96 76Q78 92 60 85Q52 75 58 66Z" fill="#4C4C58" fill-opacity="0.75"/>
+    <path d="M64 73Q76 69 86 77" fill="none" stroke-width="3"/>
+
+    <!-- szyja i glowa wysoko nad tulowiem -->
+    <path d="M96 62Q100 42 108 36" fill="none" stroke-width="12" stroke="#33333D"/>
+    <circle cx="112" cy="34" r="22" fill="url(#hczu)"/>
+
+    <!-- duzy, zebaty grzebien -->
+    <path d="M98 16q5-13 11-4q5-14 11-3q5-12 10-1q4-9 7 3" fill="#D8453F"/>
+    <!-- korale pod dziobem -->
+    <path d="M124 50q-5 14-14 10q-2-11 6-15Z" fill="#D8453F"/>
+    <path d="M134 48q6 10 0 14q-6-3-5-11Z" fill="#D8453F"/>
+
+    <!-- dziob -->
+    <path d="M132 36l17 6-17 6Z" fill="url(#kczu)"/>
+
+    <!-- oko -->
+    <circle cx="122" cy="30" r="4.5" fill="#3A3744" stroke="none"/>
+    <circle cx="123.6" cy="28.4" r="1.6" fill="#FFFFFF" stroke="none"/>
+  </g>
+</svg>

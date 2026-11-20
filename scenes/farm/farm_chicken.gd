@@ -12,6 +12,8 @@ const CHICK_SPEED := 58.0
 ## palcem na telefonie.
 const CHICK_SCALE := Vector2(1.01, 1.15)
 const HEN_SCALE := Vector2(1.15, 1.33)
+## Kogut jest o oczko wiekszy od swoich kur.
+const ROOSTER_SCALE := 1.12
 ## Chora kura ledwo sie wlecze, jest zzielniala i parauje od niej mgla.
 const SICK_SPEED := 11.0
 const SICK_TINT := Color(0.62, 0.78, 0.52)
@@ -28,6 +30,8 @@ const ARRIVED_DISTANCE := 8.0
 
 var breed_id: String = ""
 var is_chick := false
+## Kogut: inna grafika, odrobine wiekszy i nie znosi jaj.
+var is_rooster := false
 ## Kura chora: nie znosi jaj, ma nad soba banke z krzyzem i wkrotce padnie.
 var is_sick := false
 ## Zwierze jest w trakcie animacji znikania — scena ma go juz nie liczyc.
@@ -47,12 +51,17 @@ var _rest_range := REST_SECONDS
 
 
 ## `bounds` to obszar w ukladzie farmy, po ktorym zwierze moze chodzic.
-func setup(animal_breed_id: String, bounds: Rect2, chick: bool = false, sick: bool = false) -> void:
+func setup(animal_breed_id: String, bounds: Rect2, chick: bool = false, sick: bool = false,
+		rooster: bool = false) -> void:
 	breed_id = animal_breed_id
 	is_chick = chick
+	is_rooster = rooster and not chick
 	_bounds = bounds
 
-	var path: String = CHICK_SPRITE if chick else String(GameData.breed(breed_id).get("sprite", ""))
+	var def := GameData.breed(breed_id)
+	var path := CHICK_SPRITE
+	if not chick:
+		path = String(def.get("rooster_sprite", "")) if is_rooster else String(def.get("sprite", ""))
 	var texture := load(path) as Texture2D
 	if texture == null:
 		push_error("FarmChicken: brak grafiki dla rasy '%s'" % breed_id)
@@ -64,6 +73,8 @@ func setup(animal_breed_id: String, bounds: Rect2, chick: bool = false, sick: bo
 	# Lekko rozne rozmiary, zeby stado nie wygladalo jak kopie jednej kury.
 	var range_used := CHICK_SCALE if chick else HEN_SCALE
 	var size := randf_range(range_used.x, range_used.y)
+	if is_rooster:
+		size *= ROOSTER_SCALE
 	scale = Vector2(size, size)
 	set_sick(sick)
 	_rest_left = randf_range(0.0, _rest_range.y)
