@@ -301,38 +301,12 @@ static func run_area() -> Rect2:
 			float(area.get("w", 860)), float(area.get("h", 420)))
 
 
-## Rasy, ktore wlasnie spelnily warunki odblokowania. Dopisuje je do stanu
-## i zwraca ich identyfikatory, zeby gra mogla pokazac komunikat.
-static func check_unlocks(state: FarmState) -> Array[String]:
-	var fresh: Array[String] = []
-	for breed: Dictionary in GameData.breeds():
-		var breed_id: String = breed.get("id", "")
-		if state.is_unlocked(breed_id):
-			continue
-		if not meets_unlock(state, breed):
-			continue
-		state.unlocked_breeds.append(breed_id)
-		fresh.append(breed_id)
-	return fresh
-
-
-## Czy gospodarstwo spelnia warunki odblokowania danej rasy.
-static func meets_unlock(state: FarmState, breed: Dictionary) -> bool:
-	var need: Dictionary = breed.get("unlock", {})
-	if need.is_empty():
-		return true
-	if state.money < float(need.get("money", 0)):
-		return false
-	if state.days < int(need.get("days", 0)):
-		return false
-	if state.hen_count() < int(need.get("hens", 0)):
-		return false
-	if state.feed < float(need.get("feed", 0)):
-		return false
-	for required_id: String in need.get("breeds", []):
-		if not state.owns_breed(required_id):
-			return false
-	return true
+## Dawniej rasy odblokowywaly sie po przekroczeniu progu pieniedzy albo
+## liczby kur. Gracz czytal te progi jak ceny i slusznie uznal za sztuczne:
+## wszystko stoi teraz w sklepie od poczatku, a jedyna bariera jest cena.
+## Funkcja zostaje pusta, zeby nie przepisywac wszystkich jej wywolan.
+static func check_unlocks(_state: FarmState) -> Array[String]:
+	return [] as Array[String]
 
 
 ## Sprawdza warunki wygranej. Zwraca powod ("money" albo "collection"),

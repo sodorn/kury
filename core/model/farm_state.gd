@@ -67,12 +67,25 @@ static func from_start_config(start: Dictionary) -> FarmState:
 	return state
 
 
-## Rasy bez warunkow odblokowania sa dostepne od poczatku.
+## W sklepie stoja wszystkie rasy od pierwszej minuty. Bariera jest cena,
+## a nie sztuczny prog — mozesz kupic Ayam Cemani na starcie, jesli tylko
+## uzbierasz 8 tysiecy.
+##
+## Lista `unlocked_breeds` sluzy teraz do czego innego: pamieta, ktore rasy
+## gracz juz mial. Dzieki temu okienko z historia rasy pokazuje sie raz,
+## przy pierwszym zakupie, i nie wyskakuje przy kazdej kolejnej sztuce.
 func ensure_starting_unlocks() -> void:
-	for breed: Dictionary in GameData.breeds():
-		var breed_id: String = breed.get("id", "")
-		if Dictionary(breed.get("unlock", {})).is_empty() and not unlocked_breeds.has(breed_id):
-			unlocked_breeds.append(breed_id)
+	pass
+
+
+## Czy gracz mial juz kiedys kure tej rasy.
+func has_ever_owned(breed_id: String) -> bool:
+	return unlocked_breeds.has(breed_id)
+
+
+func mark_owned(breed_id: String) -> void:
+	if not unlocked_breeds.has(breed_id):
+		unlocked_breeds.append(breed_id)
 
 
 func hen_count() -> int:
@@ -122,8 +135,9 @@ func owns_breed(breed_id: String) -> bool:
 	return false
 
 
-func is_unlocked(breed_id: String) -> bool:
-	return unlocked_breeds.has(breed_id)
+## Zostawione dla UI: w sklepie nic juz nie jest zablokowane.
+func is_unlocked(_breed_id: String) -> bool:
+	return true
 
 
 ## Czy gracz ma po jednej kurze kazdej rasy w grze.

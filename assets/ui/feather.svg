@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="40" viewBox="-14 -20 28 40">
+  <!-- Pioro wyrwane kurze przez lisa. Kod barwi je na kolor rasy. -->
+  <g stroke="#8A6A55" stroke-width="2" stroke-linejoin="round">
+    <path d="M0 -18C7 -10 9 2 4 14C1 18 -1 18 -4 14C-9 2 -7 -10 0 -18Z" fill="#FFFCF5"/>
+    <path d="M0 -14V13" stroke="#D8C4A4" stroke-width="2"/>
+  </g>
+</svg>

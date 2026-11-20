@@ -1,12 +1,17 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scenes/farm/fox.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/animals/fox.svg" id="2"]
+[ext_resource type="Texture2D" path="res://assets/ui/feather.svg" id="3"]
+[ext_resource type="Texture2D" path="res://assets/ui/blood.svg" id="4"]
+[ext_resource type="Texture2D" path="res://assets/ui/mist.svg" id="5"]
 
 [sub_resource type="RectangleShape2D" id="FoxShape"]
 size = Vector2(190, 150)
 
 [node name="Fox" type="Area2D"]
+scale = Vector2(1.45, 1.45)
+z_index = 50
 input_pickable = true
 script = ExtResource("1")
 
@@ -17,3 +22,65 @@ offset = Vector2(0, -62)
 [node name="Shape" type="CollisionShape2D" parent="."]
 position = Vector2(0, -62)
 shape = SubResource("FoxShape")
+
+[node name="Dust" type="CPUParticles2D" parent="."]
+emitting = false
+local_coords = false
+position = Vector2(0, -8)
+amount = 18
+lifetime = 0.5
+texture = ExtResource("5")
+emission_shape = 1
+emission_sphere_radius = 16.0
+direction = Vector2(0, -1)
+spread = 60.0
+gravity = Vector2(0, -40)
+initial_velocity_min = 20.0
+initial_velocity_max = 70.0
+scale_amount_min = 0.4
+scale_amount_max = 0.9
+color = Color(0.78, 0.69, 0.55, 0.5)
+
+[node name="Feathers" type="CPUParticles2D" parent="."]
+emitting = false
+local_coords = false
+one_shot = true
+explosiveness = 0.85
+position = Vector2(0, -70)
+amount = 22
+lifetime = 1.8
+texture = ExtResource("3")
+emission_shape = 1
+emission_sphere_radius = 40.0
+direction = Vector2(0, -1)
+spread = 180.0
+gravity = Vector2(0, 160)
+initial_velocity_min = 120.0
+initial_velocity_max = 320.0
+angular_velocity_min = -220.0
+angular_velocity_max = 220.0
+scale_amount_min = 0.7
+scale_amount_max = 1.5
+
+[node name="Blood" type="CPUParticles2D" parent="."]
+emitting = false
+local_coords = false
+one_shot = true
+explosiveness = 1.0
+position = Vector2(0, -46)
+amount = 30
+lifetime = 0.9
+texture = ExtResource("4")
+emission_shape = 1
+emission_sphere_radius = 22.0
+direction = Vector2(0, -1)
+spread = 110.0
+gravity = Vector2(0, 900)
+initial_velocity_min = 160.0
+initial_velocity_max = 470.0
+angular_velocity_min = -320.0
+angular_velocity_max = 320.0
+scale_amount_min = 0.5
+scale_amount_max = 1.2
+damping_min = 60.0
+damping_max = 140.0

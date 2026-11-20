@@ -64,7 +64,7 @@
 	},
 	"disease": {
 		"_opis": "chance_per_hen_hour: srednia liczba zachorowan na kure na godzine. Chora kura nie znosi jaj i po death_minutes pada. Szczepienie placi sie od kury, wiec rosnie razem ze stadem.",
-		"chance_per_hen_hour": 0.15,
+		"chance_per_hen_hour": 0.45,
 		"death_minutes": 7.0,
 		"medicine_price": 80,
 		"vaccine_price": 0,
@@ -72,8 +72,8 @@
 	},
 	"fox": {
 		"_opis": "Lis przychodzi raz na kilka godzin i porywa od min_share do max_share stada. Przez visit_seconds biega po wybiegu — jesli gracz zdazy w niego trafic scare_taps razy, ucieka z niczym.",
-		"min_hours": 3.0,
-		"max_hours": 8.0,
+		"min_hours": 1.0,
+		"max_hours": 3.0,
 		"min_share": 0.2,
 		"max_share": 0.9,
 		"min_hens": 5,
@@ -81,8 +81,9 @@
 		"scare_taps": 3
 	},
 	"win": {
+		"_opis": "Jeden cel: pieniadze. Kolekcja ras przestala byc wyzwaniem, gdy zniknely progi odblokowania — po jednej sztuce kazdej rasy da sie kupic w niecale szesc godzin.",
 		"money": 1500000,
-		"collection": true
+		"collection": false
 	},
 	"buildings": {
 		"_opis": "Ulepszenia budynkow. Poziom 0 to stan poczatkowy, kazdy kolejny to wpis z upgrades.",

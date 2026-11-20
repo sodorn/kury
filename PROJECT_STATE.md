@@ -4,14 +4,16 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 6 zakonczony** (wersja 8.1): ekonomia w zlotowkach,
-  dziewiec ras, glod, choroby, szczepienia, lis, handel kurami w sklepie,
-  rozbudowa inkubatora i dwa warunki wygranej.
+- Aktualny etap: **ETAP 7 zakonczony** (wersja 9.0): sklep bez blokad —
+  siedemnascie ras do kupienia od pierwszej minuty, a hamulcem balansu jest
+  czas odchowu, nie prog odblokowania. Do tego czesciej choroby i lis,
+  okienko ostrzegawcze, zgnilozielone chore kury z mgielka i krew po napasci.
 - Wersje grafiki: **1.0** plaski wektor (galaz `v1.0-grafika-plaska`, commit 6ea3a3c),
   **2.1** pastelowa, miekkie kontury, zaokraglone sylwetki — aktualna.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
-  `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`.
+  `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -174,6 +176,23 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
 
+## Weryfikacja wersji 9.0 (wykonana w srodowisku Claude, Linux)
+
+- `tests/tests.tscn`: **797/797 OK**.
+- `tests/smoke_ui.tscn` (xvfb, renderer programowy): **OK**, cztery biegi
+  pod rzad bez bledu. Obejmuje ekran startowy, cztery panele budynkow,
+  zbieranie jajka, sklep z siedemnastoma rasami (kazda z widocznym przyciskiem
+  zakupu), inkubator, sprzedaz kury, okienko rasy, wczytanie farmy z kodu,
+  zgnilozielone chore kury z mgielka, okienko "Uwaga, choroba!", wejscie lisa,
+  piora, krew i plamy zostajace na wybiegu.
+- Wersja przegladarkowa zbudowana i uruchomiona w prawdziwym Chrome
+  (playwright-core): gra wstaje, ekran startowy dziala, sklep pokazuje
+  wszystkie rasy az do Ayam Cemani za 8 000 zl, bez blokad.
+- **NIE sprawdzone:** polaczenie z prawdziwym Supabase — proxy w srodowisku
+  Claude odrzuca `supabase.co`, wiec chmura jest testowana tylko przeciwko
+  atrapie (`tools/mock_backend.py`). Na zywym adresie musi to potwierdzic
+  wlasciciel (napis "Serwer: polaczony" w Kurniku).
+
 ## Weryfikacja ETAPU 2 (wykonana w srodowisku Claude, Linux)
 
 - Import projektu w Godot 4.7.2: bez bledow.
@@ -201,9 +220,9 @@ tools/       gen_ground.py          generator tla i przedniego plotu
 ## Nastepne zadania
 
 - Krotki samouczek na start (3-4 kroki) i przycisk "?" z zasadami.
-- UI do przepisania kodu farmy na inne urzadzenie (z wymuszonym pobraniem
-  z serwera, patrz uwaga wyzej).
 - Zdjecia ras: podmiana plikow w assets/photos/, bez zmian w kodzie.
+- Z `POMYSLY.md` jeszcze nie zrobione: zamowienia od klientow, jakosc/genetyka
+  pojedynczej kury, wahania cen na rynku, wystawy drobiu, pory roku.
 - Zdjecia ras w panelu sklepu: wlasciciel dostarcza pliki, Claude nie ma
   dostepu do sieci poza GitHubem i rejestrami pakietow, wiec sam ich nie pobierze.
   Wymagania: PNG, jeden ptak na plik, licencja pozwalajaca na uzycie
@@ -353,11 +372,31 @@ python3 tools/gen_ground.py
   scena pokazuje proporcjonalna probke, ale po jednej sztuce kazdej rasy.
   Chore kury pokazywane sa zawsze, bo to one wymagaja reakcji.
 
-### Karta rasy zablokowanej
+### Sklep bez blokad (wersja 9.0)
 
-- Warunek odblokowania i cena to **dwie osobne linijki**. Samo "3 000 zl"
-  w miejscu, gdzie inne karty maja "Kup za 80 zl", czyta sie jak cena kury —
-  Tomek tak to odczytal i zglosil jako bledny balans.
+- **Zadnych progow odblokowania.** Rasa ma jedna cene za sztuke, taka sama
+  za pierwszym i za dziesiatym razem. Klucze `unlock` zniknely z
+  `breeds.json`, `Simulation.check_unlocks()` zwraca pusta liste (zostawiona
+  jako zaslepka, zeby nie przerabiac wszystkich wywolan), a
+  `FarmState.is_unlocked()` zawsze zwraca `true`.
+- Pole `unlocked_breeds` w zapisie **zostalo**, ale znaczy teraz co innego:
+  "te rasy gracz kiedykolwiek mial". Sluzy wylacznie do tego, zeby okienko
+  z historia rasy pokazalo sie raz, przy pierwszym zakupie. Format zapisu
+  sie nie zmienil (`SaveGame.VERSION` dalej 4), wiec stare farmy wchodza bez
+  konwersji.
+- Powodem zmiany byla uwaga wlasciciela: prog "3 000 zl" czytal sie jak cena
+  kury i wygladal jak absurdalny balans.
+- **Hamulcem jest teraz czas odchowu.** `grow_seconds` kazdej rasy to czas
+  bazowy przemnozony przez `(cena / 40) ^ 0,28`: leghorn 2,5 min, cemani
+  32,5 min. Droga kura zarabia wiecej na jajku, ale dlugo nie pracuje.
+- Sprzedaz dalej daje **70% ceny zakupu** — cemani kupiony za 8 000 zl wraca
+  jako 5 600 zl, wiec rozmnozenie drogiej rasy ma sens.
+- Wykladnik 0,28 nie jest zgadniety: `tools/balance_model.py` przeliczyl
+  kilka wartosci i przy tej gra dochodzi do 1 500 000 zl w okolo **18,7 h**
+  gry. Przy braku jakiegokolwiek hamulca wychodzilo 9,8 h.
+- Druga wygrana (kolekcja wszystkich ras) jest **wylaczona**
+  (`win.collection: false`): bez blokad dalo sie ja zrobic w 5,6 h i psula
+  cel gry. Liczy sie tylko `win.money`.
 
 ### Okienko "nowa rasa odblokowana"
 
@@ -366,6 +405,44 @@ python3 tools/gen_ground.py
 - Odblokowania potrafia trafic sie po dwa naraz (gracz przekroczyl prog
   pieniedzy i liczbe kur w tej samej klatce), wiec rasy czekaja w kolejce
   i pokazuja sie jedna po drugiej.
+
+### Choroba i lis: oprawa (wersja 9.0)
+
+- Choroba zdarza sie czesciej (`disease.chance_per_hen_hour` 0,45), lis
+  przychodzi co **1–3 h** zamiast co kilka godzin. To one trzymaja balans
+  zamiast progow w sklepie.
+- Chora kura **nie ma juz ikonki apteczki**. Zamiast tego: zgnilozielony
+  odcien (`SICK_TINT`), przechylenie sylwetki, osiadniecie na nogach,
+  predkosc 11 px/s i mgielka z `CPUParticles2D` (`assets/ui/mist.svg`).
+  Wszystko w `farm_chicken.gd`, przelaczane przez `set_sick()`.
+- Pulapka, ktora juz raz ugryzla: `farm.gd/_flip_existing` przerzuca kure
+  miedzy stanami **tylko w strone chorej**. Gdy dzialalo w obie strony,
+  synchronizacja zdrowych cofala kury, ktore wlasnie zachorowaly, i gracz
+  nigdy nie widzial zielonej kury.
+- Choroba zglasza sie przez `Events.alert` i `AlertPanel`
+  (`scenes/ui/panels/alert_panel.tscn`) — modalne okienko z kolejka, nie
+  znikajacy pasek. Arkusz nie ma stalej wysokosci, tylko rosnie pod tresc.
+- Lis: `class_name FarmFox` (bez tego `_nodes_of_type("Fox")` w tescie nic
+  nie znajdowal), skala 1,45 i `z_index = 50`, zeby nie chowal sie za kurami.
+  Przy wejsciu i ucieczce leci kurz, przy napasci: chmura piór, **krew**
+  (`Blood`, `assets/ui/blood.svg`), szarpniecie calym wybiegiem i skok na kure.
+- Plamy krwi (`assets/ui/blood_splat.svg`) zostaja na wybiegu przez 9 s.
+  Siedza w **rodzicu** lisa, nie w nim samym — inaczej odjechalyby razem
+  z uciekajacym lisem. Z tego samego powodu czastki maja `local_coords = false`.
+- Komunikat przy wejsciu (`HINT_FOX_HERE`) jest podyktowany przez wlasciciela
+  co do slowa: "Ojej, do twojego kurnika zakrada sie chytry lisek!".
+
+### Test dymny: wspolrzedne dotkniecia
+
+- `_tap` dostaje punkt we wspolrzednych **widoku** (1080x1920), ale
+  `Input.parse_input_event` udaje zdarzenie z systemu, a system podaje
+  piksele **okna**. Przy `window_width_override=486` okno jest 0,45 raza
+  mniejsze, wiec bez przeliczenia przez `get_viewport().get_screen_transform()`
+  dotkniecie ladowalo ponad dwa razy dalej niz cel i zaden budynek sie nie
+  otwieral. Przeliczenie robi teraz samo `_tap`.
+- Scena dokleja kury i jaja przy swoim cyklicznym odswiezeniu, a nie od razu
+  po sygnale. Testy, ktore licza wezly, czekaja przez `_wait_for_nodes`
+  zamiast zgadywac liczbe klatek — bez tego co trzeci bieg byl czerwony.
 
 ### Teksty: pulapka z cudzyslowami
 

@@ -638,10 +638,7 @@ func _add_breed_card(breed: Dictionary) -> void:
 	_actions.add_child(card)
 
 	_refreshers.append(func() -> void:
-		var unlocked: bool = Game.state.is_unlocked(breed_id)
 		var owned := _owned(breed_id)
-		picture.modulate = Color(1, 1, 1, 1) if unlocked else Color(0.45, 0.45, 0.5, 0.9)
-		buy.visible = unlocked
 		buy.text = tr("PANEL_BUY_HEN") % NumberFormat.money(price)
 		buy.disabled = Game.state.money < price
 		sell.visible = owned > 0
@@ -651,17 +648,11 @@ func _add_breed_card(breed: Dictionary) -> void:
 		var key := "PANEL_SELL_HEN_SICK" if sick_sale else "PANEL_SELL_HEN"
 		sell.text = tr(key) % [
 			NumberFormat.money(FarmState.hen_sell_price(breed_id, sick_sale)), owned]
-		if unlocked:
-			subtitle.text = "%s · %s" % [tr(breed.get("rarity", "")), tr(breed.get("desc", ""))]
-			numbers.text = tr("PANEL_BREED_NUMBERS") % [
-				NumberFormat.money(FarmState.egg_value(breed_id)),
-				int(float(breed.get("egg_seconds", 0))),
-				owned]
-		else:
-			# Przy zablokowanej rasie pokazujemy osobno warunek i osobno cene,
-			# bo sam warunek ("3 000 zl") czyta sie jak cena kury.
-			subtitle.text = tr("PANEL_NEED") % _unlock_text(breed)
-			numbers.text = tr("PANEL_LOCKED_PRICE") % NumberFormat.money(price))
+		subtitle.text = "%s · %s" % [tr(breed.get("rarity", "")), tr(breed.get("desc", ""))]
+		numbers.text = tr("PANEL_BREED_NUMBERS") % [
+			NumberFormat.money(FarmState.egg_value(breed_id)),
+			int(float(breed.get("egg_seconds", 0))),
+			owned])
 
 
 ## Grafika rasy: najpierw prawdziwe zdjecie, w razie jego braku rysunek.
@@ -673,22 +664,6 @@ func _breed_image(breed: Dictionary) -> Texture2D:
 
 
 ## Czego brakuje do odblokowania rasy, po przecinku.
-func _unlock_text(breed: Dictionary) -> String:
-	var need: Dictionary = breed.get("unlock", {})
-	var parts: Array[String] = []
-	if Game.state.money < float(need.get("money", 0)):
-		parts.append(tr("PANEL_NEED_MONEY") % NumberFormat.money(float(need.get("money", 0))))
-	if Game.state.days < int(need.get("days", 0)):
-		parts.append(tr("PANEL_NEED_DAYS") % int(need.get("days", 0)))
-	if Game.state.hen_count() < int(need.get("hens", 0)):
-		parts.append(tr("PANEL_NEED_HENS") % int(need.get("hens", 0)))
-	if Game.state.feed < float(need.get("feed", 0)):
-		parts.append(tr("PANEL_NEED_FEED") % int(need.get("feed", 0)))
-	for required_id: String in need.get("breeds", []):
-		if not Game.state.owns_breed(required_id):
-			parts.append(tr("PANEL_NEED_BREED") % tr(GameData.breed(required_id).get("name", "")))
-	return ", ".join(parts)
-
 
 func _on_incubate(breed_id: String) -> void:
 	if Game.incubate(breed_id):

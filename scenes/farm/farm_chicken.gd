@@ -12,10 +12,13 @@ const CHICK_SPEED := 58.0
 ## palcem na telefonie.
 const CHICK_SCALE := Vector2(1.01, 1.15)
 const HEN_SCALE := Vector2(1.15, 1.33)
-## Chora kura rusza sie niechetnie i jest przygaszona.
-const SICK_SPEED := 18.0
-const SICK_TINT := Color(0.82, 0.86, 0.78)
-const SICK_REST_SECONDS := Vector2(3.0, 6.0)
+## Chora kura ledwo sie wlecze, jest zzielniala i parauje od niej mgla.
+const SICK_SPEED := 11.0
+const SICK_TINT := Color(0.62, 0.78, 0.52)
+const SICK_REST_SECONDS := Vector2(4.0, 8.0)
+## O tyle chora kura przechyla sie i opada — wyglada na oklapnieta.
+const SICK_DROOP := 0.17
+const SICK_SINK := 10.0
 ## Ile sekund zwierze stoi i dziobie miedzy spacerami.
 const REST_SECONDS := Vector2(1.2, 3.4)
 const CHICK_REST_SECONDS := Vector2(0.4, 1.4)
@@ -40,7 +43,7 @@ var _speed := SPEED
 var _rest_range := REST_SECONDS
 
 @onready var _sprite: Sprite2D = $Sprite
-@onready var _sick_mark: Sprite2D = $Sick
+@onready var _mist: CPUParticles2D = $Mist
 
 
 ## `bounds` to obszar w ukladzie farmy, po ktorym zwierze moze chodzic.
@@ -74,17 +77,11 @@ func set_sick(sick: bool) -> void:
 	_rest_range = SICK_REST_SECONDS if sick else (CHICK_REST_SECONDS if is_chick else REST_SECONDS)
 	if _sprite != null:
 		_sprite.modulate = SICK_TINT if sick else Color.WHITE
-	if _sick_mark != null:
-		_sick_mark.visible = sick
-		if sick:
-			_pulse_mark()
-
-
-## Banka nad chora kura lekko pulsuje, zeby wpadla w oko na pelnym wybiegu.
-func _pulse_mark() -> void:
-	var tween := create_tween().set_loops()
-	tween.tween_property(_sick_mark, "scale", Vector2(1.16, 1.16), 0.5).set_trans(Tween.TRANS_SINE)
-	tween.tween_property(_sick_mark, "scale", Vector2.ONE, 0.5).set_trans(Tween.TRANS_SINE)
+		# Oklapniecie: kura przechyla sie na bok i osiada nizej.
+		_sprite.rotation = SICK_DROOP if sick else 0.0
+		_sprite.position.y = SICK_SINK if sick else 0.0
+	if _mist != null:
+		_mist.emitting = sick
 
 
 func _process(delta: float) -> void:

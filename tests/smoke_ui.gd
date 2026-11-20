@@ -58,6 +58,7 @@ func _run() -> void:
 	await _test_no_feed_notice()
 	await _test_unlock_popup()
 	await _test_farm_code_restore()
+	await _test_sick_and_fox_look()
 
 	SaveGame.clear()
 	print("TEST DYMNY: %s" % ("OK" if _failed == 0 else "%d BLEDOW" % _failed))
@@ -106,9 +107,10 @@ func _test_egg_pickup() -> void:
 	Game.state.eggs_on_ground.append("leghorn")
 	Game.state.eggs_on_ground.append("leghorn")
 	Events.eggs_laid.emit(2)
-	await _frames(20)
-	var eggs := _nodes_of_type("GroundEgg")
-	_check(eggs.size() == 2, "jajka pojawily sie na wybiegu")
+	# Scena dokleja jajka przy swoim cyklicznym odswiezeniu, a nie od razu po
+	# sygnale — czekamy, az dojdzie do dwoch, zamiast zgadywac liczbe klatek.
+	var eggs := await _wait_for_nodes("GroundEgg", 2)
+	_check(eggs.size() == 2, "jajka pojawily sie na wybiegu (jest %d)" % eggs.size())
 	_shot("jajka.png")
 	if eggs.is_empty():
 		return
@@ -142,18 +144,19 @@ func _test_shop() -> void:
 	await _frames(10)
 	_check(Game.state.feed > feed_before, "zakup paszy dziala")
 
-	# Karta rasy odblokowanej ma widoczny przycisk, zablokowanej nie ma.
-	# Karty ras siedza na koncu listy, po przyciskach i notce o szczepieniu.
+	# Kazda rasa ma teraz widoczny przycisk zakupu — sklep nie ma blokad.
 	var first_card := rows.size() - GameData.breeds().size()
 	var open_card := _card_button(rows[first_card])
-	var locked_card := _card_button(rows[rows.size() - 1])
+	var last_card := _card_button(rows[rows.size() - 1])
 	_check(open_card != null and open_card.visible, "karta rasy startowej ma przycisk zakupu")
-	_check(locked_card != null and not locked_card.visible, "karta zablokowanej rasy nie pozwala kupic")
+	_check(last_card != null and last_card.visible, "najdrozsza rasa tez ma przycisk zakupu")
+	_check(last_card != null and last_card.disabled, "ale bez pieniedzy przycisk jest wyszarzony")
 
 	var hens_before: int = Game.state.hen_count()
 	if open_card != null:
 		open_card.emit_signal("pressed")
 	await _frames(30)
+	await _dismiss_unlock_popup()
 	_check(Game.state.hen_count() == hens_before + 1, "zakup kury dziala")
 	_check(_nodes_of_type("FarmChicken").size() == Game.state.hen_count(), "kupiona kura pojawila sie na wybiegu")
 	_shot("panel_po_zakupach.png")
@@ -192,7 +195,8 @@ func _test_incubator_panel() -> void:
 	Simulation.advance(Game.state, float(GameData.breed(breed_id).get("incubate_seconds", 0)) + 1.0)
 	await _frames(40)
 	_check(Game.state.chicks.size() == 1, "pisklę sie wykluło")
-	_check(_nodes_of_type("FarmChicken").size() == Game.state.hen_count() + 1,
+	var with_chick := await _wait_for_nodes("FarmChicken", Game.state.hen_count() + 1)
+	_check(with_chick.size() == Game.state.hen_count() + 1,
 			"pisklę pojawilo sie na wybiegu")
 	_shot("pisklę.png")
 
@@ -200,7 +204,8 @@ func _test_incubator_panel() -> void:
 	Simulation.advance(Game.state, float(GameData.breed(breed_id).get("grow_seconds", 0)) + 1.0)
 	await _frames(40)
 	_check(Game.state.hen_count() == hens_before + 1, "pisklę wyroslo w kure")
-	_check(_nodes_of_type("FarmChicken").size() == Game.state.hen_count(), "wybieg nadazyl za zmiana")
+	var grown := await _wait_for_nodes("FarmChicken", Game.state.hen_count())
+	_check(grown.size() == Game.state.hen_count(), "wybieg nadazyl za zmiana")
 
 
 ## Sprzedaz kury w sklepie: stado maleje, pieniedzy przybywa, kura znika
@@ -281,14 +286,29 @@ func _nodes_of_type(class_name_wanted: String) -> Array[Node]:
 	return found
 
 
+## Czeka, az w scenie pojawi sie zadana liczba wezlow danego typu. Zwraca to,
+## co zastanie po ostatniej probie, zeby test mogl sam powiedziec, czego brakuje.
+func _wait_for_nodes(class_name_wanted: String, wanted: int, tries: int = 12) -> Array[Node]:
+	var found := _nodes_of_type(class_name_wanted)
+	for i in tries:
+		if found.size() == wanted:
+			break
+		await _frames(10)
+		found = _nodes_of_type(class_name_wanted)
+	return found
+
+
 func _canvas_point(node: Node2D, offset: Vector2) -> Vector2:
 	return node.get_global_transform_with_canvas() * offset
 
 
-## Dotkniecie w punkcie podanym w pikselach okna. `get_global_transform_with_canvas`
-## zwraca juz wspolrzedne okna, wiec nie wolno ich mnozyc po raz drugi przez
-## skale — przy oknie innym niz 1080 px szerokosci dotyk ladowal obok celu.
-func _tap(point: Vector2) -> void:
+## Dotkniecie w punkcie podanym we wspolrzednych widoku (1080x1920) — tak jak
+## zwraca je `_canvas_point`. `Input.parse_input_event` udaje zdarzenie z systemu,
+## a system podaje piksele OKNA, ktore przy `window_width_override=486` sa 0,45
+## raza mniejsze. Bez przeliczenia przez `get_screen_transform` dotkniecie ladowalo
+## ponad dwa razy dalej niz cel i zaden budynek sie nie otwieral.
+func _tap(viewport_point: Vector2) -> void:
+	var point := get_viewport().get_screen_transform() * viewport_point
 	for pressed in [true, false]:
 		var event := InputEventScreenTouch.new()
 		event.index = 0
@@ -315,7 +335,8 @@ func _test_unlock_popup() -> void:
 		await _frames(30)
 
 	var popup: Control = _main.get_node("Hud/Root/UnlockPanel")
-	_check(not popup.visible, "okienko rasy jest schowane, dopoki nic sie nie odblokuje")
+	await _dismiss_unlock_popup()
+	_check(not popup.visible, "okienko rasy jest schowane, dopoki nic sie nie pojawi")
 
 	# Rasa z konca drabinki, zeby bylo widac i historie, i wysoka cene.
 	Events.breed_unlocked.emit("cemani")
@@ -442,3 +463,84 @@ func _test_start_screen() -> void:
 
 	# Po zamknieciu ekranu symulacje zatrzymujemy, jak reszta testu tego oczekuje.
 	Game.set_process(false)
+
+
+## Zamyka okienko z historia rasy, jesli wlasnie wyskoczylo. Po zmianie
+## z wersji 9.0 pokazuje sie przy pierwszym zakupie kazdej rasy i — jako
+## okno modalne — przykrywa sklep.
+func _dismiss_unlock_popup() -> void:
+	var popup: Control = _main.get_node("Hud/Root/UnlockPanel")
+	while popup.visible:
+		(popup.get_node("Sheet/Content/Close") as Button).emit_signal("pressed")
+		await _frames(40)
+
+
+## Oprawa choroby i lisa: zgnilozielona kura z mgielka, okienko ostrzezenia
+## i chmura piór po napasci.
+func _test_sick_and_fox_look() -> void:
+	var panel: Control = _main.get_node("Hud/Root/BuildingPanel")
+	if panel.visible:
+		panel.close()
+		await _frames(30)
+
+	# Chora kura: zielen, przechylenie i mgla zamiast dawnej ikonki.
+	Game.state.chickens.clear()
+	for i in 6:
+		Game.state.chickens.append(Chicken.create("leghorn"))
+	Game.state.chickens[0].sick = true
+	Game.state.chickens[1].sick = true
+	await _frames(80)
+	var sick_nodes := 0
+	var mist_on := 0
+	for node in _nodes_of_type("FarmChicken"):
+		var animal := node as FarmChicken
+		if not animal.is_sick:
+			continue
+		sick_nodes += 1
+		if (animal.get_node("Mist") as CPUParticles2D).emitting:
+			mist_on += 1
+	_check(sick_nodes == 2, "obie chore kury widac na wybiegu")
+	_check(mist_on == sick_nodes, "od kazdej chorej kury idzie mgielka")
+	_check(_main.get_node_or_null("Hud/Root/UnlockPanel") != null, "okienko rasy nadal w scenie")
+	_shot("chore_kury.png")
+
+	# Okienko ostrzezenia o chorobie.
+	var alert: Control = _main.get_node("Hud/Root/AlertPanel")
+	_check(not alert.visible, "ostrzezenie schowane, dopoki nic sie nie dzieje")
+	Events.alert.emit(tr("ALERT_SICK_TITLE"), tr("ALERT_SICK_BODY") % 2)
+	await _frames(40)
+	_check(alert.visible, "ostrzezenie o chorobie pokazuje sie jako okienko")
+	_check((alert.get_node("Sheet/Content/Title") as Label).text == tr("ALERT_SICK_TITLE"),
+			"naglowek ostrzezenia")
+	_shot("okienko_choroba.png")
+	(alert.get_node("Sheet/Content/Close") as Button).emit_signal("pressed")
+	await _frames(40)
+	_check(not alert.visible, "ostrzezenie da sie zamknac")
+
+	# Lis: wejscie, komunikat i chmura piór przy napasci.
+	Events.fox_arrived.emit(3, 7.0)
+	await _frames(60)
+	var foxes := _nodes_of_type("FarmFox")
+	_check(foxes.size() == 1, "lis wszedl na wybieg")
+	_shot("lis_na_wybiegu.png")
+	Events.fox_visited.emit(3)
+	await _frames(20)
+	var feathers_on := false
+	var blood_on := false
+	for node in foxes:
+		feathers_on = feathers_on or (node.get_node("Feathers") as CPUParticles2D).emitting
+		blood_on = blood_on or (node.get_node("Blood") as CPUParticles2D).emitting
+	_check(feathers_on, "po napasci leca piora")
+	_check(blood_on, "po napasci leci krew")
+	# Plamy krwi zostaja na wybiegu, wiec sa dziecmi kontenera, nie lisa.
+	var splats := 0
+	for child in _main.get_node("Farm/Objects").get_children():
+		var sprite := child as Sprite2D
+		if sprite != null and sprite.texture != null \
+				and sprite.texture.resource_path.ends_with("blood_splat.svg"):
+			splats += 1
+	_check(splats > 0, "na wybiegu zostaly plamy krwi (jest %d)" % splats)
+	_shot("lis_piora.png")
+	await _frames(90)
+	_check(_nodes_of_type("FarmFox").is_empty(), "lis odszedl z wybiegu")
+	_shot("lis_krew.png")

@@ -45,3 +45,8 @@ signal fox_scared()
 ## Gra zostala wygrana; `reason` to "money" albo "collection".
 @warning_ignore("unused_signal")
 signal game_won(reason: String)
+
+## Ostrzezenie wymagajace reakcji gracza — pokazuje sie jako okienko,
+## nie jako znikajacy pasek.
+@warning_ignore("unused_signal")
+signal alert(title: String, message: String)

@@ -11,8 +11,8 @@
 		"egg_value": 0.4,
 		"price": 40,
 		"sell_price": 28,
-		"incubate_seconds": 60.0,
-		"grow_seconds": 90.0
+		"incubate_seconds": 60,
+		"grow_seconds": 90
 	},
 	{
 		"id": "rhode",
@@ -26,12 +26,8 @@
 		"egg_value": 0.44,
 		"price": 55,
 		"sell_price": 39,
-		"incubate_seconds": 66.0,
-		"grow_seconds": 98.0,
-		"unlock": {
-			"money": 250,
-			"days": 1
-		}
+		"incubate_seconds": 72,
+		"grow_seconds": 107
 	},
 	{
 		"id": "szabo",
@@ -45,12 +41,8 @@
 		"egg_value": 0.48,
 		"price": 80,
 		"sell_price": 56,
-		"incubate_seconds": 72.0,
-		"grow_seconds": 106.0,
-		"unlock": {
-			"money": 700,
-			"hens": 5
-		}
+		"incubate_seconds": 87,
+		"grow_seconds": 129
 	},
 	{
 		"id": "nagoszyja",
@@ -64,12 +56,8 @@
 		"egg_value": 0.52,
 		"price": 110,
 		"sell_price": 77,
-		"incubate_seconds": 78.0,
-		"grow_seconds": 114.0,
-		"unlock": {
-			"money": 1800,
-			"hens": 8
-		}
+		"incubate_seconds": 104,
+		"grow_seconds": 151
 	},
 	{
 		"id": "marans",
@@ -83,13 +71,9 @@
 		"egg_value": 0.55,
 		"price": 150,
 		"sell_price": 105,
-		"incubate_seconds": 84.0,
-		"grow_seconds": 124.0,
-		"egg_tint": "#8B5A3C",
-		"unlock": {
-			"money": 4000,
-			"days": 3
-		}
+		"incubate_seconds": 122,
+		"grow_seconds": 180,
+		"egg_tint": "#8B5A3C"
 	},
 	{
 		"id": "araukana",
@@ -103,13 +87,9 @@
 		"egg_value": 0.59,
 		"price": 210,
 		"sell_price": 147,
-		"incubate_seconds": 90.0,
-		"grow_seconds": 134.0,
-		"egg_tint": "#A8DCD2",
-		"unlock": {
-			"money": 8000,
-			"hens": 12
-		}
+		"incubate_seconds": 143,
+		"grow_seconds": 213,
+		"egg_tint": "#A8DCD2"
 	},
 	{
 		"id": "jedwabista",
@@ -123,16 +103,10 @@
 		"egg_value": 0.63,
 		"price": 290,
 		"sell_price": 203,
-		"incubate_seconds": 96.0,
-		"grow_seconds": 144.0,
+		"incubate_seconds": 167,
+		"grow_seconds": 251,
 		"egg_tint": "#F6E7CC",
-		"incubation_bonus": 0.5,
-		"unlock": {
-			"money": 15000,
-			"breeds": [
-				"araukana"
-			]
-		}
+		"incubation_bonus": 0.5
 	},
 	{
 		"id": "serama",
@@ -146,12 +120,8 @@
 		"egg_value": 0.66,
 		"price": 400,
 		"sell_price": 280,
-		"incubate_seconds": 102.0,
-		"grow_seconds": 154.0,
-		"unlock": {
-			"money": 27000,
-			"hens": 16
-		}
+		"incubate_seconds": 194,
+		"grow_seconds": 293
 	},
 	{
 		"id": "brahma",
@@ -165,13 +135,9 @@
 		"egg_value": 0.7,
 		"price": 550,
 		"sell_price": 385,
-		"incubate_seconds": 110.0,
-		"grow_seconds": 166.0,
-		"egg_tint": "#F0DCC0",
-		"unlock": {
-			"money": 45000,
-			"days": 6
-		}
+		"incubate_seconds": 229,
+		"grow_seconds": 346,
+		"egg_tint": "#F0DCC0"
 	},
 	{
 		"id": "czubatka",
@@ -185,14 +151,8 @@
 		"egg_value": 0.74,
 		"price": 750,
 		"sell_price": 525,
-		"incubate_seconds": 118.0,
-		"grow_seconds": 178.0,
-		"unlock": {
-			"money": 75000,
-			"breeds": [
-				"jedwabista"
-			]
-		}
+		"incubate_seconds": 268,
+		"grow_seconds": 404
 	},
 	{
 		"id": "pavlovskaya",
@@ -206,12 +166,8 @@
 		"egg_value": 0.78,
 		"price": 1050,
 		"sell_price": 735,
-		"incubate_seconds": 126.0,
-		"grow_seconds": 190.0,
-		"unlock": {
-			"money": 120000,
-			"hens": 22
-		}
+		"incubate_seconds": 315,
+		"grow_seconds": 474
 	},
 	{
 		"id": "feniks",
@@ -225,12 +181,8 @@
 		"egg_value": 0.81,
 		"price": 1450,
 		"sell_price": 1015,
-		"incubate_seconds": 134.0,
-		"grow_seconds": 202.0,
-		"unlock": {
-			"money": 190000,
-			"days": 10
-		}
+		"incubate_seconds": 366,
+		"grow_seconds": 552
 	},
 	{
 		"id": "deathlayer",
@@ -244,14 +196,8 @@
 		"egg_value": 0.85,
 		"price": 2000,
 		"sell_price": 1400,
-		"incubate_seconds": 142.0,
-		"grow_seconds": 214.0,
-		"unlock": {
-			"money": 290000,
-			"breeds": [
-				"czubatka"
-			]
-		}
+		"incubate_seconds": 425,
+		"grow_seconds": 640
 	},
 	{
 		"id": "sultanka",
@@ -265,12 +211,8 @@
 		"egg_value": 0.89,
 		"price": 2800,
 		"sell_price": 1960,
-		"incubate_seconds": 150.0,
-		"grow_seconds": 228.0,
-		"unlock": {
-			"money": 420000,
-			"hens": 28
-		}
+		"incubate_seconds": 493,
+		"grow_seconds": 749
 	},
 	{
 		"id": "onagadori",
@@ -284,13 +226,9 @@
 		"egg_value": 0.92,
 		"price": 4000,
 		"sell_price": 2800,
-		"incubate_seconds": 158.0,
-		"grow_seconds": 242.0,
-		"egg_tint": "#FFF6E4",
-		"unlock": {
-			"money": 600000,
-			"days": 14
-		}
+		"incubate_seconds": 574,
+		"grow_seconds": 879,
+		"egg_tint": "#FFF6E4"
 	},
 	{
 		"id": "dongtao",
@@ -304,14 +242,8 @@
 		"egg_value": 0.96,
 		"price": 5600,
 		"sell_price": 3920,
-		"incubate_seconds": 164.0,
-		"grow_seconds": 256.0,
-		"unlock": {
-			"money": 820000,
-			"breeds": [
-				"sultanka"
-			]
-		}
+		"incubate_seconds": 654,
+		"grow_seconds": 1021
 	},
 	{
 		"id": "cemani",
@@ -325,13 +257,8 @@
 		"egg_value": 1.0,
 		"price": 8000,
 		"sell_price": 5600,
-		"incubate_seconds": 172.0,
-		"grow_seconds": 270.0,
-		"egg_tint": "#E6D2B4",
-		"unlock": {
-			"money": 1200000,
-			"days": 18,
-			"hens": 34
-		}
+		"incubate_seconds": 758,
+		"grow_seconds": 1190,
+		"egg_tint": "#E6D2B4"
 	}
 ]

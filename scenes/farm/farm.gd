@@ -122,9 +122,15 @@ func _sync_animals(chicks: bool, sick: bool, wanted: Dictionary) -> void:
 			_remove_animal(breed_id, chicks, sick)
 
 
-## Przerabia istniejace zwierze ze zdrowego na chore (albo odwrotnie).
+## Przerabia zdrowa kure na chora bez podmiany wezla, zeby zostala na swoim
+## miejscu na wybiegu.
+##
+## Tylko w te strone. Wczesniej dzialalo w obie i chore kury nigdy sie nie
+## pokazywaly: najpierw uzgadnialismy chore (zdrowy wezel stawal sie chory),
+## a zaraz potem uzgadnialismy zdrowe, ktorych nagle brakowalo — i ten sam
+## wezel wracal do zdrowia. Wyzdrowienie obsluguje zwykle dodanie i usuniecie.
 func _flip_existing(breed_id: String, chicks: bool, from_sick: bool, to_sick: bool) -> bool:
-	if chicks or from_sick == to_sick:
+	if chicks or from_sick == to_sick or not to_sick:
 		return false
 	for child in _objects.get_children():
 		var animal := child as FarmChicken

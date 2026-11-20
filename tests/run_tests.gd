@@ -24,7 +24,7 @@ func _ready() -> void:
 	_test_save()
 	_test_offline()
 	_test_incubator()
-	_test_unlocks()
+	_test_shop_is_open()
 	_test_hunger()
 	_test_disease()
 	_test_fox()
@@ -244,7 +244,7 @@ func _test_economy() -> void:
 	_check(not Game.buy_hen("leghorn"), "brak pieniedzy blokuje zakup kury")
 	_check(not Game.buy_hen("nieistniejaca"), "nieznana rasa nie da sie kupic")
 	Game.state.money = 999999
-	_check(not Game.buy_hen("cemani"), "zablokowanej rasy nie da sie kupic mimo pieniedzy")
+	_check(Game.buy_hen("cemani"), "najdrozsza rasa do kupienia, gdy stac gracza")
 
 	# Wartosc jaj zalezy od stada.
 	Game.new_game()
@@ -395,6 +395,46 @@ func _test_incubator() -> void:
 	Game.new_game()
 
 
+## Sklep bez barier: kazda rasa stoi w nim od pierwszej minuty, a cena jest
+## jedna, niezaleznie od tego, ktora to sztuka. Dawniej rasy odblokowywaly
+## sie po przekroczeniu progu pieniedzy — gracz czytal te progi jak ceny
+## i slusznie uznal za sztuczne.
+func _test_shop_is_open() -> void:
+	var state := _fresh_state(["leghorn"], 10.0)
+	for breed: Dictionary in GameData.breeds():
+		var breed_id: String = breed.get("id", "")
+		_check(state.is_unlocked(breed_id), "rasa '%s' dostepna od startu" % breed_id)
+		_check(not breed.has("unlock"), "rasa '%s' nie ma juz progu odblokowania" % breed_id)
+	_check(Simulation.check_unlocks(state).is_empty(), "nie ma czego odblokowywac")
+
+	# Cena kupna i sprzedazy jest ta sama przy pierwszej i przy kolejnej sztuce.
+	Game.new_game()
+	Game.state.money = 100000.0
+	Game.state.chickens.clear()
+	var price := float(GameData.breed("cemani").get("price", 0))
+	var before := Game.state.money
+	_check(Game.buy_hen("cemani"), "najdrozsza rasa do kupienia od razu")
+	var first_cost := before - Game.state.money
+	before = Game.state.money
+	_check(Game.buy_hen("cemani"), "druga sztuka tej samej rasy")
+	var second_cost := before - Game.state.money
+	_check(is_equal_approx(first_cost, price) and is_equal_approx(second_cost, price),
+			"obie sztuki kosztuja tyle samo")
+	var sell := Game.sell_hen("cemani")
+	_check(sell > price * 0.5, "sprzedaz oddaje wiecej niz polowe ceny zakupu")
+	_check(is_equal_approx(sell, FarmState.hen_sell_price("cemani")), "stawka zgodna z breeds.json")
+
+	# Historia rasy pokazuje sie raz, przy pierwszej sztuce.
+	Game.new_game()
+	Game.state.money = 100000.0
+	Game.state.unlocked_breeds.clear()
+	_check(not Game.state.has_ever_owned("brahma"), "na starcie gracz nie mial tej rasy")
+	Game.buy_hen("brahma")
+	_check(Game.state.has_ever_owned("brahma"), "pierwsza sztuka zapisuje sie w kolekcji")
+	Game.buy_hen("brahma")
+	_check(Game.state.hens_of_breed("brahma") == 2, "druga sztuka tez trafia do stada")
+	Game.new_game()
+
 ## Odblokowywanie ras: warunki musza byc spelnione w calosci.
 func _test_unlocks() -> void:
 	var state := _fresh_state(["leghorn"], 0.0)
@@ -415,28 +455,6 @@ func _test_unlocks() -> void:
 	_check(fresh.has("rhode"), "komplet warunkow odblokowuje rase")
 	_check(state.is_unlocked("rhode"), "odblokowana rasa zostaje w stanie")
 	_check(Simulation.check_unlocks(state).is_empty(), "rasa odblokowuje sie tylko raz")
-
-	# Warunek "miej juz inna rase": bierzemy pierwsza rase, ktora go uzywa,
-	# zeby test nie rozsypal sie po zmianie drabinki odblokowan w breeds.json.
-	var chain := _fresh_state(["leghorn"], 1000.0)
-	var chained := {}
-	var required_id := ""
-	for breed: Dictionary in GameData.breeds():
-		var needs: Array = Dictionary(breed.get("unlock", {})).get("breeds", [])
-		if not needs.is_empty():
-			chained = breed
-			required_id = String(needs[0])
-			break
-	_check(not chained.is_empty(), "jakas rasa wymaga innej rasy w stadzie")
-	var chain_need: Dictionary = chained.get("unlock", {})
-	chain.money = float(chain_need.get("money", 0)) + 1000.0
-	chain.days = int(chain_need.get("days", 0))
-	while chain.hen_count() < int(chain_need.get("hens", 0)):
-		chain.chickens.append(Chicken.create("leghorn"))
-	chain.feed = float(chain_need.get("feed", 0))
-	_check(not Simulation.meets_unlock(chain, chained), "brak wymaganej rasy blokuje odblokowanie")
-	chain.chickens.append(Chicken.create(required_id))
-	_check(Simulation.meets_unlock(chain, chained), "posiadanie wymaganej rasy odblokowuje")
 
 	# Dni gospodarstwa licza sie z uplywu czasu, takze offline.
 	var day_seconds := float(GameData.balance().get("day", {}).get("seconds", 600.0))
@@ -703,16 +721,18 @@ func _test_win() -> void:
 	_check(rich.won, "stan pamieta wygrana")
 	_check(Simulation.check_win(rich) == "", "wygrana zglasza sie tylko raz")
 
+	# Kolekcja ras nie konczy juz gry: bez progow odblokowania da sie kupic
+	# po jednej sztuce kazdej rasy w niecale szesc godzin.
 	var collector := _fresh_state(["leghorn"], 100.0)
 	collector.chickens.clear()
 	for breed: Dictionary in GameData.breeds():
 		collector.chickens.append(Chicken.create(String(breed.get("id", ""))))
 	_check(collector.has_full_collection(), "komplet ras rozpoznany")
-	_check(Simulation.check_win(collector) == "collection", "pelna kolekcja konczy gre")
+	_check(Simulation.check_win(collector) == "", "sama kolekcja nie konczy gry")
 
 	var partial := _fresh_state(["leghorn"], 100.0)
 	_check(not partial.has_full_collection(), "jedna rasa to nie kolekcja")
-	_check(Simulation.check_win(partial) == "", "bez kolekcji i bez miliona gra trwa")
+	_check(Simulation.check_win(partial) == "", "bez pieniedzy gra trwa")
 
 	# Wygrana przezywa zapis, zeby okno nie wyskakiwalo po kazdym wczytaniu.
 	SaveGame.save_state(rich)

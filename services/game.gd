@@ -123,7 +123,7 @@ func _report(result: Dictionary) -> void:
 
 	var sick := int(result["got_sick"])
 	if sick > 0:
-		Events.notice.emit(tr("HINT_SICK") % sick)
+		Events.alert.emit(tr("ALERT_SICK_TITLE"), tr("ALERT_SICK_BODY") % sick)
 	var died_disease := int(result["died_disease"])
 	if died_disease > 0:
 		Events.notice.emit(tr("HINT_DIED_DISEASE") % died_disease)
@@ -144,9 +144,7 @@ func _report(result: Dictionary) -> void:
 
 
 func _check_unlocks() -> void:
-	for breed_id in Simulation.check_unlocks(state):
-		Events.breed_unlocked.emit(breed_id)
-		Events.notice.emit(tr("HINT_BREED_UNLOCKED") % tr(GameData.breed(breed_id).get("name", "")))
+	pass
 
 
 func _check_win() -> void:
@@ -389,6 +387,10 @@ func buy_hen(breed_id: String) -> bool:
 	var hen := Chicken.create(breed_id)
 	state.chickens.append(hen)
 	Events.hen_added.emit(hen)
+	# Pierwsza sztuka danej rasy to wydarzenie: pokazujemy jej historie.
+	if not state.has_ever_owned(breed_id):
+		state.mark_owned(breed_id)
+		Events.breed_unlocked.emit(breed_id)
 	Events.resources_changed.emit()
 	return true
 
