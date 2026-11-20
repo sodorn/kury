@@ -111,6 +111,7 @@ def simulate(verbose: bool = True) -> dict:
     capacity = buildings["coop"]["capacity"]
     guard_block = 0.0
     fox_dry = 0.0
+    SCALE = BALANCE["offline"]["scale"]
 
     history = []
     starved = 0
@@ -220,13 +221,17 @@ def simulate(verbose: bool = True) -> dict:
         # --- lis ---------------------------------------------------------
         # Lis: cisza przez pierwsze grace_minutes gry i przy malym stadzie,
         # potem losowanie proporcjonalne do dlugosci kroku.
-        # Szansa rosnie z kazda minuta bez lisa (krzywa z Simulation._event_fires).
-        if seconds >= fox["grace_minutes"] * 60:
+        # Krzywa i twardy sufit z Simulation._event_fires. Progi w balansie sa
+        # w minutach rzeczywistych, a model liczy w sekundach gry — stad SCALE.
+        grace_game = fox["grace_minutes"] * 60 * SCALE
+        if seconds >= grace_game:
             fox_dry += STEP
+        dry_real = fox_dry / 60.0 / SCALE
         span = fox["mean_minutes"] * 1.95
-        chance = min(fox_dry / 60.0 / span, 1.0) ** 4
-        if (seconds >= fox["grace_minutes"] * 60
-                and random.random() < 1.0 - (1.0 - chance) ** (STEP / 60.0)):
+        chance = min(dry_real / span, 1.0) ** 4
+        hard_hit = fox.get("hard_minutes", 0) > 0 and dry_real >= fox["hard_minutes"]
+        if seconds >= grace_game and (hard_hit
+                or random.random() < 1.0 - (1.0 - chance) ** (STEP / 60.0 / SCALE)):
             fox_dry = 0.0
             if random.random() < guard_block:
                 # Plot, pies albo swiatla zawrocily lisa od zagrody.

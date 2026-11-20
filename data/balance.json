@@ -21,20 +21,21 @@
 		"chick_feed_multiplier": 0.5
 	},
 	"run": {
-		"_opis": "max_eggs_on_ground to tylko tyle, ile jaj lezy naraz na wybiegu do zebrania palcem. Nadmiar idzie prosto do magazynu - pelny wybieg nie wstrzymuje juz znoszenia.",
+		"_opis": "max_eggs_on_ground to tylko tyle, ile jaj lezy naraz na wybiegu do zebrania palcem. Nadmiar idzie prosto do magazynu. area musi sie zgadzac z piaskowym prostokatem w ground.svg - oba biora sie z RUN w tools/gen_ground.py.",
 		"max_eggs_on_ground": 40,
-		"max_visible_hens": 26,
+		"max_visible_hens": 36,
 		"area": {
 			"x": 110,
-			"y": 1105,
+			"y": 975,
 			"w": 860,
-			"h": 420
-		}
+			"h": 550
+		},
+		"pickup_radius": 300
 	},
 	"offline": {
-		"_opis": "Czas poza gra plynie speed_divider razy wolniej, zeby noc nie zmieniala gospodarstwa nie do poznania. max_hours liczy sie w godzinach rzeczywistych, przed podzieleniem.",
+		"_opis": "Czas gry plynie tak samo, gdy grasz i gdy nie grasz: scale razy wolniej od zegara sciennego. Dawny speed_divider 60 dla nieaktywnej gry zostal usuniety - teraz noc liczy sie tak samo jak granie. max_hours to sufit na jedno nadrabianie, w godzinach rzeczywistych.",
 		"max_hours": 72,
-		"speed_divider": 60
+		"scale": 0.3333333333
 	},
 	"day": {
 		"seconds": 600
@@ -75,25 +76,27 @@
 		"reference_hens": 10
 	},
 	"disease": {
-		"_opis": "Te same zasady co u lisa: cisza przez grace_minutes i przy stadzie mniejszym niz min_hens, potem losowanie co minute ze srednia mean_minutes. Chorob liczy sie na cale gospodarstwo, nie na kure - stawka od sztuki sprawiala, ze duze stado chorowalo bez przerwy, a male prawie wcale. Chorej kury skup nie przyjmuje: trzeba ja wyleczyc albo ubic za darmo.",
+		"_opis": "Te same zasady co u lisa, liczone w minutach rzeczywistych. Chorob liczy sie na cale gospodarstwo, nie na kure. Szansa, ze padnie na konkretna kure, rosnie z jej cena: droga rasa choruje czesciej (waga = pierwiastek z ceny). Chorej kury skup nie przyjmuje.",
 		"death_minutes": 7.0,
 		"medicine_price": 10,
 		"vaccine_price": 200,
 		"vaccine_price_per_hen": 0,
 		"grace_minutes": 30,
 		"min_hens": 5,
-		"mean_minutes": 15
+		"mean_minutes": 10,
+		"hard_minutes": 20
 	},
 	"fox": {
-		"_opis": "Przez pierwsze grace_minutes gry lis nie przychodzi wcale i nie przychodzi do stada mniejszego niz min_hens. Potem co minute leci kostka tak, zeby wypadal srednio raz na mean_minutes. Odstepy sa przez to rozrzucone: czasem dwa pod rzad, czasem dluga cisza. Plot i pies nie zmieniaja czestosci podejsc, tylko zawracaja lisa od zagrody. carcass_share to czesc lupu, ktora lis zagryza na miejscu zamiast wyniesc - zwloki i krew zostaja na wybiegu, zeby po napasci byl po niej slad.",
+		"_opis": "Przez pierwsze grace_minutes gry lis nie przychodzi i nie przychodzi do stada mniejszego niz min_hens. Potem co minute leci kostka ze szansa rosnaca wraz z cisza, a po hard_minutes bez lisa przychodzi NA PEWNO - bez losowania. Wszystkie te minuty liczone sa w czasie RZECZYWISTYM, nie w czasie gry; przeliczenie robi Simulation._event_fires.",
 		"min_share": 0.3,
 		"max_share": 0.9,
 		"min_hens": 5,
 		"visit_seconds": 10,
 		"scare_taps": 3,
 		"grace_minutes": 30,
-		"mean_minutes": 45,
-		"carcass_share": 0.5
+		"mean_minutes": 15,
+		"carcass_share": 0.5,
+		"hard_minutes": 30
 	},
 	"win": {
 		"_opis": "Jeden cel: pieniadze. Kolekcja ras przestala byc wyzwaniem, gdy zniknely progi odblokowania — po jednej sztuce kazdej rasy da sie kupic w niecale szesc godzin.",
@@ -167,19 +170,27 @@
 			]
 		},
 		"guard": {
-			"_opis": "block_chance to szansa, ze obrona zawroci lisa przy samej zagrodzie. Losuje sie przy kazdym podejsciu, wiec nawet pelna obrona kiedys przepusci. Wczesniej obrona rozciagala przerwe miedzy wizytami i przy cenie 600 zl bylo to praktycznie niewidoczne dla gracza. Gorny prog to 0.99 — `fox_block_chance` i tak przycina wyzsze wartosci, a przycisk w panelu pokazuje liczbe z pliku, wiec 0.995 wyswietlaloby klamliwe 100%.",
+			"_opis": "block_chance to szansa, ze obrona zawroci lisa przy samej zagrodzie. Losuje sie przy kazdym podejsciu. Ostatni poziom daje 100%, czyli wylacza lisa z gry calkowicie - tak zyczyl sobie wlasciciel.",
 			"upgrades": [
 				{
+					"block_chance": 0.6,
+					"price": 800
+				},
+				{
+					"block_chance": 0.7,
+					"price": 1200
+				},
+				{
+					"block_chance": 0.8,
+					"price": 1800
+				},
+				{
 					"block_chance": 0.9,
-					"price": 600
+					"price": 2700
 				},
 				{
-					"block_chance": 0.97,
-					"price": 2500
-				},
-				{
-					"block_chance": 0.99,
-					"price": 9000
+					"block_chance": 1.0,
+					"price": 4000
 				}
 			]
 		}

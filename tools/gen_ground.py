@@ -12,7 +12,10 @@ import random
 from pathlib import Path
 
 W, H = 1080, 2400
-RUN = (50, 1040, 1030, 1575)          # x0, y0, x1, y1 wybiegu
+RUN = (50, 880, 1030, 1575)           # x0, y0, x1, y1 wybiegu
+# Wybieg siega wyzej niz w 10.4: gora planszy stala pusta pod drzewami,
+# a kury tloczyly sie na dole. Kurnik i inkubator przesunely sie w gore
+# razem z nim (patrz scenes/farm/farm.tscn).
 GATE = (480, 600)                     # przerwa w plocie (gora i dol)
 OUTLINE = "#7E4F2A"
 OUT_DIR = Path(__file__).resolve().parent.parent / "assets/sprites/world"
@@ -20,9 +23,9 @@ OUT_DIR = Path(__file__).resolve().parent.parent / "assets/sprites/world"
 # Strefy bez dekoracji: wybieg, sciezki, budynki (x0, y0, x1, y1).
 BLOCKED = [
     (RUN[0] - 50, RUN[1] - 70, RUN[2] + 50, RUN[3] + 50),
-    (160, 940, 920, 1070), (470, 1000, 610, 1100),
+    (160, 790, 920, 920), (470, 850, 610, 960),
     (470, 1565, 610, H), (160, 2030, 920, 2160),
-    (60, 520, 520, 990), (580, 540, 1010, 990),
+    (60, 360, 520, 850), (580, 380, 1010, 850),
     (30, 1600, 510, 2080), (560, 1610, 1040, 2080),
 ]
 
@@ -191,7 +194,7 @@ def ground():
         s.append(f'<ellipse cx="{x}" cy="{y}" rx="{rx}" ry="{ry}" fill="url(#{kind})"/>')
 
     # sciezki
-    d = "M230 1005H850M540 1005V1090M540 1500V2400M230 2095H850"
+    d = "M230 845H850M540 845V920M540 1500V2400M230 2095H850"
     s.append(f'<path d="{d}" fill="none" stroke="#CAAE7E" stroke-width="95.2" stroke-linecap="round" stroke-opacity="0.55"/>')
     s.append(f'<path d="{d}" fill="none" stroke="url(#dirt)" stroke-width="78.2" stroke-linecap="round"/>')
     for _ in range(90):

@@ -4,7 +4,9 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 8 zakonczony** (wersja 10.4): kury i koguty. Kura
+- Aktualny etap: **ETAP 9 zakonczony** (wersja 11.0): jeden czas na wszystko,
+  lis z twarda gwarancja, wiekszy wybieg i zbieranie jaj garsciami.
+- Wersja 10.x: kury i koguty. Kura
   znosi jaja tylko wtedy, gdy na farmie jest kogut jej rasy. Do tego duzo
   tansze rozbudowy, kurnik do 260 ptakow, trzy jaja na pisklę zamiast
   szesciu, szczepienie za stala setke i czesciej przychodzacy lis.
@@ -15,7 +17,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -177,6 +179,16 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## Weryfikacja wersji 11.0 (wykonana w srodowisku Claude, Linux)
+
+- `tests/tests.tscn`: **892/892 OK**. Nowe: twarda gwarancja lisa i choroby
+  mierzona na 20 przebiegach po 1200 minut, pelna obrona na 50 prob, droga
+  rasa chorujaca czesciej od taniej, jednakowy czas w grze i poza nia.
+- `tests/smoke_ui.tscn`: **OK**. Nowe: jedno dotkniecie zgarnia jajka
+  z poblizu, a jajko poza promieniem zostaje na wybiegu.
+- Uklad farmy i kolory przyciskow obejrzane na zrzutach.
+- Straty nocne zmierzone osobno dla kazdego poziomu plotu.
 
 ## Weryfikacja wersji 10.4 (wykonana w srodowisku Claude, Linux)
 
@@ -516,6 +528,65 @@ python3 tools/gen_ground.py
   poprawek w `assets/sprites/animals/rooster_*.svg` nie wprowadzac — zgina
   przy nastepnym przebiegu. Plotno 170x130, stopy na y=118, tak samo jak
   u kur, zeby `Sprite2D` z `offset = (4, -53)` postawil je na ziemi.
+
+### Jeden czas na wszystko (wersja 11.0)
+
+- Dzielnik 60 dla nieaktywnej gry **zniknal**. Czas plynie tak samo, gdy
+  gracz patrzy i gdy go nie ma: `offline.scale` = 1/3, czyli **trzy minuty
+  zegara to jedna minuta gry**, a godzina zegara to 20 minut gry.
+- Przeliczenie siedzi w `Game.apply_gap` i `Game._apply_elapsed`, wiec cala
+  symulacja dostaje juz sekundy gry i nie musi o skali wiedziec. Jedyny
+  wyjatek to progi zdarzen, ktore sa podane w minutach rzeczywistych.
+- `offline.max_hours` 72 to dalej sufit na jedno nadrabianie, liczony
+  w godzinach zegara (czyli 24 godziny gry).
+- **Skutek uboczny, ktory trzeba znac:** noc poza gra przestala byc
+  nieszkodliwa. Pomiar: osiem godzin nieobecnosci ze stadem 31 ptakow
+  zostawia okolo 16 sztuk przy kazdym poziomie plotu ponizej 100% — tyle,
+  ile wynosi sufit `hunger.offline_max_share` (0,5). Jesli ma byc lagodniej,
+  to wlasnie ten parametr trzeba obnizyc.
+
+### Lis: twarda gwarancja (wersja 11.0)
+
+- Do krzywej narastania doszedl `hard_minutes`: po tylu **minutach
+  rzeczywistych** bez lisa przychodzi on NA PEWNO, bez losowania. Lis 30,
+  choroba 20.
+- Wszystkie progi zdarzen (`grace_minutes`, `mean_minutes`, `hard_minutes`)
+  sa teraz w minutach RZECZYWISTYCH, bo tak o nich mysli gracz. Przelicza je
+  `Simulation._event_fires` przez `GameData.time_scale()`.
+- Lis, ktory podszedl pod nieobecnosc gracza, **nie zabiera po cichu** —
+  zostaje na wybiegu z wlasnym oknem na reakcje. Ten, ktory podszedl wczesniej
+  w trakcie nadrabiania, rozlicza sie normalnie, ale ostatni czeka na powrot.
+  Bez tego gracz dalej by lisa nie zobaczyl.
+- Plot ma piec poziomow: 60%/800, 70%/1200, 80%/1800, 90%/2700, **100%/4000**.
+  Ostatni wylacza lisa z gry calkowicie. Argumentowalem przeciw, wlasciciel
+  zdecydowal inaczej; test pilnuje tej decyzji.
+- Model przy graczu, ktory nigdy nie przegania lisa, **nie konczy gry**.
+  Przy przeganianiu polowy wizyt: mediana 9,1 godziny gry (27 godzin zegara).
+  Gwarantowany lis co pol godziny zabierajacy 30-90% stada wymaga albo
+  reakcji, albo plotu — innej drogi nie ma.
+
+### Wiekszy wybieg i zbieranie garsciami (wersja 11.0)
+
+- Wybieg urosl z 420 na 550 px wysokosci. Kurnik i inkubator przesunely sie
+  w gore (y 950 -> 800), drzewo ze srodka gornej czesci znikło, a pozostale
+  drzewa i krzaki poszly wyzej. Zrodlem jest `RUN` w `tools/gen_ground.py` —
+  grafika ziemi jest generowana, wiec `run.area` w balansie i piaskowy
+  prostokat w `ground.svg` musza sie zgadzac.
+- `max_visible_hens` 26 -> 36.
+- Jedno dotkniecie zbiera **wszystkie jajka w promieniu** `run.pickup_radius`
+  (300 px swiata, okolo 2 cm na telefonie). Przy znoszeniu co cztery sekundy
+  zbieranie pojedynczo oznaczaloby setki stuknieć na minute.
+
+### Chora kura i kolory przyciskow (wersja 11.0)
+
+- Droga rasa choruje czesciej: waga losowania to **pierwiastek z ceny**.
+  Sama cena dawalaby cemani dwiescie razy wieksza szanse niz leghornowi,
+  czyli w praktyce chorowalyby wylacznie cemani.
+- Kupno i sprzedaz roznia sie kolorem, bo na karcie rasy stoja jeden pod
+  drugim: kupno ciemne zloto (`BuyButton`), sprzedaz blada zielen
+  (`SellButton`), ubicie przygaszona czerwien (`CullButton`).
+- Licznik kur w pasku pokazuje znowu **"33/60"**. Proba pokazania rezerwacji
+  jako "33+27/60" byla nieczytelna; rezerwacja jest w panelu Kurnika.
 
 ### Kwoty bez przecinka i szerokosc licznikow (wersja 10.4)
 

@@ -667,22 +667,25 @@ func _add_breed_card(breed: Dictionary) -> void:
 	card.add_child(no_rooster)
 
 	var buy := Button.new()
-	buy.theme_type_variation = &"PrimaryButton"
+	buy.theme_type_variation = &"BuyButton"
 	buy.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	buy.pressed.connect(func() -> void: _on_buy_hen(breed_id, breed_name))
 	card.add_child(buy)
 
 	var buy_rooster := Button.new()
+	buy_rooster.theme_type_variation = &"BuyButton"
 	buy_rooster.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	buy_rooster.pressed.connect(func() -> void: _on_buy_hen(breed_id, breed_name, true))
 	card.add_child(buy_rooster)
 
 	var sell := Button.new()
+	sell.theme_type_variation = &"SellButton"
 	sell.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	sell.pressed.connect(func() -> void: _on_sell_hen(breed_id, breed_name))
 	card.add_child(sell)
 
 	var sell_rooster := Button.new()
+	sell_rooster.theme_type_variation = &"SellButton"
 	sell_rooster.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	sell_rooster.pressed.connect(func() -> void: _on_sell_hen(breed_id, breed_name, true))
 	card.add_child(sell_rooster)
@@ -690,6 +693,7 @@ func _add_breed_card(breed: Dictionary) -> void:
 	# Chorej sztuki skup nie przyjmuje. Jedyne, co mozna z nia zrobic bez
 	# pieniedzy na lek, to ubic — za darmo, zeby zwolnic miejsce w kurniku.
 	var cull := Button.new()
+	cull.theme_type_variation = &"CullButton"
 	cull.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	cull.pressed.connect(func() -> void: _on_cull_hen(breed_id, breed_name))
 	card.add_child(cull)

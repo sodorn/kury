@@ -9,6 +9,9 @@ const PAPER := Color("FFFCF5")
 const GOLD := Color("FFD98A")
 const GOLD_DARK := Color("E8A94A")
 const GREEN := Color("A8DE8C")
+## Jasna zielen przyciskow sprzedazy i przygaszona czerwien uboju.
+const SELL_GREEN := Color("DFF3D2")
+const CULL_RED := Color("F2CFC8")
 
 ## Polowa szerokosci suwaka przewijania w pikselach widoku (1080 px szerokosci).
 ## Caly pasek wychodzi dwa razy szerszy, czyli okolo 2,5 mm na telefonie.
@@ -47,6 +50,16 @@ static func build() -> Theme:
 	_apply_button(theme, "Button", CREAM)
 	theme.set_type_variation("PrimaryButton", "Button")
 	_apply_button(theme, "PrimaryButton", GOLD)
+	# Kupno i sprzedaz musza sie roznic kolorem, bo na karcie rasy stoja jeden
+	# pod drugim i latwo kliknac nie ten co trzeba. Kupno ciemniejsze (zloto),
+	# sprzedaz jasniejsza (blada zielen), ubicie chorej sztuki — przygaszona
+	# czerwien, zeby nikt nie nacisnal jej odruchowo.
+	theme.set_type_variation("BuyButton", "Button")
+	_apply_button(theme, "BuyButton", GOLD_DARK)
+	theme.set_type_variation("SellButton", "Button")
+	_apply_button(theme, "SellButton", SELL_GREEN)
+	theme.set_type_variation("CullButton", "Button")
+	_apply_button(theme, "CullButton", CULL_RED)
 
 	_apply_line_edit(theme)
 

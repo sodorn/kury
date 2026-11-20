@@ -34,7 +34,7 @@ centered = false
 y_sort_enabled = true
 
 [node name="Coop" parent="Objects" instance=ExtResource("6")]
-position = Vector2(290, 950)
+position = Vector2(290, 800)
 building_id = "coop"
 
 [node name="Sprite" parent="Objects/Coop" index="0"]
@@ -46,7 +46,7 @@ position = Vector2(0, -184)
 shape = SubResource("ShapeCoop")
 
 [node name="Incubator" parent="Objects" instance=ExtResource("6")]
-position = Vector2(790, 950)
+position = Vector2(790, 800)
 building_id = "incubator"
 
 [node name="Sprite" parent="Objects/Incubator" index="0"]
@@ -88,19 +88,13 @@ centered = false
 offset = Vector2(0, -66)
 
 [node name="TreeTopLeft" type="Sprite2D" parent="Objects"]
-position = Vector2(100, 640)
-texture = ExtResource("4")
-centered = false
-offset = Vector2(-120, -278)
-
-[node name="TreeTopMid" type="Sprite2D" parent="Objects"]
-position = Vector2(545, 800)
+position = Vector2(85, 455)
 texture = ExtResource("4")
 centered = false
 offset = Vector2(-120, -278)
 
 [node name="TreeTopRight" type="Sprite2D" parent="Objects"]
-position = Vector2(985, 620)
+position = Vector2(1000, 430)
 texture = ExtResource("4")
 centered = false
 offset = Vector2(-120, -278)
@@ -118,13 +112,13 @@ centered = false
 offset = Vector2(-120, -278)
 
 [node name="BushLeftTop" type="Sprite2D" parent="Objects"]
-position = Vector2(62, 905)
+position = Vector2(52, 700)
 texture = ExtResource("5")
 centered = false
 offset = Vector2(-85, -104)
 
 [node name="BushRightTop" type="Sprite2D" parent="Objects"]
-position = Vector2(1022, 895)
+position = Vector2(1032, 680)
 texture = ExtResource("5")
 centered = false
 offset = Vector2(-85, -104)

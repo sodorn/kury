@@ -48,6 +48,12 @@ static func breed(id: String) -> Dictionary:
 	return {}
 
 
+## Ile sekund gry przypada na sekunde zegara sciennego. Jedna skala na
+## wszystko: granie i nieobecnosc licza sie tak samo.
+static func time_scale() -> float:
+	return clampf(float(balance().get("offline", {}).get("scale", 1.0)), 0.001, 10.0)
+
+
 ## Wymusza ponowne wczytanie plikow (uzywane w testach).
 static func reload() -> void:
 	_loaded = false

@@ -377,4 +377,6 @@ func feed_pack() -> Dictionary:
 ## Losowana przy kazdym podejsciu, wiec nawet pelna obrona kiedys przepusci.
 func fox_block_chance() -> float:
 	var upgrade := current_building_upgrade("guard")
-	return clampf(float(upgrade.get("block_chance", 0.0)), 0.0, 0.99)
+	# Gorny poziom daje pelne 100%, czyli wylacza lisa calkowicie — tak zyczyl
+	# sobie wlasciciel. Wczesniej sufit wynosil 0,99.
+	return clampf(float(upgrade.get("block_chance", 0.0)), 0.0, 1.0)

@@ -214,14 +214,28 @@ static func _advance_disease(state: FarmState, step: float, out: Dictionary, bud
 	# bez przerwy, a male prawie wcale.
 	if not _event_fires(state, step, "disease", disease):
 		return
-	var healthy: Array[int] = []
-	for i in state.chickens.size():
-		var hen: Chicken = state.chickens[i]
-		if not hen.sick and not hen.vaccinated:
-			healthy.append(i)
+	# Droga rasa choruje czesciej. Waga to pierwiastek z ceny, a nie sama cena:
+	# przy cenach od 40 do 8000 zl sama cena dawalaby cemani dwiescie razy
+	# wieksza szanse niz leghornowi, czyli w praktyce tylko cemani by chorowaly.
+	var healthy: Array[Chicken] = []
+	var weights: Array[float] = []
+	var total := 0.0
+	for hen: Chicken in state.chickens:
+		if hen.sick or hen.vaccinated:
+			continue
+		var weight := sqrt(maxf(1.0, float(GameData.breed(hen.breed_id).get("price", 1))))
+		healthy.append(hen)
+		weights.append(weight)
+		total += weight
 	if healthy.is_empty():
 		return
-	var chosen: Chicken = state.chickens[healthy[randi() % healthy.size()]]
+	var roll := randf() * total
+	var chosen: Chicken = healthy[healthy.size() - 1]
+	for i in healthy.size():
+		roll -= weights[i]
+		if roll <= 0.0:
+			chosen = healthy[i]
+			break
 	chosen.sick = true
 	chosen.sick_seconds = 0.0
 	out["got_sick"] = int(out["got_sick"]) + 1
@@ -255,13 +269,25 @@ static func _event_fires(state: FarmState, step: float, key: String,
 		return false
 	var dry := float(state.event_dry.get(key, 0.0)) + step
 	state.event_dry[key] = dry
+	# Progi w balansie podane sa w minutach RZECZYWISTYCH, bo tak mysli o nich
+	# gracz ("pol godziny grania"). Licznik `dry` chodzi w sekundach gry, wiec
+	# przeliczamy progi przez te sama skale, ktora spowalnia cala symulacje.
+	var scale := GameData.time_scale()
+	var dry_real_minutes := dry / 60.0 / scale
+	# Twardy sufit: po tylu minutach grania bez zdarzenia wypada ono na pewno,
+	# bez zadnego losowania. Wlasciciel poprosil o to wprost po tym, jak przez
+	# dwa dni nie zobaczyl lisa ani razu.
+	var hard := float(config.get("hard_minutes", 0.0))
+	if hard > 0.0 and dry_real_minutes >= hard:
+		state.event_dry[key] = 0.0
+		return true
 	var span := maxf(1.0, float(config.get("mean_minutes", 45.0)) * RAMP_SPAN)
-	var chance_per_minute := pow(minf(dry / 60.0 / span, 1.0), RAMP_POWER)
+	var chance_per_minute := pow(minf(dry_real_minutes / span, 1.0), RAMP_POWER)
 	# Przeliczenie szansy "na minute" na szanse w kroku o dlugosci `step`.
 	# Mnozenie przez step/60 byloby przyblizeniem, ktore przy szansie rownej
-	# jedynce dawaloby 1/60 zamiast pewnosci — a pewnosc po G minutach to cala
-	# istota tej krzywej.
-	if randf() >= 1.0 - pow(1.0 - chance_per_minute, step / 60.0):
+	# jedynce dawaloby 1/60 zamiast pewnosci.
+	var step_real_minutes := step / 60.0 / scale
+	if randf() >= 1.0 - pow(1.0 - chance_per_minute, step_real_minutes):
 		return false
 	state.event_dry[key] = 0.0
 	return true
@@ -298,9 +324,10 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 
 	var share := randf_range(float(fox.get("min_share", 0.2)), float(fox.get("max_share", 0.9)))
 	state.fox_pending = clampi(int(round(state.chickens.size() * share)), 1, state.chickens.size() - 1)
-	if offline:
-		_fox_takes(state, out, budget)
-		return
+	# Lis, ktory podchodzi pod nieobecnosc gracza, NIE zabiera po cichu.
+	# Zostaje na wybiegu i czeka — gracz zastanie go po powrocie i bedzie mial
+	# te same kilka sekund na reakcje co zwykle. Wczesniej strata liczyla sie
+	# od razu i wlasciciel przez cztery wersje nie zobaczyl lisa ani razu.
 	state.fox_visit_left = maxf(1.0, float(fox.get("visit_seconds", 7.0)))
 	out["fox_arrived"] = int(out["fox_arrived"]) + 1
 

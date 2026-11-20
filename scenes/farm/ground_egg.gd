@@ -46,11 +46,31 @@ func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> vo
 	elif touch.index == _pressed_touch:
 		_pressed_touch = -1
 		if touch.position.distance_to(_pressed_at) <= TAP_MAX_MOVE:
-			collect()
+			_collect_around()
 			# Jajka potrafia na siebie zachodzic, a Godot rozsyla dotkniecie do
-			# kazdego obszaru pod palcem. Bez tego jedno dotkniecie zbieraloby
-			# dwa jajka naraz.
+			# kazdego obszaru pod palcem. Bez tego jedno dotkniecie uruchomiloby
+			# zbieranie kilka razy.
 			get_viewport().set_input_as_handled()
+
+
+## Jedno dotkniecie zgarnia wszystkie jajka w poblizu, nie tylko to pod palcem.
+## Przy znoszeniu co cztery sekundy zbieranie pojedynczo oznaczaloby setki
+## stuknieć na minute. Promien siedzi w balance.json (`run.pickup_radius`)
+## i liczy sie we wspolrzednych swiata, czyli tak samo dla kazdego ekranu.
+func _collect_around() -> void:
+	var radius := float(GameData.balance().get("run", {}).get("pickup_radius", 0.0))
+	collect()
+	if radius <= 0.0:
+		return
+	var parent := get_parent()
+	if parent == null:
+		return
+	for sibling in parent.get_children():
+		var egg := sibling as GroundEgg
+		if egg == null or egg == self or egg.collected:
+			continue
+		if egg.position.distance_to(position) <= radius:
+			egg.collect()
 
 
 ## Zbiera jajko: zglasza to do Game i odgrywa animacje znikniecia.

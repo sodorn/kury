@@ -19,7 +19,7 @@
   <stop offset="0" stop-color="#EFDCB2"/>
   <stop offset="1" stop-color="#E0C99A"/>
 </linearGradient>
-<linearGradient id="sand" x1="50" y1="1040" x2="1030" y2="1575" gradientUnits="userSpaceOnUse">
+<linearGradient id="sand" x1="50" y1="880" x2="1030" y2="1575" gradientUnits="userSpaceOnUse">
   <stop offset="0" stop-color="#EFD9AD"/>
   <stop offset="0.5" stop-color="#E3C898"/>
   <stop offset="1" stop-color="#D5B782"/>

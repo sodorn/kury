@@ -114,13 +114,41 @@ func _test_egg_pickup() -> void:
 	_shot("jajka.png")
 	if eggs.is_empty():
 		return
+	# Jedno dotkniecie zgarnia wszystko w promieniu `run.pickup_radius`.
+	# Ustawiamy jajka tak, zeby jedno bylo w zasiegu, a drugie daleko poza nim.
+	var radius := float(GameData.balance().get("run", {}).get("pickup_radius", 300.0))
+	var first := eggs[0] as Node2D
+	var second := eggs[1] as Node2D
+	second.position = first.position + Vector2(0.0, radius * 0.5)
+	var far := eggs[2] as Node2D if eggs.size() > 2 else null
 	var stored_before := Game.state.egg_count()
-	await _tap(_canvas_point(eggs[0], Vector2(0, -38)))
+	await _tap(_canvas_point(first, Vector2(0, -38)))
 	await _frames(40)
-	_check(Game.state.egg_count() == stored_before + 1, "dotkniecie jajka zwieksza stan magazynu")
-	# Zebrane jajko gasnie animacja, wiec wezel znika dopiero po chwili.
-	var left := await _wait_for_nodes("GroundEgg", 1)
-	_check(left.size() == 1, "zebrane jajko znika z wybiegu (zostalo %d)" % left.size())
+	_check(Game.state.egg_count() == stored_before + 2,
+			"jedno dotkniecie zgarnia jajka z calego poblizu (+%d)" % [
+				Game.state.egg_count() - stored_before])
+	var left := await _wait_for_nodes("GroundEgg", 0)
+	_check(left.is_empty(), "zebrane jajka znikaja z wybiegu (zostalo %d)" % left.size())
+
+	# Jajko poza promieniem ma zostac na miejscu.
+	Game.state.eggs_on_ground.append("leghorn")
+	Game.state.eggs_on_ground.append("leghorn")
+	Events.eggs_laid.emit(2)
+	var pair := await _wait_for_nodes("GroundEgg", 2)
+	if pair.size() == 2:
+		var near := pair[0] as Node2D
+		var away := pair[1] as Node2D
+		away.position = near.position + Vector2(radius * 2.0, 0.0)
+		var before_far := Game.state.egg_count()
+		await _tap(_canvas_point(near, Vector2(0, -38)))
+		await _frames(40)
+		_check(Game.state.egg_count() == before_far + 1,
+				"jajko poza promieniem zostaje na wybiegu")
+		var rest := await _wait_for_nodes("GroundEgg", 1)
+		_check(rest.size() == 1, "i dalej tam lezy (jest %d)" % rest.size())
+		for node in rest:
+			(node as GroundEgg).collect()
+		await _frames(30)
 
 
 func _test_shop() -> void:

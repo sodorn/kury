@@ -101,7 +101,10 @@ func apply_gap(elapsed: float, focused: bool = DisplayServer.window_is_focused()
 	if pending > MAX_LIVE_STEP:
 		_apply_elapsed(pending)
 		return true
-	_report(Simulation.advance(state, pending))
+	# Czas gry plynie `offline.scale` razy wolniej od zegara sciennego — tak
+	# samo w grze i poza nia. Przeliczenie siedzi tutaj, zeby cala symulacja
+	# dostawala juz sekundy gry i nie musiala o tym wiedziec.
+	_report(Simulation.advance(state, pending * GameData.time_scale()))
 	return false
 
 
@@ -310,11 +313,9 @@ func _apply_elapsed(elapsed: float) -> void:
 	var offline: Dictionary = GameData.balance().get("offline", {})
 	var max_hours := float(offline.get("max_hours", 72.0))
 	var real_seconds := clampf(elapsed, 0.0, max_hours * 3600.0)
-	# Poza gra czas plynie wolniej, zeby noc nie zmieniala gospodarstwa nie do
-	# poznania: stado nie pada z glodu, lis nie wynosi polowy kurnika, ale tez
-	# nie ma co liczyc na kokosy z samego czekania.
-	var divider := maxf(1.0, float(offline.get("speed_divider", 1.0)))
-	var seconds := real_seconds / divider
+	# Czas poza gra liczy sie dokladnie tak samo jak w grze. Dawny dzielnik 60
+	# zniknal: wlasciciel chcial jednej skali na wszystko.
+	var seconds := real_seconds * GameData.time_scale()
 	if seconds < 1.0:
 		return
 	var result := Simulation.advance(state, seconds, true)
@@ -326,6 +327,15 @@ func _apply_elapsed(elapsed: float) -> void:
 	var lost := int(result["died_hunger"]) + int(result["died_disease"]) + int(result["fox_took"])
 	if lost > 0:
 		Events.notice.emit(tr("HINT_LOST_WHILE_AWAY") % lost)
+	# Lis, ktory podszedl pod nasza nieobecnosc, czeka na wybiegu zamiast
+	# zabrac kury po cichu. Inaczej gracz nigdy by go nie zobaczyl, a wlasnie
+	# o to mial najwieksza pretensje.
+	if int(result["fox_arrived"]) > 0:
+		Events.fox_arrived.emit(state.fox_pending, state.fox_visit_left)
+		Events.notice.emit(tr("HINT_FOX_HERE"))
+	if int(result["fox_blocked"]) > 0:
+		Events.notice.emit(tr("HINT_FOX_BLOCKED"))
+		Events.fox_repelled.emit()
 
 
 # --- jaja ---------------------------------------------------------------
