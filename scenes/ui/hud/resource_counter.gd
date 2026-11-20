@@ -27,14 +27,21 @@ func set_value(value: float) -> void:
 	_set_text(value, text)
 
 
-## Licznik z gornym limitem, np. "37/40" przy kurach. Gdy robi sie ciasno,
-## liczba zmienia kolor — inaczej gracz dowiaduje sie o pelnym kurniku
-## dopiero po tym, jak pisklęta przestaja wychodzic z inkubatora.
-func set_value_of(value: int, limit: int) -> void:
-	_set_text(float(value), "%s/%s" % [NumberFormat.grouped(value), NumberFormat.grouped(limit)])
-	if value >= limit:
+## Licznik z gornym limitem, np. "37/40" przy kurach. `pending` to sztuki,
+## ktore miejsca jeszcze nie zajmuja, ale je rezerwuja — jaja w inkubatorze
+## i pisklęta na odchowie. Pokazujemy je jako "30+30/60", bo samo "30/60"
+## przy pelnej rezerwacji wygladalo, jakby polowa kurnika stala pusta,
+## a inkubator mimo to odmawial przyjecia jaj.
+func set_value_of(value: int, limit: int, pending: int = 0) -> void:
+	var text := "%s/%s" % [NumberFormat.grouped(value), NumberFormat.grouped(limit)]
+	if pending > 0:
+		text = "%s+%s/%s" % [
+			NumberFormat.grouped(value), NumberFormat.grouped(pending),
+			NumberFormat.grouped(limit)]
+	_set_text(float(value), text)
+	if value + pending >= limit:
 		_label.add_theme_color_override("font_color", FULL_COLOR)
-	elif value >= limit - 2:
+	elif value + pending >= limit - 2:
 		_label.add_theme_color_override("font_color", NEARLY_FULL_COLOR)
 	else:
 		_label.remove_theme_color_override("font_color")

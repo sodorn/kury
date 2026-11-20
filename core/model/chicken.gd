@@ -8,11 +8,6 @@ var breed_id: String = ""
 var is_rooster: bool = false
 ## Sekundy, ktore uplynely od ostatnio zniesionego jaja.
 var since_last_egg: float = 0.0
-## Sekundy, przez ktore kura ma gotowe jajko, ale nie ma go gdzie zniesc, bo
-## wybieg jest pelny. Decyduje o kolejnosci: pierwsze wolne miejsce dostaje
-## ta, ktora czeka najdluzej. Pole jest ulotne — nie idzie do zapisu, bo po
-## wczytaniu gry wybieg i tak jest pusty.
-var waiting_seconds: float = 0.0
 ## Czy kura jest chora. Chora nie znosi jaj i po kilku minutach pada.
 var sick: bool = false
 ## Sekundy od zachorowania. Liczone tylko gdy `sick`.

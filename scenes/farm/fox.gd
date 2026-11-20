@@ -10,7 +10,7 @@ extends Area2D
 const TAP_MAX_MOVE := 36.0
 ## Plamy krwi po ataku: ile ich maksymalnie i jak dlugo schna.
 const SPLATS_MAX := 4
-const SPLAT_SECONDS := 9.0
+const SPLAT_SECONDS := 300.0
 const SPLAT := preload("res://assets/ui/blood_splat.svg")
 
 var _taps_left := 3

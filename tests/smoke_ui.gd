@@ -277,13 +277,34 @@ func _test_no_feed_notice() -> void:
 	if panel.visible:
 		panel.close()
 		await _frames(30)
-	var notice: Control = _main.get_node("Hud/Root/Notice")
+	# Pusty magazyn zatrzymuje cale gospodarstwo, wiec melduje sie okienkiem,
+	# a nie znikajacym paskiem.
+	var alert: Control = _main.get_node("Hud/Root/AlertPanel")
 	Game.state.feed = 0.0
 	Game.set_process(true)
 	await _frames(10)
 	Game.set_process(false)
-	_check(notice.visible, "komunikat o braku paszy sie pokazuje")
+	await _frames(30)
+	_check(alert.visible, "brak paszy melduje sie okienkiem")
 	_shot("brak_paszy.png")
+	var ok_button := _find_button(alert)
+	if ok_button != null:
+		ok_button.emit_signal("pressed")
+		await _frames(40)
+	# Magazyn trzeba uzupelnic, inaczej kolejne testy dostana to okienko
+	# w najmniej spodziewanym momencie.
+	Game.state.feed = 100000.0
+
+
+## Pierwszy przycisk w poddrzewie — okienka maja ich po jednym.
+func _find_button(root: Node) -> Button:
+	for child in root.get_children():
+		if child is Button:
+			return child
+		var deeper := _find_button(child)
+		if deeper != null:
+			return deeper
+	return null
 
 
 ## Przycisk ukryty w karcie rasy.

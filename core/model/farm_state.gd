@@ -33,6 +33,10 @@ var hunger_next_death: float = 0.0
 ## Poziom rozbudowy inkubatora: 0 to stan poczatkowy, dalej wpisy z
 ## `incubator.upgrades` w balance.json.
 var incubator_level: int = 0
+## Ile sekund gry minelo bez lisa i bez choroby, osobno dla kazdego zdarzenia.
+## Szansa na zdarzenie rosnie razem z tym licznikiem, a licznik idzie do zapisu,
+## zeby granie po minucie z doskoku tez sie liczylo. Klucze: "fox", "disease".
+var event_dry: Dictionary = {}
 ## Trwajaca wizyta lisa: ile sekund jeszcze biega po wybiegu. Dopoki trwa,
 ## kury sa tylko zagrozone — zabiera je dopiero na koniec wizyty. Dzieki temu
 ## gracz, ktory akurat patrzy na ekran, ma szanse go przegonic.

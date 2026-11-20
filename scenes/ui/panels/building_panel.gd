@@ -160,6 +160,9 @@ func _build_content(building_id: String) -> void:
 func _build_coop() -> void:
 	_add_row("PANEL_HENS", func() -> String: return str(Game.state.laying_hen_count()))
 	_add_row("PANEL_ROOSTERS", func() -> String: return str(Game.state.rooster_count()))
+	# Jaja w inkubatorze i pisklęta rezerwuja miejsca w kurniku, wiec musza byc
+	# widoczne obok zajetych — inaczej "30/60" wyglada, jakby bylo pelno luzu.
+	_add_row("PANEL_COOP_PENDING", func() -> String: return str(Game.state.coop_reserved()))
 	_add_row("PANEL_COOP_SPACE",
 			func() -> String: return "%d / %d" % [Game.state.coop_occupied(), Game.state.coop_capacity()])
 	_add_row("PANEL_FOX_GUARD",
@@ -327,7 +330,8 @@ func _build_incubator() -> void:
 					# Wyszarzony przycisk ma powiedziec, czego brakuje: jaj czy
 					# miejsca w kurniku. Samo "nie da sie" niczego nie tlumaczy.
 					if Game.incubation_blocked_by_coop(breed_id):
-						return tr("PANEL_INCUBATE_NO_ROOM") % breed_name
+						return tr("PANEL_INCUBATE_NO_ROOM") % [
+							breed_name, Game.state.coop_occupied(), Game.state.coop_reserved()]
 					return tr("PANEL_INCUBATE") % [
 						cost, breed_name, int(Game.state.eggs.get(breed_id, 0))],
 				func() -> void: _on_incubate(breed_id),

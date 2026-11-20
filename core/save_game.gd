@@ -48,6 +48,7 @@ static func to_dict(state: FarmState) -> Dictionary:
 		"guard_level": state.guard_level,
 		"fox_visit_left": state.fox_visit_left,
 		"fox_pending": state.fox_pending,
+		"event_dry": state.event_dry,
 		"hunger_seconds": state.hunger_seconds,
 		"intro_seen": state.intro_seen,
 		"won": state.won,
@@ -79,6 +80,12 @@ static func from_dict(data: Dictionary) -> Dictionary:
 	# w trakcie, nie ma czego przeganiac po powrocie.
 	state.fox_visit_left = 0.0
 	state.fox_pending = 0
+	# Licznik suchych minut przenosi sie przez zapis — na tym polega narastanie
+	# szansy przy graniu z doskoku. Stare zapisy zaczynaja od zera.
+	state.event_dry = {}
+	for key: String in ["fox", "disease"]:
+		state.event_dry[key] = maxf(0.0, float(
+				(data.get("event_dry", {}) as Dictionary).get(key, 0.0)))
 	state.hunger_seconds = maxf(0.0, float(data.get("hunger_seconds", 0.0)))
 	state.intro_seen = bool(data.get("intro_seen", false))
 	state.won = bool(data.get("won", false))

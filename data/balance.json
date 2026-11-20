@@ -21,8 +21,8 @@
 		"chick_feed_multiplier": 0.5
 	},
 	"run": {
-		"_opis": "area to obszar, po ktorym chodza kury i na ktorym lezą jaja (wspolrzedne swiata 1080x2400).",
-		"max_eggs_on_ground": 30,
+		"_opis": "max_eggs_on_ground to tylko tyle, ile jaj lezy naraz na wybiegu do zebrania palcem. Nadmiar idzie prosto do magazynu - pelny wybieg nie wstrzymuje juz znoszenia.",
+		"max_eggs_on_ground": 40,
 		"max_visible_hens": 26,
 		"area": {
 			"x": 110,
@@ -67,11 +67,12 @@
 		"_opis": "slots to liczba partii grzanych naraz; kazda partia to jedno pisklę. eggs_per_chick jaj danej rasy robi jedno pisklę tej rasy."
 	},
 	"hunger": {
-		"_opis": "Po grace_minutes bez paszy kury zaczynaja padac - jedna na death_interval_seconds. offline_max_share ogranicza straty przy nadrabianiu czasu, zeby powrot do gry nie oznaczal pustego wybiegu.",
+		"_opis": "Po grace_minutes bez paszy stado zaczyna padac. Odstep miedzy zgonami to death_interval_seconds przy stadzie wielkosci reference_hens i skraca sie proporcjonalnie przy wiekszym - przy stalym odstepie stado liczace dwiescie sztuk gloddzilo godzinami i pasza przestawala byc problemem. Bez paszy stoi tez inkubator i odchow piskląt.",
 		"grace_minutes": 3.0,
 		"death_interval_seconds": 50.0,
-		"corpse_seconds": 90.0,
-		"offline_max_share": 0.5
+		"corpse_seconds": 300.0,
+		"offline_max_share": 0.5,
+		"reference_hens": 10
 	},
 	"disease": {
 		"_opis": "Te same zasady co u lisa: cisza przez grace_minutes i przy stadzie mniejszym niz min_hens, potem losowanie co minute ze srednia mean_minutes. Chorob liczy sie na cale gospodarstwo, nie na kure - stawka od sztuki sprawiala, ze duze stado chorowalo bez przerwy, a male prawie wcale. Chorej kury skup nie przyjmuje: trzeba ja wyleczyc albo ubic za darmo.",
@@ -84,14 +85,15 @@
 		"mean_minutes": 15
 	},
 	"fox": {
-		"_opis": "Przez pierwsze grace_minutes gry lis nie przychodzi wcale i nie przychodzi do stada mniejszego niz min_hens. Potem co minute leci kostka tak, zeby wypadal srednio raz na mean_minutes. Odstepy sa przez to rozrzucone: czasem dwa pod rzad, czasem dluga cisza. Plot i pies nie zmieniaja czestosci podejsc, tylko zawracaja lisa od zagrody.",
+		"_opis": "Przez pierwsze grace_minutes gry lis nie przychodzi wcale i nie przychodzi do stada mniejszego niz min_hens. Potem co minute leci kostka tak, zeby wypadal srednio raz na mean_minutes. Odstepy sa przez to rozrzucone: czasem dwa pod rzad, czasem dluga cisza. Plot i pies nie zmieniaja czestosci podejsc, tylko zawracaja lisa od zagrody. carcass_share to czesc lupu, ktora lis zagryza na miejscu zamiast wyniesc - zwloki i krew zostaja na wybiegu, zeby po napasci byl po niej slad.",
 		"min_share": 0.3,
 		"max_share": 0.9,
 		"min_hens": 5,
 		"visit_seconds": 10,
 		"scare_taps": 3,
 		"grace_minutes": 30,
-		"mean_minutes": 45
+		"mean_minutes": 45,
+		"carcass_share": 0.5
 	},
 	"win": {
 		"_opis": "Jeden cel: pieniadze. Kolekcja ras przestala byc wyzwaniem, gdy zniknely progi odblokowania — po jednej sztuce kazdej rasy da sie kupic w niecale szesc godzin.",

@@ -4,7 +4,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 8 zakonczony** (wersja 10.2): kury i koguty. Kura
+- Aktualny etap: **ETAP 8 zakonczony** (wersja 10.3): kury i koguty. Kura
   znosi jaja tylko wtedy, gdy na farmie jest kogut jej rasy. Do tego duzo
   tansze rozbudowy, kurnik do 260 ptakow, trzy jaja na pisklę zamiast
   szesciu, szczepienie za stala setke i czesciej przychodzacy lis.
@@ -15,7 +15,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -177,6 +177,14 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## Weryfikacja wersji 10.3 (wykonana w srodowisku Claude, Linux)
+
+- `tests/tests.tscn`: **864/864 OK**. Przepisany `_test_event_rules` mierzy
+  teraz odstepy i gwarancje; doszlo `_test_starving_farm`.
+- `tests/smoke_ui.tscn`: **OK**, trzy biegi pod rzad.
+- `tools/balance_model.py` na 25 losowaniach: mediana **7,6 h** (zakres
+  7,6-8,0). Rozrzut zmalal, bo lis stal sie przewidywalny, a plot go zawraca.
 
 ## Weryfikacja wersji 10.2 (wykonana w srodowisku Claude, Linux)
 
@@ -498,6 +506,56 @@ python3 tools/gen_ground.py
   przy nastepnym przebiegu. Plotno 170x130, stopy na y=118, tak samo jak
   u kur, zeby `Sprite2D` z `offset = (4, -53)` postawil je na ziemi.
 
+### Narastajaca szansa na zdarzenie (wersja 10.3)
+
+Stala szansa co minute nie dziala przy graniu z doskoku. Wlasciciel gra po
+minucie, odklada telefon i wraca — i nie zobaczyl lisa przez trzy wersje
+z rzedu, mimo ze liczby w balansie byly poprawne.
+
+- Kazda minuta bez zdarzenia zwieksza szanse na nastepna. Krzywa:
+  `p na minute = (t / G)^4`, gdzie `t` to minuty bez zdarzenia, a
+  `G = mean_minutes * RAMP_SPAN` (1,95). Wykladnik 4 trzyma poczatek spokojny,
+  a koniec stromy.
+- Przy `mean_minutes` 45 daje to **srednia 45 minut i pewnosc po 84 minutach**;
+  przy 15 — srednia 19 i pewnosc po 30. Wartosci wyliczone, nie zgadniete
+  (skrypt liczacy rozklad jest w historii sesji; test pilnuje obu wlasnosci).
+- Licznik suchych minut siedzi w `FarmState.event_dry` **i idzie do zapisu** —
+  na tym polega narastanie miedzy sesjami. Stare zapisy zaczynaja od zera.
+- Licznik stoi, dopoki furtka jest zamknieta (karencja, male stado). Inaczej
+  gracz dostalby lisa w tej samej sekundzie, w ktorej stado urosło do piatej
+  sztuki.
+- Szanse na krok przelicza `1 - (1-p)^(step/60)`, a nie `p * step/60`.
+  Mnozenie dawaloby przy p = 1 szanse 1/60 zamiast pewnosci, a pewnosc jest
+  cala istota tej krzywej.
+- `_test_event_rules` mierzy 20 przebiegow po 1200 minut i sprawdza dwie
+  rzeczy: sredni odstep (lis 30-60 min, choroba 10-25) oraz **najdluzsza
+  cisze**, ktora nie moze przekroczyc gwarancji.
+
+### Slady po napasci (wersja 10.3)
+
+- Lis zagryza na miejscu `fox.carcass_share` (polowe) lupu, a reszte wynosi.
+  Wczesniej nie zostawialo po nim nic i gracz, ktory akurat nie patrzyl, nie
+  mial skad wiedziec, co sie stalo.
+- `hunger.corpse_seconds` 90 -> **300 s**, a plamy krwi (`fox.gd/SPLAT_SECONDS`)
+  tyle samo. Zwloki i krew maja zostac na wybiegu na dlugo.
+
+### Dziesieciokrotnie czestsze jaja (wersja 10.3)
+
+- `egg_seconds` kazdej rasy podzielone przez 10: leghorn 4 s, cemani 13,6 s.
+  Cel wlasciciela: zeby oplacalo sie sprzedawac jaja, a nie tylko kury, i zeby
+  w hodowli blokerem byla pojemnosc inkubatora, a nie liczba jaj.
+- **Pelny wybieg nie wstrzymuje juz znoszenia.** `run.max_eggs_on_ground` (40)
+  ogranicza tylko to, ile jaj lezy naraz do zebrania palcem; nadmiar idzie
+  prosto do magazynu. Bez tej zmiany dziesieciokrotne przyspieszenie nie
+  daloby nic: cala produkcja byla ograniczona tempem stukania gracza.
+- Zniklo przez to pole `Chicken.waiting_seconds` i cala kolejka sprawiedliwosci
+  z 10.0 — nikt juz nie czeka na miejsce, wiec nie ma czego dzielic.
+- Jedna kura moze w dlugim kroku zniesc wiecej niz jedno jajko (`while`,
+  nie `if`): przy odstepie 4 s i kroku 10 s zdarza sie to stale.
+- Skutek dla tempa gry: model spadl z 12,6 h do **7,6 h**. Mniej niz dwa razy
+  szybciej, bo pasza i tak kosztuje od ptaka, a inkubator dalej ma tyle samo
+  miejsc.
+
 ### Lis i choroba: zasady zdarzen (wersja 10.2)
 
 Zasady podyktowane przez wlasciciela wprost, po tym jak przez caly wieczor
@@ -537,6 +595,21 @@ aktywnej gry** — a on gra krocej, wiec w praktyce nie widzial go nigdy.
 - Przycisk uboju bierze najpierw kury, a koguta dopiero gdy to on jest chory —
   inaczej jedno nieuwazne stukniecie zostawialoby rase bez koguta.
 - Szczepienie zdrozalo do 200 zl (bylo 100).
+
+### Dziura znaleziona przez gracza: gra bez karmienia (wersja 10.3)
+
+Znajomy wlasciciela zglosil: "jak zrobisz kury, to nie musisz ich karmic
+nigdy". Pomiar potwierdzil dwie realne dziury:
+
+- **Inkubator i odchow chodzily przy pustym magazynie.** Stado odnawialo sie
+  szybciej, niz gloddzilo. Teraz bez paszy nic sie nie wykluwa i nic nie
+  rosnie — sprawdza to `_test_starving_farm`.
+- **Tempo padania nie zalezalo od wielkosci stada.** Jeden zgon na 50 sekund
+  przy dwustu ptakach to godziny agonii. Teraz odstep dzieli sie przez
+  `wielkosc stada / hunger.reference_hens` (10). Pomiar po poprawce: stado
+  20 sztuk wymiera w 8 minut, 60 sztuk w 23, 150 sztuk w 33.
+- Pusty magazyn melduje sie okienkiem (`ALERT_NO_FEED_*`), a nie znikajacym
+  paskiem — zatrzymuje cale gospodarstwo, wiec zasluguje na przerwanie gry.
 
 ### Pasza (wersja 10.2)
 

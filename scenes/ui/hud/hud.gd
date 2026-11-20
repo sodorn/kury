@@ -26,7 +26,7 @@ func _refresh() -> void:
 	_money.set_value(state.money)
 	_eggs.set_value(state.egg_count())
 	_feed.set_value(floor(state.feed))
-	_animals.set_value_of(state.coop_occupied(), state.coop_capacity())
+	_animals.set_value_of(state.coop_occupied(), state.coop_capacity(), state.coop_reserved())
 
 
 ## Odsuwa pasek od wyciecia na aparat / paska statusu telefonu.

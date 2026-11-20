@@ -60,8 +60,12 @@ static func _losses(out: Dictionary) -> int:
 static func _step(state: FarmState, step: float, out: Dictionary, loss_budget: int,
 		offline: bool = false) -> void:
 	out["days_passed"] = int(out["days_passed"]) + _advance_days(state, step)
-	out["hatched"] = int(out["hatched"]) + _advance_incubator(state, step)
-	out["grown_up"] = int(out["grown_up"]) + _advance_chicks(state, step)
+	# Bez paszy nic sie nie wykluwa i nic nie rosnie. Wczesniej inkubator
+	# i odchow chodzily nawet przy pustym magazynie, wiec stado odnawialo sie
+	# szybciej, niz gloddzilo — dalo sie grac w ogole nie kupujac paszy.
+	if state.feed > 0.0:
+		out["hatched"] = int(out["hatched"]) + _advance_incubator(state, step)
+		out["grown_up"] = int(out["grown_up"]) + _advance_chicks(state, step)
 	out["rotted"] = int(out["rotted"]) + _advance_corpses(state, step)
 	_advance_fox(state, step, out, loss_budget, offline)
 
@@ -171,7 +175,13 @@ static func _advance_hunger(state: FarmState, step: float, out: Dictionary, budg
 	state.hunger_seconds += step
 	if state.hunger_seconds < grace:
 		return
-	var interval := maxf(1.0, float(hunger.get("death_interval_seconds", 50.0)))
+	# Tempo padania rosnie razem ze stadem. Przy stalym odstepie duze stado
+	# gloduje godzinami i pasza przestaje byc problemem: wystarczylo hodowac
+	# nowe kury szybciej, niz stare padaly. `reference_hens` to wielkosc stada,
+	# przy ktorej obowiazuje goly `death_interval_seconds`.
+	var reference := maxf(1.0, float(hunger.get("reference_hens", 10.0)))
+	var scale := maxf(1.0, float(state.chickens.size()) / reference)
+	var interval := maxf(0.5, float(hunger.get("death_interval_seconds", 50.0)) / scale)
 	state.hunger_next_death -= step
 	while state.hunger_next_death <= 0.0 and not state.chickens.is_empty():
 		if _losses(out) >= budget:
@@ -202,7 +212,7 @@ static func _advance_disease(state: FarmState, step: float, out: Dictionary, bud
 	# Potem losowanie nowego zachorowania — jedno na cale gospodarstwo, nie na
 	# kura. Wczesniejsza stawka od sztuki sprawiala, ze duze stado chorowalo
 	# bez przerwy, a male prawie wcale.
-	if not _event_fires(state, step, disease):
+	if not _event_fires(state, step, "disease", disease):
 		return
 	var healthy: Array[int] = []
 	for i in state.chickens.size():
@@ -218,16 +228,43 @@ static func _advance_disease(state: FarmState, step: float, out: Dictionary, bud
 
 
 ## Wspolna zasada dla lisa i choroby: przez pierwsze `grace_minutes` gry nic
-## zlego sie nie dzieje, male stado jest nietykalne, a potem co minute leci
-## kostka. `mean_minutes` to sredni odstep miedzy zdarzeniami — przy losowaniu
-## co minute odstepy sa rozrzucone: czasem dwa po sobie, czasem dluga cisza.
-static func _event_fires(state: FarmState, step: float, config: Dictionary) -> bool:
+## zlego sie nie dzieje i male stado jest nietykalne. Potem co minute leci
+## kostka, ale **szansa rosnie z kazda minuta bez zdarzenia**.
+##
+## Stala szansa nie dziala przy graniu z doskoku. Wlasciciel gra po minucie,
+## odklada telefon i wraca — przy stalym losowaniu z taka sama szansa za
+## kazdym razem potrafil nie zobaczyc lisa przez caly wieczor. Teraz licznik
+## suchych minut (`event_dry`) przechodzi przez zapis, wiec pressja narasta
+## miedzy sesjami.
+##
+## Krzywa: p na minute = (t / G)^4, gdzie t to minuty bez zdarzenia,
+## a G = `mean_minutes` * `RAMP_SPAN`. Wykladnik 4 trzyma poczatek spokojny,
+## a koniec stromy. Przy `mean_minutes` 45 daje to srednia 45 minut i
+## **pewnosc najpozniej po 84 minutach**; przy 15 — srednia 19 minut
+## i pewnosc po 30. Liczby wyliczone, nie zgadniete.
+const RAMP_SPAN := 1.95
+const RAMP_POWER := 4.0
+
+static func _event_fires(state: FarmState, step: float, key: String,
+		config: Dictionary) -> bool:
+	# Dopoki furtka jest zamknieta, licznik stoi: inaczej gracz dostalby lisa
+	# w tej samej sekundzie, w ktorej stado urosło do piatej sztuki.
 	if state.chickens.size() < int(config.get("min_hens", 5)):
 		return false
 	if state.played_seconds() < float(config.get("grace_minutes", 30.0)) * 60.0:
 		return false
-	var mean_seconds := maxf(1.0, float(config.get("mean_minutes", 45.0)) * 60.0)
-	return randf() < step / mean_seconds
+	var dry := float(state.event_dry.get(key, 0.0)) + step
+	state.event_dry[key] = dry
+	var span := maxf(1.0, float(config.get("mean_minutes", 45.0)) * RAMP_SPAN)
+	var chance_per_minute := pow(minf(dry / 60.0 / span, 1.0), RAMP_POWER)
+	# Przeliczenie szansy "na minute" na szanse w kroku o dlugosci `step`.
+	# Mnozenie przez step/60 byloby przyblizeniem, ktore przy szansie rownej
+	# jedynce dawaloby 1/60 zamiast pewnosci — a pewnosc po G minutach to cala
+	# istota tej krzywej.
+	if randf() >= 1.0 - pow(1.0 - chance_per_minute, step / 60.0):
+		return false
+	state.event_dry[key] = 0.0
+	return true
 
 
 ## Lis: przychodzi raz na kilka godzin i porywa czesc stada.
@@ -248,7 +285,7 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 		_fox_takes(state, out, budget)
 		return
 
-	if not _event_fires(state, step, fox):
+	if not _event_fires(state, step, "fox", fox):
 		return
 
 	# Plot, pies i nocne swiatla nie odwlekaja wizyty — po prostu zawracaja
@@ -275,24 +312,34 @@ static func _fox_takes(state: FarmState, out: Dictionary, budget: int) -> void:
 	state.fox_pending = 0
 	if taken <= 0:
 		return
+	# Czesc lupu lis wynosi, ale reszte zagryza na miejscu. Zwloki i krew maja
+	# zostac na wybiegu na dlugo — bez tego po napasci nie ma po niej sladu
+	# i gracz, ktory akurat nie patrzyl, nie wie, co sie stalo.
+	var share := clampf(float(GameData.balance().get("fox", {}).get("carcass_share", 0.5)), 0.0, 1.0)
+	var left_behind := clampi(int(round(taken * share)), 1, taken)
 	for i in taken:
-		# Lis zabiera kury ze soba — zwlok nie ma.
-		state.chickens.remove_at(randi() % state.chickens.size())
+		var index := randi() % state.chickens.size()
+		if i < left_behind:
+			_kill_hen(state, index, "fox")
+		else:
+			state.chickens.remove_at(index)
 	out["fox_took"] = int(out["fox_took"]) + taken
 
 
 ## Znoszenie jaj. Nie znosza: koguty, chore kury i kury rasy, ktora nie ma
-## na farmie koguta. Pelny wybieg wstrzymuje reszte.
+## na farmie koguta.
 ##
-## Miejsca na wybiegu dostaja kury, ktore **najdluzej czekaja** z gotowym
-## jajkiem, a nie te stojace najwczesniej w tablicy stada. Wczesniej decydowala
-## kolejnosc zakupu i przy pelnym wybiegu rasy kupione pozniej nie znosily
-## w ogole (pomiar: 20 leghornow 292 jaja, cemani 0; po poprawce 161 i 7,
-## czyli tyle, ile wynosi rowny podzial miejsc miedzy wszystkie kury).
+## Pelny wybieg **nie wstrzymuje juz znoszenia**. `max_eggs_on_ground` ogranicza
+## tylko to, ile jaj lezy na wybiegu do zebrania palcem; nadmiar idzie prosto do
+## magazynu. Wczesniej kura z gotowym jajkiem czekala na wolne miejsce, przez co
+## cala produkcja byla ograniczona tempem stukania gracza — po dziesieciokrotnym
+## przyspieszeniu znoszenia nie zostaloby z tego nic. Przy okazji znika problem
+## kolejnosci: kiedys wolne miejsce bralo zawsze zwierze z poczatku tablicy
+## i rasy kupione pozniej nie znosily w ogole (pomiar: 20 leghornow 292 jaja,
+## cemani 0).
 static func _lay_eggs(state: FarmState, step: float, out: Dictionary, offline: bool) -> void:
 	var capacity := int(GameData.balance().get("run", {}).get("max_eggs_on_ground", 30))
-	var count := state.chickens.size()
-	if count <= 0:
+	if state.chickens.is_empty():
 		return
 	# Rasy z kogutem zbieramy raz na krok. Pytanie `has_rooster` osobno dla
 	# kazdej kury dawaloby koszt kwadratowy — przy 260 ptakach to odczuwalne.
@@ -302,8 +349,6 @@ static func _lay_eggs(state: FarmState, step: float, out: Dictionary, offline: b
 			with_rooster[bird.breed_id] = true
 	if with_rooster.is_empty():
 		return
-	# Krok pierwszy: zegary chodza kazdej kurze, niezaleznie od kolejnosci.
-	var ready: Array[Chicken] = []
 	for hen: Chicken in state.chickens:
 		if hen.is_rooster or hen.sick or not with_rooster.has(hen.breed_id):
 			continue
@@ -311,34 +356,17 @@ static func _lay_eggs(state: FarmState, step: float, out: Dictionary, offline: b
 		if seconds <= 0.0:
 			continue
 		hen.since_last_egg += step
-		if hen.since_last_egg >= seconds:
-			ready.append(hen)
-	if ready.is_empty():
-		return
-	# Krok drugi: pierwsze wolne miejsce dostaje kura, ktora czeka najdluzej
-	# z gotowym jajkiem. Kolejnosc w tablicy stada nie moze o niczym decydowac:
-	# wczesniej braly ja zawsze ptaki kupione najdawniej i przy pelnym wybiegu
-	# rasy kupione pozniej nie znosily nic (20 leghornow 292 jaja, cemani 0).
-	# Licznik oczekiwania jest odporny na to, ze sklad gotowych kur zmienia sie
-	# z kroku na krok — numer pozycji w tablicy nie byl.
-	ready.sort_custom(func(a: Chicken, b: Chicken) -> bool:
-		return a.waiting_seconds > b.waiting_seconds)
-	for hen: Chicken in ready:
-		var seconds := float(GameData.breed(hen.breed_id).get("egg_seconds", 0.0))
-		if not offline and state.eggs_on_ground.size() >= capacity:
-			# Wybieg pelny: kura czeka z gotowym jajkiem. Licznik znoszenia stoi
-			# na maksimum, zeby po zwolnieniu miejsca nie wysypala serii jaj.
-			hen.since_last_egg = seconds
-			hen.waiting_seconds += step
-			continue
-		hen.since_last_egg -= seconds
-		hen.waiting_seconds = 0.0
-		if offline:
-			# Pod nieobecnosc gracza jaja trafiaja od razu do magazynu.
-			state.add_egg(hen.breed_id)
-		else:
-			state.eggs_on_ground.append(hen.breed_id)
-		out["eggs_laid"] = int(out["eggs_laid"]) + 1
+		# Jedna kura moze w dlugim kroku zniesc wiecej niz jedno jajko —
+		# przy odstepie 4 s i kroku 10 s zdarza sie to stale.
+		while hen.since_last_egg >= seconds:
+			hen.since_last_egg -= seconds
+			if offline or state.eggs_on_ground.size() >= capacity:
+				# Pod nieobecnosc gracza i przy zapelnionym wybiegu jajko idzie
+				# prosto do magazynu, zamiast przepadac albo blokowac kure.
+				state.add_egg(hen.breed_id)
+			else:
+				state.eggs_on_ground.append(hen.breed_id)
+			out["eggs_laid"] = int(out["eggs_laid"]) + 1
 
 
 ## Usuwa kure ze stada i kladzie zwloki na wybiegu.

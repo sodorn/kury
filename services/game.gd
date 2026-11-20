@@ -111,7 +111,10 @@ func _report(result: Dictionary) -> void:
 	# a nie co klatke.
 	var hungry := bool(result["out_of_feed"]) and not state.chickens.is_empty()
 	if hungry and not _reported_no_feed:
-		Events.notice.emit(tr("HINT_NO_FEED"))
+		# Pusty magazyn zatrzymuje cale gospodarstwo: stado przestaje niesc,
+		# inkubator i odchow staja, a po chwili zaczynaja padac kury. Na tyle
+		# powazne, zeby przerwac gre okienkiem, a nie znikajacym paskiem.
+		Events.alert.emit(tr("ALERT_NO_FEED_TITLE"), tr("ALERT_NO_FEED_BODY"))
 	_reported_no_feed = hungry
 
 	var laid := int(result["eggs_laid"])
@@ -594,7 +597,8 @@ func incubate(breed_id: String) -> bool:
 	if not can_incubate(breed_id):
 		if incubation_blocked_by_coop(breed_id):
 			Events.alert.emit(tr("ALERT_COOP_FULL_TITLE"),
-					tr("ALERT_COOP_FULL_BODY") % state.coop_capacity())
+					tr("ALERT_COOP_FULL_BODY") % [state.coop_capacity(),
+							state.coop_occupied(), state.coop_reserved()])
 		return false
 	state.take_eggs(breed_id, eggs_per_chick())
 	state.incubating.append(EggBatch.create(breed_id, 1))

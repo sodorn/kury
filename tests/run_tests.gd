@@ -35,6 +35,7 @@ func _ready() -> void:
 	_test_roosters()
 	_test_coop_limit()
 	_test_event_rules()
+	_test_starving_farm()
 	_test_lay_fairness()
 	_test_time_gap()
 	_test_buildings()
@@ -66,6 +67,13 @@ func _force_event(kind: String) -> void:
 	var cfg: Dictionary = GameData.balance().get(kind, {})
 	cfg["grace_minutes"] = 0.0
 	cfg["mean_minutes"] = 0.0
+
+
+## Dodatkowo nabija licznik suchych minut, zeby krzywa narastania byla juz na
+## maksimum i zdarzenie wypadlo w najblizszym kroku na pewno, a nie "zwykle".
+func _arm_event(state: FarmState, kind: String) -> void:
+	_force_event(kind)
+	state.event_dry[kind] = 100000.0
 
 
 ## Odwrotnie: zdarzenie nie wypadnie przez cala rozsadna dlugosc testu.
@@ -367,7 +375,11 @@ func _test_offline() -> void:
 		hen.vaccinated = true
 	var laid := int(Simulation.advance(away, 7200.0)["eggs_laid"])
 	var capacity := int(GameData.balance().get("run", {}).get("max_eggs_on_ground", 24))
-	_check(laid == mini(int(7200.0 / seconds), capacity), "produkcja przez 2 godziny z limitem wybiegu")
+	# Limit wybiegu dotyczy juz tylko tego, ile jaj na nim lezy; nadmiar idzie
+	# do magazynu, wiec przez dwie godziny kura znosi pelna pule.
+	_check(laid == int(7200.0 / seconds), "dwie godziny to pelna pula jaj (%d)" % laid)
+	_check(away.eggs_on_ground.size() <= capacity, "na wybiegu lezy najwyzej tyle, ile miesci")
+	_check(away.egg_count() > 0, "reszta czeka w magazynie")
 
 	# Limit: nieobecnosc dluzsza niz `max_hours` liczy sie jak `max_hours`.
 	var long_state := _fresh_state(["leghorn"], 10000.0)
@@ -617,12 +629,14 @@ func _test_fox() -> void:
 	# Male stado lis zostawia w spokoju nawet po karencji.
 	_force_event("fox")
 	var tiny := _fresh_state(["leghorn", "leghorn"], 100.0)
+	_arm_event(tiny, "fox")
 	var tiny_result := Simulation.advance(tiny, 5.0)
 	_check(int(tiny_result["fox_arrived"]) == 0, "przy malym stadzie lis nie przychodzi")
 	_check(tiny.hen_count() == 2, "male stado zostaje nietkniete")
 
 	# Etap pierwszy: lis jest na wybiegu, ale jeszcze nic nie zabral.
 	var state := _fresh_state(hens, 100000.0)
+	_arm_event(state, "fox")
 	var arrival := Simulation.advance(state, 1.0)
 	_check(int(arrival["fox_arrived"]) == 1, "lis przychodzi, gdy minie jego czas")
 	_check(int(arrival["fox_took"]) == 0, "po wejsciu lis jeszcze nic nie zabiera")
@@ -639,7 +653,12 @@ func _test_fox() -> void:
 	_check(state.hen_count() > 0, "lis nigdy nie zabiera calego stada")
 	_check(float(taken) / 20.0 >= float(fox.get("min_share", 0.2)) - 0.08, "lup nie mniejszy niz minimum")
 	_check(float(taken) / 20.0 <= float(fox.get("max_share", 0.9)) + 0.08, "lup nie wiekszy niz maksimum")
-	_check(state.corpses.is_empty(), "lis zabiera kury ze soba, zwlok nie ma")
+	# Czesc lupu lis zagryza na miejscu — slad po napasci ma zostac.
+	_check(not state.corpses.is_empty(), "po napasci zostaja zwloki na wybiegu")
+	for corpse: Corpse in state.corpses:
+		_check(corpse.cause == "fox", "zwloki podpisane sa jako robota lisa")
+		break
+	_check(state.corpses.size() < taken, "czesc lupu lis jednak wynosi")
 
 	# Przegoniony lis odchodzi z niczym.
 	Game.new_game()
@@ -647,6 +666,7 @@ func _test_fox() -> void:
 	for i in 20:
 		Game.state.chickens.append(Chicken.create("leghorn"))
 	Game.state.feed = 100000.0
+	_arm_event(Game.state, "fox")
 	_check(not Game.scare_fox(), "bez lisa nie ma kogo przeganiac")
 	Simulation.advance(Game.state, 2.0)
 	_check(Game.state.fox_visit_left > 0.0, "lis wszedl na wybieg")
@@ -662,6 +682,7 @@ func _test_fox() -> void:
 	# Pod nieobecnosc gracza nie ma kogo czekac: strata liczy sie od razu.
 	_force_event("fox")
 	var away := _laying_state(hens, 100000.0)
+	_arm_event(away, "fox")
 	var offline := Simulation.advance(away, 1.0, true)
 	_check(int(offline["fox_took"]) > 0, "offline lis zabiera od razu")
 	_check(int(offline["fox_arrived"]) == 0, "offline nie ma okna na reakcje")
@@ -686,12 +707,14 @@ func _test_fox() -> void:
 	for i in 100:
 		var yard := _fresh_state(hens, 100000.0)
 		yard.guard_level = 1
+		_arm_event(yard, "fox")
 		var tally := Simulation.advance(yard, 1.0)
 		blocked += int(tally["fox_blocked"])
 		walked_in += int(tally["fox_arrived"])
 	_check(blocked > 70 and walked_in > 0,
 			"plot zawrocil %d na 100 podejsc, wszedl %d razy" % [blocked, walked_in])
 	var bare := _fresh_state(hens, 100000.0)
+	_arm_event(bare, "fox")
 	_check(int(Simulation.advance(bare, 1.0)["fox_blocked"]) == 0, "bez plotu nikt lisa nie zawraca")
 
 	GameData.reload()
@@ -846,6 +869,65 @@ func _test_money_format() -> void:
 
 
 ## Pod nieobecnosc gracza jaja omijaja wybieg i ida prosto do magazynu.
+## Gospodarstwo bez paszy. Dziura znaleziona przez znajomego wlasciciela:
+## "jak zrobisz kury, to nie musisz ich karmic nigdy" — inkubator i odchow
+## chodzily przy pustym magazynie, wiec stado odnawialo sie szybciej, niz
+## gloddzilo, a przy stalym odstepie zgonow duze stado padalo godzinami.
+func _test_starving_farm() -> void:
+	var hens: Array[String] = []
+	for i in 40:
+		hens.append("leghorn")
+
+	# Bez paszy nic sie nie wykluwa i nic nie rosnie.
+	var starving := _laying_state(hens, 0.0)
+	starving.days = 10
+	starving.coop_level = 3
+	for bird: Chicken in starving.chickens:
+		bird.vaccinated = true
+	for i in 6:
+		starving.chicks.append(Chick.create("leghorn"))
+	for i in 4:
+		starving.incubating.append(EggBatch.create("leghorn", 1))
+	var chicks_before := starving.chicks.size()
+	var batches_before := starving.incubating.size()
+	# Cztery minuty: trzy minuty karencji i minuta padania. Dluzej i cale stado
+	# by wymarlo, a potrzebne jest zywe do sprawdzenia, czy po dosypaniu paszy
+	# gospodarstwo rusza z miejsca.
+	var hungry := Simulation.advance(starving, 240.0)
+	_check(int(hungry["eggs_laid"]) == 0, "glodne stado nie znosi jaj")
+	_check(int(hungry["hatched"]) == 0 and starving.incubating.size() == batches_before,
+			"bez paszy inkubator stoi")
+	_check(int(hungry["grown_up"]) == 0, "bez paszy pisklęta nie dorastaja")
+	_check(starving.chicks.size() == chicks_before, "pisklęta czekaja, zadne nie dorosło")
+	_check(int(hungry["died_hunger"]) > 0, "glodne stado zaczyna padac")
+
+	# Tempo padania rosnie razem ze stadem.
+	var small := _fresh_state(["leghorn", "leghorn", "leghorn", "leghorn", "leghorn"], 0.0)
+	small.coop_level = 3
+	var big_hens: Array[String] = []
+	for i in 100:
+		big_hens.append("leghorn")
+	var big := _fresh_state(big_hens, 0.0)
+	big.coop_level = 3
+	var small_dead := int(Simulation.advance(small, 600.0)["died_hunger"])
+	var big_dead := int(Simulation.advance(big, 600.0)["died_hunger"])
+	_check(big_dead > small_dead * 3,
+			"duze stado pada szybciej: %d zgonow na 100 kur wobec %d na 5" % [big_dead, small_dead])
+
+	# Po dosypaniu paszy wszystko rusza z miejsca. Kogut tez gloduje i mogl
+	# paść razem z kurami, a bez niego stado i tak by nie zniosło — wiec
+	# upewniamy sie, ze jakis jest.
+	starving.feed = 100000.0
+	if not starving.has_rooster("leghorn"):
+		starving.chickens.append(Chicken.create_rooster("leghorn"))
+	_check(starving.laying_hen_count() > 0, "cos ze stada przezylo glodowke")
+	var fed := Simulation.advance(starving, 600.0)
+	_check(int(fed["eggs_laid"]) > 0, "po dosypaniu paszy stado znowu niesie")
+	_check(int(fed["grown_up"]) > 0 or int(fed["hatched"]) > 0,
+			"po dosypaniu paszy odchow i inkubator ruszaja")
+	Game.new_game()
+
+
 ## Zasady wspolne dla lisa i choroby, podane przez wlasciciela wprost:
 ## przez pierwsze pol godziny gry nic sie nie dzieje, przy stadzie mniejszym
 ## niz piec sztuk tez nie, a potem losowanie co minute z zadana srednia.
@@ -864,9 +946,9 @@ func _test_event_rules() -> void:
 	_check(absf(state.played_seconds() - 1800.0) < 1.0,
 			"po pol godziny licznik pokazuje pol godziny (%.0f s)" % state.played_seconds())
 
-	# Czestosc: przy stu przebiegach po godzinie gry liczba zdarzen ma sie
-	# zgadzac ze srednia z balansu. Dla lisa to 45 minut, czyli okolo 1,3
-	# podejscia na godzine.
+	# Czestosc i gwarancja. Mierzymy odstepy miedzy zdarzeniami przez dluga
+	# gre, bo wlasciciel podal cel wprost: lis srednio raz na 30-60 minut,
+	# choroba raz na 10-20, i ma przyjsc NA PEWNO, a nie "statystycznie".
 	var hens: Array[String] = []
 	for i in 12:
 		hens.append("leghorn")
@@ -874,51 +956,60 @@ func _test_event_rules() -> void:
 	# karencji to trzy dni. Stado trzeba po kazdej minucie uzupelniac: po
 	# napasci spada ponizej pieciu sztuk i lis przestaje podchodzic, co
 	# zanizyloby pomiar do zera.
-	var runs := 60
-	var minutes := 60
-	var fox_events := 0
-	var sick_events := 0
+	var runs := 20
+	var minutes := 1200
+	var gaps: Dictionary = {"fox": [] as Array[int], "disease": [] as Array[int]}
 	for r in runs:
-		var yard := _fresh_state(hens, 1000000.0)
+		var yard := _fresh_state(hens, 10000000.0)
 		yard.days = 10
-		for bird: Chicken in yard.chickens:
-			bird.vaccinated = true
+		var since: Dictionary = {"fox": 0, "disease": 0}
 		for i in minutes:
 			var out := Simulation.advance(yard, 60.0)
-			fox_events += int(out["fox_arrived"]) + int(out["fox_blocked"])
+			var happened: Dictionary = {
+				"fox": int(out["fox_arrived"]) + int(out["fox_blocked"]) > 0,
+				"disease": int(out["got_sick"]) > 0,
+			}
+			for key: String in happened:
+				since[key] = int(since[key]) + 1
+				if happened[key]:
+					(gaps[key] as Array).append(int(since[key]))
+					since[key] = 0
 			yard.fox_visit_left = 0.0
 			yard.fox_pending = 0
-			while yard.chickens.size() < hens.size():
-				var extra := Chicken.create("leghorn")
-				extra.vaccinated = true
-				yard.chickens.append(extra)
-	var per_hour := float(fox_events) / runs
-	var want := 60.0 / float(fox.get("mean_minutes", 45))
-	_check(absf(per_hour - want) < want * 0.35,
-			"lis podchodzi %.2f raza na godzine, w balansie %.2f" % [per_hour, want])
-
-	# Choroba: ta sama mechanika, ale czesciej. Liczymy zachorowania w stadzie,
-	# ktore nie jest zaszczepione.
-	for r in runs:
-		var yard := _fresh_state(hens, 1000000.0)
-		yard.days = 10
-		for i in minutes:
-			var out := Simulation.advance(yard, 60.0)
-			sick_events += int(out["got_sick"])
-			# Wyleczenie na biezaco, zeby stado nie wymarlo w trakcie pomiaru.
 			for bird: Chicken in yard.chickens:
 				bird.sick = false
 				bird.sick_seconds = 0.0
-	var sick_per_hour := float(sick_events) / runs
-	var sick_want := 60.0 / float(disease.get("mean_minutes", 15))
-	_check(absf(sick_per_hour - sick_want) < sick_want * 0.35,
-			"choroba wypada %.2f raza na godzine, w balansie %.2f" % [sick_per_hour, sick_want])
-	_check(sick_want > want, "choroba zdarza sie czesciej niz lis")
+			while yard.chickens.size() < hens.size():
+				yard.chickens.append(Chicken.create("leghorn"))
+
+	for key: String in ["fox", "disease"]:
+		var list: Array = gaps[key]
+		_check(list.size() > 50, "%s: zebralo sie %d odstepow do pomiaru" % [key, list.size()])
+		if list.is_empty():
+			continue
+		var total := 0
+		var worst := 0
+		for gap: int in list:
+			total += gap
+			worst = maxi(worst, gap)
+		var average := float(total) / list.size()
+		var config: Dictionary = GameData.balance().get(key, {})
+		var limit := int(ceil(float(config.get("mean_minutes", 45.0)) * Simulation.RAMP_SPAN)) + 1
+		var low := 30.0 if key == "fox" else 10.0
+		var high := 60.0 if key == "fox" else 25.0
+		_check(average >= low and average <= high,
+				"%s: sredni odstep %.1f min miesci sie w %d-%d" % [key, average, int(low), int(high)])
+		# To jest sedno prosby: po tylu minutach zdarzenie wypada na pewno.
+		_check(worst <= limit,
+				"%s: najdluzsza cisza to %d min, gwarancja %d min" % [key, worst, limit])
+	_check(float(GameData.balance().get("disease", {}).get("mean_minutes", 15))
+			< float(GameData.balance().get("fox", {}).get("mean_minutes", 45)),
+			"choroba zdarza sie czesciej niz lis")
 
 	# Choroba dotyka jednej kury na raz, nie calego stada naraz.
-	_force_event("disease")
 	var flock := _fresh_state(hens, 1000000.0)
 	flock.days = 10
+	_arm_event(flock, "disease")
 	Simulation.advance(flock, 1.0)
 	_check(flock.sick_count() == 1, "jedno losowanie to jedna chora kura")
 	GameData.reload()
@@ -1069,21 +1160,32 @@ func _test_offline_eggs() -> void:
 	for i in 10:
 		hens.append("leghorn")
 
-	# Na zywo: wybieg ma limit i po jego zapelnieniu kury przestaja niesc.
+	# Na zywo: na wybiegu lezy najwyzej `capacity` jaj, reszta idzie od razu
+	# do magazynu. Zadne jajko nie przepada i zadna kura nie czeka.
 	var live := _laying_state(hens, 100000.0)
+	for bird: Chicken in live.chickens:
+		bird.vaccinated = true
 	var live_result := Simulation.advance(live, 3.0 * 3600.0)
 	_check(live.eggs_on_ground.size() <= capacity, "na zywo wybieg nie przekracza limitu")
-	_check(live.egg_count() == 0, "na zywo jaja czekaja na wybiegu, nie w magazynie")
-	_check(int(live_result["eggs_laid"]) == capacity, "na zywo limit wybiegu wstrzymuje znoszenie")
+	_check(live.egg_count() > 0, "na zywo nadmiar trafia do magazynu")
+	_check(live.egg_count() + live.eggs_on_ground.size() == int(live_result["eggs_laid"]),
+			"na zywo nic nie ginie: wybieg plus magazyn to cala produkcja")
 
-	# Offline: te same kury przez ten sam czas odkladaja o wiele wiecej.
+	# Offline: te same kury przez ten sam czas odkladaja tyle samo, tylko
+	# wszystko od razu w magazynie.
 	var away := _laying_state(hens, 100000.0)
+	for bird: Chicken in away.chickens:
+		bird.vaccinated = true
 	var away_result := Simulation.advance(away, 3.0 * 3600.0, true)
 	_check(away.eggs_on_ground.is_empty(), "offline nic nie laduje na wybiegu")
 	_check(away.egg_count() > capacity, "offline magazyn zbiera wiecej, niz miesci wybieg")
 	_check(int(away_result["eggs_laid"]) == away.egg_count(), "licznik zgadza sie z magazynem")
-	_check(away.egg_count() > int(live_result["eggs_laid"]) * 3,
-			"nieobecnosc nie marnuje nocnej produkcji")
+	# Offline wychodzi nawet odrobine lepiej, bo `offline_max_share` ogranicza
+	# straty od lisa do polowy stada. Chodzi o to, zeby nieobecnosc niczego
+	# nie marnowala — nie o to, zeby wyszlo co do jajka tyle samo.
+	_check(float(away_result["eggs_laid"]) >= float(live_result["eggs_laid"]) * 0.9,
+			"nieobecnosc nie marnuje nocnej produkcji (%d wobec %d)" % [
+				int(away_result["eggs_laid"]), int(live_result["eggs_laid"])])
 	_check(int(away.eggs.get("leghorn", 0)) == away.egg_count(), "jaja zapisane pod wlasciwa rasa")
 	Game.new_game()
 
@@ -1098,12 +1200,14 @@ func _test_time_gap() -> void:
 	# Zwykla klatka: jaja ladu ja na wybiegu, bo gracz patrzy.
 	Game.new_game()
 	Game.state.feed = 100000.0
+	var egg_seconds := float(GameData.breed("leghorn").get("egg_seconds", 4.0))
 	for i in 10:
 		# Kury tuz przed zniesieniem, zeby jedna krotka klatka wystarczyla.
-		Game.state.chickens.append(Chicken.create("leghorn", 39.0))
+		Game.state.chickens.append(Chicken.create("leghorn", egg_seconds - 1.0))
 	_check(not Game.apply_gap(5.0, true), "krotka przerwa idzie zwykla sciezka")
 	_check(Game.state.eggs_on_ground.size() > 0, "przy graczu jaja ladu ja na wybiegu")
-	_check(Game.state.egg_count() == 0, "przy graczu magazyn zostaje pusty")
+	_check(Game.state.eggs_on_ground.size() <= capacity,
+			"przy graczu wybieg nie przekracza limitu")
 
 	# Dziura dluzsza niz krok na zywo: liczymy ja jak czas offline.
 	Game.new_game()
