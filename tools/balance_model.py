@@ -101,7 +101,6 @@ def simulate(verbose: bool = True) -> dict:
     for breed_id in BALANCE["start"].get("roosters", []):
         roosters[breed_id] = roosters.get(breed_id, 0) + 1
     vaccinated = 0
-    fox_timer = (fox["min_hours"] + fox["max_hours"]) / 2 * 3600
     fox_share = (fox["min_share"] + fox["max_share"]) / 2
     fox_visits = 0
     vaccine_spent = 0.0
@@ -132,17 +131,19 @@ def simulate(verbose: bool = True) -> dict:
             money -= up["price"]
             capacity = up["capacity"]
             history.append((seconds / 3600.0, "kurnik na %d kur" % capacity))
-        while store_up and money >= store_up[0]["price"] * 3:
-            up = store_up.pop(0)
-            money -= up["price"]
-            pack_size, pack_price = up["pack_size"], up["pack_price"]
-            history.append((seconds / 3600.0, "magazyn: worek %d kg" % pack_size))
-        while guard_up and money >= guard_up[0]["price"] * 4:
+        # Plot kupuje sie od razu, jak tylko stac: lis jest najwiekszym
+        # zagrozeniem dla stada, a 600 zl to najtansza rozbudowa w grze.
+        while guard_up and money >= guard_up[0]["price"] * 1.3:
             up = guard_up.pop(0)
             money -= up["price"]
             guard_block = up["block_chance"]
             history.append((seconds / 3600.0,
                             "obrona przed lisem: zawraca %d%% podejsc" % round(guard_block * 100)))
+        while store_up and money >= store_up[0]["price"] * 3:
+            up = store_up.pop(0)
+            money -= up["price"]
+            pack_size, pack_price = up["pack_size"], up["pack_price"]
+            history.append((seconds / 3600.0, "magazyn: worek %d kg" % pack_size))
 
         # --- pasza -------------------------------------------------------
         need = total_birds * feed_rate * 15  # zapas na 15 minut
@@ -216,9 +217,10 @@ def simulate(verbose: bool = True) -> dict:
         vaccinated = min(vaccinated, total_birds)
 
         # --- lis ---------------------------------------------------------
-        fox_timer -= STEP
-        if fox_timer <= 0:
-            fox_timer = (fox["min_hours"] + fox["max_hours"]) / 2 * 3600
+        # Lis: cisza przez pierwsze grace_minutes gry i przy malym stadzie,
+        # potem losowanie proporcjonalne do dlugosci kroku.
+        if (seconds >= fox["grace_minutes"] * 60
+                and random.random() < STEP / (fox["mean_minutes"] * 60)):
             if random.random() < guard_block:
                 # Plot, pies albo swiatla zawrocily lisa od zagrody.
                 pass

@@ -33,8 +33,6 @@ var hunger_next_death: float = 0.0
 ## Poziom rozbudowy inkubatora: 0 to stan poczatkowy, dalej wpisy z
 ## `incubator.upgrades` w balance.json.
 var incubator_level: int = 0
-## Sekundy do nastepnej wizyty lisa. Losowane po kazdej wizycie.
-var fox_timer: float = -1.0
 ## Trwajaca wizyta lisa: ile sekund jeszcze biega po wybiegu. Dopoki trwa,
 ## kury sa tylko zagrozone — zabiera je dopiero na koniec wizyty. Dzieki temu
 ## gracz, ktory akurat patrzy na ekran, ma szanse go przegonic.
@@ -68,7 +66,6 @@ static func from_start_config(start: Dictionary) -> FarmState:
 	if starting_eggs > 0 and not state.chickens.is_empty():
 		state.eggs[state.chickens[0].breed_id] = starting_eggs
 	state.ensure_starting_unlocks()
-	state.reset_fox_timer()
 	return state
 
 
@@ -183,6 +180,14 @@ func is_unlocked(_breed_id: String) -> bool:
 	return true
 
 
+## Ile czasu gry uplynelo od zalozenia farmy, w sekundach. Liczone z licznika
+## dni, wiec nie wymaga osobnego pola w zapisie. Lis i choroba daja farmie
+## spokoj przez pierwsze pol godziny i wlasnie to tu sprawdzaja.
+func played_seconds() -> float:
+	var day_seconds := float(GameData.balance().get("day", {}).get("seconds", 600.0))
+	return (float(days) + day_fraction) * day_seconds
+
+
 ## Czy gracz ma po jednej kurze kazdej rasy w grze.
 func has_full_collection() -> bool:
 	for breed: Dictionary in GameData.breeds():
@@ -194,14 +199,13 @@ func has_full_collection() -> bool:
 ## Kwota, jaka skup placi za kure. Cena z breeds.json to 70% ceny zakupu,
 ## wiec odsprzedanie kupionej kury zawsze jest strata — zarabia sie na
 ## odchowanych mlodych, nie na obracaniu tym samym ptakiem.
-## Za chora kure skup placi ulamek tej kwoty (`economy.sick_sell_share`):
-## nikt nie kupi do hodowli ptaka, ktory za chwile padnie.
+## Chorej kury skup nie przyjmuje w ogole — trzeba ja wyleczyc albo ubic.
+## Parametr `sick` zostaje, zeby stare wywolania nadal sie kompilowaly, ale
+## zwraca teraz zero zamiast ulamka ceny.
 static func hen_sell_price(breed_id: String, sick: bool = false) -> float:
-	var price := float(GameData.breed(breed_id).get("sell_price", 0))
-	if not sick:
-		return price
-	var share := float(GameData.balance().get("economy", {}).get("sick_sell_share", 0.35))
-	return maxf(1.0, round(price * share))
+	if sick:
+		return 0.0
+	return float(GameData.breed(breed_id).get("sell_price", 0))
 
 
 static func egg_value(breed_id: String) -> float:
@@ -275,16 +279,6 @@ func next_incubator_upgrade() -> Dictionary:
 	if incubator_level >= upgrades.size():
 		return {}
 	return upgrades[incubator_level]
-
-
-## Losuje czas do nastepnej wizyty lisa, z uwzglednieniem plotu i psa.
-func reset_fox_timer() -> void:
-	var fox: Dictionary = GameData.balance().get("fox", {})
-	var low := float(fox.get("min_hours", 2.0)) * 3600.0
-	var high := float(fox.get("max_hours", 5.0)) * 3600.0
-	# Przerwa miedzy podejsciami lisa nie zalezy od obrony — obrona rozstrzyga
-	# sie dopiero przy samej zagrodzie, w `fox_block_chance`.
-	fox_timer = randf_range(low, maxf(low, high))
 
 
 # --- budynki ------------------------------------------------------------

@@ -136,6 +136,7 @@ func _report(result: Dictionary) -> void:
 	# za co zaplacil za plot.
 	if int(result["fox_blocked"]) > 0:
 		Events.notice.emit(tr("HINT_FOX_BLOCKED"))
+		Events.fox_repelled.emit()
 	var arrived := int(result["fox_arrived"])
 	if arrived > 0:
 		Events.fox_arrived.emit(state.fox_pending, state.fox_visit_left)
@@ -410,15 +411,13 @@ func buy_hen(breed_id: String, rooster: bool = false) -> bool:
 ## wiec pozbycie sie jej jest pierwszym, co gracz chce zrobic; skup placi za
 ## nia mniej. Zdrowe sztuki ida dopiero, gdy chorych nie ma.
 ## Zwraca uzyskana kwote albo 0, gdy nie ma czego sprzedac.
+## Sprzedaje jednego ZDROWEGO ptaka. Chorej sztuki skup nie przyjmuje —
+## gracz musi ja wyleczyc albo ubic (`cull_hen`).
 func sell_hen(breed_id: String, rooster: bool = false) -> float:
-	var sick := true
-	var index := _find_hen(breed_id, true, rooster)
-	if index < 0:
-		index = _find_hen(breed_id, false, rooster)
-		sick = false
+	var index := _find_hen(breed_id, false, rooster)
 	if index < 0:
 		return 0.0
-	var price := FarmState.hen_sell_price(breed_id, sick)
+	var price := FarmState.hen_sell_price(breed_id, false)
 	state.chickens.remove_at(index)
 	state.money += price
 	Events.hen_removed.emit(breed_id)
@@ -431,9 +430,26 @@ func sell_hen(breed_id: String, rooster: bool = false) -> float:
 	return price
 
 
-## Czy kolejna sprzedaz tej rasy dotyczy chorej sztuki. UI pyta o to, zeby
-## kwota na przycisku zgadzala sie z tym, co gracz faktycznie dostanie.
-func next_sale_is_sick(breed_id: String, rooster: bool = false) -> bool:
+## Ubija jednego chorego ptaka danej rasy. Za darmo i bez zaplaty — to wyjscie
+## awaryjne dla kogos, kogo nie stac na lek, a chora kura blokuje miejsce
+## w kurniku i i tak za chwile padnie.
+func cull_hen(breed_id: String, rooster: bool = false) -> bool:
+	var index := _find_hen(breed_id, true, rooster)
+	if index < 0:
+		return false
+	state.chickens.remove_at(index)
+	Events.hen_removed.emit(breed_id)
+	Events.resources_changed.emit()
+	if rooster and state.hens_of_breed(breed_id) > 0 and not state.has_rooster(breed_id):
+		Events.alert.emit(tr("ALERT_NO_ROOSTER_TITLE"),
+				tr("ALERT_NO_ROOSTER_BODY") % tr(String(GameData.breed(breed_id).get("name", ""))))
+	save()
+	return true
+
+
+## Czy w stadzie jest chora sztuka danej rasy i plci. UI pyta o to, zeby
+## pokazac przycisk uboju zamiast sprzedazy.
+func has_sick(breed_id: String, rooster: bool = false) -> bool:
 	return _find_hen(breed_id, true, rooster) >= 0
 
 
@@ -537,9 +553,6 @@ func upgrade_building(building_id: String) -> bool:
 		return false
 	state.money -= price
 	state.set_building_level(building_id, state.building_level(building_id) + 1)
-	if building_id == "guard":
-		# Nowy plot albo pies dziala od zaraz, a nie dopiero po nastepnej wizycie.
-		state.reset_fox_timer()
 	Events.resources_changed.emit()
 	Events.notice.emit(tr("HINT_BUILDING_UPGRADED_%s" % building_id.to_upper()))
 	return true

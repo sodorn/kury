@@ -187,8 +187,8 @@ static func _advance_hunger(state: FarmState, step: float, out: Dictionary, budg
 static func _advance_disease(state: FarmState, step: float, out: Dictionary, budget: int) -> void:
 	var disease: Dictionary = GameData.balance().get("disease", {})
 	var death_seconds := float(disease.get("death_minutes", 7.0)) * 60.0
-	var per_hen_second := float(disease.get("chance_per_hen_hour", 0.05)) / 3600.0
 
+	# Najpierw przebieg choroby u tych, ktore juz choruja.
 	var index := state.chickens.size() - 1
 	while index >= 0:
 		var hen: Chicken = state.chickens[index]
@@ -197,11 +197,37 @@ static func _advance_disease(state: FarmState, step: float, out: Dictionary, bud
 			if hen.sick_seconds >= death_seconds and _losses(out) < budget:
 				_kill_hen(state, index, "disease")
 				out["died_disease"] = int(out["died_disease"]) + 1
-		elif not hen.vaccinated and randf() < per_hen_second * step:
-			hen.sick = true
-			hen.sick_seconds = 0.0
-			out["got_sick"] = int(out["got_sick"]) + 1
 		index -= 1
+
+	# Potem losowanie nowego zachorowania — jedno na cale gospodarstwo, nie na
+	# kura. Wczesniejsza stawka od sztuki sprawiala, ze duze stado chorowalo
+	# bez przerwy, a male prawie wcale.
+	if not _event_fires(state, step, disease):
+		return
+	var healthy: Array[int] = []
+	for i in state.chickens.size():
+		var hen: Chicken = state.chickens[i]
+		if not hen.sick and not hen.vaccinated:
+			healthy.append(i)
+	if healthy.is_empty():
+		return
+	var chosen: Chicken = state.chickens[healthy[randi() % healthy.size()]]
+	chosen.sick = true
+	chosen.sick_seconds = 0.0
+	out["got_sick"] = int(out["got_sick"]) + 1
+
+
+## Wspolna zasada dla lisa i choroby: przez pierwsze `grace_minutes` gry nic
+## zlego sie nie dzieje, male stado jest nietykalne, a potem co minute leci
+## kostka. `mean_minutes` to sredni odstep miedzy zdarzeniami — przy losowaniu
+## co minute odstepy sa rozrzucone: czasem dwa po sobie, czasem dluga cisza.
+static func _event_fires(state: FarmState, step: float, config: Dictionary) -> bool:
+	if state.chickens.size() < int(config.get("min_hens", 5)):
+		return false
+	if state.played_seconds() < float(config.get("grace_minutes", 30.0)) * 60.0:
+		return false
+	var mean_seconds := maxf(1.0, float(config.get("mean_minutes", 45.0)) * 60.0)
+	return randf() < step / mean_seconds
 
 
 ## Lis: przychodzi raz na kilka godzin i porywa czesc stada.
@@ -222,14 +248,7 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 		_fox_takes(state, out, budget)
 		return
 
-	if state.fox_timer < 0.0:
-		state.reset_fox_timer()
-		return
-	state.fox_timer -= step
-	if state.fox_timer > 0.0:
-		return
-	state.reset_fox_timer()
-	if state.chickens.size() < int(fox.get("min_hens", 5)):
+	if not _event_fires(state, step, fox):
 		return
 
 	# Plot, pies i nocne swiatla nie odwlekaja wizyty — po prostu zawracaja

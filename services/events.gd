@@ -42,6 +42,12 @@ signal fox_visited(count: int)
 @warning_ignore("unused_signal")
 signal fox_scared()
 
+## Plot albo pies zawrocily lisa od zagrody. Nic nie zginelo, ale scena ma go
+## pokazac, jak przebiega i odchodzi — inaczej gracz nie widzi, za co zaplacil
+## za obrone, a sam lis bywa rzadkim gosciem.
+@warning_ignore("unused_signal")
+signal fox_repelled()
+
 ## Gra zostala wygrana; `reason` to "money" albo "collection".
 @warning_ignore("unused_signal")
 signal game_won(reason: String)

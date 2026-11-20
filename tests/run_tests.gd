@@ -34,6 +34,7 @@ func _ready() -> void:
 	_test_offline_eggs()
 	_test_roosters()
 	_test_coop_limit()
+	_test_event_rules()
 	_test_lay_fairness()
 	_test_time_gap()
 	_test_buildings()
@@ -57,6 +58,23 @@ func _check(condition: bool, label: String) -> void:
 ## Stado samych kur, BEZ kogutow. Uwaga: takie stado nie zniesie ani jednego
 ## jajka — od wersji 10.0 kura potrzebuje koguta swojej rasy. Do testow
 ## produkcji jaj sluzy `_laying_state`.
+## Ustawia zdarzenie ("fox" albo "disease") tak, zeby na pewno wypadlo
+## w najblizszym kroku sekundowym: zero karencji i sredni odstep przyciety
+## do jednej sekundy. Zmiana dotyczy wczytanej kopii balansu, wiec kazdy test,
+## ktory z tego korzysta, konczy sie `GameData.reload()`.
+func _force_event(kind: String) -> void:
+	var cfg: Dictionary = GameData.balance().get(kind, {})
+	cfg["grace_minutes"] = 0.0
+	cfg["mean_minutes"] = 0.0
+
+
+## Odwrotnie: zdarzenie nie wypadnie przez cala rozsadna dlugosc testu.
+func _never_event(kind: String) -> void:
+	var cfg: Dictionary = GameData.balance().get(kind, {})
+	cfg["grace_minutes"] = 0.0
+	cfg["mean_minutes"] = 1000000.0
+
+
 func _fresh_state(hens: Array[String] = ["leghorn"], feed := 100.0) -> FarmState:
 	var state := FarmState.new()
 	state.money = 100
@@ -588,10 +606,24 @@ func _test_fox() -> void:
 	for i in 20:
 		hens.append("leghorn")
 
+	# Karencja: przez pierwsze pol godziny gry lis nie przychodzi wcale.
+	var young := _fresh_state(hens, 100000.0)
+	_check(young.played_seconds() < float(fox.get("grace_minutes", 30)) * 60.0,
+			"nowa farma jest jeszcze w okresie ochronnym")
+	var quiet := Simulation.advance(young, 600.0)
+	_check(int(quiet["fox_arrived"]) == 0 and int(quiet["fox_blocked"]) == 0,
+			"w okresie ochronnym lis nie podchodzi ani razu")
+
+	# Male stado lis zostawia w spokoju nawet po karencji.
+	_force_event("fox")
+	var tiny := _fresh_state(["leghorn", "leghorn"], 100.0)
+	var tiny_result := Simulation.advance(tiny, 5.0)
+	_check(int(tiny_result["fox_arrived"]) == 0, "przy malym stadzie lis nie przychodzi")
+	_check(tiny.hen_count() == 2, "male stado zostaje nietkniete")
+
 	# Etap pierwszy: lis jest na wybiegu, ale jeszcze nic nie zabral.
 	var state := _fresh_state(hens, 100000.0)
-	state.fox_timer = 5.0
-	var arrival := Simulation.advance(state, 6.0)
+	var arrival := Simulation.advance(state, 1.0)
 	_check(int(arrival["fox_arrived"]) == 1, "lis przychodzi, gdy minie jego czas")
 	_check(int(arrival["fox_took"]) == 0, "po wejsciu lis jeszcze nic nie zabiera")
 	_check(state.hen_count() == 20, "stado na razie w komplecie")
@@ -607,7 +639,6 @@ func _test_fox() -> void:
 	_check(state.hen_count() > 0, "lis nigdy nie zabiera calego stada")
 	_check(float(taken) / 20.0 >= float(fox.get("min_share", 0.2)) - 0.08, "lup nie mniejszy niz minimum")
 	_check(float(taken) / 20.0 <= float(fox.get("max_share", 0.9)) + 0.08, "lup nie wiekszy niz maksimum")
-	_check(state.fox_timer > 0.0, "po wizycie losuje sie nowy czas")
 	_check(state.corpses.is_empty(), "lis zabiera kury ze soba, zwlok nie ma")
 
 	# Przegoniony lis odchodzi z niczym.
@@ -616,21 +647,22 @@ func _test_fox() -> void:
 	for i in 20:
 		Game.state.chickens.append(Chicken.create("leghorn"))
 	Game.state.feed = 100000.0
-	Game.state.fox_timer = 1.0
 	_check(not Game.scare_fox(), "bez lisa nie ma kogo przeganiac")
 	Simulation.advance(Game.state, 2.0)
 	_check(Game.state.fox_visit_left > 0.0, "lis wszedl na wybieg")
 	_check(Game.scare_fox(), "lisa da sie przegonic w trakcie wizyty")
 	_check(Game.state.fox_pending == 0 and is_zero_approx(Game.state.fox_visit_left),
 			"po przegonieniu nie ma ani lupu, ani wizyty")
+	# Bez tego wymuszony lis wrocilby w tej samej chwili i zjadl wynik testu.
+	_never_event("fox")
 	var after := Simulation.advance(Game.state, visit + 2.0)
 	_check(int(after["fox_took"]) == 0, "przegoniony lis nie zabiera nic")
 	_check(Game.state.hen_count() == 20, "stado w komplecie po przegonieniu")
 
 	# Pod nieobecnosc gracza nie ma kogo czekac: strata liczy sie od razu.
+	_force_event("fox")
 	var away := _laying_state(hens, 100000.0)
-	away.fox_timer = 5.0
-	var offline := Simulation.advance(away, 6.0, true)
+	var offline := Simulation.advance(away, 1.0, true)
 	_check(int(offline["fox_took"]) > 0, "offline lis zabiera od razu")
 	_check(int(offline["fox_arrived"]) == 0, "offline nie ma okna na reakcje")
 
@@ -654,22 +686,15 @@ func _test_fox() -> void:
 	for i in 100:
 		var yard := _fresh_state(hens, 100000.0)
 		yard.guard_level = 1
-		yard.fox_timer = 0.5
 		var tally := Simulation.advance(yard, 1.0)
 		blocked += int(tally["fox_blocked"])
 		walked_in += int(tally["fox_arrived"])
 	_check(blocked > 70 and walked_in > 0,
 			"plot zawrocil %d na 100 podejsc, wszedl %d razy" % [blocked, walked_in])
 	var bare := _fresh_state(hens, 100000.0)
-	bare.fox_timer = 0.5
 	_check(int(Simulation.advance(bare, 1.0)["fox_blocked"]) == 0, "bez plotu nikt lisa nie zawraca")
 
-	# Male stado lis zostawia w spokoju.
-	var tiny := _fresh_state(["leghorn", "leghorn"], 100.0)
-	tiny.fox_timer = 1.0
-	var tiny_result := Simulation.advance(tiny, 5.0)
-	_check(int(tiny_result["fox_arrived"]) == 0, "przy malym stadzie lis nie przychodzi")
-	_check(tiny.hen_count() == 2, "male stado zostaje nietkniete")
+	GameData.reload()
 	Game.new_game()
 
 
@@ -696,27 +721,37 @@ func _test_vet_and_selling() -> void:
 
 	_check(FarmState.hen_sell_price("leghorn") < float(GameData.breed("leghorn").get("price", 0)),
 			"sprzedaz jest tansza od zakupu")
-	_check(FarmState.hen_sell_price("leghorn", true) < FarmState.hen_sell_price("leghorn"),
-			"za chora kure skup placi mniej")
-	_check(FarmState.hen_sell_price("cemani", true) > FarmState.hen_sell_price("leghorn", true),
-			"chora kura drogiej rasy wciaz warta wiecej niz chora tania")
+	_check(is_zero_approx(FarmState.hen_sell_price("leghorn", true)),
+			"chora kura nie ma ceny skupu")
 
-	# Jeden przycisk sprzedazy: chora kura idzie pierwsza, bo i tak by padla.
+	# Chorej sztuki skup nie przyjmuje: zostaje lek albo ubicie za darmo.
 	Game.state.chickens.clear()
-	var healthy := Chicken.create("rhode")
 	var ill := Chicken.create("rhode")
 	ill.sick = true
-	Game.state.chickens.append(healthy)
 	Game.state.chickens.append(ill)
-	_check(Game.next_sale_is_sick("rhode"), "dopoki jest chora, sprzedaz dotyczy chorej")
-	var sick_price := Game.sell_hen("rhode")
-	_check(is_equal_approx(sick_price, FarmState.hen_sell_price("rhode", true)),
-			"chora idzie pierwsza, za obnizona stawke")
-	_check(Game.state.sick_count() == 0, "chora zniknela ze stada")
-	_check(not Game.next_sale_is_sick("rhode"), "zostala sama zdrowa")
+	_check(Game.has_sick("rhode"), "w stadzie jest chora sztuka")
+	_check(is_zero_approx(Game.sell_hen("rhode")), "chorej kury nie da sie sprzedac")
+	_check(Game.state.chickens.size() == 1, "nieudana sprzedaz nie usuwa kury ze stada")
+
+	var purse := Game.state.money
+	_check(Game.cull_hen("rhode"), "chora kure da sie ubic")
+	_check(Game.state.chickens.is_empty(), "ubita kura znika ze stada")
+	_check(is_equal_approx(Game.state.money, purse), "ubicie jest za darmo i nic nie placi")
+	_check(not Game.cull_hen("rhode"), "nie ma juz czego ubijac")
+
+	# Zdrowa idzie normalnie, za pelna stawke.
+	Game.state.chickens.append(Chicken.create("rhode"))
 	var full_price := Game.sell_hen("rhode")
 	_check(is_equal_approx(full_price, FarmState.hen_sell_price("rhode")), "zdrowa idzie za pelna stawke")
-	_check(sick_price < full_price, "za chora skup placi mniej niz za zdrowa")
+
+	# Kogut tez: chorego nie sprzedasz, ale ubic mozna.
+	Game.state.chickens.clear()
+	var sick_cock := Chicken.create_rooster("marans")
+	sick_cock.sick = true
+	Game.state.chickens.append(sick_cock)
+	_check(is_zero_approx(Game.sell_hen("marans", true)), "chorego koguta tez nie kupia")
+	_check(Game.cull_hen("marans", true), "chorego koguta da sie ubic")
+	_check(Game.state.chickens.is_empty(), "ubity kogut znika ze stada")
 	_check(Game.state.chickens.is_empty(), "stado puste po obu sprzedazach")
 	_check(is_zero_approx(Game.sell_hen("rhode")), "nie ma czego sprzedac")
 
@@ -811,6 +846,85 @@ func _test_money_format() -> void:
 
 
 ## Pod nieobecnosc gracza jaja omijaja wybieg i ida prosto do magazynu.
+## Zasady wspolne dla lisa i choroby, podane przez wlasciciela wprost:
+## przez pierwsze pol godziny gry nic sie nie dzieje, przy stadzie mniejszym
+## niz piec sztuk tez nie, a potem losowanie co minute z zadana srednia.
+func _test_event_rules() -> void:
+	var fox: Dictionary = GameData.balance().get("fox", {})
+	var disease: Dictionary = GameData.balance().get("disease", {})
+	_check(int(fox.get("grace_minutes", 0)) == 30, "lis: pol godziny spokoju na start")
+	_check(int(disease.get("grace_minutes", 0)) == 30, "choroba: pol godziny spokoju na start")
+	_check(int(fox.get("min_hens", 0)) == 5, "lis: nie rusza stada mniejszego niz piec")
+	_check(int(disease.get("min_hens", 0)) == 5, "choroba: to samo ograniczenie")
+
+	# Licznik czasu gry idzie od zalozenia farmy i to on otwiera furtke.
+	var state := _fresh_state(["leghorn"], 100000.0)
+	_check(is_zero_approx(state.played_seconds()), "nowa farma ma zerowy licznik czasu")
+	Simulation.advance(state, 1800.0)
+	_check(absf(state.played_seconds() - 1800.0) < 1.0,
+			"po pol godziny licznik pokazuje pol godziny (%.0f s)" % state.played_seconds())
+
+	# Czestosc: przy stu przebiegach po godzinie gry liczba zdarzen ma sie
+	# zgadzac ze srednia z balansu. Dla lisa to 45 minut, czyli okolo 1,3
+	# podejscia na godzine.
+	var hens: Array[String] = []
+	for i in 12:
+		hens.append("leghorn")
+	# Dzien w grze trwa `day.seconds`, czyli dziesiec minut — pol godziny
+	# karencji to trzy dni. Stado trzeba po kazdej minucie uzupelniac: po
+	# napasci spada ponizej pieciu sztuk i lis przestaje podchodzic, co
+	# zanizyloby pomiar do zera.
+	var runs := 60
+	var minutes := 60
+	var fox_events := 0
+	var sick_events := 0
+	for r in runs:
+		var yard := _fresh_state(hens, 1000000.0)
+		yard.days = 10
+		for bird: Chicken in yard.chickens:
+			bird.vaccinated = true
+		for i in minutes:
+			var out := Simulation.advance(yard, 60.0)
+			fox_events += int(out["fox_arrived"]) + int(out["fox_blocked"])
+			yard.fox_visit_left = 0.0
+			yard.fox_pending = 0
+			while yard.chickens.size() < hens.size():
+				var extra := Chicken.create("leghorn")
+				extra.vaccinated = true
+				yard.chickens.append(extra)
+	var per_hour := float(fox_events) / runs
+	var want := 60.0 / float(fox.get("mean_minutes", 45))
+	_check(absf(per_hour - want) < want * 0.35,
+			"lis podchodzi %.2f raza na godzine, w balansie %.2f" % [per_hour, want])
+
+	# Choroba: ta sama mechanika, ale czesciej. Liczymy zachorowania w stadzie,
+	# ktore nie jest zaszczepione.
+	for r in runs:
+		var yard := _fresh_state(hens, 1000000.0)
+		yard.days = 10
+		for i in minutes:
+			var out := Simulation.advance(yard, 60.0)
+			sick_events += int(out["got_sick"])
+			# Wyleczenie na biezaco, zeby stado nie wymarlo w trakcie pomiaru.
+			for bird: Chicken in yard.chickens:
+				bird.sick = false
+				bird.sick_seconds = 0.0
+	var sick_per_hour := float(sick_events) / runs
+	var sick_want := 60.0 / float(disease.get("mean_minutes", 15))
+	_check(absf(sick_per_hour - sick_want) < sick_want * 0.35,
+			"choroba wypada %.2f raza na godzine, w balansie %.2f" % [sick_per_hour, sick_want])
+	_check(sick_want > want, "choroba zdarza sie czesciej niz lis")
+
+	# Choroba dotyka jednej kury na raz, nie calego stada naraz.
+	_force_event("disease")
+	var flock := _fresh_state(hens, 1000000.0)
+	flock.days = 10
+	Simulation.advance(flock, 1.0)
+	_check(flock.sick_count() == 1, "jedno losowanie to jedna chora kura")
+	GameData.reload()
+	Game.new_game()
+
+
 ## Pelny kurnik: inkubator ma odmowic, a nie przyjac jaja i zatrzymac pisklę
 ## w kolejce bez slowa wyjasnienia.
 func _test_coop_limit() -> void:
@@ -1105,7 +1219,7 @@ func _test_strings() -> void:
 	var keys: Array[String] = [
 		"UNLOCK_TITLE", "UNLOCK_PRICE", "UNLOCK_EGG", "UNLOCK_CLOSE",
 		"WIN_TITLE", "WIN_MONEY", "WIN_COLLECTION", "WIN_CONTINUE",
-		"PANEL_SELL_HEN", "PANEL_SELL_HEN_SICK", "PANEL_BUY_HEN",
+		"PANEL_SELL_HEN", "PANEL_CULL_HEN", "PANEL_BUY_HEN",
 		"PANEL_UPGRADE_COOP", "PANEL_UPGRADE_GUARD", "PANEL_UPGRADE_STORAGE",
 		"PANEL_COOP_SPACE", "PANEL_FOX_GUARD", "PANEL_LOCKED_PRICE",
 		"HINT_FOX_HERE", "HINT_FOX_SCARED", "HINT_COOP_FULL",

@@ -568,3 +568,16 @@ func _test_sick_and_fox_look() -> void:
 	await _frames(90)
 	_check(_nodes_of_type("FarmFox").is_empty(), "lis odszedl z wybiegu")
 	_shot("lis_krew.png")
+
+	# Lis zawrocony przez plot: ma przebiec i zniknac, nic nie zabierajac.
+	var flock_before := Game.state.hen_count()
+	Events.fox_repelled.emit()
+	await _frames(20)
+	var repelled := _nodes_of_type("FarmFox")
+	_check(repelled.size() == 1, "zawrocony lis pokazuje sie na wybiegu")
+	_check(not (repelled[0] as FarmFox).input_pickable,
+			"zawroconego lisa nie da sie przeganiac, bo juz odchodzi")
+	_shot("lis_zawrocony.png")
+	await _frames(240)
+	_check(_nodes_of_type("FarmFox").is_empty(), "zawrocony lis sam znika z wybiegu")
+	_check(Game.state.hen_count() == flock_before, "zawrocony lis nic nie zabral")

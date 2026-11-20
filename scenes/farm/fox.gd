@@ -141,3 +141,29 @@ func run_through(run: Rect2, seconds: float) -> void:
 	var prowl := create_tween().set_loops()
 	prowl.tween_property(_sprite, "rotation", 0.09, 0.45).set_trans(Tween.TRANS_SINE)
 	prowl.tween_property(_sprite, "rotation", -0.09, 0.45).set_trans(Tween.TRANS_SINE)
+
+
+## Lis zawrocony przez plot: podbiega do zagrody, wacha i odchodzi z niczym.
+## Nie da sie go dotknac — nie ma czego przeganiac, jest juz przegoniony.
+func sniff_and_leave(run: Rect2) -> void:
+	input_pickable = false
+	var from_left := randf() < 0.5
+	var y := randf_range(run.position.y + run.size.y * 0.35, run.end.y)
+	var edge := run.position.x - 260.0 if from_left else run.end.x + 260.0
+	var near := run.position.x + run.size.x * 0.22 if from_left else run.end.x - run.size.x * 0.22
+	position = Vector2(edge, y)
+	_sprite.flip_h = not from_left
+
+	_dust.emitting = true
+	var tween := create_tween()
+	tween.tween_property(self, "position:x", near, 1.0) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	# Chwila wahania przy plocie, zeby bylo widac, ze zawrocil, a nie przeszedl.
+	tween.tween_property(_sprite, "rotation", 0.12, 0.3).set_trans(Tween.TRANS_SINE)
+	tween.tween_property(_sprite, "rotation", -0.12, 0.3).set_trans(Tween.TRANS_SINE)
+	tween.tween_property(_sprite, "rotation", 0.0, 0.2)
+	tween.tween_callback(func() -> void: _sprite.flip_h = from_left)
+	tween.tween_property(self, "position:x", edge, 0.9) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	tween.tween_callback(func() -> void: _dust.emitting = false)
+	tween.tween_callback(queue_free)

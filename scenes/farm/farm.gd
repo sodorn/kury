@@ -29,6 +29,7 @@ func _ready() -> void:
 	_run = Simulation.run_area()
 	get_viewport().size_changed.connect(_center_world)
 	Events.fox_arrived.connect(_on_fox_arrived)
+	Events.fox_repelled.connect(_on_fox_repelled)
 	_center_world()
 	_sync_livestock()
 
@@ -227,6 +228,14 @@ func _on_fox_arrived(_count: int, seconds: float) -> void:
 	var fox: Node2D = FOX_SCENE.instantiate()
 	_objects.add_child(fox)
 	fox.run_through(_run, seconds)
+
+
+## Plot zawrocil lisa. Pokazujemy go mimo wszystko: wbiega, rozglada sie
+## i wychodzi z niczym. Bez tego zakup plotu wyglada, jakby nic nie zmienil.
+func _on_fox_repelled() -> void:
+	var fox: FarmFox = FOX_SCENE.instantiate()
+	_objects.add_child(fox)
+	fox.sniff_and_leave(_run)
 
 
 ## Jajko pojawia sie obok losowej kury, a bez stada — gdziekolwiek na wybiegu.

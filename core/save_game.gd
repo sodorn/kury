@@ -46,7 +46,6 @@ static func to_dict(state: FarmState) -> Dictionary:
 		"coop_level": state.coop_level,
 		"storage_level": state.storage_level,
 		"guard_level": state.guard_level,
-		"fox_timer": state.fox_timer,
 		"fox_visit_left": state.fox_visit_left,
 		"fox_pending": state.fox_pending,
 		"hunger_seconds": state.hunger_seconds,
@@ -76,7 +75,6 @@ static func from_dict(data: Dictionary) -> Dictionary:
 	state.coop_level = maxi(0, int(data.get("coop_level", 0)))
 	state.storage_level = maxi(0, int(data.get("storage_level", 0)))
 	state.guard_level = maxi(0, int(data.get("guard_level", 0)))
-	state.fox_timer = float(data.get("fox_timer", -1.0))
 	# Wizyty lisa nie przenosimy przez zapis: gracz, ktory wylaczyl gre
 	# w trakcie, nie ma czego przeganiac po powrocie.
 	state.fox_visit_left = 0.0
@@ -121,8 +119,6 @@ static func from_dict(data: Dictionary) -> Dictionary:
 			continue
 		state.corpses.append(Corpse.from_dict(entry))
 	state.ensure_starting_unlocks()
-	if state.fox_timer < 0.0:
-		state.reset_fox_timer()
 
 	var saved_at := float(data.get("saved_at", 0.0))
 	var elapsed := maxf(0.0, Time.get_unix_time_from_system() - saved_at)

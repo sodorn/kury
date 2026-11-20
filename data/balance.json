@@ -14,12 +14,11 @@
 		]
 	},
 	"economy": {
-		"_opis": "Worek paszy 25 kg za 60 zl to 2,40 zl/kg - tyle kosztuje pasza dla niosek w Polsce. sick_sell_share: za chora kure skup placi tyle z normalnej ceny sprzedazy.",
+		"_opis": "feed_per_hen_minute w kilogramach na ptaka na minute. Wartosc jest cztery razy wyzsza niz w 10.1: wczesniej worek starczal na pol godziny i pasza w ogole nie byla problemem. Razem z nia spadla cena kilograma, zeby karma nie zjadala calego zarobku.",
 		"feed_pack_size": 25,
-		"feed_pack_price": 60,
-		"feed_per_hen_minute": 0.085,
-		"chick_feed_multiplier": 0.5,
-		"sick_sell_share": 0.35
+		"feed_pack_price": 25,
+		"feed_per_hen_minute": 0.34,
+		"chick_feed_multiplier": 0.5
 	},
 	"run": {
 		"_opis": "area to obszar, po ktorym chodza kury i na ktorym lezą jaja (wspolrzedne swiata 1080x2400).",
@@ -75,22 +74,24 @@
 		"offline_max_share": 0.5
 	},
 	"disease": {
-		"_opis": "chance_per_hen_hour: srednia liczba zachorowan na kure na godzine. Chora kura nie znosi jaj i po death_minutes pada. Szczepienie to jedna oplata za cale stado, ale chroni tylko ptaki zyjace w chwili szczepienia - mlode wyklute pozniej trzeba zaszczepic ponownie.",
-		"chance_per_hen_hour": 1.2,
+		"_opis": "Te same zasady co u lisa: cisza przez grace_minutes i przy stadzie mniejszym niz min_hens, potem losowanie co minute ze srednia mean_minutes. Chorob liczy sie na cale gospodarstwo, nie na kure - stawka od sztuki sprawiala, ze duze stado chorowalo bez przerwy, a male prawie wcale. Chorej kury skup nie przyjmuje: trzeba ja wyleczyc albo ubic za darmo.",
 		"death_minutes": 7.0,
-		"medicine_price": 80,
-		"vaccine_price": 100,
-		"vaccine_price_per_hen": 0
+		"medicine_price": 10,
+		"vaccine_price": 200,
+		"vaccine_price_per_hen": 0,
+		"grace_minutes": 30,
+		"min_hens": 5,
+		"mean_minutes": 15
 	},
 	"fox": {
-		"_opis": "Lis przychodzi co 15-36 minut gry i porywa od min_share do max_share stada. Przez visit_seconds biega po wybiegu - jesli gracz zdazy w niego trafic scare_taps razy, ucieka z niczym. Czesciej niz co 15 minut farma nie nadaza odbudowac stada: przy 6-18 minutach model nie konczy gry nawet w 300 godzin, jesli gracz nie przegania lisa.",
-		"min_hours": 0.25,
-		"max_hours": 0.6,
+		"_opis": "Przez pierwsze grace_minutes gry lis nie przychodzi wcale i nie przychodzi do stada mniejszego niz min_hens. Potem co minute leci kostka tak, zeby wypadal srednio raz na mean_minutes. Odstepy sa przez to rozrzucone: czasem dwa pod rzad, czasem dluga cisza. Plot i pies nie zmieniaja czestosci podejsc, tylko zawracaja lisa od zagrody.",
 		"min_share": 0.3,
 		"max_share": 0.9,
-		"min_hens": 4,
-		"visit_seconds": 7.0,
-		"scare_taps": 3
+		"min_hens": 5,
+		"visit_seconds": 10,
+		"scare_taps": 3,
+		"grace_minutes": 30,
+		"mean_minutes": 45
 	},
 	"win": {
 		"_opis": "Jeden cel: pieniadze. Kolekcja ras przestala byc wyzwaniem, gdy zniknely progi odblokowania — po jednej sztuce kazdej rasy da sie kupic w niecale szesc godzin.",
@@ -138,27 +139,27 @@
 			"upgrades": [
 				{
 					"pack_size": 60,
-					"pack_price": 132,
+					"pack_price": 57,
 					"price": 350
 				},
 				{
 					"pack_size": 150,
-					"pack_price": 300,
+					"pack_price": 135,
 					"price": 1200
 				},
 				{
 					"pack_size": 400,
-					"pack_price": 720,
+					"pack_price": 340,
 					"price": 4000
 				},
 				{
 					"pack_size": 1000,
-					"pack_price": 1700,
+					"pack_price": 800,
 					"price": 12000
 				},
 				{
 					"pack_size": 2500,
-					"pack_price": 4000,
+					"pack_price": 1875,
 					"price": 30000
 				}
 			]

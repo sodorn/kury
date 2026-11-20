@@ -4,7 +4,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 8 zakonczony** (wersja 10.1): kury i koguty. Kura
+- Aktualny etap: **ETAP 8 zakonczony** (wersja 10.2): kury i koguty. Kura
   znosi jaja tylko wtedy, gdy na farmie jest kogut jej rasy. Do tego duzo
   tansze rozbudowy, kurnik do 260 ptakow, trzy jaja na pisklę zamiast
   szesciu, szczepienie za stala setke i czesciej przychodzacy lis.
@@ -15,7 +15,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -177,6 +177,19 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## Weryfikacja wersji 10.2 (wykonana w srodowisku Claude, Linux)
+
+- `tests/tests.tscn`: **847/847 OK**. Doszlo `_test_event_rules`: karencja,
+  prog stada, licznik czasu gry i **pomiar czestosci** obu zdarzen na 60
+  przebiegach po godzinie — wynik musi trafic w srednia z balansu z dokladnoscia
+  do 35%.
+- `tests/smoke_ui.tscn`: **OK**. Doszlo sprawdzenie zawroconego lisa: pokazuje
+  sie, nie da sie go stuknac, sam znika i nic nie zabiera.
+- `tools/balance_model.py` na 25 losowaniach: mediana **12,6 h** przy graczu,
+  ktory nigdy nie przegania lisa, i 12,2 h przy graczu przeganiajacym polowe
+  wizyt. Jeden przebieg na 25 utknal — to cena losowania co minute przy lisie
+  zabierajacym 30-90% stada przed kupnem plotu.
 
 ## Weryfikacja wersji 10.1 (wykonana w srodowisku Claude, Linux)
 
@@ -484,6 +497,54 @@ python3 tools/gen_ground.py
   poprawek w `assets/sprites/animals/rooster_*.svg` nie wprowadzac — zgina
   przy nastepnym przebiegu. Plotno 170x130, stopy na y=118, tak samo jak
   u kur, zeby `Sprite2D` z `offset = (4, -53)` postawil je na ziemi.
+
+### Lis i choroba: zasady zdarzen (wersja 10.2)
+
+Zasady podyktowane przez wlasciciela wprost, po tym jak przez caly wieczor
+nie zobaczyl lisa ani razu. Pomiar przed zmiana: **0,8 wejscia na 30 minut
+aktywnej gry** — a on gra krocej, wiec w praktyce nie widzial go nigdy.
+
+- **Karencja:** przez pierwsze `grace_minutes` (30) gry od zalozenia farmy nie
+  dzieje sie nic. Ani lis, ani choroba.
+- **Prog stada:** przy mniej niz `min_hens` (5) ptakach tez nie dzieje sie nic.
+- **Potem kostka co minute**, tak zeby zdarzenie wypadalo srednio raz na
+  `mean_minutes`: lis 45 minut, choroba 15 minut. Odstepy sa przez to
+  rozrzucone — czasem dwa pod rzad, czasem dluga cisza.
+- Jedno miejsce decyduje o obu: `Simulation._event_fires(state, step, config)`.
+- Czas gry liczy `FarmState.played_seconds()` z licznika dni, wiec karencja nie
+  wymagala nowego pola w zapisie. **Uwaga:** dzien w grze trwa `day.seconds`,
+  czyli dziesiec minut, wiec `state.days = 1` to dopiero dziesiec minut gry.
+  Testy, ktore chca ominac karencje, ustawiaja `days = 10`.
+- Choroba liczy sie teraz **na gospodarstwo, nie na kure**. Stawka od sztuki
+  (`chance_per_hen_hour`) sprawiala, ze duze stado chorowalo bez przerwy,
+  a male prawie wcale. Jedno losowanie to jedna chora kura.
+- Pomiar po zmianie, 200 przebiegow: w pierwszych 30 minutach zero zdarzen,
+  w godzinie gry 0,69 podejscia lisa i 1,96 zachorowania.
+- `fox_timer` i `reset_fox_timer()` zniknely — nie ma juz odliczania. Stare
+  zapisy moga miec klucz `fox_timer`, jest po prostu ignorowany.
+- Testy wymuszaja zdarzenie przez `_force_event("fox")`, ktory podmienia
+  `grace_minutes` i `mean_minutes` we wczytanej kopii balansu. Kazdy taki test
+  konczy sie `GameData.reload()`.
+
+### Chora kura: wyleczyc albo ubic (wersja 10.2)
+
+- **Skup nie przyjmuje chorej sztuki.** `hen_sell_price(id, true)` zwraca zero,
+  `sell_hen` szuka wylacznie zdrowych. Wczesniej chora szla pierwsza za ulamek
+  ceny; `economy.sick_sell_share` zniknelo z balansu.
+- Zostaja dwa wyjscia: lek (10 zl, bylo 80) albo `Game.cull_hen()` — ubicie
+  **za darmo i bez zaplaty**, zeby ktos bez grosza przy duszy mogl zwolnic
+  miejsce w kurniku.
+- Przycisk uboju bierze najpierw kury, a koguta dopiero gdy to on jest chory —
+  inaczej jedno nieuwazne stukniecie zostawialoby rase bez koguta.
+- Szczepienie zdrozalo do 200 zl (bylo 100).
+
+### Pasza (wersja 10.2)
+
+- `feed_per_hen_minute` 0,085 -> **0,34** (cztery razy wiecej). Worek starczal
+  na pol godziny i pasza w ogole nie byla problemem.
+- Razem z tym spadla cena: worek 25 kg kosztuje 25 zl zamiast 60, a kazdy
+  poziom magazynu daje tansze kilogramy (1,00 -> 0,75 zl/kg). Bez tego
+  czterokrotne zuzycie zjadaloby caly zarobek i ekonomia staneleby.
 
 ### Obrona przed lisem: zawracanie, nie odwlekanie (wersja 10.1)
 

@@ -510,6 +510,14 @@ func _on_buy_hen(breed_id: String, breed_name: String, rooster: bool = false) ->
 		_flash(tr(key) % breed_name)
 
 
+## Ubija chora sztuke. Najpierw kury, a koguta dopiero wtedy, gdy to on jest
+## chory — inaczej jedno nieuwazne stukniecie zostawialoby rase bez koguta.
+func _on_cull_hen(breed_id: String, breed_name: String) -> void:
+	var rooster := not Game.has_sick(breed_id)
+	if Game.cull_hen(breed_id, rooster):
+		_flash(tr("PANEL_HEN_CULLED") % breed_name)
+
+
 func _on_sell_hen(breed_id: String, breed_name: String, rooster: bool = false) -> void:
 	var earned := Game.sell_hen(breed_id, rooster)
 	if earned > 0.0:
@@ -675,6 +683,13 @@ func _add_breed_card(breed: Dictionary) -> void:
 	sell_rooster.pressed.connect(func() -> void: _on_sell_hen(breed_id, breed_name, true))
 	card.add_child(sell_rooster)
 
+	# Chorej sztuki skup nie przyjmuje. Jedyne, co mozna z nia zrobic bez
+	# pieniedzy na lek, to ubic — za darmo, zeby zwolnic miejsce w kurniku.
+	var cull := Button.new()
+	cull.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	cull.pressed.connect(func() -> void: _on_cull_hen(breed_id, breed_name))
+	card.add_child(cull)
+
 	_actions.add_child(card)
 
 	_refreshers.append(func() -> void:
@@ -686,17 +701,19 @@ func _add_breed_card(breed: Dictionary) -> void:
 		buy_rooster.text = tr("PANEL_BUY_ROOSTER") % [NumberFormat.money(price), cocks]
 		buy_rooster.disabled = poor
 		no_rooster.visible = owned > 0 and cocks == 0
-		sell.visible = owned > 0
-		# Najpierw sprzedaja sie zdrowe sztuki; gdy zostana same chore,
-		# przycisk sam pokazuje nizsza kwote i dopisek.
-		var sick_sale: bool = owned > 0 and Game.next_sale_is_sick(breed_id)
-		var key := "PANEL_SELL_HEN_SICK" if sick_sale else "PANEL_SELL_HEN"
-		sell.text = tr(key) % [
-			NumberFormat.money(FarmState.hen_sell_price(breed_id, sick_sale)), owned]
-		sell_rooster.visible = cocks > 0
-		var sick_cock: bool = cocks > 0 and Game.next_sale_is_sick(breed_id, true)
+		# Skup bierze tylko zdrowe sztuki, wiec licznik na przycisku sprzedazy
+		# pokazuje zdrowe, a nie cale stado tej rasy.
+		var healthy := Game.state.hens_of_breed(breed_id, true)
+		var healthy_cocks := Game.state.hens_of_breed(breed_id, true, true)
+		sell.visible = healthy > 0
+		sell.text = tr("PANEL_SELL_HEN") % [
+			NumberFormat.money(FarmState.hen_sell_price(breed_id)), healthy]
+		sell_rooster.visible = healthy_cocks > 0
 		sell_rooster.text = tr("PANEL_SELL_ROOSTER") % [
-			NumberFormat.money(FarmState.hen_sell_price(breed_id, sick_cock)), cocks]
+			NumberFormat.money(FarmState.hen_sell_price(breed_id)), healthy_cocks]
+		var sick := owned - healthy + cocks - healthy_cocks
+		cull.visible = sick > 0
+		cull.text = tr("PANEL_CULL_HEN") % sick
 		subtitle.text = "%s · %s" % [tr(breed.get("rarity", "")), tr(breed.get("desc", ""))]
 		numbers.text = tr("PANEL_BREED_NUMBERS") % [
 			NumberFormat.money(FarmState.egg_value(breed_id)),
