@@ -163,6 +163,7 @@ func _build_coop() -> void:
 			func() -> String: return "%d / %d" % [Game.state.coop_occupied(), Game.state.coop_capacity()])
 	_add_row("PANEL_FOX_GUARD",
 			func() -> String: return tr(_guard_name(Game.state.guard_level)))
+	_add_row("PANEL_FARM_CODE", func() -> String: return Cloud.player_id)
 	_add_row("PANEL_SICK", func() -> String: return str(Game.state.sick_count()))
 	_add_row("PANEL_CHICKS", func() -> String: return str(Game.state.chicks.size()))
 	_add_row("PANEL_VACCINATED",
@@ -217,6 +218,15 @@ func _build_coop() -> void:
 	hint.text = tr("PANEL_COOP_HINT")
 	_actions.add_child(hint)
 
+	# Kod farmy trzymamy w kurniku, bo to tutaj gracz zaglada najczesciej.
+	var note := Label.new()
+	note.theme_type_variation = &"NoteLabel"
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.text = tr("PANEL_CLOUD_ON") if Cloud.is_enabled() else tr("PANEL_CLOUD_OFF")
+	_actions.add_child(note)
+	if Cloud.is_enabled():
+		_add_code_entry()
+
 
 func _build_storage() -> void:
 	_add_row("PANEL_EGGS_STORED", func() -> String: return NumberFormat.grouped(Game.state.egg_count()))
@@ -252,14 +262,7 @@ func _build_storage() -> void:
 			func() -> void: _on_upgrade("storage"),
 			func() -> bool: return not Game.state.next_building_upgrade("storage").is_empty())
 
-	_add_row("PANEL_FARM_CODE", func() -> String: return Cloud.player_id)
-	var note := Label.new()
-	note.theme_type_variation = &"NoteLabel"
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	note.text = tr("PANEL_CLOUD_ON") if Cloud.is_enabled() else tr("PANEL_CLOUD_OFF")
-	_rows.add_child(note)
-	if Cloud.is_enabled():
-		_add_code_entry()
+
 
 
 ## Inkubator: postep wykluwania i wzrostu, wkladanie jaj, rozbudowa.
@@ -524,7 +527,9 @@ func _add_code_entry() -> void:
 	var field := LineEdit.new()
 	field.placeholder_text = tr("PANEL_CODE_PLACEHOLDER")
 	field.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	field.max_length = 20
+	field.max_length = 6
+	# Na telefonie wyskakuje klawiatura numeryczna, a nie pelna.
+	field.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
 	_actions.add_child(field)
 
 	var button := Button.new()

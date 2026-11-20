@@ -1,0 +1,111 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/panels/start_panel.gd" id="1"]
+
+[node name="StartPanel" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.19, 0.12, 0.07, 0.8)
+
+[node name="Sheet" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -480.0
+offset_top = -560.0
+offset_right = 480.0
+offset_bottom = 560.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="Sheet"]
+layout_mode = 2
+theme_override_constants/separation = 26
+
+[node name="Title" type="Label" parent="Sheet/Content"]
+layout_mode = 2
+text = "START_TITLE"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="About" type="Label" parent="Sheet/Content"]
+layout_mode = 2
+theme_type_variation = &"NoteLabel"
+text = "START_ABOUT"
+autowrap_mode = 3
+
+[node name="Choice" type="VBoxContainer" parent="Sheet/Content"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="NewFarm" type="Button" parent="Sheet/Content/Choice"]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "START_NEW"
+
+[node name="Or" type="Label" parent="Sheet/Content/Choice"]
+layout_mode = 2
+theme_type_variation = &"NoteLabel"
+text = "START_OR"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="CodeRow" type="VBoxContainer" parent="Sheet/Content/Choice"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Code" type="LineEdit" parent="Sheet/Content/Choice/CodeRow"]
+layout_mode = 2
+placeholder_text = "123456"
+alignment = 1
+max_length = 6
+virtual_keyboard_type = 2
+
+[node name="Load" type="Button" parent="Sheet/Content/Choice/CodeRow"]
+layout_mode = 2
+text = "START_LOAD"
+autowrap_mode = 3
+
+[node name="Created" type="VBoxContainer" parent="Sheet/Content"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="CodeTitle" type="Label" parent="Sheet/Content/Created"]
+layout_mode = 2
+text = "START_CODE_TITLE"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Code" type="Label" parent="Sheet/Content/Created"]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="CodeNote" type="Label" parent="Sheet/Content/Created"]
+layout_mode = 2
+theme_type_variation = &"NoteLabel"
+text = "START_CODE_NOTE"
+autowrap_mode = 3
+
+[node name="Play" type="Button" parent="Sheet/Content/Created"]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "START_PLAY"

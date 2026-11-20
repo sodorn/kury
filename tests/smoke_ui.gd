@@ -35,6 +35,10 @@ func _run() -> void:
 		SaveGame.clear()
 		Game.new_game()
 
+	# Udajemy swieze urzadzenie, zeby zobaczyc ekran powitalny. Pierwszy test
+	# go zamyka, wiec reszta leci jak zwykle.
+	Game.is_new_player = true
+
 	_main = load("res://scenes/main/main.tscn").instantiate()
 	get_tree().root.add_child(_main)
 	await _frames(20)
@@ -44,6 +48,7 @@ func _run() -> void:
 	Game.set_process(false)
 	_shot("farma.png")
 
+	await _test_start_screen()
 	await _test_buildings()
 	await _test_hens()
 	await _test_egg_pickup()
@@ -379,3 +384,32 @@ func _test_farm_code_restore() -> void:
 	Cloud.set_player_id(own_code)
 	SaveGame.clear()
 	Game.new_game()
+
+
+## Ekran powitalny na swiezym urzadzeniu: nowa farma, kod i wejscie do gry.
+func _test_start_screen() -> void:
+	var start: Control = _main.get_node("Hud/Root/StartPanel")
+	await _frames(30)
+	_check(start.visible, "ekran powitalny pokazuje sie na swiezym urzadzeniu")
+	_check(not Game.is_processing(), "gospodarstwo stoi, dopoki gracz nie zacznie")
+	var choice: Control = start.get_node("Sheet/Content/Choice")
+	var created: Control = start.get_node("Sheet/Content/Created")
+	_check(choice.visible and not created.visible, "najpierw wybor: nowa farma albo kod")
+	_shot("ekran_startowy.png")
+
+	(start.get_node("Sheet/Content/Choice/NewFarm") as Button).emit_signal("pressed")
+	await _frames(20)
+	_check(created.visible and not choice.visible, "po zalozeniu farmy pokazuje sie kod")
+	var code: String = (start.get_node("Sheet/Content/Created/Code") as Label).text
+	_check(Cloud.is_short_code(code), "kod farmy to szesc cyfr (jest '%s')" % code)
+	_check(code == Cloud.player_id, "pokazany kod to kod tej farmy")
+	_shot("ekran_kod.png")
+
+	(start.get_node("Sheet/Content/Created/Play") as Button).emit_signal("pressed")
+	await _frames(40)
+	_check(not start.visible, "po nacisnieciu Zaczynamy ekran znika")
+	_check(Game.is_processing(), "gospodarstwo rusza")
+	_check(not Game.is_new_player, "gra nie uznaje juz gracza za nowego")
+
+	# Po zamknieciu ekranu symulacje zatrzymujemy, jak reszta testu tego oczekuje.
+	Game.set_process(false)

@@ -925,16 +925,26 @@ func _test_strings() -> void:
 		_check(lore.length() > 120, "historia rasy '%s' jest napisana" % breed.get("id", ""))
 
 
-## Kod farmy: normalizacja tego, co gracz przepisze z drugiego urzadzenia.
+## Kod farmy: szesc cyfr, plus stare kody literowo-cyfrowe dla tych, ktorzy
+## zalozyli farme przed wersja 8.1.
 func _test_farm_code() -> void:
-	_check(Cloud.normalize_code("7K73-ABGC-63CK") == "7K73-ABGC-63CK", "poprawny kod przechodzi bez zmian")
-	_check(Cloud.normalize_code("7k73abgc63ck") == "7K73-ABGC-63CK", "male litery i brak myslnikow")
-	_check(Cloud.normalize_code("  7K73 ABGC 63CK  ") == "7K73-ABGC-63CK", "spacje nie przeszkadzaja")
-	_check(Cloud.normalize_code("7K73_ABGC_63CK") == "7K73-ABGC-63CK", "inny separator tez przejdzie")
+	_check(Cloud.normalize_code("482913") == "482913", "szesc cyfr przechodzi bez zmian")
+	_check(Cloud.normalize_code(" 482 913 ") == "482913", "spacje nie przeszkadzaja")
+	_check(Cloud.normalize_code("482-913") == "482913", "myslnik nie przeszkadza")
+	_check(Cloud.normalize_code("48291") == "", "piec cyfr to za malo")
+	_check(Cloud.normalize_code("4829134") == "", "siedem cyfr to za duzo")
 	_check(Cloud.normalize_code("") == "", "pusty kod odrzucony")
-	_check(Cloud.normalize_code("7K73-ABGC") == "", "za krotki kod odrzucony")
-	_check(Cloud.normalize_code("7K73-ABGC-63CK-9999") == "", "za dlugi kod odrzucony")
-	# Znaki spoza alfabetu sa odsiewane, wiec kod z zerem i jedynka nie przejdzie.
-	_check(Cloud.normalize_code("0K73-ABGC-63CK") == "", "znaki spoza alfabetu nie licza sie do dlugosci")
-	_check(Cloud.player_id.length() == 14, "wlasny kod farmy ma postac XXXX-XXXX-XXXX")
+	_check(Cloud.normalize_code("abcdef") == "", "same litery to nie kod")
+
+	# Wlasny kod gracza musi byc w nowym formacie i przechodzic walidacje.
+	_check(Cloud.is_short_code(Cloud.player_id),
+			"wlasny kod farmy ma szesc cyfr (jest '%s')" % Cloud.player_id)
 	_check(Cloud.normalize_code(Cloud.player_id) == Cloud.player_id, "wlasny kod przechodzi walidacje")
+	_check(int(Cloud.player_id) >= Cloud.CODE_MIN, "kod nie zaczyna sie od zera")
+	_check(int(Cloud.player_id) <= Cloud.CODE_MAX, "kod miesci sie w zakresie")
+
+	# Stare kody nadal przyjmujemy, zeby nikt nie stracil farmy.
+	_check(Cloud.normalize_code("7K73-ABGC-63CK") == "7K73-ABGC-63CK", "stary kod wciaz dziala")
+	_check(Cloud.normalize_code("7k73abgc63ck") == "7K73-ABGC-63CK", "stary kod bez myslnikow")
+	_check(Cloud.normalize_code("7K73-ABGC") == "", "ucięty stary kod odrzucony")
+	_check(not Cloud.is_short_code("7K73-ABGC-63CK"), "stary kod nie udaje nowego")

@@ -48,25 +48,49 @@ func is_enabled() -> bool:
 			and String(_config.get("api_key", "")) != ""
 
 
-## Znaki, z ktorych skladaja sie kody farm. Bez liter i cyfr, ktore latwo
-## pomylic przy przepisywaniu (0/O, 1/I).
-const ALPHABET := "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-## Dlugosc kodu bez myslnikow.
-const CODE_LENGTH := 12
+## Kod farmy to szesc cyfr — tyle, zeby dalo sie go zapamietac i przepisac
+## z telefonu bez bledow. Zakres zaczyna sie od 100000, bo kod z zerem
+## na poczatku ludzie gubia przy przepisywaniu.
+const CODE_LENGTH := 6
+const CODE_MIN := 100000
+const CODE_MAX := 999999
+
+## Kody sprzed wersji 8.1 mialy postac XXXX-XXXX-XXXX z tego alfabetu.
+## Nadal je przyjmujemy przy wpisywaniu, zeby nikt nie stracil farmy
+## zalozonej na starej wersji gry.
+const LEGACY_ALPHABET := "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+const LEGACY_LENGTH := 12
 
 
-## Sprowadza kod wpisany przez gracza do postaci XXXX-XXXX-XXXX albo zwraca
-## pusty napis, gdy to nie jest poprawny kod. Wielkosc liter, myslniki
-## i spacje nie maja znaczenia — przepisywanie z drugiego telefonu i tak
-## jest zmudne.
+## Sprowadza kod wpisany przez gracza do postaci, pod ktora lezy na serwerze,
+## albo zwraca pusty napis, gdy to nie jest poprawny kod. Spacje, myslniki
+## i wielkosc liter nie maja znaczenia — przepisywanie z drugiego telefonu
+## i tak jest zmudne.
 static func normalize_code(raw: String) -> String:
-	var letters := ""
-	for character in raw.to_upper():
-		if ALPHABET.contains(character):
-			letters += character
-	if letters.length() != CODE_LENGTH:
+	var upper := raw.to_upper()
+	var digits := ""
+	var legacy := ""
+	var has_letter := false
+	for character in upper:
+		if character >= "0" and character <= "9":
+			digits += character
+		elif character >= "A" and character <= "Z":
+			has_letter = true
+		if LEGACY_ALPHABET.contains(character):
+			legacy += character
+
+	if not has_letter:
+		return digits if digits.length() == CODE_LENGTH else ""
+
+	# Stary kod literowo-cyfrowy.
+	if legacy.length() != LEGACY_LENGTH:
 		return ""
-	return "%s-%s-%s" % [letters.substr(0, 4), letters.substr(4, 4), letters.substr(8, 4)]
+	return "%s-%s-%s" % [legacy.substr(0, 4), legacy.substr(4, 4), legacy.substr(8, 4)]
+
+
+## Czy kod jest w nowym, szesciocyfrowym formacie.
+static func is_short_code(code: String) -> bool:
+	return code.length() == CODE_LENGTH and code.is_valid_int()
 
 
 ## Przestawia gre na inna farme (kod przepisany z drugiego urzadzenia).
@@ -75,10 +99,7 @@ func set_player_id(new_id: String) -> void:
 	if trimmed.is_empty():
 		return
 	player_id = trimmed
-	var file := FileAccess.open(PLAYER_ID_PATH, FileAccess.WRITE)
-	if file != null:
-		file.store_string(player_id)
-		file.close()
+	_store_player_id(player_id)
 
 
 ## Wysyla stan na serwer. Wynik przychodzi sygnalem `pushed`.
@@ -175,20 +196,31 @@ func _load_config() -> Dictionary:
 	return json.data if typeof(json.data) == TYPE_DICTIONARY else {}
 
 
-## Kod farmy: czytelny, latwy do przepisania z ekranu na inne urzadzenie.
+## Kod farmy: szesc cyfr, latwe do zapamietania i przepisania.
+##
+## Urzadzenie, ktore ma jeszcze stary kod literowo-cyfrowy, dostaje nowy.
+## Nic przez to nie traci: lokalny zapis zostaje nietkniety i przy najblizszym
+## zapisie trafia na serwer juz pod nowym kodem. Stary kod nadal mozna wpisac
+## recznie, gdyby cos pod nim zostalo.
 func _load_or_create_player_id() -> String:
 	if FileAccess.file_exists(PLAYER_ID_PATH):
 		var saved := FileAccess.get_file_as_string(PLAYER_ID_PATH).strip_edges()
-		if not saved.is_empty():
+		if is_short_code(saved):
 			return saved
-	const ALPHABET := "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-	var generated := ""
-	for i in 12:
-		if i > 0 and i % 4 == 0:
-			generated += "-"
-		generated += ALPHABET[randi() % ALPHABET.length()]
+	var generated := str(randi_range(CODE_MIN, CODE_MAX))
+	_store_player_id(generated)
+	return generated
+
+
+## Losuje nowy kod farmy. Uzywane, gdy gracz zaklada gospodarstwo od zera.
+func new_player_id() -> String:
+	player_id = str(randi_range(CODE_MIN, CODE_MAX))
+	_store_player_id(player_id)
+	return player_id
+
+
+func _store_player_id(code: String) -> void:
 	var file := FileAccess.open(PLAYER_ID_PATH, FileAccess.WRITE)
 	if file != null:
-		file.store_string(generated)
+		file.store_string(code)
 		file.close()
-	return generated

@@ -42,11 +42,37 @@ static func build() -> Theme:
 	theme.set_type_variation("PrimaryButton", "Button")
 	_apply_button(theme, "PrimaryButton", GOLD)
 
+	_apply_line_edit(theme)
+
 	theme.set_stylebox("background", "ProgressBar", _bar(Color("EFE3CC")))
 	theme.set_stylebox("fill", "ProgressBar", _bar(GOLD_DARK))
 	theme.set_color("font_color", "ProgressBar", INK)
 	theme.set_font_size("font_size", "ProgressBar", 28)
 	return theme
+
+
+## Pole tekstowe (wpisywanie kodu farmy). Bez tego Godot rysuje swoje
+## domyslne, ciemne pole, ktore na kremowym arkuszu wyglada jak obcy element.
+static func _apply_line_edit(theme: Theme) -> void:
+	theme.set_font("font", "LineEdit", FONT_TITLE)
+	theme.set_font_size("font_size", "LineEdit", 44)
+	theme.set_color("font_color", "LineEdit", INK)
+	theme.set_color("font_placeholder_color", "LineEdit", Color(INK_SOFT, 0.55))
+	theme.set_color("caret_color", "LineEdit", INK)
+	theme.set_color("selection_color", "LineEdit", Color(GOLD, 0.5))
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color("FFFCF5")
+	box.set_corner_radius_all(16)
+	box.set_border_width_all(4)
+	box.border_color = Color("E0CBA8")
+	box.set_content_margin_all(18)
+	theme.set_stylebox("normal", "LineEdit", box)
+	var focused := box.duplicate() as StyleBoxFlat
+	focused.border_color = GOLD_DARK
+	theme.set_stylebox("focus", "LineEdit", focused)
+	var disabled := box.duplicate() as StyleBoxFlat
+	disabled.bg_color = Color("F0E8DA")
+	theme.set_stylebox("read_only", "LineEdit", disabled)
 
 
 static func _apply_button(theme: Theme, type_name: String, base: Color) -> void:

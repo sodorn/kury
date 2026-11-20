@@ -27,6 +27,9 @@ var _away_seconds := 0.0
 ## wygrywa niezaleznie od tego, co lezy lokalnie — inaczej swiezy zapis
 ## nowego telefonu przykrylby farme, po ktora gracz wlasnie siegnal.
 var _force_pull := false
+## Na tym urzadzeniu nie bylo jeszcze zadnego zapisu. Ekran powitalny
+## sprawdza to przy starcie i pyta: nowa farma czy wczytanie po kodzie.
+var is_new_player := false
 
 
 func _ready() -> void:
@@ -155,12 +158,25 @@ func _check_win() -> void:
 func load_or_start() -> void:
 	var loaded := SaveGame.load_state()
 	if loaded.is_empty():
+		# Nikt jeszcze nie gral na tym urzadzeniu. Ekran powitalny zapyta,
+		# czy zakladamy nowa farme, czy wracamy do istniejacej po kodzie.
+		is_new_player = true
 		new_game()
 	else:
 		_apply_loaded(loaded)
 	_started = true
-	if Cloud.is_enabled():
+	if Cloud.is_enabled() and not is_new_player:
 		Cloud.pull()
+
+
+## Wstrzymuje gospodarstwo na czas ekranu powitalnego — inaczej kury
+## zaczynaly by jesc i znosic, zanim gracz w ogole zobaczy wybieg.
+func pause_simulation(paused: bool) -> void:
+	set_process(not paused)
+	if not paused:
+		# Zegar scienny stal w miejscu, wiec zaczynamy liczyc od teraz.
+		_last_tick = Time.get_unix_time_from_system()
+		_away_seconds = 0.0
 
 
 ## Serwer odpowiedzial. Jesli ma nowszy zapis niz lokalny, bierzemy jego.
@@ -185,6 +201,16 @@ func _on_cloud_pulled(payload: Dictionary, ok: bool) -> void:
 	_apply_loaded(remote)
 	save()
 	Events.notice.emit(tr("HINT_CODE_RESTORED") if forced else tr("HINT_CLOUD_LOADED"))
+
+
+## Zaklada nowa farme: swiezy kod i stan poczatkowy. Wywolywane z ekranu
+## powitalnego po wybraniu "Nowa farma".
+func start_new_farm() -> void:
+	is_new_player = false
+	SaveGame.clear()
+	Cloud.new_player_id()
+	new_game()
+	save()
 
 
 ## Przejmuje farme spod kodu przepisanego z innego urzadzenia.

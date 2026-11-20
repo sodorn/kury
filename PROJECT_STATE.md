@@ -4,7 +4,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 6 zakonczony** (wersja 8.0): ekonomia w zlotowkach,
+- Aktualny etap: **ETAP 6 zakonczony** (wersja 8.1): ekonomia w zlotowkach,
   dziewiec ras, glod, choroby, szczepienia, lis, handel kurami w sklepie,
   rozbudowa inkubatora i dwa warunki wygranej.
 - Wersje grafiki: **1.0** plaski wektor (galaz `v1.0-grafika-plaska`, commit 6ea3a3c),
@@ -386,7 +386,18 @@ python3 tools/gen_ground.py
   w kodzie.
 - **Gra dziala tak samo, gdy serwer nie odpowiada** — sprawdzone w Chrome
   z wylaczona atrapa: zapis leci do przegladarki, zero bledow na stronie.
-- **Kod farmy** w magazynie: gracz moze przepisac kod z innego urzadzenia
+- **Kod farmy to szesc cyfr** (100000-999999). Wczesniej byl dwunastoznakowy,
+  literowo-cyfrowy — nie do zapamietania i zmudny do przepisania z telefonu.
+  Stare kody nadal przyjmujemy przy wpisywaniu, zeby nikt nie stracil farmy;
+  urzadzenie ze starym kodem dostaje nowy przy najblizszym uruchomieniu
+  i nic przez to nie traci, bo lokalny zapis zostaje nietkniety.
+- **Ekran powitalny** (`start_panel.tscn`) pokazuje sie tylko wtedy, gdy na
+  urzadzeniu nie ma zadnego zapisu: krotko o grze, duzy przycisk "Nowa farma"
+  i pole na kod istniejacej farmy. Po zalozeniu gospodarstwa drugi krok
+  pokazuje swiezy kod — osobnym ekranem, bo to jedyna rzecz, ktora gracz
+  musi sobie zapisac, a komunikat na pasku znika po kilku sekundach.
+  Na czas ekranu `Game.pause_simulation(true)` wstrzymuje gospodarstwo.
+- **Kod farmy** w kurniku: gracz moze przepisac kod z innego urzadzenia
   i przejac tamta farme. Przy takim przejeciu zapis z serwera wygrywa
   niezaleznie od tego, co lezy lokalnie (`_force_pull`) — inaczej swiezy
   zapis nowego telefonu przykrylby farme, po ktora gracz wlasnie siegnal.
