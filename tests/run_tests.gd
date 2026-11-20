@@ -847,17 +847,32 @@ func _test_win() -> void:
 	Game.new_game()
 
 
-## Kwoty: zlotowki i grosze, separator tysiecy.
+## Kwoty: pelne zlotowki bez przecinka, separator tysiecy, grosze tylko
+## przy drobnych kwotach w rodzaju wartosci jajka.
 func _test_money_format() -> void:
 	_check(NumberFormat.money(0.0) == "0 zł", "0 zl")
-	_check(NumberFormat.money(1.0) == "1 zł", "pelna zlotowka bez groszy")
-	_check(NumberFormat.money(0.4) == "0,40 zł", "40 groszy")
-	_check(NumberFormat.money(12.5) == "12,50 zł", "zlotowki i grosze")
+	_check(NumberFormat.money(1.0) == "1 zł", "pelna zlotowka")
 	_check(NumberFormat.money(1000000.0) == "1\u00a0000\u00a0000 zł", "milion z separatorami")
 	_check(NumberFormat.amount_only(3.0) == "3", "kwota bez waluty")
-	# Zaokraglanie nie moze gubic groszy ani produkowac "0,100".
-	_check(NumberFormat.money(0.999) == "1 zł", "zaokraglenie w gore do pelnej zlotowki")
-	_check(NumberFormat.money(2.004) == "2 zł", "grosze ponizej pol grosza znikaja")
+
+	# Zadnych przecinkow w kwotach: licznik na pasku ma pokazywac pelne
+	# zlotowki, a nie "298,27". Zaokraglenie w dol, zeby nigdy nie obiecac
+	# wiecej, niz gracz ma na koncie.
+	for amount in [0.4, 12.5, 298.27, 0.999, 2.004]:
+		_check(not NumberFormat.money(amount).contains(","),
+				"kwota %.3f bez przecinka (%s)" % [amount, NumberFormat.money(amount)])
+	_check(NumberFormat.money(12.9) == "12 zł", "zaokraglenie w dol, nie w gore")
+	_check(NumberFormat.money(298.27) == "298 zł", "kwota z paska bez groszy")
+
+	# Drobne kwoty mimo to musza byc czytelne: jajko za 40 groszy nie moze
+	# pokazywac sie jako "0 zl", bo rasa wygladalaby na bezwartosciowa.
+	_check(NumberFormat.small_money(0.4) == "40 gr", "wartosc jajka w groszach")
+	_check(NumberFormat.small_money(1.0) == "1 zł", "rowna zlotowka to zlotowka")
+	_check(NumberFormat.small_money(0.01) == "1 gr", "jeden grosz")
+	for breed: Dictionary in GameData.breeds():
+		var shown := NumberFormat.small_money(float(breed.get("egg_value", 0.0)))
+		_check(shown != "0 gr" and shown != "0 zł",
+				"jajko rasy %s ma widoczna wartosc (%s)" % [breed.get("id", ""), shown])
 
 	# Ceny jaj musza siedziec w widelkach, ktore ustalilismy dla balansu.
 	for breed: Dictionary in GameData.breeds():
@@ -1162,6 +1177,11 @@ func _test_offline_eggs() -> void:
 
 	# Na zywo: na wybiegu lezy najwyzej `capacity` jaj, reszta idzie od razu
 	# do magazynu. Zadne jajko nie przepada i zadna kura nie czeka.
+	# Lisa i choroby wylaczamy: test mierzy ksiegowanie jaj, a nie to, ile kur
+	# zjadl lis. Przy lupie 30-90% stada roznica miedzy przebiegami siegala
+	# 30% i test potrafil zaswiecic sie na czerwono bez zadnego bledu w kodzie.
+	_never_event("fox")
+	_never_event("disease")
 	var live := _laying_state(hens, 100000.0)
 	for bird: Chicken in live.chickens:
 		bird.vaccinated = true
@@ -1183,10 +1203,11 @@ func _test_offline_eggs() -> void:
 	# Offline wychodzi nawet odrobine lepiej, bo `offline_max_share` ogranicza
 	# straty od lisa do polowy stada. Chodzi o to, zeby nieobecnosc niczego
 	# nie marnowala — nie o to, zeby wyszlo co do jajka tyle samo.
-	_check(float(away_result["eggs_laid"]) >= float(live_result["eggs_laid"]) * 0.9,
+	_check(float(away_result["eggs_laid"]) >= float(live_result["eggs_laid"]) * 0.99,
 			"nieobecnosc nie marnuje nocnej produkcji (%d wobec %d)" % [
 				int(away_result["eggs_laid"]), int(live_result["eggs_laid"])])
 	_check(int(away.eggs.get("leghorn", 0)) == away.egg_count(), "jaja zapisane pod wlasciwa rasa")
+	GameData.reload()
 	Game.new_game()
 
 

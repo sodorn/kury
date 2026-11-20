@@ -81,7 +81,7 @@ func _fill(breed: Dictionary) -> void:
 	_stats.text = "%s\n%s" % [
 		tr("UNLOCK_PRICE") % NumberFormat.money(float(breed.get("price", 0))),
 		tr("UNLOCK_EGG") % [
-			NumberFormat.money(float(breed.get("egg_value", 0))),
+			NumberFormat.small_money(float(breed.get("egg_value", 0))),
 			int(float(breed.get("egg_seconds", 0)))],
 	]
 	_portrait.texture = _breed_image(breed)

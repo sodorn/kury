@@ -199,7 +199,7 @@ func _build_coop() -> void:
 					if not Game.state.has_rooster(breed_id):
 						return tr("PANEL_FLOCK_LINE_NO_ROOSTER") % _owned(breed_id)
 					return tr("PANEL_FLOCK_LINE") % [
-						_owned(breed_id), NumberFormat.money(FarmState.egg_value(breed_id))])
+						_owned(breed_id), NumberFormat.small_money(FarmState.egg_value(breed_id))])
 
 	_add_action(true,
 			func() -> bool: return Game.state.money >= float(
@@ -720,7 +720,7 @@ func _add_breed_card(breed: Dictionary) -> void:
 		cull.text = tr("PANEL_CULL_HEN") % sick
 		subtitle.text = "%s · %s" % [tr(breed.get("rarity", "")), tr(breed.get("desc", ""))]
 		numbers.text = tr("PANEL_BREED_NUMBERS") % [
-			NumberFormat.money(FarmState.egg_value(breed_id)),
+			NumberFormat.small_money(FarmState.egg_value(breed_id)),
 			int(float(breed.get("egg_seconds", 0))),
 			owned])
 

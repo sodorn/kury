@@ -4,7 +4,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 8 zakonczony** (wersja 10.3): kury i koguty. Kura
+- Aktualny etap: **ETAP 8 zakonczony** (wersja 10.4): kury i koguty. Kura
   znosi jaja tylko wtedy, gdy na farmie jest kogut jej rasy. Do tego duzo
   tansze rozbudowy, kurnik do 260 ptakow, trzy jaja na pisklę zamiast
   szesciu, szczepienie za stala setke i czesciej przychodzacy lis.
@@ -15,7 +15,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -177,6 +177,17 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## Weryfikacja wersji 10.4 (wykonana w srodowisku Claude, Linux)
+
+- `tests/tests.tscn`: **887/887 OK**. Przepisany `_test_money_format`
+  sprawdza, ze zadna kwota nie zawiera przecinka i ze jajko kazdej rasy ma
+  widoczna wartosc w groszach.
+- `tests/smoke_ui.tscn`: **OK**.
+- Gorny pasek obejrzany na zrzucie przy wartosciach maksymalnych
+  (1 500 000 zl, 98 765 jaj, 2 500 kg, 254+6/260 ptakow) — nic sie nie ucina.
+- Przeplyw czasu zmierzony dwiema droga: pomiarem w prawdziwym Chrome oraz
+  bezposrednio przez `Game.apply_gap` z wymuszonym brakiem aktywnosci okna.
 
 ## Weryfikacja wersji 10.3 (wykonana w srodowisku Claude, Linux)
 
@@ -505,6 +516,42 @@ python3 tools/gen_ground.py
   poprawek w `assets/sprites/animals/rooster_*.svg` nie wprowadzac — zgina
   przy nastepnym przebiegu. Plotno 170x130, stopy na y=118, tak samo jak
   u kur, zeby `Sprite2D` z `offset = (4, -53)` postawil je na ziemi.
+
+### Kwoty bez przecinka i szerokosc licznikow (wersja 10.4)
+
+- `NumberFormat.money` i `amount_only` podaja **pelne zlotowki**, zaokraglone
+  w dol. Przecinek w liczniku na pasku nie miescil sie w polu i niczego nie
+  wnosil. Zaokraglanie w dol, zeby licznik nigdy nie obiecal wiecej, niz
+  gracz naprawde ma.
+- `NumberFormat.small_money` jest do drobnych kwot: ponizej zlotowki podaje
+  je w groszach ("40 gr"). Bez tego wartosc jajka pokazywalaby sie jako
+  "0 zl" i rasy wygladalyby na bezwartosciowe. Uzywaja go karty ras
+  w sklepie, spis stada i okienko nowej rasy.
+- Gorny pasek: font licznikow 44 -> 34, ikona 64 -> 52 px, a cztery pola
+  dziela szerokosc proporcjami (`size_flags_stretch_ratio`), bo najdluzsze
+  napisy to "1 500 000" i "254+6/260". Sprawdzone zrzutem przy maksymalnych
+  wartosciach — nic sie nie ucina.
+
+### Jak plynie czas (zweryfikowane w wersji 10.4)
+
+Wlasciciel zapytal wprost, wiec pomiar zamiast teorii.
+
+- Symulacje prowadzi **zegar scienny**, nie delta klatki. Dopoki strona
+  dostaje klatki, czas liczy sie w skali 1:1, nawet gdy przegladarka zwalnia
+  petle gry.
+- Gdy okno traci aktywnosc albo strona zostaje zamrozona (zminimalizowana
+  przegladarka na telefonie), czas idzie sciezka offline:
+  `real_seconds / offline.speed_divider`, czyli **60 razy wolniej**, i jest
+  przyciety do `offline.max_hours` = 72 godzin zegara.
+- Zmierzone: 1 min poza gra = 0 min gry, 10 min = 0,2 min, godzina = 1 min,
+  noc (8 h) = 8 min, trzy doby i wiecej = 72 min (sufit).
+- Prog `MAX_LIVE_STEP` = 30 s rozstrzyga, ktora sciezka: dziura dluzsza niz
+  30 sekund jest rozliczana jak offline.
+- **Uwaga na pomiary w Chrome bez okna:** headless nie dusi kart w tle tak,
+  jak robi to telefon. W tescie playwright karta schowana za inna liczyla
+  czas w pelnej skali. Na telefonie strona jest zamrazana naprawde, wiec
+  obowiazuje dzielnik 60. Tego nie da sie sprawdzic w srodowisku Claude —
+  moze to potwierdzic tylko wlasciciel na swoim telefonie.
 
 ### Narastajaca szansa na zdarzenie (wersja 10.3)
 

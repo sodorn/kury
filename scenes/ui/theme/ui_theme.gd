@@ -32,7 +32,9 @@ static func build() -> Theme:
 
 	theme.set_type_variation("CounterLabel", "Label")
 	theme.set_font("font", "CounterLabel", FONT_TITLE)
-	theme.set_font_size("font_size", "CounterLabel", 44)
+	# 36, a nie 44: na gorny pasek musza wejsc cztery liczniki, a najdluzsze
+	# z nich to kwota w rodzaju "1 500 000" i stan kurnika "260+34/260".
+	theme.set_font_size("font_size", "CounterLabel", 34)
 
 	theme.set_type_variation("NoteLabel", "Label")
 	theme.set_font_size("font_size", "NoteLabel", 32)
