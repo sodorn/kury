@@ -20,12 +20,14 @@ const FADE_TIME := 0.3
 ## wpisywal kod, serwer odpowiadal "nie ma takiej farmy", a na wierzchu
 ## nie zmienialo sie nic.
 @onready var _status: Label = $Sheet/Content/Choice/CodeRow/Status
+@onready var _version: Label = $Sheet/Content/Version
 @onready var _load_button: Button = $Sheet/Content/Choice/CodeRow/Load
 @onready var _code_label: Label = $Sheet/Content/Created/Code
 @onready var _play_button: Button = $Sheet/Content/Created/Play
 
 
 func _ready() -> void:
+	_version.text = tr("START_VERSION") % GameData.VERSION
 	hide()
 	_continue_button.pressed.connect(_close)
 	_new_button.pressed.connect(_on_new_farm)

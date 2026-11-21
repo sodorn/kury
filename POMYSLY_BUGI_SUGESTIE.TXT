@@ -11,67 +11,55 @@ LEGENDA
 
 
 ================================================================================
- 1. NAJWAZNIEJSZE: DROZSZE KURY SA GORSZE OD TANSZYCH   [DECYZJA TOMKA]
+ 1. ZAMYSL EKONOMII - USTALONY PRZEZ TOMKA 2026-11-21   [BEZ ZMIAN NA RAZIE]
 ================================================================================
 
-Uwaga Bartka o stosunku wartosci jajka do czasu znoszenia jest trafna,
-a sprawa jest gorsza, niz napisal. Policzylem wszystkie 17 ras.
+Najpierw sprostowanie moje wlasne. Policzylem wczesniej oplacalnosc ras
+po zarobku z JAJEK i wyszlo mi, ze drogie rasy sa bezsensowne. Mierzylem
+nie te petle, co trzeba. Tomek ustalil zamysl tak:
 
-  rasa            cena   jajko  co ile s   zl/min realnej   zwrot po (min)
-  --------------------------------------------------------------------------
-  leghorn           40    0.40         4             2.00             20
-  rhode             55    0.44         5             1.91             29
-  szabo             80    0.48         5             1.85             43
-  nagoszyja        110    0.52         6             1.79             61
-  marans           150    0.55         6             1.72             87
-  araukana         210    0.59         7             1.69            125
-  jedwabista       290    0.63         8             1.66            175
-  serama           400    0.66         8             1.61            249
-  brahma           550    0.70         9             1.59            346
-  czubatka         750    0.74         9             1.57            476
-  pavlovskaya     1050    0.78        10             1.56            673
-  feniks          1450    0.81        11             1.53            949
-  deathlayer      2000    0.85        11             1.52           1318
-  sultanka        2800    0.89        12             1.51           1856
-  onagadori       4000    0.92        12             1.48           2696
-  dongtao         5600    0.96        13             1.48           3792
-  cemani          8000    1.00        14             1.47           5440
+  - Jajka maja byc TANIE. Sprzedaz jaj to grosze, ktore maja starczyc na
+    pasze i biezace drobne wydatki.
+  - Pieniadze robi sie na SPRZEDAZY DROGICH KUR, ktore sam wyhodowales.
+  - Hamulcem postepu jest CZAS ROZRODU, a nie cena jajka.
 
-Co z tego wynika:
+Przy takim zamysle liczy sie petla: jaja -> inkubator -> odchow ->
+sprzedaz dorosłej sztuki. Policzona na dzisiejszych danych, w czasie
+realnym (gra chodzi 3 razy wolniej od zegarka):
 
-  - Kazda kura zarabia mniej wiecej TYLE SAMO na minute (1.47-2.00 zl),
-    a ceny roznia sie 200 razy.
-  - Miejsce w kurniku jest ograniczone, wiec liczy sie zarobek NA MIEJSCE.
-    Leghorn zarabia najwiecej na miejsce i kosztuje najmniej.
-  - Leghorn zwraca sie po 20 minutach. Cemani po 5440 minutach, czyli po
-    90 godzinach realnego czasu. To nie jest "drozsza, ale lepsza kura",
-    to jest kara za zakup.
-  - Do tego doszlo "drozsze kury czesciej choruja" (Twoja prosba z 11.0),
-    wiec drogie rasy sa gorsze w KAZDYM wymiarze naraz.
+  rasa            kup  sprzedaj  marza   cykl    zl/h na jedno
+                                         (min)   miejsce w inkubatorze
+  ------------------------------------------------------------------------
+  leghorn          40        28    70%     7,5        224
+  marans          150       105    70%    15,1        417
+  serama          400       280    70%    24,4        690
+  czubatka        750       525    70%    33,6        937
+  feniks         1450      1015    70%    45,9      1 327
+  sultanka       2800      1960    70%    62,1      1 894
+  cemani         8000      5600    70%    97,4      3 450
 
-Wniosek: optymalna gra to kupic same leghorny i nigdy nie patrzec na reszte
-sklepu. 17 ras istnieje po to, zeby ich nie kupowac. To podkopuje cala
-progresje.
+To DZIALA tak, jak chcesz. Cemani daje 15 razy wiecej na miejsce
+w inkubatorze niz leghorn, a jedno miejsce jest zajete prawie dwie
+godziny realnego czasu - czas rozrodu naprawde jest hamulcem.
+Marza wszedzie rowna, 70% ceny zakupu.
 
-CO PROPONUJE (do Twojej decyzji, bo to przestawia cala ekonomie):
+JEST JEDNA RZECZ NIEZGODNA Z ZAMYSLEM: jajka nie sa groszami.
 
-  Wariant A - lagodny. Wartosc jajka rosnie z cena rasy tak, zeby czas
-  zwrotu rosl powoli: zwrot = 20 min * (cena/40)^0,25. Cemani wychodzi
-  wtedy ~75 min zwrotu, jajko ~75 zl. Drogie rasy staja sie wyraznie
-  lepsze na miejsce w kurniku, ale nie psuja gry od razu.
+  - Jedna kura leghorn daje 120 zl/h z jaj, a sama jest warta 28 zl.
+    Zwraca sie z jaj po 14 minutach.
+  - Pasza kosztuje 6,8 zl/h na ptaka. Jajka daja 15-17 razy wiecej, niz
+    zjada kura.
+  - Kurnik na 20 leghornow: 2 400 zl/h z jaj. Trzy miejsca w inkubatorze
+    z leghornow: 672 zl/h. Jajka zarabiaja dzis 3,5 raza wiecej niz
+    hodowla, czyli dokladnie odwrotnie, niz chcesz.
 
-  Wariant B - ostry. Staly czas zwrotu ~30 min dla wszystkich. Jajko
-  cemani ~186 zl. Rasy roznia sie wtedy tylko progiem wejscia i ryzykiem
-  choroby, a nie oplacalnoscia.
+Zeby jajka byly "groszami na pasze", ich wartosc musi spasc mniej wiecej
+10-15 razy (jajko leghorna z 0,40 zl na ~0,03 zl). To jest zmiana jednej
+kolumny w `data/breeds.json`, nie przebudowa ekonomii - petla hodowlana
+jest juz zbudowana dobrze.
 
-  Wariant C - zostawiamy. Drogie rasy sa wtedy ozdoba, nie inwestycja,
-  i trzeba to powiedziec graczowi wprost w sklepie, zeby nie czul sie
-  oszukany.
-
-Obie przebudowy (A i B) wymagaja przeliczenia celu wygranej (dzis
-1 500 000 zl) i cen rozbudowy. Powiedz, ktory wariant, to przeliczam
-tabele i pokazuje nowe liczby przed wprowadzeniem.
-
+NIE RUSZAM TEGO TERAZ. Tomek powiedzial: najpierw stabilnosc i baza.
+Liczby czekaja na jutro.
 
 ================================================================================
  2. BUGI NAPRAWIONE W WERSJI 11.4
@@ -283,6 +271,10 @@ tabele i pokazuje nowe liczby przed wprowadzeniem.
  6. CO WCHODZI DO 11.4, A CO CZEKA
 ================================================================================
 
+  W 11.5 (zrobione, przetestowane):
+    - numer wersji na ekranie powitalnym, zeby bylo widac, czy
+      przegladarka wczytala nowa wersje, czy stara z pamieci
+
   W 11.4 (zrobione, przetestowane):
     - wyleg jaj po sprzedaniu calego stada rasy
     - procent i czas na paskach inkubatora
@@ -297,8 +289,9 @@ tabele i pokazuje nowe liczby przed wprowadzeniem.
     - druga proba wczytania tego samego kodu po nieudanej pierwszej
       (gra odpowiadala "nie ma czego wczytywac" i nie robila nic)
 
-  Czeka na Twoja decyzje:
-    - punkt 1 (wartosc jajek wzgledem ceny rasy) - WARIANT A, B czy C?
+  Czeka na jutro:
+    - punkt 1: obnizyc wartosc jaj 10-15 razy, zeby byly groszami na
+      pasze, zgodnie z Twoim zamyslem. Petla hodowlana zostaje bez zmian.
     - punkt 4.4 (dwie mapy) - zaczynac?
     - punkt 5.4 (gluszec z minigra) - czy najpierw 4.1 i 5.5?
 

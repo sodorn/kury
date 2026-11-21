@@ -4,7 +4,11 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 9 zakonczony** (wersja 11.4): uwagi kolegow Tomka
+- Aktualny etap: **ETAP 9 zakonczony** (wersja 11.5): wersja do testow,
+  bez zmian w balansie. Numer wersji widac na ekranie powitalnym.
+  Ustalony zamysl ekonomii: jajka to grosze na pasze, zarabia sie na
+  sprzedazy wyhodowanych drogich kur, hamulcem jest czas rozrodu.
+- Wersja 11.4: uwagi kolegow Tomka
   rozpisane w `POMYSLY_BUGI_SUGESTIE.TXT`, naprawione bledy inkubatora
   i panelu, numery poziomow rozbudowy, baza Supabase budzona codziennie.
 - Wersja 11.3: jeden czas na wszystko, lis z twarda gwarancja, wiekszy
@@ -20,7 +24,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -182,6 +186,26 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## Weryfikacja wersji 11.5 (wykonana w srodowisku Claude, Linux)
+
+Wersja stabilizacyjna: zadnych zmian w balansie, tylko numer wersji na
+ekranie i naprawiony test.
+
+- `tests/tests.tscn`: **911 OK, 0 bledow**.
+- `tests/smoke_ui.tscn`: **OK, trzy biegi pod rzad**.
+- Baza Supabase sprawdzona ponownie o 17:47 UTC przez GitHub Actions:
+  HTTP 200, 14 farm w tabeli, farmy 327733 i 756362 na miejscu.
+
+Naprawiony blad w samym tescie dymnym: czekal na odejscie lisa przez
+odliczanie KLATEK (`_frames(240)`), a animacja lisa trwa 2,7 sekundy
+ZEGARKA. Na szybszym przebiegu 240 klatek mijalo w pol sekundy i test
+oblewal sie na czyms, co w grze dziala poprawnie. Doszedl pomocnik
+`_seconds(duration)`, ktory czeka czasem, nie klatkami.
+
+Z tego wynika druga rzecz: test dymny trzeba odpalac z `--quit-after
+30000`, nie `4000`. Stary limit 4000 klatek konczyl prace przed koncem
+testu, co wygladalo jak przebieg bez wyniku.
 
 ## Co wiadomo o serwerze na 2026-11-21 (sprawdzone przez GitHub Actions)
 

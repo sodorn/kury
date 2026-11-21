@@ -121,3 +121,9 @@ custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
 theme_type_variation = &"PrimaryButton"
 text = "START_PLAY"
+
+[node name="Version" type="Label" parent="Sheet/Content"]
+layout_mode = 2
+theme_type_variation = &"NoteLabel"
+horizontal_alignment = 2
+text = "wersja"

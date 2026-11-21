@@ -451,6 +451,16 @@ func _frames(count: int) -> void:
 		await get_tree().process_frame
 
 
+## Czeka ZEGARKIEM, nie klatkami. Animacje lisa trwaja 0,6 s i 2,7 s
+## realnego czasu, a liczba klatek na sekunde zalezy od obciazenia maszyny:
+## na szybszym przebiegu 240 klatek mijalo w pol sekundy i test wywalal sie
+## na tym, ze lis "nie znikl", choc jego animacja dopiero sie zaczela.
+func _seconds(duration: float) -> void:
+	var until := Time.get_ticks_msec() + int(duration * 1000.0)
+	while Time.get_ticks_msec() < until:
+		await get_tree().process_frame
+
+
 func _shot(file_name: String) -> void:
 	get_tree().root.get_texture().get_image().save_png(_out_dir + file_name)
 
@@ -718,7 +728,7 @@ func _test_sick_and_fox_look() -> void:
 			splats += 1
 	_check(splats > 0, "na wybiegu zostaly plamy krwi (jest %d)" % splats)
 	_shot("lis_piora.png")
-	await _frames(90)
+	await _seconds(2.0)
 	_check(_nodes_of_type("FarmFox").is_empty(), "lis odszedl z wybiegu")
 	_shot("lis_krew.png")
 
@@ -731,6 +741,6 @@ func _test_sick_and_fox_look() -> void:
 	_check(not (repelled[0] as FarmFox).input_pickable,
 			"zawroconego lisa nie da sie przeganiac, bo juz odchodzi")
 	_shot("lis_zawrocony.png")
-	await _frames(240)
+	await _seconds(4.5)
 	_check(_nodes_of_type("FarmFox").is_empty(), "zawrocony lis sam znika z wybiegu")
 	_check(Game.state.hen_count() == flock_before, "zawrocony lis nic nie zabral")
