@@ -69,6 +69,17 @@ jobs:
           print("  rozmiar zapisu: %d znakow" % rozmiar)
           PY
 
+      - name: Czy dziala wariant z kluczem w pasku adresu
+        run: |
+          # Wariant do wklejenia w pasek przegladarki, takze na telefonie.
+          # PostgREST przyjmuje apikey jako parametr zapytania, ale lepiej
+          # to sprawdzac, niz zakladac — to jest najprostsze narzedzie
+          # diagnostyczne, jakie ma wlasciciel gry.
+          url="${{ steps.cfg.outputs.url }}/rest/v1/${{ steps.cfg.outputs.table }}?select=player_id&limit=3&apikey=${{ steps.cfg.outputs.key }}"
+          code=$(curl -sS --max-time 30 -o /tmp/pasek.json -w '%{http_code}' "$url")
+          echo "klucz w pasku adresu -> HTTP $code"
+          head -c 200 /tmp/pasek.json; echo
+
       - name: Ile farm jest w bazie w ogole
         run: |
           curl -sS --max-time 30 -I \
