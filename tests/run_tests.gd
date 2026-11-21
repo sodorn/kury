@@ -37,6 +37,7 @@ func _ready() -> void:
 	_test_server_diagnosis()
 	_test_incubate_without_flock()
 	_test_retry_same_code()
+	_test_body_unpacking()
 	_test_event_rules()
 	_test_starving_farm()
 	_test_lay_fairness()
@@ -998,6 +999,31 @@ func _test_retry_same_code() -> void:
 	_check(Game.restore_from_code(kod), "ponowna proba tym samym kodem rusza")
 	# Kod inny niz szesc cyfr nadal odpada od razu.
 	_check(not Game.restore_from_code("12ab"), "zly kod odpada przed zapytaniem")
+
+
+## Kod 8 z HTTPRequest to RESULT_BODY_DECOMPRESS_FAILED: serwer odpowiedzial,
+## a Godot nie potrafil rozpakowac ciala. Rozpakowywanie jest teraz wylaczone
+## po stronie Godota, ale gdyby gzip mimo wszystko do nas trafil, musimy sobie
+## z nim poradzic sami, a nie udawac, ze serwera nie ma.
+func _test_body_unpacking() -> void:
+	var tekst := '[{"player_id":"327733","updated_at":1795000000}]'
+	var czysty := tekst.to_utf8_buffer()
+	_check(Cloud._body_text(czysty) == tekst, "zwykly JSON przechodzi bez zmian")
+
+	var spakowany := czysty.compress(FileAccess.COMPRESSION_GZIP)
+	_check(spakowany.size() >= 2 and spakowany[0] == 0x1f and spakowany[1] == 0x8b,
+			"gzip zaczyna sie od 0x1f 0x8b")
+	_check(Cloud._body_text(spakowany) == tekst, "gzip rozpakowany samodzielnie")
+
+	_check(Cloud._body_text(PackedByteArray()) == "", "puste cialo nie wywraca gry")
+
+	# Nazwa powodu dla kodu 8 ma byc po ludzku, a nie "nieznany powod".
+	Cloud.last_action = "odczyt"
+	Cloud.last_result = HTTPRequest.RESULT_BODY_DECOMPRESS_FAILED
+	Cloud.last_http_code = 0
+	var said := Cloud.describe_last()
+	_check(said.contains("rozpakowa"), "kod 8 opisany po ludzku: %s" % said)
+	_check(not said.contains(tr("DIAG_R_OTHER")), "kod 8 to juz nie 'nieznany powod'")
 
 func _test_event_rules() -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})

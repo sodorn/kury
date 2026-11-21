@@ -4,8 +4,10 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 9 zakonczony** (wersja 11.5): wersja do testow,
-  bez zmian w balansie. Numer wersji widac na ekranie powitalnym.
+- Aktualny etap: **ETAP 9 zakonczony** (wersja 11.6): znaleziona
+  i naprawiona przyczyna "serwer nie odpowiada" przy wczytywaniu farmy
+  z kodu — Godot nie rozpakowywal odpowiedzi serwera (kod 8).
+- Wersja 11.5: numer wersji widac na ekranie powitalnym.
   Ustalony zamysl ekonomii: jajka to grosze na pasze, zarabia sie na
   sprzedazy wyhodowanych drogich kur, hamulcem jest czas rozrodu.
 - Wersja 11.4: uwagi kolegow Tomka
@@ -24,7 +26,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`, `v11.6-rozpakowanie-odpowiedzi`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -186,6 +188,37 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## ROZWIAZANIE zagadki "serwer nie odpowiada" (wersja 11.6)
+
+Gra pokazala wlascicielowi dokladny powod bledu: **kod 8**. Sprawdzone
+w samym silniku (`HTTPRequest` w Godot 4.7.2, nie z pamieci):
+
+    RESULT_BODY_DECOMPRESS_FAILED = 8
+
+To znaczy, ze zapytanie **doszlo do Supabase i wrocilo z odpowiedzia**,
+a Godot nie potrafil rozpakowac ciala. Czyli: siec dziala, klucz dziala,
+RLS pozwala czytac, farma jest na serwerze. Wszystkie wczesniejsze
+hipotezy (RLS, CORS, Brave, uspiona baza, wyscig przy `cancel_request`)
+byly chybione.
+
+Dlaczego dotykalo tylko odczytu: zapis idzie z naglowkiem
+`Prefer: return=minimal`, wiec serwer odsyla puste cialo — nie ma czego
+rozpakowywac. Odczyt dostaje JSON spakowany gzipem i tam Godot sie
+przewracal.
+
+Poprawka w `services/cloud.gd`:
+- `accept_gzip = false` na obu wezlach `HTTPRequest`. Rozpakowywanie
+  zostawiamy przegladarce, ktora i tak to robi.
+- `_body_text()` jako siatka bezpieczenstwa: jesli cialo mimo wszystko
+  przyjdzie spakowane (pierwsze bajty 0x1f 0x8b), rozpakowujemy je sami.
+- Kody 1, 7, 8 i 12 maja wreszcie nazwy po polsku. Kod 8 pokazywal sie
+  jako "nieznany powod", przez co diagnostyka byla mniej warta.
+
+Sprawdzone naprawde: atrapa serwera (`tools/mock_backend.py` z czwartym
+argumentem `1`) pakuje teraz odpowiedzi gzipem tak jak Supabase.
+Zbudowana gra w prawdziwym Chrome wczytala z niej farme po kodzie
+(payload 4242 zl doszedl na ekran). Testy jednostkowe: `_test_body_unpacking`.
 
 ## Weryfikacja wersji 11.5 (wykonana w srodowisku Claude, Linux)
 

@@ -12,6 +12,7 @@ Endpointy:
     GET  /rest/v1/saves?player_id=eq.<id>       odczyt rekordu gracza
     GET  /_dump                                 podglad calej bazy (test)
 """
+import gzip
 import json
 import time
 import sys
@@ -24,6 +25,9 @@ STORE_PATH = sys.argv[2] if len(sys.argv) > 2 else "/tmp/mock_saves.json"
 # natychmiast i nie da sie odtworzyc bledow zwiazanych z tym, ze jedno
 # zapytanie jeszcze trwa, gdy zaczyna sie drugie.
 DELAY = float(sys.argv[3]) if len(sys.argv) > 3 else 0.0
+## Czwarty argument: 1 = pakuj odpowiedzi gzipem zawsze, nawet gdy klient
+## o to nie poprosil. Tak zachowuje sie prawdziwy Supabase wobec przegladarki.
+GZIP_ALWAYS = len(sys.argv) > 4 and sys.argv[4] == "1"
 
 
 def read_store() -> dict:
@@ -50,9 +54,16 @@ class Handler(BaseHTTPRequestHandler):
 
     def _send(self, code: int, payload):
         body = json.dumps(payload).encode("utf-8")
+        # Prawdziwy Supabase odsyla odpowiedzi spakowane gzipem. Zeby makieta
+        # odtwarzala jego zachowanie (a nie tylko ksztalt danych), pakujemy
+        # tak samo, gdy klient o to poprosi albo gdy wymusza to GZIP=1.
+        gzip_ok = GZIP_ALWAYS or "gzip" in self.headers.get("Accept-Encoding", "")
         self.send_response(code)
         self._cors()
         self.send_header("Content-Type", "application/json")
+        if gzip_ok:
+            body = gzip.compress(body)
+            self.send_header("Content-Encoding", "gzip")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)

@@ -48,6 +48,7 @@ func _ready() -> void:
 	player_id = _load_or_create_player_id()
 	_push_http = HTTPRequest.new()
 	_push_http.timeout = float(_config.get("timeout_seconds", 8))
+	_push_http.accept_gzip = false
 	add_child(_push_http)
 	_push_http.request_completed.connect(_on_push_done)
 
@@ -155,6 +156,12 @@ func pull() -> void:
 	_pull_nodes.clear()
 	var http := HTTPRequest.new()
 	http.timeout = float(_config.get("timeout_seconds", 8))
+	# Rozpakowywanie gzipa zostawiamy przegladarce. Godot robil to sam i
+	# przewracal sie z RESULT_BODY_DECOMPRESS_FAILED (kod 8) — odpowiedz
+	# serwera przychodzila cala, a gra i tak mowila "serwer nie odpowiada".
+	# Z tym wylaczonym dostajemy cialo takie, jakie przyslal serwer,
+	# a gdyby mimo wszystko bylo spakowane, radzi sobie `_body_text()`.
+	http.accept_gzip = false
 	add_child(http)
 	_pull_nodes.append(http)
 	# Odpowiedz spoznionego zapytania nie moze podmienic wyniku biezacego.
@@ -196,7 +203,7 @@ func _on_pull_done(result: int, code: int, _headers: PackedStringArray, body: Pa
 		return
 	_set_online(true)
 	var json := JSON.new()
-	if json.parse(body.get_string_from_utf8()) != OK or typeof(json.data) != TYPE_ARRAY:
+	if json.parse(_body_text(body)) != OK or typeof(json.data) != TYPE_ARRAY:
 		pulled.emit({}, false, _pulling_for)
 		return
 	var rows: Array = json.data
@@ -208,6 +215,18 @@ func _on_pull_done(result: int, code: int, _headers: PackedStringArray, body: Pa
 	var row: Dictionary = rows[0]
 	var payload: Variant = row.get("payload", {})
 	pulled.emit(payload if typeof(payload) == TYPE_DICTIONARY else {}, true, _pulling_for)
+
+
+## Tekst odpowiedzi serwera. Zwykle to czysty JSON, bo przegladarka sama
+## rozpakowuje to, co przyszlo spakowane. Jesli jednak trafi do nas gzip
+## (pierwsze dwa bajty 0x1f 0x8b), rozpakowujemy go tutaj — lepiej, zeby
+## gra poradzila sobie sama, niz zeby znowu klamala o braku polaczenia.
+func _body_text(body: PackedByteArray) -> String:
+	if body.size() >= 2 and body[0] == 0x1f and body[1] == 0x8b:
+		var raw := body.decompress_dynamic(-1, FileAccess.COMPRESSION_GZIP)
+		if not raw.is_empty():
+			return raw.get_string_from_utf8()
+	return body.get_string_from_utf8()
 
 
 func _set_online(value: bool) -> void:
@@ -317,4 +336,12 @@ func _result_name(code: int) -> String:
 			return tr("DIAG_R_TIMEOUT")
 		HTTPRequest.RESULT_REQUEST_FAILED:
 			return tr("DIAG_R_REFUSED")
+		HTTPRequest.RESULT_BODY_DECOMPRESS_FAILED:
+			return tr("DIAG_R_UNPACK")
+		HTTPRequest.RESULT_CHUNKED_BODY_SIZE_MISMATCH:
+			return tr("DIAG_R_TRUNCATED")
+		HTTPRequest.RESULT_BODY_SIZE_LIMIT_EXCEEDED:
+			return tr("DIAG_R_TOO_BIG")
+		HTTPRequest.RESULT_REDIRECT_LIMIT_REACHED:
+			return tr("DIAG_R_REDIRECTS")
 	return tr("DIAG_R_OTHER")
