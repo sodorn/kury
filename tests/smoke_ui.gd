@@ -84,10 +84,50 @@ func _test_buildings() -> void:
 		_check(panel.is_open() and title.text == tr(def["name"]), "panel budynku '%s'" % id)
 		if id == "shop":
 			_shot("panel_sklep.png")
+		if id == "coop":
+			await _check_dog_offer(panel)
 		await _tap(Vector2(540, 260))
 		await _frames(30)
 		_check(not panel.visible, "panel '%s' zamyka sie dotknieciem tla" % id)
 
+
+
+## Pies ma byc do kupienia OD RAZU, bez plotu jako warunku, i ma stac przed
+## plotem, bo jest tanszy. Wlasciciel szukal go w panelu i nie znalazl —
+## test pilnuje, zeby przycisk nie zniknal po jakiejs przyszlej przebudowie.
+func _check_dog_offer(panel: Control) -> void:
+	await _frames(20)
+	var rows: VBoxContainer = panel.get_node(
+			"Sheet/Content/Scroll/Gutter/Scrollable/Rows")
+	var actions: VBoxContainer = panel.get_node(
+			"Sheet/Content/Scroll/Gutter/Scrollable/Actions")
+	var stany := "\n".join(_labels_in(rows))
+	_check(stany.contains(tr("PANEL_FOX_FENCE")), "kurnik pokazuje stan plotu")
+	_check(stany.contains(tr("PANEL_FOX_DOG")), "kurnik pokazuje stan psa")
+
+	var pies := -1
+	var plot := -1
+	var teksty: Array[String] = []
+	var index := 0
+	for node in _controls_of_type(actions, "Button"):
+		var button := node as Button
+		if not button.visible:
+			continue
+		teksty.append(button.text)
+		if button.text.contains(tr("DOG_BUY_MUTT")) and pies < 0:
+			pies = index
+		if button.text.contains(tr("GUARD_BUY_FENCE")) and plot < 0:
+			plot = index
+		index += 1
+	_check(pies >= 0, "jest przycisk zakupu psa: %s" % "; ".join(teksty))
+	_check(plot >= 0, "jest przycisk zakupu plotu")
+	if pies >= 0 and plot >= 0:
+		_check(pies < plot, "pies stoi przed plotem (tanszy)")
+	# Szukamy NIEPODSTAWIONYCH wzorcow, a nie samego znaku procenta — napis
+	# o plocie slusznie zawiera "60%".
+	for tekst in teksty:
+		var czysty := tekst.contains("%s") or tekst.contains("%d")
+		_check(not czysty, "przycisk ma podstawione wszystkie wartosci: %s" % tekst)
 
 func _test_hens() -> void:
 	var hens := _nodes_of_type("FarmChicken")

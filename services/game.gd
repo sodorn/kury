@@ -146,7 +146,9 @@ func _report(result: Dictionary) -> void:
 	var arrived := int(result["fox_arrived"])
 	if arrived > 0:
 		Events.fox_arrived.emit(state.fox_pending, state.fox_visit_left)
-		Events.notice.emit(tr("HINT_FOX_HERE"))
+		# Gracz ma wiedziec, ze pies pracuje — inaczej 200 zl wyglada
+		# jak wyrzucone w bloto.
+		Events.notice.emit(tr("HINT_FOX_HERE_DOG") if state.dog_level > 0 else tr("HINT_FOX_HERE"))
 	var fox := int(result["fox_took"])
 	if fox > 0:
 		Events.fox_visited.emit(fox)
@@ -339,7 +341,9 @@ func _apply_elapsed(elapsed: float) -> void:
 	# o to mial najwieksza pretensje.
 	if int(result["fox_arrived"]) > 0:
 		Events.fox_arrived.emit(state.fox_pending, state.fox_visit_left)
-		Events.notice.emit(tr("HINT_FOX_HERE"))
+		# Gracz ma wiedziec, ze pies pracuje — inaczej 200 zl wyglada
+		# jak wyrzucone w bloto.
+		Events.notice.emit(tr("HINT_FOX_HERE_DOG") if state.dog_level > 0 else tr("HINT_FOX_HERE"))
 	if int(result["fox_blocked"]) > 0:
 		Events.notice.emit(tr("HINT_FOX_BLOCKED"))
 		Events.fox_repelled.emit()

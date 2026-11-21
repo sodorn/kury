@@ -38,6 +38,8 @@ func _ready() -> void:
 	_test_incubate_without_flock()
 	_test_retry_same_code()
 	_test_body_unpacking()
+	_test_dog()
+	_test_guard_migration()
 	_test_event_rules()
 	_test_starving_farm()
 	_test_lay_fairness()
@@ -78,6 +80,21 @@ func _force_event(kind: String) -> void:
 func _arm_event(state: FarmState, kind: String) -> void:
 	_force_event(kind)
 	state.event_dry[kind] = 100000.0
+
+
+## GameData.balance() zwraca WSPOLNY slownik, wiec _force_event i _never_event
+## zmieniaja ustawienia dla wszystkich dalszych testow. Te dwie funkcje
+## pozwalaja oddac stan nietkniety. Bez tego _test_event_rules widzialo
+## karencje lisa rowna zeru i oblewalo sie przez test, ktory skonczyl sie
+## wczesniej.
+func _snapshot_event(kind: String) -> Dictionary:
+	return (GameData.balance().get(kind, {}) as Dictionary).duplicate(true)
+
+
+func _restore_event(kind: String, snapshot: Dictionary) -> void:
+	var cfg: Dictionary = GameData.balance().get(kind, {})
+	cfg.clear()
+	cfg.merge(snapshot)
 
 
 ## Odwrotnie: zdarzenie nie wypadnie przez cala rozsadna dlugosc testu.
@@ -705,16 +722,22 @@ func _test_fox() -> void:
 	guarded.guard_level = 1
 	_check(guarded.fox_block_chance() >= 0.6, "plot zawraca wiekszosc podejsc")
 	guarded.guard_level = 2
-	var with_dog := guarded.fox_block_chance()
+	var higher := guarded.fox_block_chance()
 	guarded.guard_level = 1
-	_check(with_dog > guarded.fox_block_chance(), "pies dziala lepiej niz sam plot")
+	_check(higher > guarded.fox_block_chance(), "wyzszy plot zawraca czesciej")
 	# Ostatni poziom daje pelne 100% i wylacza lisa calkowicie. Argumentowalem
 	# przeciw, wlasciciel zdecydowal inaczej — test pilnuje jego decyzji.
-	guarded.guard_level = 5
+	guarded.guard_level = 3
 	_check(is_equal_approx(guarded.fox_block_chance(), 1.0),
-			"najwyzszy poziom obrony zatrzymuje kazde podejscie")
+			"najwyzszy plot zatrzymuje kazde podejscie")
+	# Pies to OSOBNA sciezka: nie ma wplywu na to, czy lis wejdzie.
+	guarded.guard_level = 1
+	var sam_plot := guarded.fox_block_chance()
+	guarded.dog_level = 2
+	_check(is_equal_approx(guarded.fox_block_chance(), sam_plot),
+			"pies nie zmienia szansy, ze lis wejdzie — od tego jest plot")
 	var walled := _fresh_state(hens, 100000.0)
-	walled.guard_level = 5
+	walled.guard_level = 3
 	var tries := 0
 	for i in 50:
 		_arm_event(walled, "fox")
@@ -1024,6 +1047,85 @@ func _test_body_unpacking() -> void:
 	var said := Cloud.describe_last()
 	_check(said.contains("rozpakowa"), "kod 8 opisany po ludzku: %s" % said)
 	_check(not said.contains(tr("DIAG_R_OTHER")), "kod 8 to juz nie 'nieznany powod'")
+
+
+## Pies podworzowy — wprost z opisu wlasciciela: kupowany od razu, tanszy
+## niz plot, goni lisa, ktory JUZ wszedl. Kundel po dluzszej chwili, owczarek
+## od razu. Lis zawsze cos porwie; zero strat tylko wtedy, gdy gracz przegoni
+## go palcem.
+func _test_dog() -> void:
+	var dogs: Array = GameData.balance().get("buildings", {}).get("dog", {}).get("upgrades", [])
+	var fences: Array = GameData.balance().get("buildings", {}).get("guard", {}).get("upgrades", [])
+	_check(dogs.size() == 2, "sa dwa psy do kupienia")
+	_check(float(dogs[0].get("price", 0)) < float(fences[0].get("price", 0)),
+			"kundel jest tanszy niz plot (%s < %s)" % [dogs[0].get("price"), fences[0].get("price")])
+
+	# Pies kupowalny od poczatku, bez plotu jako warunku.
+	Game.new_game()
+	Game.state.money = float(dogs[0].get("price", 0))
+	_check(Game.state.guard_level == 0, "zaczynamy bez plotu")
+	_check(Game.upgrade_building("dog"), "psa kupuje sie bez kupowania plotu")
+	_check(Game.state.dog_level == 1, "kundel na podworku")
+	_check(Game.state.guard_level == 0, "zakup psa nie stawia plotu")
+
+	# Czas wizyty i lup maleja z kazdym psem. Stado liczne, zeby lis mial
+	# co zabierac i zeby roznica w lupie byla widoczna.
+	var hens: Array[String] = []
+	for i in 20:
+		hens.append("leghorn")
+	var bez := _fresh_state(hens, 0.0)
+	var kundel := _fresh_state(hens, 0.0)
+	kundel.dog_level = 1
+	var owczarek := _fresh_state(hens, 0.0)
+	owczarek.dog_level = 2
+	_check(kundel.fox_visit_seconds() < bez.fox_visit_seconds(), "kundel skraca wizyte lisa")
+	_check(owczarek.fox_visit_seconds() < kundel.fox_visit_seconds(), "owczarek skraca ja bardziej")
+	_check(is_equal_approx(bez.fox_dog_share(), 1.0), "bez psa lis bierze caly upatrzony lup")
+	_check(owczarek.fox_dog_share() < kundel.fox_dog_share(), "owczarek zostawia lisowi mniej")
+	_check(kundel.fox_dog_share() < 1.0, "kundel tez przycina lup")
+
+	# W symulacji: pies zmniejsza straty, ale ich nie zeruje.
+	var kopia := _snapshot_event("fox")
+	var straty_bez := 0
+	var straty_z := 0
+	var porwal_zawsze := true
+	for i in 40:
+		var a := _fresh_state(hens, 0.0)
+		_arm_event(a, "fox")
+		Simulation.advance(a, 1.0)
+		straty_bez += a.fox_pending
+		var b := _fresh_state(hens, 0.0)
+		b.dog_level = 2
+		_arm_event(b, "fox")
+		Simulation.advance(b, 1.0)
+		straty_z += b.fox_pending
+		if b.fox_pending < 1:
+			porwal_zawsze = false
+	_check(straty_z < straty_bez, "z psem lis zabiera mniej (%d wobec %d)" % [straty_z, straty_bez])
+	_check(straty_z > 0, "pies nie zeruje strat — lis zawsze cos porwie")
+	_check(porwal_zawsze, "nawet przy owczarku lis bierze co najmniej jedna kure")
+	_restore_event("fox", kopia)
+
+
+## Migracja zapisow 5 -> 6: stara jedna drabinka obrony rozbita na plot
+## i psa. Nikt nie moze stracic tego, za co zaplacil.
+func _test_guard_migration() -> void:
+	var oczekiwane := {0: [0, 0], 1: [1, 0], 2: [1, 1], 3: [2, 1], 4: [2, 2], 5: [3, 2]}
+	for stary: int in oczekiwane.keys():
+		var stan := FarmState.new()
+		stan.guard_level = stary
+		var zapis := SaveGame.to_dict(stan)
+		zapis["version"] = 5
+		zapis.erase("dog_level")
+		var wczytany := SaveGame.from_dict(zapis)
+		_check(wczytany != null, "stary zapis z obrona %d daje sie wczytac" % stary)
+		if wczytany == null:
+			continue
+		var chciane: Array = oczekiwane[stary]
+		_check(wczytany.guard_level == chciane[0],
+				"obrona %d -> plot %d (jest %d)" % [stary, chciane[0], wczytany.guard_level])
+		_check(wczytany.dog_level == chciane[1],
+				"obrona %d -> pies %d (jest %d)" % [stary, chciane[1], wczytany.dog_level])
 
 func _test_event_rules() -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})

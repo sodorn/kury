@@ -1,198 +1,207 @@
 {
-	"_opis": "Wszystkie liczby balansu gry. Ceny w zlotowkach, czasy w sekundach, zuzycie paszy w kg na minute.",
-	"start": {
-		"money": 150,
-		"eggs": 0,
-		"feed": 20,
-		"hens": [
-			"leghorn",
-			"leghorn",
-			"leghorn"
-		],
-		"roosters": [
-			"leghorn"
-		]
-	},
-	"economy": {
-		"_opis": "feed_per_hen_minute w kilogramach na ptaka na minute. Wartosc jest cztery razy wyzsza niz w 10.1: wczesniej worek starczal na pol godziny i pasza w ogole nie byla problemem. Razem z nia spadla cena kilograma, zeby karma nie zjadala calego zarobku.",
-		"feed_pack_size": 25,
-		"feed_pack_price": 25,
-		"feed_per_hen_minute": 0.34,
-		"chick_feed_multiplier": 0.5
-	},
-	"run": {
-		"_opis": "max_eggs_on_ground to tylko tyle, ile jaj lezy naraz na wybiegu do zebrania palcem. Nadmiar idzie prosto do magazynu. area musi sie zgadzac z piaskowym prostokatem w ground.svg - oba biora sie z RUN w tools/gen_ground.py.",
-		"max_eggs_on_ground": 40,
-		"max_visible_hens": 36,
-		"area": {
-			"x": 110,
-			"y": 975,
-			"w": 860,
-			"h": 550
-		},
-		"pickup_radius": 300
-	},
-	"offline": {
-		"_opis": "Czas gry plynie tak samo, gdy grasz i gdy nie grasz: scale razy wolniej od zegara sciennego. Dawny speed_divider 60 dla nieaktywnej gry zostal usuniety - teraz noc liczy sie tak samo jak granie. max_hours to sufit na jedno nadrabianie, w godzinach rzeczywistych.",
-		"max_hours": 72,
-		"scale": 0.3333333333
-	},
-	"day": {
-		"seconds": 600
-	},
-	"incubator": {
-		"slots": 3,
-		"eggs_per_chick": 3,
-		"upgrades": [
-			{
-				"slots": 6,
-				"price": 350
-			},
-			{
-				"slots": 10,
-				"price": 1200
-			},
-			{
-				"slots": 16,
-				"price": 3000
-			},
-			{
-				"slots": 24,
-				"price": 8000
-			},
-			{
-				"slots": 34,
-				"price": 20000
-			}
-		],
-		"_opis": "slots to liczba partii grzanych naraz; kazda partia to jedno pisklę. eggs_per_chick jaj danej rasy robi jedno pisklę tej rasy."
-	},
-	"hunger": {
-		"_opis": "Po grace_minutes bez paszy stado zaczyna padac. Odstep miedzy zgonami to death_interval_seconds przy stadzie wielkosci reference_hens i skraca sie proporcjonalnie przy wiekszym - przy stalym odstepie stado liczace dwiescie sztuk gloddzilo godzinami i pasza przestawala byc problemem. Bez paszy stoi tez inkubator i odchow piskląt.",
-		"grace_minutes": 3.0,
-		"death_interval_seconds": 50.0,
-		"corpse_seconds": 300.0,
-		"offline_max_share": 0.5,
-		"reference_hens": 10
-	},
-	"disease": {
-		"_opis": "Te same zasady co u lisa, liczone w minutach rzeczywistych. Chorob liczy sie na cale gospodarstwo, nie na kure. Szansa, ze padnie na konkretna kure, rosnie z jej cena: droga rasa choruje czesciej (waga = pierwiastek z ceny). Chorej kury skup nie przyjmuje.",
-		"death_minutes": 7.0,
-		"medicine_price": 10,
-		"vaccine_price": 200,
-		"vaccine_price_per_hen": 0,
-		"grace_minutes": 30,
-		"min_hens": 5,
-		"mean_minutes": 10,
-		"hard_minutes": 20
-	},
-	"fox": {
-		"_opis": "Przez pierwsze grace_minutes gry lis nie przychodzi i nie przychodzi do stada mniejszego niz min_hens. Potem co minute leci kostka ze szansa rosnaca wraz z cisza, a po hard_minutes bez lisa przychodzi NA PEWNO - bez losowania. Wszystkie te minuty liczone sa w czasie RZECZYWISTYM, nie w czasie gry; przeliczenie robi Simulation._event_fires.",
-		"min_share": 0.3,
-		"max_share": 0.9,
-		"min_hens": 5,
-		"visit_seconds": 10,
-		"scare_taps": 3,
-		"grace_minutes": 30,
-		"mean_minutes": 15,
-		"carcass_share": 0.5,
-		"hard_minutes": 30
-	},
-	"win": {
-		"_opis": "Jeden cel: pieniadze. Kolekcja ras przestala byc wyzwaniem, gdy zniknely progi odblokowania — po jednej sztuce kazdej rasy da sie kupic w niecale szesc godzin.",
-		"money": 1500000,
-		"collection": false
-	},
-	"buildings": {
-		"_opis": "Ulepszenia budynkow. Poziom 0 to stan poczatkowy, kazdy kolejny to wpis z upgrades.",
-		"coop": {
-			"_opis": "Pojemnosc kurnika liczona we wszystkich doroslych ptakach, razem z kogutami. Ponad limit nie kupisz ptaka, a podrosniete pisklę czeka przy inkubatorze. Drabinka siega 260, zeby przy siedemnastu rasach zmiescilo sie po kilka sztuk kazdej.",
-			"capacity": 20,
-			"upgrades": [
-				{
-					"capacity": 40,
-					"price": 500
-				},
-				{
-					"capacity": 60,
-					"price": 1400
-				},
-				{
-					"capacity": 80,
-					"price": 3200
-				},
-				{
-					"capacity": 110,
-					"price": 7000
-				},
-				{
-					"capacity": 150,
-					"price": 15000
-				},
-				{
-					"capacity": 200,
-					"price": 30000
-				},
-				{
-					"capacity": 260,
-					"price": 60000
-				}
-			]
-		},
-		"storage": {
-			"_opis": "Hurt na pasze: wiekszy worek i nizsza cena za kilogram.",
-			"upgrades": [
-				{
-					"pack_size": 60,
-					"pack_price": 57,
-					"price": 350
-				},
-				{
-					"pack_size": 150,
-					"pack_price": 135,
-					"price": 1200
-				},
-				{
-					"pack_size": 400,
-					"pack_price": 340,
-					"price": 4000
-				},
-				{
-					"pack_size": 1000,
-					"pack_price": 800,
-					"price": 12000
-				},
-				{
-					"pack_size": 2500,
-					"pack_price": 1875,
-					"price": 30000
-				}
-			]
-		},
-		"guard": {
-			"_opis": "block_chance to szansa, ze obrona zawroci lisa przy samej zagrodzie. Losuje sie przy kazdym podejsciu. Ostatni poziom daje 100%, czyli wylacza lisa z gry calkowicie - tak zyczyl sobie wlasciciel.",
-			"upgrades": [
-				{
-					"block_chance": 0.6,
-					"price": 800
-				},
-				{
-					"block_chance": 0.7,
-					"price": 1200
-				},
-				{
-					"block_chance": 0.8,
-					"price": 1800
-				},
-				{
-					"block_chance": 0.9,
-					"price": 2700
-				},
-				{
-					"block_chance": 1.0,
-					"price": 4000
-				}
-			]
-		}
-	}
+  "_opis": "Wszystkie liczby balansu gry. Ceny w zlotowkach, czasy w sekundach, zuzycie paszy w kg na minute.",
+  "start": {
+    "money": 150,
+    "eggs": 0,
+    "feed": 20,
+    "hens": [
+      "leghorn",
+      "leghorn",
+      "leghorn"
+    ],
+    "roosters": [
+      "leghorn"
+    ]
+  },
+  "economy": {
+    "_opis": "feed_per_hen_minute w kilogramach na ptaka na minute. Wartosc jest cztery razy wyzsza niz w 10.1: wczesniej worek starczal na pol godziny i pasza w ogole nie byla problemem. Razem z nia spadla cena kilograma, zeby karma nie zjadala calego zarobku.",
+    "feed_pack_size": 25,
+    "feed_pack_price": 25,
+    "feed_per_hen_minute": 0.34,
+    "chick_feed_multiplier": 0.5
+  },
+  "run": {
+    "_opis": "max_eggs_on_ground to tylko tyle, ile jaj lezy naraz na wybiegu do zebrania palcem. Nadmiar idzie prosto do magazynu. area musi sie zgadzac z piaskowym prostokatem w ground.svg - oba biora sie z RUN w tools/gen_ground.py.",
+    "max_eggs_on_ground": 40,
+    "max_visible_hens": 36,
+    "area": {
+      "x": 110,
+      "y": 975,
+      "w": 860,
+      "h": 550
+    },
+    "pickup_radius": 300
+  },
+  "offline": {
+    "_opis": "Czas gry plynie tak samo, gdy grasz i gdy nie grasz: scale razy wolniej od zegara sciennego. Dawny speed_divider 60 dla nieaktywnej gry zostal usuniety - teraz noc liczy sie tak samo jak granie. max_hours to sufit na jedno nadrabianie, w godzinach rzeczywistych.",
+    "max_hours": 72,
+    "scale": 0.3333333333
+  },
+  "day": {
+    "seconds": 600
+  },
+  "incubator": {
+    "slots": 3,
+    "eggs_per_chick": 3,
+    "upgrades": [
+      {
+        "slots": 6,
+        "price": 350
+      },
+      {
+        "slots": 10,
+        "price": 1200
+      },
+      {
+        "slots": 16,
+        "price": 3000
+      },
+      {
+        "slots": 24,
+        "price": 8000
+      },
+      {
+        "slots": 34,
+        "price": 20000
+      }
+    ],
+    "_opis": "slots to liczba partii grzanych naraz; kazda partia to jedno pisklę. eggs_per_chick jaj danej rasy robi jedno pisklę tej rasy."
+  },
+  "hunger": {
+    "_opis": "Po grace_minutes bez paszy stado zaczyna padac. Odstep miedzy zgonami to death_interval_seconds przy stadzie wielkosci reference_hens i skraca sie proporcjonalnie przy wiekszym - przy stalym odstepie stado liczace dwiescie sztuk gloddzilo godzinami i pasza przestawala byc problemem. Bez paszy stoi tez inkubator i odchow piskląt.",
+    "grace_minutes": 3.0,
+    "death_interval_seconds": 50.0,
+    "corpse_seconds": 300.0,
+    "offline_max_share": 0.5,
+    "reference_hens": 10
+  },
+  "disease": {
+    "_opis": "Te same zasady co u lisa, liczone w minutach rzeczywistych. Chorob liczy sie na cale gospodarstwo, nie na kure. Szansa, ze padnie na konkretna kure, rosnie z jej cena: droga rasa choruje czesciej (waga = pierwiastek z ceny). Chorej kury skup nie przyjmuje.",
+    "death_minutes": 7.0,
+    "medicine_price": 10,
+    "vaccine_price": 200,
+    "vaccine_price_per_hen": 0,
+    "grace_minutes": 30,
+    "min_hens": 5,
+    "mean_minutes": 10,
+    "hard_minutes": 20
+  },
+  "fox": {
+    "_opis": "Przez pierwsze grace_minutes gry lis nie przychodzi i nie przychodzi do stada mniejszego niz min_hens. Potem co minute leci kostka ze szansa rosnaca wraz z cisza, a po hard_minutes bez lisa przychodzi NA PEWNO - bez losowania. Wszystkie te minuty liczone sa w czasie RZECZYWISTYM, nie w czasie gry; przeliczenie robi Simulation._event_fires.",
+    "min_share": 0.3,
+    "max_share": 0.9,
+    "min_hens": 5,
+    "visit_seconds": 10,
+    "scare_taps": 3,
+    "grace_minutes": 30,
+    "mean_minutes": 15,
+    "carcass_share": 0.5,
+    "hard_minutes": 30
+  },
+  "win": {
+    "_opis": "Jeden cel: pieniadze. Kolekcja ras przestala byc wyzwaniem, gdy zniknely progi odblokowania — po jednej sztuce kazdej rasy da sie kupic w niecale szesc godzin.",
+    "money": 1500000,
+    "collection": false
+  },
+  "buildings": {
+    "_opis": "Ulepszenia budynkow. Poziom 0 to stan poczatkowy, kazdy kolejny to wpis z upgrades.",
+    "coop": {
+      "_opis": "Pojemnosc kurnika liczona we wszystkich doroslych ptakach, razem z kogutami. Ponad limit nie kupisz ptaka, a podrosniete pisklę czeka przy inkubatorze. Drabinka siega 260, zeby przy siedemnastu rasach zmiescilo sie po kilka sztuk kazdej.",
+      "capacity": 20,
+      "upgrades": [
+        {
+          "capacity": 40,
+          "price": 500
+        },
+        {
+          "capacity": 60,
+          "price": 1400
+        },
+        {
+          "capacity": 80,
+          "price": 3200
+        },
+        {
+          "capacity": 110,
+          "price": 7000
+        },
+        {
+          "capacity": 150,
+          "price": 15000
+        },
+        {
+          "capacity": 200,
+          "price": 30000
+        },
+        {
+          "capacity": 260,
+          "price": 60000
+        }
+      ]
+    },
+    "storage": {
+      "_opis": "Hurt na pasze: wiekszy worek i nizsza cena za kilogram.",
+      "upgrades": [
+        {
+          "pack_size": 60,
+          "pack_price": 57,
+          "price": 350
+        },
+        {
+          "pack_size": 150,
+          "pack_price": 135,
+          "price": 1200
+        },
+        {
+          "pack_size": 400,
+          "pack_price": 340,
+          "price": 4000
+        },
+        {
+          "pack_size": 1000,
+          "pack_price": 800,
+          "price": 12000
+        },
+        {
+          "pack_size": 2500,
+          "pack_price": 1875,
+          "price": 30000
+        }
+      ]
+    },
+    "guard": {
+      "_opis": "PLOT. block_chance to szansa, ze lis w ogole nie wejdzie na wybieg — losowana przy kazdym podejsciu. Plot nie ma nic wspolnego z psem: pies dziala dopiero wtedy, gdy lis juz wszedl.",
+      "upgrades": [
+        {
+          "block_chance": 0.6,
+          "price": 800
+        },
+        {
+          "block_chance": 0.8,
+          "price": 1800
+        },
+        {
+          "block_chance": 1.0,
+          "price": 4000
+        }
+      ]
+    },
+    "dog": {
+      "_opis": "PIES. Kupujesz raz, zostaje na zawsze i rzuca sie na kazdego lisa, ktory wejdzie na wybieg. Nie zatrzymuje go przy bramie (od tego jest plot) — skraca mu czas i zmniejsza lup. seconds: ile sekund lis ma, zanim pies go wygoni. share: jaka czesc planowanego lupu zdazy zabrac. Lis ZAWSZE zabiera co najmniej jedna kure — tak zyczyl sobie wlasciciel. Zero strat jest tylko wtedy, gdy gracz przegoni lisa palcem.",
+      "upgrades": [
+        {
+          "name": "kundel",
+          "seconds": 5.0,
+          "share": 0.5,
+          "price": 200
+        },
+        {
+          "name": "owczarek",
+          "seconds": 2.0,
+          "share": 0.2,
+          "price": 500
+        }
+      ]
+    }
+  }
 }

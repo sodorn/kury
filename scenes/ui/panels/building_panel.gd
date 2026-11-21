@@ -166,9 +166,17 @@ func _build_coop() -> void:
 	_add_row("PANEL_COOP_PENDING", func() -> String: return str(Game.state.coop_reserved()))
 	_add_row("PANEL_COOP_SPACE",
 			func() -> String: return "%d / %d" % [Game.state.coop_occupied(), Game.state.coop_capacity()])
-	_add_row("PANEL_FOX_GUARD",
-			func() -> String: return "%s (%d / %d)" % [tr(_guard_name(Game.state.guard_level)),
-					Game.state.guard_level + 1, _building_levels("guard")])
+	_add_row("PANEL_FOX_FENCE",
+			func() -> String:
+				if Game.state.guard_level <= 0:
+					return tr("PANEL_FOX_GUARD_NONE")
+				return "%s — %d%%" % [tr(_guard_name(Game.state.guard_level)),
+						int(round(Game.state.fox_block_chance() * 100.0))])
+	_add_row("PANEL_FOX_DOG",
+			func() -> String:
+				if Game.state.dog_level <= 0:
+					return tr("PANEL_DOG_NONE")
+				return tr(_dog_name(Game.state.dog_level)))
 	_add_row("PANEL_FARM_CODE", func() -> String: return Cloud.player_id)
 	_add_dynamic_row(
 			func() -> String: return tr("PANEL_SERVER") if Cloud.is_enabled() else "",
@@ -213,6 +221,17 @@ func _build_coop() -> void:
 					NumberFormat.money(float(upgrade.get("price", 0)))],
 			func() -> void: _on_upgrade("coop"),
 			func() -> bool: return not Game.state.next_building_upgrade("coop").is_empty())
+
+	_add_action(false,
+			func() -> bool: return Game.state.money >= float(
+					Game.state.next_building_upgrade("dog").get("price", 0)),
+			func() -> String:
+				var upgrade := Game.state.next_building_upgrade("dog")
+				return tr("PANEL_BUY_DOG") % [
+					tr(_dog_buy_name(Game.state.dog_level + 1)),
+					NumberFormat.money(float(upgrade.get("price", 0)))],
+			func() -> void: _on_upgrade("dog"),
+			func() -> bool: return not Game.state.next_building_upgrade("dog").is_empty())
 
 	_add_action(false,
 			func() -> bool: return Game.state.money >= float(
@@ -657,14 +676,29 @@ func _guard_name(level: int) -> String:
 		1:
 			return "PANEL_FOX_GUARD_FENCE"
 		2:
-			return "PANEL_FOX_GUARD_DOG"
+			return "PANEL_FOX_GUARD_HIGH"
 		3:
-			return "PANEL_FOX_GUARD_PACK"
-		4:
-			return "PANEL_FOX_GUARD_SENSORS"
-		5:
-			return "PANEL_FOX_GUARD_FORT"
+			return "PANEL_FOX_GUARD_MESH"
 	return "PANEL_FOX_GUARD_NONE"
+
+
+func _dog_name(level: int) -> String:
+	match level:
+		1:
+			return "PANEL_DOG_MUTT"
+		2:
+			return "PANEL_DOG_SHEPHERD"
+	return "PANEL_DOG_NONE"
+
+
+## Pies w bierniku: "Kup psa", nie "Kup pies".
+func _dog_buy_name(level: int) -> String:
+	match level:
+		1:
+			return "DOG_BUY_MUTT"
+		2:
+			return "DOG_BUY_SHEPHERD"
+	return "PANEL_DOG_NONE"
 
 
 ## Ta sama ochrona w bierniku, do zdania "Kup psa podwórzowego za 1200 zł".
@@ -675,13 +709,9 @@ func _guard_buy_name(level: int) -> String:
 		1:
 			return "GUARD_BUY_FENCE"
 		2:
-			return "GUARD_BUY_DOG"
+			return "GUARD_BUY_HIGH"
 		3:
-			return "GUARD_BUY_PACK"
-		4:
-			return "GUARD_BUY_SENSORS"
-		5:
-			return "GUARD_BUY_FORT"
+			return "GUARD_BUY_MESH"
 	return "PANEL_FOX_GUARD_NONE"
 
 

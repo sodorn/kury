@@ -323,13 +323,20 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 		return
 
 	var share := randf_range(float(fox.get("min_share", 0.2)), float(fox.get("max_share", 0.9)))
+	# Pies nie zatrzymuje lisa przy bramie (od tego jest plot) — rzuca sie na
+	# niego, gdy ten juz wszedl. Skraca mu czas i przycina lup, ale lis ZAWSZE
+	# zdazy porwac co najmniej jedna kure. Zero strat jest tylko wtedy, gdy
+	# gracz przegoni go palcem.
+	share *= state.fox_dog_share()
 	state.fox_pending = clampi(int(round(state.chickens.size() * share)), 1, state.chickens.size() - 1)
 	# Lis, ktory podchodzi pod nieobecnosc gracza, NIE zabiera po cichu.
 	# Zostaje na wybiegu i czeka — gracz zastanie go po powrocie i bedzie mial
 	# te same kilka sekund na reakcje co zwykle. Wczesniej strata liczyla sie
 	# od razu i wlasciciel przez cztery wersje nie zobaczyl lisa ani razu.
-	state.fox_visit_left = maxf(1.0, float(fox.get("visit_seconds", 7.0)))
+	state.fox_visit_left = state.fox_visit_seconds()
 	out["fox_arrived"] = int(out["fox_arrived"]) + 1
+	if state.dog_level > 0:
+		out["fox_dog"] = int(out.get("fox_dog", 0)) + 1
 
 
 ## Koniec wizyty: lis zabiera upatrzone kury, o ile nikt go nie przegonil.

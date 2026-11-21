@@ -11,7 +11,7 @@ extends RefCounted
 
 const PATH := "user://save.json"
 ## Numer formatu zapisu. Podnosic przy KAZDEJ zmianie ukladu pol.
-const VERSION := 5
+const VERSION := 6
 
 
 ## Zamienia stan gry na slownik gotowy do zapisu.
@@ -46,6 +46,7 @@ static func to_dict(state: FarmState) -> Dictionary:
 		"coop_level": state.coop_level,
 		"storage_level": state.storage_level,
 		"guard_level": state.guard_level,
+		"dog_level": state.dog_level,
 		"fox_visit_left": state.fox_visit_left,
 		"fox_pending": state.fox_pending,
 		"event_dry": state.event_dry,
@@ -76,6 +77,7 @@ static func from_dict(data: Dictionary) -> Dictionary:
 	state.coop_level = maxi(0, int(data.get("coop_level", 0)))
 	state.storage_level = maxi(0, int(data.get("storage_level", 0)))
 	state.guard_level = maxi(0, int(data.get("guard_level", 0)))
+	state.dog_level = maxi(0, int(data.get("dog_level", 0)))
 	# Wizyty lisa nie przenosimy przez zapis: gracz, ktory wylaczyl gre
 	# w trakcie, nie ma czego przeganiac po powrocie.
 	state.fox_visit_left = 0.0
@@ -199,6 +201,7 @@ static func _migrate(data: Dictionary, from_version: int) -> Dictionary:
 		data["coop_level"] = 0
 		data["storage_level"] = 0
 		data["guard_level"] = 0
+		data["dog_level"] = 0
 		data["version"] = 4
 	if from_version < 5:
 		# Wersja 5 dzieli stado na kury i koguty, a kura bez koguta swojej rasy
@@ -222,4 +225,18 @@ static func _migrate(data: Dictionary, from_version: int) -> Dictionary:
 			gifted.append(rooster.to_dict())
 		data["chickens"] = birds + gifted
 		data["version"] = 5
+	if from_version < 6:
+		# Wersja 6 rozbija obrone przed lisem na DWIE niezalezne rzeczy.
+		# Wczesniej byla jedna drabinka 0-5, w ktorej plot i pies robily to
+		# samo: podbijaly szanse, ze lis zawroci przy bramie. Teraz plot
+		# decyduje, czy lis wejdzie, a pies — jak szybko wyleci.
+		#
+		# Przeliczamy hojnie: nikt nie moze stracic tego, za co zaplacil.
+		# stary poziom -> [plot, pies]
+		var mapa := {0: [0, 0], 1: [1, 0], 2: [1, 1], 3: [2, 1], 4: [2, 2], 5: [3, 2]}
+		var stary := clampi(int(data.get("guard_level", 0)), 0, 5)
+		var nowe: Array = mapa.get(stary, [0, 0])
+		data["guard_level"] = nowe[0]
+		data["dog_level"] = nowe[1]
+		data["version"] = 6
 	return data

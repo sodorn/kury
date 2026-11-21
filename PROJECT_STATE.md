@@ -4,9 +4,12 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 9 zakonczony** (wersja 11.6): znaleziona
-  i naprawiona przyczyna "serwer nie odpowiada" przy wczytywaniu farmy
-  z kodu — Godot nie rozpakowywal odpowiedzi serwera (kod 8).
+- Aktualny etap: **ETAP 10** (wersja 12.0): plot i pies rozdzielone na
+  dwie niezalezne sciezki obrony, format zapisu 6 z przeliczeniem
+  starych farm.
+- Wersja 11.6: znaleziona i naprawiona przyczyna "serwer nie odpowiada"
+  przy wczytywaniu farmy z kodu — Godot nie rozpakowywal odpowiedzi
+  serwera (kod 8).
 - Wersja 11.5: numer wersji widac na ekranie powitalnym.
   Ustalony zamysl ekonomii: jajka to grosze na pasze, zarabia sie na
   sprzedazy wyhodowanych drogich kur, hamulcem jest czas rozrodu.
@@ -26,7 +29,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`, `v11.6-rozpakowanie-odpowiedzi`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`, `v11.6-rozpakowanie-odpowiedzi`, `v12.0-plot-i-pies`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -188,6 +191,52 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## WERSJA 12.0: plot i pies to dwie osobne rzeczy
+
+Wlasciciel opisal to tak: pies do kupienia OD RAZU i TANSZY niz plot;
+kundel goni lisa po dluzszej chwili i sporo kur ginie, lepszy pies za
+500 goni od razu; pies kupiony raz zostaje; lis ZAWSZE cos zabija;
+a zeby lis w ogole nie wszedl — od tego jest plot.
+
+Przedtem byla jedna drabinka 0-5, w ktorej plot i pies robily to samo:
+podbijaly szanse, ze lis zawroci przy bramie. Pies byl drugim szczeblem
+za 1200 zl, wiec zeby go kupic, trzeba bylo najpierw postawic plot za
+800 zl. Wlasciciel szukal psa w panelu i nie znalazl.
+
+Teraz sa dwie niezalezne sciezki:
+
+    PLOT  (buildings.guard)  czy lis w ogole wejdzie
+      800 zl   60%
+     1800 zl   80%
+     4000 zl  100%
+
+    PIES  (buildings.dog)    gdy juz wszedl: jak szybko wyleci i ile wezmie
+      200 zl  kundel     5 s,  50% upatrzonego lupu
+      500 zl  owczarek   2 s,  20% upatrzonego lupu
+
+Pies nie zeruje strat — lis zawsze porywa co najmniej jedna kure.
+Zero strat jest TYLKO wtedy, gdy gracz przegoni lisa palcem (trzy
+trafienia). Dzieki temu pies ratuje gracza, ktory nie patrzy na ekran,
+ale refleks nadal sie oplaca i jedyna mechanika reakcji w grze nie
+umiera.
+
+FORMAT ZAPISU 5 -> 6. Pole `guard_level` zmienia znaczenie, wiec stare
+farmy sa przeliczane; nikt nie traci tego, za co zaplacil:
+
+    stary poziom obrony -> plot, pies
+      0 -> 0, 0        3 -> 2, 1
+      1 -> 1, 0        4 -> 2, 2
+      2 -> 1, 1        5 -> 3, 2
+
+To pierwsza zmiana MAJOR wedlug zasady ustalonej dzien wczesniej:
+pierwsza cyfra rosnie tylko przy zmianie formatu zapisu.
+
+Przy okazji wyszedl blad w samych testach, ktory siedzial tam od dawna:
+`GameData.balance()` zwraca WSPOLNY slownik, a pomocniki `_force_event`
+i `_never_event` grzebia w nim na stale. Nowy test psa wyzerowal przez
+to karencje lisa dla wszystkich testow uruchomionych pozniej. Doszly
+`_snapshot_event` i `_restore_event`.
 
 ## Wersjonowanie — ustalone 2026-11-21
 

@@ -47,6 +47,9 @@ var fox_pending: int = 0
 var coop_level: int = 0
 var storage_level: int = 0
 var guard_level: int = 0
+## Pies podworzowy. Osobna sciezka od plotu: plot decyduje, czy lis wejdzie,
+## pies — jak szybko wyleci i ile zdazy zabrac. Kupiony raz, zostaje.
+var dog_level: int = 0
 ## Czy gracz widzial juz ekran powitalny. Dzieki temu pokazuje sie raz,
 ## takze komus, kto zalozyl farme przed jego dodaniem.
 var intro_seen: bool = false
@@ -297,6 +300,8 @@ func building_level(building_id: String) -> int:
 			return storage_level
 		"guard":
 			return guard_level
+		"dog":
+			return dog_level
 	return 0
 
 
@@ -308,6 +313,8 @@ func set_building_level(building_id: String, level: int) -> void:
 			storage_level = level
 		"guard":
 			guard_level = level
+		"dog":
+			dog_level = level
 
 
 ## Opis nastepnego ulepszenia budynku albo pusty slownik, gdy to juz maksimum.
@@ -375,6 +382,22 @@ func feed_pack() -> Dictionary:
 ## Ile razy rzadziej przychodzi lis dzieki plotowi albo psu.
 ## Szansa, ze obrona zawroci lisa od zagrody, zanim ten w ogole wejdzie.
 ## Losowana przy kazdym podejsciu, wiec nawet pelna obrona kiedys przepusci.
+## Ile sekund lis ma na wybiegu, zanim pies go wygoni. Bez psa tyle, ile
+## mowi balans lisa — czyli caly jego spacer.
+func fox_visit_seconds() -> float:
+	var full := maxf(1.0, float(GameData.balance().get("fox", {}).get("visit_seconds", 7.0)))
+	if dog_level <= 0:
+		return full
+	return minf(full, maxf(0.5, float(current_building_upgrade("dog").get("seconds", full))))
+
+
+## Jaka czesc upatrzonego lupu lis zdazy zabrac, zanim pies go dopadnie.
+func fox_dog_share() -> float:
+	if dog_level <= 0:
+		return 1.0
+	return clampf(float(current_building_upgrade("dog").get("share", 1.0)), 0.0, 1.0)
+
+
 func fox_block_chance() -> float:
 	var upgrade := current_building_upgrade("guard")
 	# Gorny poziom daje pelne 100%, czyli wylacza lisa calkowicie — tak zyczyl
