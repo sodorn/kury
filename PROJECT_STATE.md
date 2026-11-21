@@ -4,7 +4,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 9 zakonczony** (wersja 11.1): jeden czas na wszystko,
+- Aktualny etap: **ETAP 9 zakonczony** (wersja 11.2): jeden czas na wszystko,
   lis z twarda gwarancja, wiekszy wybieg i zbieranie jaj garsciami.
 - Wersja 10.x: kury i koguty. Kura
   znosi jaja tylko wtedy, gdy na farmie jest kogut jej rasy. Do tego duzo
@@ -17,7 +17,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -179,6 +179,15 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## Weryfikacja wersji 11.2 (wykonana w srodowisku Claude, Linux)
+
+- `tests/tests.tscn`: **892/892 OK**.
+- `tests/smoke_ui.tscn`: **OK**, z nowym sprawdzeniem widocznosci odpowiedzi
+  serwera w okienku.
+- **NIE sprawdzone:** polaczenie z prawdziwym Supabase. Proxy w srodowisku
+  Claude odrzuca `supabase.co`, wiec w tescie wychodzi "serwer nie odpowiada".
+  Ktora z trzech odpowiedzi dostaje wlasciciel, moze powiedziec tylko on.
 
 ## Weryfikacja wersji 11.1 (wykonana w srodowisku Claude, Linux)
 
@@ -536,6 +545,27 @@ python3 tools/gen_ground.py
   poprawek w `assets/sprites/animals/rooster_*.svg` nie wprowadzac — zgina
   przy nastepnym przebiegu. Plotno 170x130, stopy na y=118, tak samo jak
   u kur, zeby `Sprite2D` z `offset = (4, -53)` postawil je na ziemi.
+
+### Komunikaty byly zaslaniane przez panele (wersja 11.2)
+
+Wlasciciel zglosil: "wpisuje kod, klikam wczytaj i nic sie nie dzieje".
+Gra odpowiadala za kazdym razem — tylko nie bylo tego widac.
+
+- `Notice` (pasek z komunikatem) lezal w `hud.tscn` **przed** panelami, wiec
+  kazde otwarte okno go zaslanialo: ekran powitalny, Kurnik, sklep. Gracz
+  wpisywal kod, serwer odpowiadal "nie ma takiej farmy", a na wierzchu nie
+  zmienialo sie nic.
+- Pasek przeniesiony na **koniec listy dzieci** `Root`, czyli rysowany nad
+  wszystkim. Ma `mouse_filter = IGNORE`, wiec niczego nie blokuje.
+- Dodatkowo oba miejsca z kodem farmy — ekran powitalny i Kurnik — maja
+  wlasna linijke na odpowiedz serwera, tuz pod przyciskiem. Po nacisnieciu
+  pokazuje sie "Szukam farmy na serwerze…", a potem konkretna odpowiedz.
+- Trzy mozliwe odpowiedzi i co znacza:
+  - "farmy o takim kodzie u niego nie ma" — zapis nie dotarl na serwer;
+  - "serwer nie odpowiada" — siec, tabela `saves` albo klucz;
+  - "to kod tej farmy" — gracz wpisal kod farmy, na ktorej wlasnie jest.
+- Test dymny sprawdza, ze po nacisnieciu wczytywania okienko od razu cos
+  mowi i ze po odpowiedzi serwera dalej cos mowi.
 
 ### Klawiatura kodu rysowana w grze (wersja 11.1)
 

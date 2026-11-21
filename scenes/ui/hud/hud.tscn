@@ -61,6 +61,17 @@ size_flags_stretch_ratio = 1.3
 layout_mode = 2
 icon = ExtResource("6")
 
+[node name="BuildingPanel" parent="Root" instance=ExtResource("7")]
+layout_mode = 1
+
+[node name="UnlockPanel" parent="Root" instance=ExtResource("10")]
+
+[node name="AlertPanel" parent="Root" instance=ExtResource("12")]
+
+[node name="WinPanel" parent="Root" instance=ExtResource("9")]
+
+[node name="StartPanel" parent="Root" instance=ExtResource("11")]
+
 [node name="Notice" type="PanelContainer" parent="Root"]
 layout_mode = 1
 anchors_preset = 5
@@ -80,14 +91,3 @@ theme_type_variation = &"NoteLabel"
 text = ""
 horizontal_alignment = 1
 autowrap_mode = 3
-
-[node name="BuildingPanel" parent="Root" instance=ExtResource("7")]
-layout_mode = 1
-
-[node name="UnlockPanel" parent="Root" instance=ExtResource("10")]
-
-[node name="AlertPanel" parent="Root" instance=ExtResource("12")]
-
-[node name="WinPanel" parent="Root" instance=ExtResource("9")]
-
-[node name="StartPanel" parent="Root" instance=ExtResource("11")]

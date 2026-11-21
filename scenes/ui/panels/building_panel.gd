@@ -568,10 +568,28 @@ func _add_code_entry() -> void:
 	button.theme_type_variation = &"BuyButton"
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	button.text = tr("PANEL_CODE_LOAD")
+	_actions.add_child(button)
+
+	# Odpowiedz serwera pokazujemy tutaj, pod przyciskiem. Sam pasek
+	# z komunikatem bywal zaslaniany przez panel i gracz po wpisaniu kodu
+	# nie widzial zupelnie nic.
+	var status := Label.new()
+	status.theme_type_variation = &"NoteLabel"
+	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	status.visible = false
+	_actions.add_child(status)
+	var say := func(text: String) -> void:
+		status.text = text
+		status.visible = not text.is_empty()
+	Events.notice.connect(func(text: String) -> void:
+		if is_open():
+			say.call(text))
+
 	button.pressed.connect(func() -> void:
+		say.call(tr("START_LOADING"))
 		if Game.restore_from_code(keypad.code()):
 			keypad.clear())
-	_actions.add_child(button)
 	keypad.submitted.connect(func(_code: String) -> void: button.emit_signal("pressed"))
 
 

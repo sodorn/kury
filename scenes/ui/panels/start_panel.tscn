@@ -88,6 +88,13 @@ layout_mode = 2
 text = "START_LOAD"
 autowrap_mode = 3
 
+[node name="Status" type="Label" parent="Sheet/Content/Choice/CodeRow"]
+visible = false
+layout_mode = 2
+theme_type_variation = &"NoteLabel"
+horizontal_alignment = 1
+autowrap_mode = 3
+
 [node name="Created" type="VBoxContainer" parent="Sheet/Content"]
 visible = false
 layout_mode = 2

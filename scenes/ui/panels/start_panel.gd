@@ -15,6 +15,11 @@ const FADE_TIME := 0.3
 @onready var _continue_button: Button = $Sheet/Content/Choice/Continue
 @onready var _new_button: Button = $Sheet/Content/Choice/NewFarm
 @onready var _keypad: CodeKeypad = $Sheet/Content/Choice/CodeRow/Keypad
+## Odpowiedz serwera pokazywana w samym okienku. Pasek z komunikatem lezy
+## w drzewie PRZED ekranem powitalnym, wiec ekran go zaslania — gracz
+## wpisywal kod, serwer odpowiadal "nie ma takiej farmy", a na wierzchu
+## nie zmienialo sie nic.
+@onready var _status: Label = $Sheet/Content/Choice/CodeRow/Status
 @onready var _load_button: Button = $Sheet/Content/Choice/CodeRow/Load
 @onready var _code_label: Label = $Sheet/Content/Created/Code
 @onready var _play_button: Button = $Sheet/Content/Created/Play
@@ -27,6 +32,7 @@ func _ready() -> void:
 	_load_button.pressed.connect(_on_load)
 	_play_button.pressed.connect(_close)
 	_keypad.submitted.connect(func(_code: String) -> void: _on_load())
+	Events.notice.connect(_on_notice)
 	# Wczytanie farmy po kodzie konczy sie odpowiedzia serwera, a nie
 	# nacisnieciem przycisku — dlatego czekamy na nia tutaj.
 	Cloud.pulled.connect(_on_pulled)
@@ -76,8 +82,20 @@ func _on_new_farm() -> void:
 func _on_load() -> void:
 	var code := _keypad.code()
 	_load_button.disabled = true
+	_show_status(tr("START_LOADING"))
 	if not Game.restore_from_code(code):
 		_load_button.disabled = false
+
+
+## Kazdy komunikat gry przepisujemy do okienka, dopoki jest na wierzchu.
+func _on_notice(text: String) -> void:
+	if visible and _choice.visible:
+		_show_status(text)
+
+
+func _show_status(text: String) -> void:
+	_status.text = text
+	_status.visible = not text.is_empty()
 
 
 ## Serwer odpowiedzial na proste o farme spod wpisanego kodu.

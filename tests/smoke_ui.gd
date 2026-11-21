@@ -557,10 +557,27 @@ func _test_start_screen() -> void:
 				key.emit_signal("pressed")
 		await _frames(5)
 		_check(keypad.code() == "756361", "kod nie rosnie ponad szesc cyfr (jest '%s')" % keypad.code())
+		_shot("klawiatura_kodu.png")
+
+		# Odpowiedz serwera musi byc widoczna W OKIENKU. Pasek z komunikatem
+		# lezy w drzewie przed ekranem powitalnym i jest przez niego zaslaniany,
+		# wiec gracz wpisywal kod i nie widzial zupelnie nic.
+		var status: Label = start.get_node("Sheet/Content/Choice/CodeRow/Status")
+		_check(not status.visible, "dopoki nic sie nie dzieje, miejsce na komunikat jest puste")
+		(start.get_node("Sheet/Content/Choice/CodeRow/Load") as Button).emit_signal("pressed")
+		await _frames(5)
+		_check(status.visible and not status.text.is_empty(),
+				"po nacisnieciu wczytywania okienko od razu cos mowi")
+		# Czekamy na odpowiedz albo na uplyniecie czasu zapytania.
+		for i in 60:
+			if not (start.get_node("Sheet/Content/Choice/CodeRow/Load") as Button).disabled:
+				break
+			await _frames(10)
+		_check(status.visible and not status.text.is_empty(),
+				"wynik proby widac w okienku: '%s'" % status.text)
 		keypad.clear()
 		await _frames(5)
 		_check(keypad.code().is_empty(), "czyszczenie kasuje caly kod")
-		_shot("klawiatura_kodu.png")
 
 	(start.get_node("Sheet/Content/Choice/NewFarm") as Button).emit_signal("pressed")
 	await _frames(20)

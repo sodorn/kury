@@ -195,3 +195,4 @@ ALERT_NO_FEED_BODY,"Bez paszy kury przestają znosić jaja, inkubator i odchów 
 PANEL_COOP_PENDING,"W drodze (jaja i pisklęta)"
 CODE_OK,"OK"
 CODE_BACK,"Kasuj"
+START_LOADING,"Szukam farmy na serwerze…"
