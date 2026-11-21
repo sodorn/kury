@@ -14,7 +14,7 @@ const FADE_TIME := 0.3
 @onready var _created: VBoxContainer = $Sheet/Content/Created
 @onready var _continue_button: Button = $Sheet/Content/Choice/Continue
 @onready var _new_button: Button = $Sheet/Content/Choice/NewFarm
-@onready var _code_field: LineEdit = $Sheet/Content/Choice/CodeRow/Code
+@onready var _keypad: CodeKeypad = $Sheet/Content/Choice/CodeRow/Keypad
 @onready var _load_button: Button = $Sheet/Content/Choice/CodeRow/Load
 @onready var _code_label: Label = $Sheet/Content/Created/Code
 @onready var _play_button: Button = $Sheet/Content/Created/Play
@@ -26,7 +26,7 @@ func _ready() -> void:
 	_new_button.pressed.connect(_on_new_farm)
 	_load_button.pressed.connect(_on_load)
 	_play_button.pressed.connect(_close)
-	_code_field.text_submitted.connect(func(_text: String) -> void: _on_load())
+	_keypad.submitted.connect(func(_code: String) -> void: _on_load())
 	# Wczytanie farmy po kodzie konczy sie odpowiedzia serwera, a nie
 	# nacisnieciem przycisku — dlatego czekamy na nia tutaj.
 	Cloud.pulled.connect(_on_pulled)
@@ -49,7 +49,7 @@ func _open() -> void:
 	_new_button.theme_type_variation = &"" if has_farm else &"PrimaryButton"
 	_new_button.text = tr("START_NEW_OTHER") if has_farm else tr("START_NEW")
 	_confirm_wipe = false
-	_code_field.editable = Cloud.is_enabled()
+	_keypad.visible = Cloud.is_enabled()
 	_load_button.disabled = not Cloud.is_enabled()
 	show()
 	modulate.a = 0.0
@@ -74,7 +74,7 @@ func _on_new_farm() -> void:
 
 
 func _on_load() -> void:
-	var code := _code_field.text
+	var code := _keypad.code()
 	_load_button.disabled = true
 	if not Game.restore_from_code(code):
 		_load_button.disabled = false

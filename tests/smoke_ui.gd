@@ -324,6 +324,16 @@ func _test_no_feed_notice() -> void:
 	Game.state.feed = 100000.0
 
 
+## Klawisz klawiatury kodu o danym napisie.
+func _keypad_key(keypad: Node, label: String) -> Button:
+	for child in keypad.get_children():
+		for inner in child.get_children():
+			var key := inner as Button
+			if key != null and key.text == label:
+				return key
+	return null
+
+
 ## Pierwszy przycisk w poddrzewie — okienka maja ich po jednym.
 func _find_button(root: Node) -> Button:
 	for child in root.get_children():
@@ -519,6 +529,38 @@ func _test_start_screen() -> void:
 	var created: Control = start.get_node("Sheet/Content/Created")
 	_check(choice.visible and not created.visible, "najpierw wybor: nowa farma albo kod")
 	_shot("ekran_startowy.png")
+
+	# Klawiatura numeryczna w grze. Pole tekstowe Godota nie wpuszczalo cyfr
+	# na telefonie, wiec kod wpisuje sie wlasnymi przyciskami — i to one
+	# musza dzialac, a nie klawiatura systemowa.
+	var keypad: CodeKeypad = start.get_node("Sheet/Content/Choice/CodeRow/Keypad")
+	_check(keypad != null and keypad.visible, "klawiatura kodu jest na ekranie")
+	if keypad != null:
+		for digit in ["7", "5", "6", "3", "6", "2"]:
+			var key := _keypad_key(keypad, digit)
+			_check(key != null, "klawisz %s istnieje" % digit)
+			if key != null:
+				key.emit_signal("pressed")
+		await _frames(5)
+		_check(keypad.code() == "756362", "cyfry wchodza do kodu (jest '%s')" % keypad.code())
+		var ok := _keypad_key(keypad, tr("CODE_OK"))
+		_check(ok != null and not ok.disabled, "przy komplecie cyfr zatwierdzenie jest aktywne")
+		var back := _keypad_key(keypad, tr("CODE_BACK"))
+		if back != null:
+			back.emit_signal("pressed")
+			await _frames(5)
+		_check(keypad.code() == "75636", "kasowanie zabiera ostatnia cyfre")
+		# Wiecej cyfr niz miesci kod ma byc zignorowane.
+		for digit in ["1", "9"]:
+			var key := _keypad_key(keypad, digit)
+			if key != null:
+				key.emit_signal("pressed")
+		await _frames(5)
+		_check(keypad.code() == "756361", "kod nie rosnie ponad szesc cyfr (jest '%s')" % keypad.code())
+		keypad.clear()
+		await _frames(5)
+		_check(keypad.code().is_empty(), "czyszczenie kasuje caly kod")
+		_shot("klawiatura_kodu.png")
 
 	(start.get_node("Sheet/Content/Choice/NewFarm") as Button).emit_signal("pressed")
 	await _frames(20)

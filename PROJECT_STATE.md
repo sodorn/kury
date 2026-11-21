@@ -4,7 +4,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 9 zakonczony** (wersja 11.0): jeden czas na wszystko,
+- Aktualny etap: **ETAP 9 zakonczony** (wersja 11.1): jeden czas na wszystko,
   lis z twarda gwarancja, wiekszy wybieg i zbieranie jaj garsciami.
 - Wersja 10.x: kury i koguty. Kura
   znosi jaja tylko wtedy, gdy na farmie jest kogut jej rasy. Do tego duzo
@@ -17,7 +17,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -179,6 +179,14 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## Weryfikacja wersji 11.1 (wykonana w srodowisku Claude, Linux)
+
+- `tests/tests.tscn`: **892/892 OK**.
+- `tests/smoke_ui.tscn`: **OK**. Doszlo wpisywanie kodu klawiatura w grze:
+  cyfry wchodza, kasowanie zabiera ostatnia, kod nie rosnie ponad szesc cyfr,
+  a zatwierdzenie jest aktywne dopiero przy komplecie.
+- Klawiatura sprawdzona takze w prawdziwym Chrome, klikaniem w przyciski.
 
 ## Weryfikacja wersji 11.0 (wykonana w srodowisku Claude, Linux)
 
@@ -528,6 +536,21 @@ python3 tools/gen_ground.py
   poprawek w `assets/sprites/animals/rooster_*.svg` nie wprowadzac — zgina
   przy nastepnym przebiegu. Plotno 170x130, stopy na y=118, tak samo jak
   u kur, zeby `Sprite2D` z `offset = (4, -53)` postawil je na ziemi.
+
+### Klawiatura kodu rysowana w grze (wersja 11.1)
+
+- Na telefonie **nie dalo sie wpisac kodu farmy**: klawiatura systemowa
+  wpuszczala litery, ale nie cyfry. Pole `LineEdit` z
+  `virtual_keyboard_type = KEYBOARD_TYPE_NUMBER` w eksporcie na przegladarke
+  nie dostawalo cyfr z numerycznej klawiatury Androida.
+- Zamiast walczyc z warstwa wejscia przegladarki, kod wpisuje sie wlasnymi
+  przyciskami: `scenes/ui/panels/code_keypad.gd`. Zadna klawiatura systemowa
+  nie bierze w tym udzialu, wiec dziala tak samo wszedzie.
+- Uzywaja jej oba miejsca: ekran powitalny i panel Kurnika.
+- Klawisz kasowania ma napis "Kasuj", a nie znak ⌫ — czcionka gry nie ma tego
+  glifu i w przegladarce wychodzil pusty kwadrat. Sprawdzone zrzutem.
+- Sprawdzone w prawdziwym Chrome klikaniem w przyciski, nie tylko w tescie
+  dymnym: cyfry wchodza do pola.
 
 ### Jeden czas na wszystko (wersja 11.0)
 

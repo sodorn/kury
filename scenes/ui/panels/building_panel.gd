@@ -559,23 +559,20 @@ func _add_code_entry() -> void:
 	hint.text = tr("PANEL_CODE_HINT")
 	_actions.add_child(hint)
 
-	var field := LineEdit.new()
-	field.placeholder_text = tr("PANEL_CODE_PLACEHOLDER")
-	field.alignment = HORIZONTAL_ALIGNMENT_CENTER
-	field.max_length = 6
-	# Na telefonie wyskakuje klawiatura numeryczna, a nie pelna.
-	field.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER
-	_actions.add_child(field)
+	# Wlasna klawiatura numeryczna zamiast pola tekstowego: klawiatura
+	# systemowa na telefonie nie wpuszczala cyfr do gry.
+	var keypad := CodeKeypad.new()
+	_actions.add_child(keypad)
 
 	var button := Button.new()
+	button.theme_type_variation = &"BuyButton"
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	button.text = tr("PANEL_CODE_LOAD")
 	button.pressed.connect(func() -> void:
-		if Game.restore_from_code(field.text):
-			field.text = "")
+		if Game.restore_from_code(keypad.code()):
+			keypad.clear())
 	_actions.add_child(button)
-	# Enter na klawiaturze telefonu robi to samo co przycisk.
-	field.text_submitted.connect(func(_text: String) -> void: button.emit_signal("pressed"))
+	keypad.submitted.connect(func(_code: String) -> void: button.emit_signal("pressed"))
 
 
 ## Nazwa obrony przed lisem na danym poziomie: nic, plot albo pies.

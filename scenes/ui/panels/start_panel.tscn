@@ -1,5 +1,6 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
+[ext_resource type="Script" path="res://scenes/ui/panels/code_keypad.gd" id="Keypad"]
 [ext_resource type="Script" path="res://scenes/ui/panels/start_panel.gd" id="1"]
 
 [node name="StartPanel" type="Control"]
@@ -78,12 +79,9 @@ autowrap_mode = 3
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Code" type="LineEdit" parent="Sheet/Content/Choice/CodeRow"]
+[node name="Keypad" type="VBoxContainer" parent="Sheet/Content/Choice/CodeRow"]
 layout_mode = 2
-placeholder_text = "123456"
-alignment = 1
-max_length = 6
-virtual_keyboard_type = 2
+script = ExtResource("Keypad")
 
 [node name="Load" type="Button" parent="Sheet/Content/Choice/CodeRow"]
 layout_mode = 2
