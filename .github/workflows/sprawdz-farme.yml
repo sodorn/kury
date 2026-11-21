@@ -1,0 +1,80 @@
+# Narzedzie diagnostyczne. Pyta baze, czy farma o podanym kodzie w niej
+# jest, i kiedy byla ostatnio zapisana. NIE wypisuje zawartosci zapisu —
+# tylko kod, date i rozmiar — zeby dziennik przebiegu nie zdradzal stanu
+# czyjegos gospodarstwa.
+#
+# Uruchamia sie recznie: Actions -> "Sprawdz farme w bazie" -> Run workflow
+# -> wpisz szesciocyfrowy kod.
+
+name: Sprawdz farme w bazie
+
+on:
+  workflow_dispatch:
+    inputs:
+      kod:
+        description: "Kod farmy (6 cyfr)"
+        required: true
+        type: string
+
+jobs:
+  sprawdz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Odczytaj adres i klucz z data/backend.json
+        id: cfg
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          cfg = json.load(open("data/backend.json", encoding="utf-8"))
+          print("url=%s" % cfg["url"].rstrip("/"))
+          print("key=%s" % cfg["api_key"])
+          print("table=%s" % cfg.get("table", "saves"))
+          PY
+
+      - name: Zapytaj o te jedna farme
+        env:
+          KOD: ${{ inputs.kod }}
+        run: |
+          set -o pipefail
+          base="${{ steps.cfg.outputs.url }}/rest/v1/${{ steps.cfg.outputs.table }}"
+          code=$(curl -sS --max-time 30 -o /tmp/odp.json -w '%{http_code}' \
+            -H "apikey: ${{ steps.cfg.outputs.key }}" \
+            -H "Authorization: Bearer ${{ steps.cfg.outputs.key }}" \
+            --get --data-urlencode "player_id=eq.$KOD" \
+            --data-urlencode "select=player_id,updated_at,payload" \
+            "$base")
+          echo "HTTP $code"
+          python3 - <<'PY'
+          import json, os, datetime
+          kod = os.environ["KOD"]
+          try:
+              rows = json.load(open("/tmp/odp.json", encoding="utf-8"))
+          except Exception as e:
+              print("Odpowiedz nie jest JSON-em:", e); raise SystemExit(1)
+          if not isinstance(rows, list):
+              print("Serwer odpowiedzial bledem:", json.dumps(rows)[:300]); raise SystemExit(1)
+          if not rows:
+              print("FARMY %s NIE MA W BAZIE." % kod)
+              raise SystemExit(0)
+          r = rows[0]
+          ts = r.get("updated_at")
+          kiedy = ""
+          if isinstance(ts, (int, float)):
+              kiedy = datetime.datetime.fromtimestamp(ts, datetime.UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
+          rozmiar = len(json.dumps(r.get("payload")))
+          print("FARMA %s JEST W BAZIE." % kod)
+          print("  ostatni zapis: %s (%s)" % (ts, kiedy))
+          print("  rozmiar zapisu: %d znakow" % rozmiar)
+          PY
+
+      - name: Ile farm jest w bazie w ogole
+        run: |
+          curl -sS --max-time 30 -I \
+            -H "apikey: ${{ steps.cfg.outputs.key }}" \
+            -H "Authorization: Bearer ${{ steps.cfg.outputs.key }}" \
+            -H "Prefer: count=exact" \
+            -H "Range: 0-0" \
+            "${{ steps.cfg.outputs.url }}/rest/v1/${{ steps.cfg.outputs.table }}?select=player_id" \
+            | grep -i "content-range" || echo "(brak naglowka content-range)"
