@@ -189,6 +189,33 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
 
+## Wersjonowanie — ustalone 2026-11-21
+
+Numer: `MAJOR.MINOR`. MINOR rosnie przy kazdym wydaniu, MAJOR tylko przy
+zmianie formatu zapisu (dzis `version: 5`) — to jedyna granica, ktora moze
+kosztowac gracza farme.
+
+Kazde wydanie dostaje **galaz** `vNUMER-krotki-opis`. Nie tagi, choc tagi
+byly by wlasciwszym narzedziem: proxy w srodowisku Claude przepuszcza push
+galezi, ale na tagu zwraca 403, przez API tez. Schemat, ktorego Claude nie
+moze wykonac, jest nic nie wart.
+
+Numer zyje dzis w trzech miejscach i trzeba je bumpowac razem:
+- `core/util/game_data.gd` -> `const VERSION` (to czyta gra)
+- `project.godot` -> `config/version` (zostal na 11.3, do wyrownania)
+- `PROJECT_STATE.md` -> naglowek
+
+Do zrobienia: `tools/release.sh NUMER "opis"`, ktory robi cala sekwencje
+jedna komenda — bump wszystkich trzech miejsc, oba zestawy testow, build,
+**sprawdzenie, czy w paczce jest prawdziwy adres Supabase, a nie atrapa**
+(21.11 zlapane recznie, o wlos od wydania gry bez polaczenia z baza),
+commit, galaz, push, gh-pages.
+
+Cofanie sie do starszej wersji opisane dla wlasciciela w `WERSJE.md`.
+Najwazniejsze: galaz `gh-pages` trzyma gotowa gre z kazdego wydania
+osobno, wiec cofniecie strony nie wymaga budowania — wystarczy
+`git reset --hard <skrot>` i `git push --force origin gh-pages`.
+
 ## ROZWIAZANIE zagadki "serwer nie odpowiada" (wersja 11.6)
 
 Gra pokazala wlascicielowi dokladny powod bledu: **kod 8**. Sprawdzone
