@@ -261,9 +261,14 @@ func restore_from_code(raw_code: String) -> bool:
 	if code.is_empty():
 		Events.notice.emit(tr("HINT_CODE_BAD"))
 		return false
+	# Kod rowny obecnemu NIE jest powodem do odmowy. Po nieudanej probie
+	# wczytania gra zostaje juz z tym kodem (ustawiamy go ponizej, zanim
+	# serwer odpowie), wiec druga proba trafiala na "nie ma czego
+	# wczytywac" i nie robila nic. Gracz nie mial jak sprobowac ponownie
+	# po chwilowym braku sieci. Teraz pobieramy zawsze, tylko uprzedzamy,
+	# ze to ten sam kod.
 	if code == Cloud.player_id:
 		Events.notice.emit(tr("HINT_CODE_SAME"))
-		return false
 	_force_pull = true
 	_restore_code = code
 	Cloud.set_player_id(code)

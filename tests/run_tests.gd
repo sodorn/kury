@@ -36,6 +36,7 @@ func _ready() -> void:
 	_test_coop_limit()
 	_test_server_diagnosis()
 	_test_incubate_without_flock()
+	_test_retry_same_code()
 	_test_event_rules()
 	_test_starving_farm()
 	_test_lay_fairness()
@@ -984,6 +985,19 @@ func _test_incubate_without_flock() -> void:
 
 	# Bez jaj nadal nie ma z czego wylegac — to nie jest ten sam przypadek.
 	_check(not Game.can_incubate("cemani"), "brak jaj rasy wciaz blokuje wyleg")
+
+
+## Po nieudanej probie wczytania gra zostaje z wpisanym kodem. Druga proba
+## tym samym kodem musi wiec ruszyc, a nie odbic sie od "to juz twoj kod" —
+## inaczej jedna chwila bez sieci zamyka graczowi droge do wlasnej farmy.
+func _test_retry_same_code() -> void:
+	Game.new_game()
+	var kod := "327733"
+	Cloud.set_player_id(kod)
+	_check(Cloud.player_id == kod, "urzadzenie ma juz ten kod")
+	_check(Game.restore_from_code(kod), "ponowna proba tym samym kodem rusza")
+	# Kod inny niz szesc cyfr nadal odpada od razu.
+	_check(not Game.restore_from_code("12ab"), "zly kod odpada przed zapytaniem")
 
 func _test_event_rules() -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})

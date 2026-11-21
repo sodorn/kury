@@ -292,6 +292,10 @@ tabele i pokazuje nowe liczby przed wprowadzeniem.
     - "Kup psa podworzowego" zamiast "Postaw pies podworzowy"
     - zwierzeta mniejsze o 20%
     - zadanie GitHub Actions budzace baze Supabase raz dziennie
+    - narzedzie "Sprawdz farme w bazie" (Actions) - pyta serwer,
+      czy farma o danym kodzie w nim jest
+    - druga proba wczytania tego samego kodu po nieudanej pierwszej
+      (gra odpowiadala "nie ma czego wczytywac" i nie robila nic)
 
   Czeka na Twoja decyzje:
     - punkt 1 (wartosc jajek wzgledem ceny rasy) - WARIANT A, B czy C?

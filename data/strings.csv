@@ -139,7 +139,7 @@ HINT_CODE_NOT_FOUND,"Serwer odpowiedział, ale farmy o takim kodzie u niego nie 
 HINT_SERVER_DOWN,"Serwer nie odpowiada. Sprawdź połączenie — a jeśli dopiero zakładasz bazę, czy tabela saves na pewno powstała."
 HINT_SAVE_BROKEN,"Znalazłem farmę pod tym kodem, ale nie umiem odczytać jej zapisu."
 HINT_CODE_BAD,"Kod farmy to sześć cyfr, na przykład 482913."
-HINT_CODE_SAME,"To kod tej farmy — nie ma czego wczytywać."
+HINT_CODE_SAME,"To kod farmy z tego urządzenia — pobieram ją z serwera."
 HINT_CLOUD_OFF,"Zapis na serwerze jest wyłączony."
 HINT_SICK,"Zachorowało %d kur."
 ALERT_OK,"Rozumiem"

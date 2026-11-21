@@ -183,13 +183,33 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
 
+## Co wiadomo o serwerze na 2026-11-21 (sprawdzone przez GitHub Actions)
+
+Srodowisko Claude nie ma dostepu do `supabase.co` (DNS odrzucony przez
+proxy), ale GitHub Actions ma. Przez recznie odpalone zadanie w repo
+sprawdzone naprawde, nie z domyslu:
+
+- `GET /rest/v1/saves?select=player_id&limit=1` z kluczem publikowalnym
+  zwraca **HTTP 200** i wiersz. Baza zyje, tabela istnieje, RLS pozwala
+  roli anon czytac. Hipoteza "RLS blokuje odczyty" jest ostatecznie
+  obalona.
+- W tabeli jest **14 farm**.
+- Farma **327733** jest w bazie, ostatni zapis 2026-11-21 14:11:35 UTC.
+- Farma **756362** jest w bazie, ostatni zapis 2026-11-21 14:09:03 UTC.
+
+Wniosek: zapis dziala, serwer odpowiada, obie farmy wlasciciela sa cale.
+Odczyt psuje sie dopiero w jego przegladarce. Wersja 11.4 pokazuje przy
+nieudanym odczycie dokladny powod z `HTTPRequest.Result`, wiec nastepna
+proba wlasciciela rozstrzygnie, co to jest.
+
 ## Weryfikacja wersji 11.4 (wykonana w srodowisku Claude, Linux)
 
 Uruchomione naprawde, nie "powinno dzialac":
 
-- `tests/tests.tscn` pod `--headless`: **908 testow OK, 0 bledow**.
-  Doszedl `_test_incubate_without_flock` (wyleg jaj po sprzedaniu calego
-  stada rasy).
+- `tests/tests.tscn` pod `--headless`: **911 testow OK, 0 bledow**.
+  Doszly `_test_incubate_without_flock` (wyleg jaj po sprzedaniu calego
+  stada rasy) i `_test_retry_same_code` (druga proba wczytania tego
+  samego kodu po nieudanej pierwszej).
 - `tests/smoke_ui.tscn` pod `xvfb-run` z `--rendering-driver opengl3`:
   **OK**. Doszly cztery sprawdzenia panelu inkubatora: procent na pasku,
   naglowek grupy, wiersz poziomu i to, czy pasek faktycznie rosnie.
