@@ -4,7 +4,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 9 zakonczony** (wersja 11.2): jeden czas na wszystko,
+- Aktualny etap: **ETAP 9 zakonczony** (wersja 11.3): jeden czas na wszystko,
   lis z twarda gwarancja, wiekszy wybieg i zbieranie jaj garsciami.
 - Wersja 10.x: kury i koguty. Kura
   znosi jaja tylko wtedy, gdy na farmie jest kogut jej rasy. Do tego duzo
@@ -17,7 +17,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -179,6 +179,17 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## Weryfikacja wersji 11.3 (wykonana w srodowisku Claude, Linux)
+
+- `tests/tests.tscn`: **902/902 OK**, w tym tlumaczenie kazdego kodu HTTP
+  na podpowiedz.
+- `tests/smoke_ui.tscn`: **OK**.
+- Przy okazji znaleziony blad w samych testach: `_never_event` nie kasowal
+  `hard_minutes`, wiec "wylaczony" lis i tak przychodzil po twardej
+  gwarancji i psul pomiar produkcji jaj.
+- **NIE sprawdzone:** prawdziwa baza wlasciciela. Proxy w srodowisku Claude
+  dalej odrzuca `supabase.co` (sprawdzone ponownie: brak odpowiedzi).
 
 ## Weryfikacja wersji 11.2 (wykonana w srodowisku Claude, Linux)
 
@@ -545,6 +556,29 @@ python3 tools/gen_ground.py
   poprawek w `assets/sprites/animals/rooster_*.svg` nie wprowadzac — zgina
   przy nastepnym przebiegu. Plotno 170x130, stopy na y=118, tak samo jak
   u kur, zeby `Sprite2D` z `offset = (4, -53)` postawil je na ziemi.
+
+### Diagnoza polaczenia z serwerem (wersja 11.3)
+
+- `Cloud` zapamietuje ostatnia rozmowe z serwerem: `last_action`,
+  `last_http_code`, `last_result`, `last_rows`. `describe_last()` tlumaczy to
+  na jedno zdanie, ktore mowi, CO naprawic — sam numer kodu nic nie daje.
+- W Kurniku jest przycisk **"Sprawdz polaczenie z serwerem"**: jedno
+  zapytanie i gotowa diagnoza pod spodem.
+- Mapowanie kodow (pilnuje go `_test_server_diagnosis`):
+  - 401/403 — RLS bez polityki dla roli `anon` albo zly klucz;
+  - 404 — nie ma tabeli `saves`;
+  - 409 — `player_id` bez warunku UNIQUE;
+  - 200 i zero wierszy — albo farmy tam nie ma, albo RLS nie pozwala czytac;
+  - brak odpowiedzi — siec albo zly adres projektu.
+- **Najbardziej prawdopodobna przyczyna klopotow wlasciciela:** tabela `saves`
+  ma wlaczone RLS bez polityk. Wtedy odczyt zwraca pusta liste (HTTP 200,
+  zero wierszy), a zapis leci 401/403 — czyli dokladnie te dwa komunikaty
+  na przemian, ktore zglosil. Klient wysyla wszystko poprawnie: oba naglowki
+  z kluczem, `on_conflict=player_id` i `Prefer: resolution=merge-duplicates`.
+- Potrzebny SQL (tabela + polityki) jest w `docs/supabase.sql`.
+- **Uwaga na przyszlosc:** `updated_at` musi byc `bigint`, bo klient wysyla
+  czas uniksowy jako liczbe. Kolumna `timestamptz` zalozona klikaniem w panelu
+  Supabase odrzucilaby zapis z kodem 400.
 
 ### Komunikaty byly zaslaniane przez panele (wersja 11.2)
 

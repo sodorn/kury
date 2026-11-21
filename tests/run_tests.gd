@@ -34,6 +34,7 @@ func _ready() -> void:
 	_test_offline_eggs()
 	_test_roosters()
 	_test_coop_limit()
+	_test_server_diagnosis()
 	_test_event_rules()
 	_test_starving_farm()
 	_test_lay_fairness()
@@ -81,6 +82,10 @@ func _never_event(kind: String) -> void:
 	var cfg: Dictionary = GameData.balance().get(kind, {})
 	cfg["grace_minutes"] = 0.0
 	cfg["mean_minutes"] = 1000000.0
+	# Twarda gwarancja tez musi zniknac, inaczej zdarzenie i tak wypadnie po
+	# `hard_minutes` — przez to test produkcji jaj dostawal lisa mimo
+	# "wylaczenia" go i pokazywal roznice, ktorej nie bylo.
+	cfg["hard_minutes"] = 0.0
 
 
 func _fresh_state(hens: Array[String] = ["leghorn"], feed := 100.0) -> FarmState:
@@ -1075,6 +1080,38 @@ func _test_event_rules() -> void:
 	_check(flock.sick_count() == 1, "jedno losowanie to jedna chora kura")
 	GameData.reload()
 	Game.new_game()
+
+
+## Diagnoza polaczenia z serwerem. Wlasciciel dostawal naprzemiennie "serwer
+## nie odpowiada" i "nie ma takiej farmy" i nie bylo jak zgadnac, co naprawic.
+## Kazdy kod HTTP ma teraz wlasne zdanie, ktore mowi, co z nim zrobic.
+func _test_server_diagnosis() -> void:
+	var cases := [
+		[HTTPRequest.RESULT_SUCCESS, 401, -1, "RLS"],
+		[HTTPRequest.RESULT_SUCCESS, 403, -1, "RLS"],
+		[HTTPRequest.RESULT_SUCCESS, 404, -1, "saves"],
+		[HTTPRequest.RESULT_SUCCESS, 409, -1, "UNIQUE"],
+		[HTTPRequest.RESULT_SUCCESS, 500, -1, "500"],
+		[HTTPRequest.RESULT_TIMEOUT, 0, -1, "nie odpowiedział"],
+		[HTTPRequest.RESULT_SUCCESS, 200, 0, "żadnego wiersza"],
+		[HTTPRequest.RESULT_SUCCESS, 200, 1, "1"],
+	]
+	for case: Array in cases:
+		Cloud.last_action = "odczyt"
+		Cloud.last_result = int(case[0])
+		Cloud.last_http_code = int(case[1])
+		Cloud.last_rows = int(case[2])
+		var said := Cloud.describe_last()
+		_check(said.contains(String(case[3])),
+				"kod %d daje podpowiedz o '%s' (jest: %s)" % [int(case[1]), case[3], said])
+
+	Cloud.last_action = "zapis"
+	Cloud.last_result = HTTPRequest.RESULT_SUCCESS
+	Cloud.last_http_code = 201
+	_check(Cloud.describe_last().contains("przeszedł"), "udany zapis melduje sie wprost")
+
+	Cloud.last_action = ""
+	_check(not Cloud.describe_last().is_empty(), "przed pierwsza rozmowa tez cos mowimy")
 
 
 ## Pelny kurnik: inkubator ma odmowic, a nie przyjac jaja i zatrzymac pisklę

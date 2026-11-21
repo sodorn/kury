@@ -32,6 +32,13 @@ var _pull_http: HTTPRequest
 var _busy_push := false
 ## Kod farmy, o ktory pytamy w trwajacym zapytaniu.
 var _pulling_for := ""
+## Slad po ostatniej rozmowie z serwerem, do diagnostyki w panelu Kurnika.
+## Bez tego "brak polaczenia" nie mowilo nic o tym, CO poszlo nie tak:
+## inaczej leczy sie brak tabeli, inaczej brak uprawnien, a inaczej siec.
+var last_action := ""
+var last_http_code := 0
+var last_result := -1
+var last_rows := -1
 
 
 func _ready() -> void:
@@ -146,12 +153,20 @@ func pull() -> void:
 
 func _on_push_done(result: int, code: int, _headers: PackedStringArray, _body: PackedByteArray) -> void:
 	_busy_push = false
+	last_action = "zapis"
+	last_http_code = code
+	last_result = result
+	last_rows = -1
 	var ok := result == HTTPRequest.RESULT_SUCCESS and code >= 200 and code < 300
 	_set_online(ok)
 	pushed.emit(ok)
 
 
 func _on_pull_done(result: int, code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+	last_action = "odczyt"
+	last_http_code = code
+	last_result = result
+	last_rows = -1
 	if result != HTTPRequest.RESULT_SUCCESS or code < 200 or code >= 300:
 		_set_online(false)
 		pulled.emit({}, false, _pulling_for)
@@ -162,6 +177,7 @@ func _on_pull_done(result: int, code: int, _headers: PackedStringArray, body: Pa
 		pulled.emit({}, false, _pulling_for)
 		return
 	var rows: Array = json.data
+	last_rows = rows.size()
 	if rows.is_empty():
 		# Serwer odpowiedzial, ale tej farmy jeszcze na nim nie ma.
 		pulled.emit({}, true, _pulling_for)
@@ -234,3 +250,26 @@ func _store_player_id(code: String) -> void:
 	if file != null:
 		file.store_string(code)
 		file.close()
+
+
+## Jednozdaniowa diagnoza ostatniej rozmowy z serwerem. Kody HTTP tlumaczymy
+## na to, co trzeba z nimi zrobic — sam numer nikomu nic nie mowi.
+func describe_last() -> String:
+	if last_action.is_empty():
+		return tr("DIAG_NONE")
+	if last_result != HTTPRequest.RESULT_SUCCESS:
+		return tr("DIAG_NO_ANSWER") % last_action
+	match last_http_code:
+		401, 403:
+			return tr("DIAG_FORBIDDEN") % [last_action, last_http_code]
+		404:
+			return tr("DIAG_NO_TABLE") % last_http_code
+		409:
+			return tr("DIAG_CONFLICT")
+	if last_http_code < 200 or last_http_code >= 300:
+		return tr("DIAG_HTTP") % [last_action, last_http_code]
+	if last_action == "zapis":
+		return tr("DIAG_SAVE_OK")
+	if last_rows == 0:
+		return tr("DIAG_EMPTY")
+	return tr("DIAG_READ_OK") % maxi(last_rows, 0)

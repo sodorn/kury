@@ -570,6 +570,14 @@ func _add_code_entry() -> void:
 	button.text = tr("PANEL_CODE_LOAD")
 	_actions.add_child(button)
 
+	# Przycisk diagnostyczny: jedno pytanie do serwera i jednozdaniowa
+	# odpowiedz, co dokladnie nie dziala. Bez tego "brak polaczenia" zmuszalo
+	# do zgadywania miedzy brakiem tabeli, brakiem uprawnien i brakiem sieci.
+	var check := Button.new()
+	check.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	check.text = tr("PANEL_SERVER_CHECK")
+	_actions.add_child(check)
+
 	# Odpowiedz serwera pokazujemy tutaj, pod przyciskiem. Sam pasek
 	# z komunikatem bywal zaslaniany przez panel i gracz po wpisaniu kodu
 	# nie widzial zupelnie nic.
@@ -590,6 +598,13 @@ func _add_code_entry() -> void:
 		say.call(tr("START_LOADING"))
 		if Game.restore_from_code(keypad.code()):
 			keypad.clear())
+
+	check.pressed.connect(func() -> void:
+		say.call(tr("START_LOADING"))
+		Cloud.pull())
+	Cloud.pulled.connect(func(_payload: Dictionary, _ok: bool, _who: String) -> void:
+		if is_open():
+			say.call(Cloud.describe_last()))
 	keypad.submitted.connect(func(_code: String) -> void: button.emit_signal("pressed"))
 
 
