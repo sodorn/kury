@@ -50,8 +50,11 @@ func _open() -> void:
 	# Gracz, ktory ma juz farme, widzi ten ekran raz. Nie wolno mu wtedy
 	# podsunac "Nowej farmy" jako pierwszego przycisku — strata gospodarstwa
 	# jednym dotknieciem bylaby nie do cofniecia.
+	# "Graj dalej" dostaje kazdy, kto ma juz jakakolwiek farme — ekran wyskakuje
+	# teraz przy kazdym uruchomieniu, wiec to on musi byc pierwszym przyciskiem.
 	var has_farm := not Game.is_new_player
 	_continue_button.visible = has_farm
+	_continue_button.theme_type_variation = &"PrimaryButton" if has_farm else &""
 	_new_button.theme_type_variation = &"" if has_farm else &"PrimaryButton"
 	_new_button.text = tr("START_NEW_OTHER") if has_farm else tr("START_NEW")
 	_confirm_wipe = false

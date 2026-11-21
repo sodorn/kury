@@ -181,10 +181,12 @@ func load_or_start() -> void:
 		Cloud.pull()
 
 
-## Czy pokazac ekran powitalny. Nowy gracz widzi go zawsze, a ten, kto
-## zalozyl farme przed jego dodaniem — raz, z przyciskiem "Graj dalej".
+## Ekran powitalny pokazuje sie przy KAZDYM uruchomieniu gry. Wlasciciel
+## poprosil o to wprost: przy testowaniu chce miec kod farmy pod reka bez
+## szukania go w Kurniku. Dla gracza z farma pierwszym przyciskiem jest
+## "Graj dalej", wiec jedno dotkniecie wraca do gry.
 func should_show_intro() -> bool:
-	return is_new_player or (state != null and not state.intro_seen)
+	return true
 
 
 ## Zamyka sprawe ekranu powitalnego, zeby wiecej nie wyskakiwal.
@@ -587,9 +589,12 @@ func eggs_per_chick() -> int:
 ## Wylegu nie wolno zaczynac, gdy pisklę nie bedzie mialo gdzie wyjsc.
 ## Liczymy razem doroslego ptaka, jajo w inkubatorze i pisklę na odchowie —
 ## inaczej dalo sie nabic kolejke, ktora stoi i czeka bez slowa wyjasnienia.
+## Posiadanie dorosłej sztuki tej rasy NIE jest wymagane: jaja, ktore juz
+## leza w magazynie, nalezą do gracza i wolno je wylec nawet po sprzedaniu
+## calego stada tej rasy. Wczesniej taka sprzedaz wyszarzala przycisk bez
+## zadnego wyjasnienia (zglosili to koledzy Tomka).
 func can_incubate(breed_id: String) -> bool:
-	return state.owns_breed(breed_id) \
-			and state.incubating.size() < incubator_slots() \
+	return state.incubating.size() < incubator_slots() \
 			and state.coop_free() > 0 \
 			and int(state.eggs.get(breed_id, 0)) >= eggs_per_chick()
 
@@ -598,7 +603,6 @@ func can_incubate(breed_id: String) -> bool:
 ## napisac na wyszarzonym przycisku, czego naprawde brakuje.
 func incubation_blocked_by_coop(breed_id: String) -> bool:
 	return state.coop_free() <= 0 \
-			and state.owns_breed(breed_id) \
 			and state.incubating.size() < incubator_slots() \
 			and int(state.eggs.get(breed_id, 0)) >= eggs_per_chick()
 

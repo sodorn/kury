@@ -157,7 +157,7 @@ func _test_shop() -> void:
 	var shop: Node2D = _main.get_node("Farm/Objects/Shop")
 	await _tap(_canvas_point(shop, Vector2(0, -150)))
 	await _frames(30)
-	var actions: VBoxContainer = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Scrollable/Actions")
+	var actions: VBoxContainer = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Gutter/Scrollable/Actions")
 	var rows := actions.get_children()
 	_check(rows.size() == 5 + GameData.breeds().size(),
 			"sklep ma przyciski, notke i karte kazdej rasy (jest %d)" % rows.size())
@@ -226,7 +226,7 @@ func _test_incubator_panel() -> void:
 	await _frames(30)
 	_shot("panel_inkubator.png")
 
-	var actions: VBoxContainer = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Scrollable/Actions")
+	var actions: VBoxContainer = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Gutter/Scrollable/Actions")
 	var put: Button = null
 	for child in actions.get_children():
 		var button := child as Button
@@ -241,6 +241,31 @@ func _test_incubator_panel() -> void:
 	await _frames(20)
 	_check(Game.state.incubating.size() == 1, "jaja trafily do inkubatora")
 	_check(Game.state.egg_count() < eggs_before, "jaja znikly z magazynu")
+
+	# Koledzy zglosili, ze pasek postepu byl goly: nie bylo ani procentow,
+	# ani czasu. Szukamy ich w panelu po wlozeniu jaj.
+	await _frames(20)
+	var rows: VBoxContainer = _main.get_node(
+			"Hud/Root/BuildingPanel/Sheet/Content/Scroll/Gutter/Scrollable/Rows")
+	var texts := _labels_in(rows)
+	var joined := "\n".join(texts)
+	_check(joined.contains("%"), "pasek inkubatora podaje procent postepu")
+	_check(joined.contains(tr("PANEL_INCUBATOR_GROUP")),
+			"paski maja naglowek grupy '%s'" % tr("PANEL_INCUBATOR_GROUP"))
+	_check(joined.contains(tr("PANEL_LEVEL")), "panel pokazuje poziom inkubatora")
+	# Swieza partia stoi na zerze, i tak ma byc. Puszczamy czwiartke czasu
+	# wykluwania, zeby zobaczyc, czy pasek faktycznie rusza.
+	var quarter := float(GameData.breed("leghorn").get("incubate_seconds", 0.0)) * 0.25
+	Simulation.advance(Game.state, quarter)
+	await _frames(30)
+	var has_bar := false
+	for bar in _controls_of_type(rows, "ProgressBar"):
+		if (bar as ProgressBar).visible and (bar as ProgressBar).value > 0.0:
+			has_bar = true
+	_check(has_bar, "pasek postepu wypelnia sie, a nie stoi na zerze")
+	var moved := "\n".join(_labels_in(rows))
+	_check(not moved.contains("0%"), "po cwiartce czasu nie pisze juz 0 procent")
+	_shot("panel_inkubator_postep.png")
 
 	# Przyspieszamy czas, zeby zobaczyc pisklę i dorosla kure na wybiegu.
 	var breed_id: String = Game.state.incubating[0].breed_id
@@ -260,6 +285,26 @@ func _test_incubator_panel() -> void:
 	_check(grown.size() == Game.state.hen_count(), "wybieg nadazyl za zmiana")
 
 
+## Wszystkie napisy z etykiet w galezi — do sprawdzania, co panel naprawde
+## pokazuje, bez zgadywania sciezek do kazdego wiersza osobno.
+func _labels_in(root: Node) -> Array[String]:
+	var found: Array[String] = []
+	for node in _controls_of_type(root, "Label"):
+		var label := node as Label
+		if label.visible and not label.text.is_empty():
+			found.append(label.text)
+	return found
+
+
+func _controls_of_type(root: Node, type_name: String) -> Array[Node]:
+	var found: Array[Node] = []
+	if root.is_class(type_name):
+		found.append(root)
+	for child in root.get_children():
+		found.append_array(_controls_of_type(child, type_name))
+	return found
+
+
 ## Sprzedaz kury w sklepie: stado maleje, pieniedzy przybywa, kura znika
 ## z wybiegu. Handel kurami siedzi teraz w sklepie, razem z jajami i pasza.
 func _test_sell_hen() -> void:
@@ -272,7 +317,7 @@ func _test_sell_hen() -> void:
 	await _frames(30)
 	_shot("panel_sklep.png")
 
-	var actions: VBoxContainer = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Scrollable/Actions")
+	var actions: VBoxContainer = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Gutter/Scrollable/Actions")
 	# Karta rasy to pionowy box: zdjecie z opisem, potem kup / sprzedaj / mieso.
 	var sell_button: Button = null
 	for child in actions.get_children():

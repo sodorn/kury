@@ -43,6 +43,13 @@ static func build() -> Theme:
 	theme.set_font_size("font_size", "NoteLabel", 32)
 	theme.set_color("font_color", "NoteLabel", INK_SOFT)
 
+	# Naglowek grupy w panelu ("W inkubatorze"). Czcionka tytulowa w malym
+	# stopniu — ma dzielic liste na czesci, a nie krzyczec.
+	theme.set_type_variation("GroupLabel", "Label")
+	theme.set_font("font", "GroupLabel", FONT_TITLE)
+	theme.set_font_size("font_size", "GroupLabel", 34)
+	theme.set_color("font_color", "GroupLabel", INK_SOFT)
+
 	theme.set_stylebox("panel", "PanelContainer", _pill())
 	theme.set_type_variation("SheetPanel", "PanelContainer")
 	theme.set_stylebox("panel", "SheetPanel", _sheet())

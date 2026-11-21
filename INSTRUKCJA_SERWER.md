@@ -137,3 +137,46 @@ jest tylko najprostszą opcją bez stawiania czegokolwiek. Pod ten sam
 adres można podstawić własny serwer — jeśli masz gdzieś VPS-a albo
 chcesz to trzymać u siebie, powiedz, przepiszę adres i napiszę
 kilkadziesiąt linii backendu. Protokół jest w `services/cloud.gd`.
+
+---
+
+## Darmowy Supabase zasypia — i co z tym zrobiłem (wersja 11.4)
+
+Darmowy projekt Supabase **usypia po tygodniu bez ruchu w bazie**. Uśpiona
+baza nie przyjmuje żadnych połączeń, więc gra pokazuje „serwer nie
+odpowiada" i nie da się wczytać farmy z kodu. Po Twoim pomyśle, żeby
+pingować bazę automatycznie, wstawiłem do repozytorium zadanie, które to
+robi za nas:
+
+**Plik:** `.github/workflows/supabase-keepalive.yml`
+
+Co robi: raz dziennie o 04:17 UTC wysyła jedno zapytanie do tabeli
+`saves`. Czyta adres i klucz prosto z `data/backend.json`, więc jeśli
+kiedyś przeniesiesz bazę gdzie indziej, zadanie samo pójdzie za nią —
+nie ma nic do poprawienia w dwóch miejscach.
+
+Jeśli baza nie odpowie poprawnie, zadanie kończy się błędem, a GitHub
+przyśle Ci maila. To znaczy, że dostaniesz ostrzeżenie **zanim** projekt
+zaśnie na dobre, a nie dopiero wtedy, gdy ktoś nie będzie mógł wczytać
+farmy.
+
+### Jak sprawdzić, że działa (klikalnie, bez zgadywania)
+
+1. Wejdź na `https://github.com/sodorn/kury/actions`
+2. Po lewej kliknij **„Utrzymaj bazę Supabase przy życiu"**
+3. Po prawej kliknij szary przycisk **„Run workflow"**, a potem zielony
+   **„Run workflow"** w rozwiniętym okienku
+4. Odśwież stronę. Pojawi się nowy wpis na liście. Kliknij w niego,
+   potem w **„ping"** — zobaczysz linijkę `HTTP 200` i zdanie
+   „Baza odpowiada".
+
+Jeśli zamiast tego zobaczysz `HTTP 000` albo czerwony krzyżyk —
+to znaczy, że baza już śpi albo klucz jest zły. Przyślij mi zrzut
+ekranu z tej strony, tam jest napisany dokładny powód.
+
+### Czego to NIE naprawia
+
+To zadanie trzyma bazę obudzoną. Nie tworzy kopii zapasowej zapisów —
+jeśli kiedyś skasujesz tabelę albo Supabase coś zgubi, farmy przepadają.
+Osobna kopia zapasowa jest na liście do zrobienia
+(`POMYSLY_BUGI_SUGESTIE.TXT`, punkt 4.3).

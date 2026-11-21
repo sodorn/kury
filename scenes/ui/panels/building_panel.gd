@@ -27,9 +27,9 @@ var _refreshers: Array[Callable] = []
 @onready var _description: Label = $Sheet/Content/Body/Text/Description
 @onready var _status: Label = $Sheet/Content/Body/Text/Status
 @onready var _scroll: ScrollContainer = $Sheet/Content/Scroll
-@onready var _scrollable: VBoxContainer = $Sheet/Content/Scroll/Scrollable
-@onready var _rows: VBoxContainer = $Sheet/Content/Scroll/Scrollable/Rows
-@onready var _actions: VBoxContainer = $Sheet/Content/Scroll/Scrollable/Actions
+@onready var _scrollable: VBoxContainer = $Sheet/Content/Scroll/Gutter/Scrollable
+@onready var _rows: VBoxContainer = $Sheet/Content/Scroll/Gutter/Scrollable/Rows
+@onready var _actions: VBoxContainer = $Sheet/Content/Scroll/Gutter/Scrollable/Actions
 @onready var _bottom_spacer: Control = $Sheet/Content/BottomSpacer
 
 
@@ -158,6 +158,7 @@ func _build_content(building_id: String) -> void:
 
 
 func _build_coop() -> void:
+	_add_level_row(func() -> int: return Game.state.coop_level, _building_levels("coop"))
 	_add_row("PANEL_HENS", func() -> String: return str(Game.state.laying_hen_count()))
 	_add_row("PANEL_ROOSTERS", func() -> String: return str(Game.state.rooster_count()))
 	# Jaja w inkubatorze i pisklęta rezerwuja miejsca w kurniku, wiec musza byc
@@ -166,7 +167,8 @@ func _build_coop() -> void:
 	_add_row("PANEL_COOP_SPACE",
 			func() -> String: return "%d / %d" % [Game.state.coop_occupied(), Game.state.coop_capacity()])
 	_add_row("PANEL_FOX_GUARD",
-			func() -> String: return tr(_guard_name(Game.state.guard_level)))
+			func() -> String: return "%s (%d / %d)" % [tr(_guard_name(Game.state.guard_level)),
+					Game.state.guard_level + 1, _building_levels("guard")])
 	_add_row("PANEL_FARM_CODE", func() -> String: return Cloud.player_id)
 	_add_dynamic_row(
 			func() -> String: return tr("PANEL_SERVER") if Cloud.is_enabled() else "",
@@ -218,7 +220,7 @@ func _build_coop() -> void:
 			func() -> String:
 				var upgrade := Game.state.next_building_upgrade("guard")
 				return tr("PANEL_UPGRADE_GUARD") % [
-					tr(_guard_name(Game.state.guard_level + 1)),
+					tr(_guard_buy_name(Game.state.guard_level + 1)),
 					NumberFormat.money(float(upgrade.get("price", 0))),
 					int(round(float(upgrade.get("block_chance", 0.0)) * 100.0))],
 			func() -> void: _on_upgrade("guard"),
@@ -241,6 +243,7 @@ func _build_coop() -> void:
 
 
 func _build_storage() -> void:
+	_add_level_row(func() -> int: return Game.state.storage_level, _building_levels("storage"))
 	_add_row("PANEL_EGGS_STORED", func() -> String: return NumberFormat.grouped(Game.state.egg_count()))
 	_add_row("PANEL_EGGS_WORTH", func() -> String: return NumberFormat.money(Game.state.eggs_value()))
 	_add_row("PANEL_FEED_LEFT", func() -> String: return _feed_text())
@@ -279,6 +282,9 @@ func _build_storage() -> void:
 
 ## Inkubator: postep wykluwania i wzrostu, wkladanie jaj, rozbudowa.
 func _build_incubator() -> void:
+	var incubator: Dictionary = GameData.balance().get("incubator", {})
+	var levels: int = (incubator.get("upgrades", []) as Array).size() + 1
+	_add_level_row(func() -> int: return Game.state.incubator_level, levels)
 	_add_row("PANEL_INCUBATOR_SLOTS",
 			func() -> String: return "%d / %d" % [Game.state.incubating.size(), Game.incubator_slots()])
 	_add_row("PANEL_EGGS_STORED", func() -> String: return NumberFormat.grouped(Game.state.egg_count()))
@@ -290,8 +296,19 @@ func _build_incubator() -> void:
 			return tr("PANEL_COOP_LEFT_PENDING") % [free, Game.state.coop_reserved()]
 		return str(free))
 
+	# Pusty inkubator mowil dotad tylko tyle, ze nic sie nie dzieje. Teraz
+	# pisze, co z tym zrobic.
+	var empty_note := Label.new()
+	empty_note.theme_type_variation = &"NoteLabel"
+	empty_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	empty_note.text = tr("PANEL_INCUBATOR_EMPTY")
+	_rows.add_child(empty_note)
+	_refreshers.append(func() -> void:
+		empty_note.visible = Game.state.incubating.is_empty() and Game.state.chicks.is_empty())
+
 	# Paski postepu: tyle, ile moze miec inkubator po pelnej rozbudowie —
 	# nadmiarowe same sie chowaja, wiec panel nie wymaga przebudowy po zakupie.
+	_add_group("PANEL_INCUBATOR_GROUP", func() -> bool: return not Game.state.incubating.is_empty())
 	for slot in _max_incubator_slots():
 		var index := slot
 		_add_progress_dynamic(
@@ -303,7 +320,15 @@ func _build_incubator() -> void:
 				func() -> float:
 					if index >= Game.state.incubating.size():
 						return 0.0
-					return (Game.state.incubating[index] as EggBatch).progress())
+					return (Game.state.incubating[index] as EggBatch).progress(),
+				func() -> String:
+					if index >= Game.state.incubating.size():
+						return ""
+					var batch: EggBatch = Game.state.incubating[index]
+					return "%d%% · %s" % [int(batch.progress() * 100.0),
+							_countdown(batch.total_seconds() - batch.elapsed)])
+
+	_add_group("PANEL_CHICKS_GROUP", func() -> bool: return not Game.state.chicks.is_empty())
 	for slot in 6:
 		var index := slot
 		_add_progress_dynamic(
@@ -315,7 +340,13 @@ func _build_incubator() -> void:
 				func() -> float:
 					if index >= Game.state.chicks.size():
 						return 0.0
-					return (Game.state.chicks[index] as Chick).progress())
+					return (Game.state.chicks[index] as Chick).progress(),
+				func() -> String:
+					if index >= Game.state.chicks.size():
+						return ""
+					var chick: Chick = Game.state.chicks[index]
+					return "%d%% · %s" % [int(chick.progress() * 100.0),
+							_countdown(chick.total_seconds() - chick.grown)])
 	_add_dynamic_row(
 			func() -> String: return tr("PANEL_CHICKS_MORE") if Game.state.chicks.size() > 6 else "",
 			func() -> String: return str(Game.state.chicks.size() - 6))
@@ -335,7 +366,11 @@ func _build_incubator() -> void:
 					return tr("PANEL_INCUBATE") % [
 						cost, breed_name, int(Game.state.eggs.get(breed_id, 0))],
 				func() -> void: _on_incubate(breed_id),
-				func() -> bool: return Game.state.owns_breed(breed_id))
+				# Wiersz widac, gdy gracz ma kury tej rasy ALBO same jaja. Po
+				# sprzedaniu calego stada jaja zostaja w magazynie i nadal
+				# wolno je wylec — przycisk nie moze wtedy znikac.
+				func() -> bool: return _owned(breed_id) > 0 \
+						or int(Game.state.eggs.get(breed_id, 0)) > 0)
 
 	_add_action(true,
 			func() -> bool: return Game.state.money >= float(Game.state.next_incubator_upgrade().get("price", 0)),
@@ -345,6 +380,14 @@ func _build_incubator() -> void:
 					int(upgrade.get("slots", 0)), NumberFormat.money(float(upgrade.get("price", 0)))],
 			_on_upgrade_incubator,
 			func() -> bool: return not Game.state.next_incubator_upgrade().is_empty())
+
+	# Padlo pytanie, czy rozbudowa przyspiesza wykluwanie. Nie — i teraz
+	# panel mowi to wprost, zanim ktos wyda 20 000 zl na zly domysl.
+	var speed_note := Label.new()
+	speed_note.theme_type_variation = &"NoteLabel"
+	speed_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	speed_note.text = tr("PANEL_INCUBATOR_SPEED")
+	_actions.add_child(speed_note)
 
 	var hint := Label.new()
 	hint.theme_type_variation = &"NoteLabel"
@@ -617,6 +660,28 @@ func _guard_name(level: int) -> String:
 			return "PANEL_FOX_GUARD_DOG"
 		3:
 			return "PANEL_FOX_GUARD_PACK"
+		4:
+			return "PANEL_FOX_GUARD_SENSORS"
+		5:
+			return "PANEL_FOX_GUARD_FORT"
+	return "PANEL_FOX_GUARD_NONE"
+
+
+## Ta sama ochrona w bierniku, do zdania "Kup psa podwórzowego za 1200 zł".
+## Mianownik dawal "Kup pies podwórzowy" — kolega Tomka slusznie sie z tego
+## smiali.
+func _guard_buy_name(level: int) -> String:
+	match level:
+		1:
+			return "GUARD_BUY_FENCE"
+		2:
+			return "GUARD_BUY_DOG"
+		3:
+			return "GUARD_BUY_PACK"
+		4:
+			return "GUARD_BUY_SENSORS"
+		5:
+			return "GUARD_BUY_FORT"
 	return "PANEL_FOX_GUARD_NONE"
 
 
@@ -626,17 +691,30 @@ func _owned(breed_id: String) -> int:
 
 
 ## Pasek postepu, ktory sam sie chowa, gdy nie ma czego pokazywac.
-func _add_progress_dynamic(label_provider: Callable, value_provider: Callable) -> void:
+##
+## Nazwa stoi po lewej, a `detail_provider` (np. "47% · 2 min") po prawej —
+## dokladnie tak, jak w zwyklych wierszach panelu, zeby kolumna liczb byla
+## wszedzie w tym samym miejscu. Koledzy zglosili, ze gole paski wygladaly
+## na puste i nie mowily, ile jeszcze zostalo.
+func _add_progress_dynamic(label_provider: Callable, value_provider: Callable,
+		detail_provider: Callable = Callable()) -> void:
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 6)
+	var head := HBoxContainer.new()
 	var label := Label.new()
 	label.theme_type_variation = &"NoteLabel"
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.clip_text = true
+	var detail := Label.new()
+	detail.theme_type_variation = &"CounterLabel"
+	head.add_child(label)
+	head.add_child(detail)
 	var bar := ProgressBar.new()
 	bar.max_value = 1.0
 	bar.step = 0.001
 	bar.show_percentage = false
 	bar.custom_minimum_size.y = 30
-	box.add_child(label)
+	box.add_child(head)
 	box.add_child(bar)
 	_rows.add_child(box)
 	_refreshers.append(func() -> void:
@@ -645,7 +723,56 @@ func _add_progress_dynamic(label_provider: Callable, value_provider: Callable) -
 		if not box.visible:
 			return
 		label.text = text
+		detail.text = detail_provider.call() if detail_provider.is_valid() else ""
 		bar.value = value_provider.call())
+
+
+## Naglowek grupy w panelu; chowa sie, gdy `visible_provider` zwroci false.
+func _add_group(label_key: String, visible_provider: Callable) -> void:
+	var label := Label.new()
+	label.text = tr(label_key)
+	label.theme_type_variation = &"GroupLabel"
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_rows.add_child(label)
+	_refreshers.append(func() -> void: label.visible = visible_provider.call())
+
+
+## Wiersz "Poziom: 2 / 6". Poziom poczatkowy liczymy jako pierwszy, bo
+## "0 / 5" gracz czyta jako brak budynku. `levels` to liczba poziomow razem
+## z poczatkowym.
+func _add_level_row(level_provider: Callable, levels: int) -> void:
+	var row := HBoxContainer.new()
+	var label := Label.new()
+	label.text = tr("PANEL_LEVEL")
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var value := Label.new()
+	value.theme_type_variation = &"CounterLabel"
+	row.add_child(label)
+	row.add_child(value)
+	_rows.add_child(row)
+	_refreshers.append(func() -> void:
+		var shown: int = int(level_provider.call()) + 1
+		var key := "PANEL_LEVEL_MAX" if shown >= levels else "PANEL_LEVEL_VALUE"
+		value.text = tr(key) % [shown, levels])
+
+
+## Ile poziomow ma budynek razem z poczatkowym.
+func _building_levels(building_id: String) -> int:
+	var upgrades: Array = GameData.balance().get("buildings", {}) \
+			.get(building_id, {}).get("upgrades", [])
+	return upgrades.size() + 1
+
+
+## Sekundy GRY zamienione na czas, ktory gracz naprawde odczeka, i zapisane
+## po polsku. Czas w grze plynie wolniej niz zegarek, wiec bez tego dzielenia
+## "jeszcze 2 min" klamaloby o trzykrotnosc.
+func _countdown(game_seconds: float) -> String:
+	var real := game_seconds / maxf(0.001, GameData.time_scale())
+	if real < 90.0:
+		return tr("TIME_SECONDS") % maxi(1, int(ceil(real)))
+	if real < 3600.0:
+		return tr("TIME_MINUTES") % int(ceil(real / 60.0))
+	return tr("TIME_HOURS") % [int(real / 3600.0), int(fmod(real, 3600.0) / 60.0)]
 
 
 ## Karta rasy w sklepie: zdjecie (albo rysunek), nazwa, rzadkosc i przycisk.

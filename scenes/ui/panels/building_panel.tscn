@@ -84,16 +84,21 @@ autowrap_mode = 3
 layout_mode = 2
 horizontal_scroll_mode = 0
 
-[node name="Scrollable" type="VBoxContainer" parent="Sheet/Content/Scroll"]
+[node name="Gutter" type="MarginContainer" parent="Sheet/Content/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_right = 30
+
+[node name="Scrollable" type="VBoxContainer" parent="Sheet/Content/Scroll/Gutter"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 20
 
-[node name="Rows" type="VBoxContainer" parent="Sheet/Content/Scroll/Scrollable"]
+[node name="Rows" type="VBoxContainer" parent="Sheet/Content/Scroll/Gutter/Scrollable"]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="Actions" type="VBoxContainer" parent="Sheet/Content/Scroll/Scrollable"]
+[node name="Actions" type="VBoxContainer" parent="Sheet/Content/Scroll/Gutter/Scrollable"]
 layout_mode = 2
 theme_override_constants/separation = 18
 

@@ -1,0 +1,52 @@
+# Darmowy projekt Supabase usypia po tygodniu bez ruchu w bazie, a uspiona
+# baza nie przyjmuje zadnych polaczen — gra pokazuje wtedy "serwer nie
+# odpowiada" i nie da sie wczytac farmy z kodu.
+#
+# To zadanie raz dziennie wysyla jedno zapytanie do tabeli `saves`, co liczy
+# sie jako ruch i trzyma projekt obudzony. Trwa kilka sekund i nic nie kosztuje.
+#
+# Klucz jest publikowalny (sb_publishable_), ten sam, ktory i tak siedzi
+# w `data/backend.json` i w gotowej grze — nie ma czego ukrywac.
+
+name: Utrzymaj baze Supabase przy zyciu
+
+on:
+  schedule:
+    # Codziennie o 04:17 UTC. Nierowna minuta, zeby nie trafiac w szczyt,
+    # w ktorym GitHub kolejkuje zadania wszystkich naraz.
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Odczytaj adres i klucz z data/backend.json
+        id: cfg
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          cfg = json.load(open("data/backend.json", encoding="utf-8"))
+          print("url=%s" % cfg["url"].rstrip("/"))
+          print("key=%s" % cfg["api_key"])
+          print("table=%s" % cfg.get("table", "saves"))
+          PY
+
+      - name: Zapytaj baze
+        run: |
+          set -o pipefail
+          url="${{ steps.cfg.outputs.url }}/rest/v1/${{ steps.cfg.outputs.table }}?select=player_id&limit=1"
+          code=$(curl -sS --max-time 30 -o /tmp/odp.txt -w '%{http_code}' \
+            -H "apikey: ${{ steps.cfg.outputs.key }}" \
+            -H "Authorization: Bearer ${{ steps.cfg.outputs.key }}" \
+            "$url")
+          echo "HTTP $code"
+          head -c 300 /tmp/odp.txt; echo
+          # 2xx znaczy, ze baza zyje. Cokolwiek innego konczy sie bledem,
+          # zeby GitHub przyslal powiadomienie, zanim projekt zasnie na dobre.
+          case "$code" in
+            2*) echo "Baza odpowiada — projekt zostaje obudzony." ;;
+            *)  echo "::error::Baza nie odpowiedziala poprawnie (HTTP $code)."; exit 1 ;;
+          esac

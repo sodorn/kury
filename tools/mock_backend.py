@@ -13,12 +13,17 @@ Endpointy:
     GET  /_dump                                 podglad calej bazy (test)
 """
 import json
+import time
 import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8899
 STORE_PATH = sys.argv[2] if len(sys.argv) > 2 else "/tmp/mock_saves.json"
+# Sztuczne opoznienie odpowiedzi, w sekundach. Bez niego atrapa odpowiada
+# natychmiast i nie da sie odtworzyc bledow zwiazanych z tym, ze jedno
+# zapytanie jeszcze trwa, gdy zaczyna sie drugie.
+DELAY = float(sys.argv[3]) if len(sys.argv) > 3 else 0.0
 
 
 def read_store() -> dict:
@@ -52,6 +57,10 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _wait(self):
+        if DELAY > 0.0:
+            time.sleep(DELAY)
+
     def do_OPTIONS(self):
         self.send_response(204)
         self._cors()
@@ -59,6 +68,7 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        self._wait()
         url = urlparse(self.path)
         store = read_store()
         if url.path == "/_dump":
@@ -73,6 +83,7 @@ class Handler(BaseHTTPRequestHandler):
         self._send(200, [row] if row else [])
 
     def do_POST(self):
+        self._wait()
         url = urlparse(self.path)
         if not url.path.startswith("/rest/v1/"):
             self._send(404, {"message": "not found"})

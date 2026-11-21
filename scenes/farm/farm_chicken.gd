@@ -8,10 +8,13 @@ const CHICK_SPRITE := "res://assets/sprites/animals/chick.svg"
 const SPEED := 44.0
 ## Pisklęta sa drobniejsze i bardziej rozbiegane.
 const CHICK_SPEED := 58.0
-## Rozmiary podniesione o 40% wzgledem wersji 5.0 — w kure duzo latwiej trafic
-## palcem na telefonie.
-const CHICK_SCALE := Vector2(1.01, 1.15)
-const HEN_SCALE := Vector2(1.15, 1.33)
+## Rozmiary: w wersji 5.0 podniesione o 40%, zeby dalo sie trafic palcem
+## w pojedyncza kure. Palec przestal byc problemem, odkad zbieranie dziala
+## w promieniu `run.pickup_radius`, a przy 60+ sztukach wybieg wygladal jak
+## tlok — wiec w 11.4 schodzimy o 20%. Jedno miejsce do krecenia, jesli
+## stado znow ma byc wieksze albo mniejsze.
+const CHICK_SCALE := Vector2(0.81, 0.92)
+const HEN_SCALE := Vector2(0.92, 1.06)
 ## Kogut jest o oczko wiekszy od swoich kur.
 const ROOSTER_SCALE := 1.12
 ## Chora kura ledwo sie wlecze, jest zzielniala i parauje od niej mgla.

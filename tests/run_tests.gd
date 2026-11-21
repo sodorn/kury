@@ -35,6 +35,7 @@ func _ready() -> void:
 	_test_roosters()
 	_test_coop_limit()
 	_test_server_diagnosis()
+	_test_incubate_without_flock()
 	_test_event_rules()
 	_test_starving_farm()
 	_test_lay_fairness()
@@ -965,6 +966,25 @@ func _test_starving_farm() -> void:
 ## Zasady wspolne dla lisa i choroby, podane przez wlasciciela wprost:
 ## przez pierwsze pol godziny gry nic sie nie dzieje, przy stadzie mniejszym
 ## niz piec sztuk tez nie, a potem losowanie co minute z zadana srednia.
+
+## Blad zglaszony przez Bartka: po sprzedaniu wszystkich kur danej rasy
+## przyciski tej rasy wyszarzaly sie, choc jaja zostaly w magazynie. Jaja
+## sa wlasnoscia gracza i wolno je wylec takze wtedy, gdy stado tej rasy
+## zostalo wyprzedane do zera.
+func _test_incubate_without_flock() -> void:
+	Game.new_game()
+	Game.state.money = 100000.0
+	Game.state.chickens.clear()
+	Game.state.eggs["leghorn"] = Game.eggs_per_chick()
+	_check(not Game.state.owns_breed("leghorn"), "zadnej kury tej rasy na farmie")
+	_check(Game.can_incubate("leghorn"), "same jaja wystarczaja do wylegu")
+	_check(Game.incubate("leghorn"), "wyleg rusza bez stada tej rasy")
+	_check(Game.state.incubating.size() == 1, "partia wlozona do inkubatora")
+	_check(int(Game.state.eggs.get("leghorn", 0)) == 0, "jaja zuzyte na pisklę")
+
+	# Bez jaj nadal nie ma z czego wylegac — to nie jest ten sam przypadek.
+	_check(not Game.can_incubate("cemani"), "brak jaj rasy wciaz blokuje wyleg")
+
 func _test_event_rules() -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})
 	var disease: Dictionary = GameData.balance().get("disease", {})
@@ -1092,7 +1112,7 @@ func _test_server_diagnosis() -> void:
 		[HTTPRequest.RESULT_SUCCESS, 404, -1, "saves"],
 		[HTTPRequest.RESULT_SUCCESS, 409, -1, "UNIQUE"],
 		[HTTPRequest.RESULT_SUCCESS, 500, -1, "500"],
-		[HTTPRequest.RESULT_TIMEOUT, 0, -1, "nie odpowiedział"],
+		[HTTPRequest.RESULT_TIMEOUT, 0, -1, "czas oczekiwania"],
 		[HTTPRequest.RESULT_SUCCESS, 200, 0, "żadnego wiersza"],
 		[HTTPRequest.RESULT_SUCCESS, 200, 1, "1"],
 	]

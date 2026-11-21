@@ -5,5 +5,5 @@
 	"url": "https://xrhehgxmaspopvvflcrn.supabase.co",
 	"api_key": "sb_publishable_0aXf0Dby-fL_aOqkylCMcA_kUz7VG93",
 	"table": "saves",
-	"timeout_seconds": 8
+	"timeout_seconds": 20
 }

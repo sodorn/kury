@@ -1,0 +1,305 @@
+================================================================================
+ UWAGI OD KOLEGOW (Bartek Tatko, Marcin Dziegielewski)
+ Zebrane 2026-11-21. Komentarze pod kazdym punktem sa moje (Claude).
+================================================================================
+
+LEGENDA
+  [ZROBIONE 11.4]  naprawione w tej wersji
+  [DO ZROBIENIA]   zgadzam sie, czeka w kolejce
+  [DECYZJA TOMKA]  wplywa na balans albo na zakres, nie ruszam bez zgody
+  [ODPOWIEDZ]      pytanie, nie zadanie
+
+
+================================================================================
+ 1. NAJWAZNIEJSZE: DROZSZE KURY SA GORSZE OD TANSZYCH   [DECYZJA TOMKA]
+================================================================================
+
+Uwaga Bartka o stosunku wartosci jajka do czasu znoszenia jest trafna,
+a sprawa jest gorsza, niz napisal. Policzylem wszystkie 17 ras.
+
+  rasa            cena   jajko  co ile s   zl/min realnej   zwrot po (min)
+  --------------------------------------------------------------------------
+  leghorn           40    0.40         4             2.00             20
+  rhode             55    0.44         5             1.91             29
+  szabo             80    0.48         5             1.85             43
+  nagoszyja        110    0.52         6             1.79             61
+  marans           150    0.55         6             1.72             87
+  araukana         210    0.59         7             1.69            125
+  jedwabista       290    0.63         8             1.66            175
+  serama           400    0.66         8             1.61            249
+  brahma           550    0.70         9             1.59            346
+  czubatka         750    0.74         9             1.57            476
+  pavlovskaya     1050    0.78        10             1.56            673
+  feniks          1450    0.81        11             1.53            949
+  deathlayer      2000    0.85        11             1.52           1318
+  sultanka        2800    0.89        12             1.51           1856
+  onagadori       4000    0.92        12             1.48           2696
+  dongtao         5600    0.96        13             1.48           3792
+  cemani          8000    1.00        14             1.47           5440
+
+Co z tego wynika:
+
+  - Kazda kura zarabia mniej wiecej TYLE SAMO na minute (1.47-2.00 zl),
+    a ceny roznia sie 200 razy.
+  - Miejsce w kurniku jest ograniczone, wiec liczy sie zarobek NA MIEJSCE.
+    Leghorn zarabia najwiecej na miejsce i kosztuje najmniej.
+  - Leghorn zwraca sie po 20 minutach. Cemani po 5440 minutach, czyli po
+    90 godzinach realnego czasu. To nie jest "drozsza, ale lepsza kura",
+    to jest kara za zakup.
+  - Do tego doszlo "drozsze kury czesciej choruja" (Twoja prosba z 11.0),
+    wiec drogie rasy sa gorsze w KAZDYM wymiarze naraz.
+
+Wniosek: optymalna gra to kupic same leghorny i nigdy nie patrzec na reszte
+sklepu. 17 ras istnieje po to, zeby ich nie kupowac. To podkopuje cala
+progresje.
+
+CO PROPONUJE (do Twojej decyzji, bo to przestawia cala ekonomie):
+
+  Wariant A - lagodny. Wartosc jajka rosnie z cena rasy tak, zeby czas
+  zwrotu rosl powoli: zwrot = 20 min * (cena/40)^0,25. Cemani wychodzi
+  wtedy ~75 min zwrotu, jajko ~75 zl. Drogie rasy staja sie wyraznie
+  lepsze na miejsce w kurniku, ale nie psuja gry od razu.
+
+  Wariant B - ostry. Staly czas zwrotu ~30 min dla wszystkich. Jajko
+  cemani ~186 zl. Rasy roznia sie wtedy tylko progiem wejscia i ryzykiem
+  choroby, a nie oplacalnoscia.
+
+  Wariant C - zostawiamy. Drogie rasy sa wtedy ozdoba, nie inwestycja,
+  i trzeba to powiedziec graczowi wprost w sklepie, zeby nie czul sie
+  oszukany.
+
+Obie przebudowy (A i B) wymagaja przeliczenia celu wygranej (dzis
+1 500 000 zl) i cen rozbudowy. Powiedz, ktory wariant, to przeliczam
+tabele i pokazuje nowe liczby przed wprowadzeniem.
+
+
+================================================================================
+ 2. BUGI NAPRAWIONE W WERSJI 11.4
+================================================================================
+
+2.1  Sprzedaz calego stada rasy wyszarzala przyciski tej rasy
+     [ZROBIONE 11.4]
+
+     Blad potwierdzony w kodzie: wyleg wymagal, zeby na farmie stala
+     dorosla sztuka tej rasy. Po sprzedaniu wszystkich leghornow jaja
+     leghornow zostawaly w magazynie, ale nie dalo sie ich wylec i
+     przycisk znikal bez slowa wyjasnienia.
+
+     Teraz: jaja z magazynu mozna wylec zawsze, niezaleznie od tego, czy
+     masz jeszcze kury tej rasy. Wiersz w inkubatorze pokazuje sie, gdy
+     masz kury TEJ rasy ALBO jej jaja. Dopisalem test, ktory tego pilnuje
+     (_test_incubate_without_flock).
+
+2.2  Pasek postepu w inkubatorze byl pusty [ZROBIONE 11.4]
+
+     Byla sama nazwa rasy i goly pasek. Teraz po prawej stronie, w tej
+     samej kolumnie co reszta liczb w panelu, stoi procent i czas, ktory
+     realnie zostal:
+
+         Wykluwa sie: Leghorn                           25% - 3 min
+
+     Czas jest przeliczony na Twoj zegarek, nie na czas gry (gra chodzi
+     3 razy wolniej), wiec "3 min" znaczy trzy minuty przy telefonie.
+
+2.3  Uklad panelu inkubatora [ZROBIONE 11.4]
+
+     - Paski sa pogrupowane naglowkami "W inkubatorze" i "Pisklęta na
+       odchowie". Wczesniej jaja i pisklęta lezaly w jednej kupie.
+     - Pusty inkubator pisze, co zrobic, zamiast pokazywac nic.
+     - Kolumna liczb po prawej chowala sie pod paskiem przewijania.
+       Dodalem 30 px marginesu, teraz nic sie nie urywa.
+
+     Jesli "nieposkladane" znaczylo cos jeszcze - przyslij zrzut ekranu
+     z telefonu, bo panelu u siebie nie widze tak jak Ty.
+
+2.4  Brak numeru poziomu przy rozbudowach [ZROBIONE 11.4]
+
+     Kurnik, magazyn i inkubator maja teraz na samej gorze panelu wiersz
+     "Poziom: 2 / 6", a przy ostatnim poziomie "6 / 6 - maksymalny".
+     Ochrona przed lisem pokazuje nazwe i numer: "pies podworzowy (3 / 6)".
+
+     Czego NIE zrobilem: dymkow po najechaniu. Na telefonie nie ma
+     najezdzania kursorem, a dotkniecie i tak otwiera panel, w ktorym
+     poziom teraz stoi. Nowe grafiki dla poziomow - osobny temat, pkt 5.3.
+
+2.5  "POSTAW PIES PODWORZOWY" [ZROBIONE 11.4]
+
+     Slusznie smieszne. Bylo "Wez pies podworzowy" - mianownik zamiast
+     biernika. Teraz: "Kup psa podworzowego za 1200 zl".
+
+     Przy okazji wyszedl drugi blad, ktorego nikt nie zglosil: ochrona
+     ma 5 poziomow, a nazwy byly tylko dla trzech. Przy poziomie 4 i 5
+     kurnik pisal "Ochrona przed lisem: brak", mimo ze miales oplacone
+     90% albo 100%. Dopisalem brakujace nazwy: "psy i czujniki ruchu"
+     (90%) i "nocny kojec i psy" (100%).
+
+2.6  Postacie sa za duze [ZROBIONE 11.4]
+
+     Zmniejszone o 20% (kury i pisklęta). Historia tego rozmiaru: w 5.0
+     powiekszylem je o 40%, zeby dalo sie trafic palcem w pojedyncza
+     kure. Potem doszlo zbieranie jaj w promieniu, wiec celnosc przestala
+     byc potrzebna, a przy 60+ sztukach wybieg wygladal jak tlok.
+
+     Jesli nadal za duze albo juz za male - to jedna linia w
+     scenes/farm/farm_chicken.gd, stale HEN_SCALE i CHICK_SCALE. Powiedz
+     o ile, poprawie w minute.
+
+
+================================================================================
+ 3. PYTANIA
+================================================================================
+
+3.1  Czy rozbudowa inkubatora przyspiesza wykluwanie?   [ODPOWIEDZ]
+
+     Nie. Rozbudowa dodaje tylko MIEJSCA (3 -> 6 -> 10 -> 16 -> 24 -> 34
+     partii naraz). Czas wykluwania zalezy wylacznie od rasy i nie zmienia
+     sie nigdy.
+
+     Dopisalem to zdanie pod przyciskiem rozbudowy w grze, zeby nikt nie
+     wydal 20 000 zl na zly domysl.
+
+     Czy POWINNA przyspieszac - to osobna sprawa. Moim zdaniem nie: masz
+     juz dwie osie rozwoju (miejsca w inkubatorze, miejsca w kurniku),
+     trzecia zrobilaby z tego mnozenie bez decyzji.
+
+3.2  Jak pozbyc sie lisa? Powinien odejsc po chwili.    [ODPOWIEDZ]
+
+     Juz tak dziala, tylko tego nie widac. Mechanika na dzis:
+       - lis biegnie przez wybieg przez 10 sekund (fox.visit_seconds),
+       - 3 dotkniecia lisa (fox.scare_taps) przeganiaja go z niczym,
+       - jesli go nie przegonisz, zabiera 30-90% stada,
+       - ochrona (plot/pies) losuje przy KAZDYM podejsciu, czy lis w ogole
+         wejdzie: 60/70/80/90/100% szansy, ze zawroci przy zagrodzie,
+       - gdy Cie nie ma przy grze, lis nigdy nie zabiera - czeka z wizyta
+         na Twoj powrot.
+
+     Czego brakuje: nikt nie wie, ze trzeba w niego klikac trzy razy.
+     Gra tego nie mowi. To jest do zrobienia - pkt 4.1.
+
+
+================================================================================
+ 4. DO ZROBIENIA - ZGADZAM SIE, KOLEJKA
+================================================================================
+
+4.1  Powiedziec graczowi, ze w lisa sie klika     [DO ZROBIENIA]
+     Przy pierwszej wizycie lisa duzy napis "KLIKAJ W LISA!" i licznik
+     trafien 1/3, 2/3. Bez tego cala mechanika przeganiania nie istnieje
+     dla nikogo, kto nie czytal naszych rozmow. Najtansza rzecz na tej
+     liscie o najwiekszym efekcie.
+
+4.2  Podzial projektu na etapy 0-5 + plik z pomyslami   [DO ZROBIENIA]
+     Plik z pomyslami juz jest (POMYSLY.md) i wlasnie dostaje drugi (ten).
+     Podzial na etapy opisany jest w PROJECT_STATE.md, ale rosnie tam
+     obok dziesieciu innych rzeczy. Wydziele to do osobnego ETAPY.md,
+     z jasnym "co jest zrobione / co jest teraz / co potem".
+
+4.3  Osobna kopia zapasowa                        [DO ZROBIENIA]
+     Dzis kazda wersja to osobna galaz w git (v11.0, v11.1, ...), wiec
+     kod jest zabezpieczony. Czego nie ma: kopii SAVEOW graczy. Jesli
+     Supabase padnie, farmy przepadaja. Do zrobienia: codzienny zrzut
+     tabeli saves do pliku w repo przez GitHub Actions - to samo miejsce,
+     gdzie wlasnie wstawilem zadanie budzace baze.
+
+4.4  Dwie mapy: podworko + wnetrze kurnika        [DECYZJA TOMKA]
+     Pomysl dobry: w kurniku widac grzedy, kury na nich siedza, a kupione
+     rozbudowy sa WIDOCZNE zamiast byc liczba w panelu. To najlepszy
+     sposob, zeby rozbudowa cos znaczyla.
+     Koszt: duzy. Druga scena, druga grafika tla, przelaczanie, sortowanie
+     kur miedzy mapami, zapis tego, gdzie kto jest. Szacuje 2-3 pelne
+     etapy roboty. Nie zaczynam bez Twojego "tak".
+
+
+================================================================================
+ 5. POMYSLY - CO O NICH MYSLE
+================================================================================
+
+5.1  Chore kury do McDonalda za 30% ceny          POPIERAM
+     Dzis chora kura ma dwie drogi: lek za 10 zl albo ubicie za darmo.
+     Skup za 30% daje trzecia, gorsza, ale sensowna opcje - i jest smieszny.
+     Robota: mala (jeden przycisk w sklepie, jedna cena w balance.json).
+     Jedyne zastrzezenie: 30% ceny kury moze przebic koszt leku (10 zl),
+     i wtedy oplaca sie NIE leczyc, tylko sprzedawac. Przy cemani: lek
+     10 zl, skup 2400 zl. Trzeba albo podniesc cene leku razem z cena
+     rasy, albo obnizyc skup do np. 10%.
+
+5.2  Pies odganiajacy lisa                         JUZ JEST, ale slabo widac
+     Pies to dzis poziom 2 ochrony (1200 zl, 70% szansy na zawrocenie
+     lisa). Problem w tym, ze dziala niewidocznie - nie ma psa na wybiegu,
+     nie ma animacji, jest tylko liczba w panelu.
+     Propozycja: narysowac psa przy budzie na wybiegu po zakupie, i gdy
+     ochrona zawroci lisa - krotka animacja, jak pies go goni. Wtedy
+     1200 zl ma twarz. Robota: srednia (grafika + animacja, bez zmian
+     w mechanice).
+
+5.3  Grafiki poziomow rozbudowy                    POPIERAM
+     Kurnik na poziomie 6 wyglada tak samo jak na poziomie 1. Nawet samo
+     przemalowanie (wiecej okien, druga przybudowka, inny kolor dachu)
+     zalatwia sprawe. To jest robota graficzna, nie programistyczna -
+     moge wygenerowac warianty SVG, ale musisz je obejrzec i wybrac.
+
+5.4  Gluszec jako boss + minigra w stylu Duck Hunt   CIEKAWE, ale uwaga
+     Najambitniejszy pomysl na liscie i najbardziej ryzykowny.
+     Za: gra nie ma dzis ZADNEGO momentu napiecia poza lisem. Boss raz na
+     jakis czas to dokladnie to, czego brakuje.
+     Przeciw: minigra to osobny tryb sterowania, osobne grafiki, osobne
+     zasady i osobne bugi. To nie jest dodatek do istniejacej gry, to
+     druga gra w srodku.
+     Moja rada: najpierw zrobic przeganianie lisa czytelnym (pkt 4.1).
+     Jesli OKAZE SIE, ze klikanie w zwierzaka jest frajda - rozbudowac to
+     w gluszca. Jesli nie bedzie frajdy przy lisie, nie bedzie i przy
+     gluszcu, tylko po dziesieciu razy wiekszym koszcie.
+     "Mozliwosc pominiecia" - dobra mysl, koniecznie, bo inaczej gra
+     karze za granie w autobusie.
+
+5.5  Gluszec, ktory sam walczy z drapieznikami      POPIERAM bardziej
+     To jest TANSZE niz 5.4 i rownie ciekawe: gluszec jako kupowany
+     obronca (drozszy pies). Zadnej minigry, jedna nowa grafika, mechanika
+     juz istnieje (to kolejny poziom ochrony). Zrobilbym to pierwsze.
+
+5.6  Karta "wyjscia z wiezienia" - strzelba / pies sasiada   OSTROZNIE
+     Jednorazowy przedmiot, ktory ratuje przed jedna napascia. Mechanicznie
+     prosty i dobry. Ryzyko: jesli da sie go kupic za pieniadze i masz
+     duzo pieniedzy, to lis przestaje istniec, a z nim cale napiecie.
+     Zrobilbym to tak: NIE do kupienia za gotowke. Dostajesz jedna sztuke
+     za przegonienie lisa golymi rekami, albo za przetrwanie X dni. Wtedy
+     nagradza granie, a nie stan konta.
+
+5.7  Klikalne krzaki, w ktorych moze siedziec lis    POPIERAM
+     Tanie, dobre i rozwiazuje prawdziwy problem: na wybiegu nie ma nic do
+     roboty miedzy zbieraniem jaj. Krzak jako "zdrapka" - czasem nic,
+     czasem lis, czasem cos dobrego.
+
+5.8  Tabela d13/d20: kara za niecelne klikniecie     ROZUMIEM, ale nie tak
+     Pomysl "nie trafiles - tracisz 1-2 kury albo 3-10 jaj" jest w duchu
+     RPG i widze, skad sie wzial. Tylko ze w grze mobilnej niecelne
+     klikniecie zdarza sie czesto PRZEZ WINE EKRANU, nie gracza. Kara za
+     to, ze telefon nie zlapal dotkniecia, bedzie odebrana jako bug.
+     Kontrpropozycja: kara za NIEROBIENIE NICZEGO (nie przegoniles lisa
+     wcale), a nie za nietrafienie. Efekt ten sam, a nie czujesz sie
+     oszukany przez ekran.
+
+
+================================================================================
+ 6. CO WCHODZI DO 11.4, A CO CZEKA
+================================================================================
+
+  W 11.4 (zrobione, przetestowane):
+    - wyleg jaj po sprzedaniu calego stada rasy
+    - procent i czas na paskach inkubatora
+    - naglowki grup i margines w panelu inkubatora
+    - numery poziomow kurnika, magazynu, inkubatora i ochrony
+    - brakujace nazwy ochrony na poziomach 4 i 5
+    - "Kup psa podworzowego" zamiast "Postaw pies podworzowy"
+    - zwierzeta mniejsze o 20%
+    - zadanie GitHub Actions budzace baze Supabase raz dziennie
+
+  Czeka na Twoja decyzje:
+    - punkt 1 (wartosc jajek wzgledem ceny rasy) - WARIANT A, B czy C?
+    - punkt 4.4 (dwie mapy) - zaczynac?
+    - punkt 5.4 (gluszec z minigra) - czy najpierw 4.1 i 5.5?
+
+  Kolejka na 11.5, jesli nie powiesz inaczej:
+    - 4.1 (pokazac, ze w lisa sie klika)
+    - 5.5 (gluszec jako obronca)
+    - 5.7 (klikalne krzaki)
+    - 4.3 (kopia zapasowa saveow)

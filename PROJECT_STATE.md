@@ -4,8 +4,11 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 9 zakonczony** (wersja 11.3): jeden czas na wszystko,
-  lis z twarda gwarancja, wiekszy wybieg i zbieranie jaj garsciami.
+- Aktualny etap: **ETAP 9 zakonczony** (wersja 11.4): uwagi kolegow Tomka
+  rozpisane w `POMYSLY_BUGI_SUGESTIE.TXT`, naprawione bledy inkubatora
+  i panelu, numery poziomow rozbudowy, baza Supabase budzona codziennie.
+- Wersja 11.3: jeden czas na wszystko, lis z twarda gwarancja, wiekszy
+  wybieg i zbieranie jaj garsciami.
 - Wersja 10.x: kury i koguty. Kura
   znosi jaja tylko wtedy, gdy na farmie jest kogut jej rasy. Do tego duzo
   tansze rozbudowy, kurnik do 260 ptakow, trzy jaja na pisklę zamiast
@@ -17,7 +20,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -179,6 +182,27 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## Weryfikacja wersji 11.4 (wykonana w srodowisku Claude, Linux)
+
+Uruchomione naprawde, nie "powinno dzialac":
+
+- `tests/tests.tscn` pod `--headless`: **908 testow OK, 0 bledow**.
+  Doszedl `_test_incubate_without_flock` (wyleg jaj po sprzedaniu calego
+  stada rasy).
+- `tests/smoke_ui.tscn` pod `xvfb-run` z `--rendering-driver opengl3`:
+  **OK**. Doszly cztery sprawdzenia panelu inkubatora: procent na pasku,
+  naglowek grupy, wiersz poziomu i to, czy pasek faktycznie rosnie.
+- Zrzut ekranu panelu inkubatora obejrzany (`panel_inkubator_postep.png`):
+  wiersz "Poziom 1 / 6", naglowek "W inkubatorze", pasek z napisem
+  "25% - 3 min", kolumna liczb nie chowa sie juz pod paskiem przewijania.
+
+Uwaga na przyszlosc: po zmianie `data/strings.csv` trzeba uruchomic
+`godot --headless --path . --import`, zanim odpali sie testy. Bez tego
+Godot czyta STARA skompilowana wersje tlumaczen i test moze przejsc na
+nieaktualnym napisie — dokladnie to zdarzylo sie przy pierwszym
+uruchomieniu w tej sesji (bledny format `DIAG_NO_ANSWER` przeszedl
+niezauwazony).
 
 ## Weryfikacja wersji 11.3 (wykonana w srodowisku Claude, Linux)
 

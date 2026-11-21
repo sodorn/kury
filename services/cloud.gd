@@ -28,10 +28,12 @@ var online := false
 
 var _config: Dictionary = {}
 var _push_http: HTTPRequest
-var _pull_http: HTTPRequest
 var _busy_push := false
 ## Kod farmy, o ktory pytamy w trwajacym zapytaniu.
 var _pulling_for := ""
+## Numer biezacego pobrania i wezly zapytan czekajace na sprzatniecie.
+var _pull_token := 0
+var _pull_nodes: Array[HTTPRequest] = []
 ## Slad po ostatniej rozmowie z serwerem, do diagnostyki w panelu Kurnika.
 ## Bez tego "brak polaczenia" nie mowilo nic o tym, CO poszlo nie tak:
 ## inaczej leczy sie brak tabeli, inaczej brak uprawnien, a inaczej siec.
@@ -45,12 +47,9 @@ func _ready() -> void:
 	_config = _load_config()
 	player_id = _load_or_create_player_id()
 	_push_http = HTTPRequest.new()
-	_pull_http = HTTPRequest.new()
-	for http in [_push_http, _pull_http]:
-		http.timeout = float(_config.get("timeout_seconds", 8))
-		add_child(http)
+	_push_http.timeout = float(_config.get("timeout_seconds", 8))
+	add_child(_push_http)
 	_push_http.request_completed.connect(_on_push_done)
-	_pull_http.request_completed.connect(_on_pull_done)
 
 
 ## Czy zapis na serwerze jest w ogole skonfigurowany.
@@ -141,12 +140,36 @@ func pull() -> void:
 	_pulling_for = player_id
 	var url := "%s/rest/v1/%s?player_id=eq.%s&select=payload,updated_at" % [
 			_base_url(), _table(), player_id.uri_encode()]
-	# Jedno zapytanie na raz. Bez tego drugie wolanie (gracz wpisuje kod,
-	# a startowe pobranie jeszcze trwa) dostawalo ERR_BUSY i konczylo sie
-	# komunikatem "nie znalazlem farmy o takim kodzie", mimo ze farma byla.
-	_pull_http.cancel_request()
-	var err := _pull_http.request(url, _headers(), HTTPClient.METHOD_GET)
+	# Kazde pobranie dostaje WLASNY wezel zapytania. Wczesniej byl jeden wezel
+	# wielokrotnego uzytku, a drugie wolanie zaczynalo sie od `cancel_request()`.
+	# W eksporcie na przegladarke to sie mscilo: przerwanie trwajacego XHR
+	# potrafilo wrocic jako niepowodzenie JUZ ROZPOCZETEGO nowego zapytania,
+	# czyli gra pokazywala "serwer nie odpowiada", mimo ze ten sam adres
+	# otwarty recznie w tej samej przegladarce zwracal dane. Zapis dzialal, bo
+	# szedl innym wezlem — stad mylacy obraz "czasem dziala, czasem nie".
+	_pull_token += 1
+	var token := _pull_token
+	for old_node in _pull_nodes:
+		if is_instance_valid(old_node):
+			old_node.queue_free()
+	_pull_nodes.clear()
+	var http := HTTPRequest.new()
+	http.timeout = float(_config.get("timeout_seconds", 8))
+	add_child(http)
+	_pull_nodes.append(http)
+	# Odpowiedz spoznionego zapytania nie moze podmienic wyniku biezacego.
+	http.request_completed.connect(
+			func(result: int, code: int, head: PackedStringArray, body: PackedByteArray) -> void:
+				if token != _pull_token:
+					return
+				_on_pull_done(result, code, head, body)
+				http.queue_free())
+	var err := http.request(url, _headers(), HTTPClient.METHOD_GET)
 	if err != OK:
+		last_action = "odczyt"
+		last_result = -1
+		last_http_code = 0
+		last_rows = -1
 		_set_online(false)
 		pulled.emit({}, false, _pulling_for)
 
@@ -258,7 +281,7 @@ func describe_last() -> String:
 	if last_action.is_empty():
 		return tr("DIAG_NONE")
 	if last_result != HTTPRequest.RESULT_SUCCESS:
-		return tr("DIAG_NO_ANSWER") % last_action
+		return tr("DIAG_NO_ANSWER") % [last_action, _result_name(last_result), last_result]
 	match last_http_code:
 		401, 403:
 			return tr("DIAG_FORBIDDEN") % [last_action, last_http_code]
@@ -273,3 +296,25 @@ func describe_last() -> String:
 	if last_rows == 0:
 		return tr("DIAG_EMPTY")
 	return tr("DIAG_READ_OK") % maxi(last_rows, 0)
+
+
+## Nazwa powodu, dla ktorego zapytanie w ogole nie doszlo do skutku. Sam numer
+## nic nie mowi, a roznica miedzy "nie rozwiazalem nazwy", "nie polaczylem sie"
+## i "minal czas" decyduje o tym, gdzie szukac bledu.
+func _result_name(code: int) -> String:
+	match code:
+		HTTPRequest.RESULT_CANT_CONNECT:
+			return tr("DIAG_R_CONNECT")
+		HTTPRequest.RESULT_CANT_RESOLVE:
+			return tr("DIAG_R_RESOLVE")
+		HTTPRequest.RESULT_CONNECTION_ERROR:
+			return tr("DIAG_R_CONNECTION")
+		HTTPRequest.RESULT_TLS_HANDSHAKE_ERROR:
+			return tr("DIAG_R_TLS")
+		HTTPRequest.RESULT_NO_RESPONSE:
+			return tr("DIAG_R_SILENCE")
+		HTTPRequest.RESULT_TIMEOUT:
+			return tr("DIAG_R_TIMEOUT")
+		HTTPRequest.RESULT_REQUEST_FAILED:
+			return tr("DIAG_R_REFUSED")
+	return tr("DIAG_R_OTHER")
