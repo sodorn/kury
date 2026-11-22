@@ -84,7 +84,7 @@ static func _step(state: FarmState, step: float, out: Dictionary, loss_budget: i
 	if state.chickens.is_empty():
 		return
 
-	_advance_disease(state, step, out, loss_budget)
+	_advance_disease(state, step, out, loss_budget, offline)
 	if state.feed <= 0.0:
 		# Glodne stado nie znosi jaj; samo czekanie na karme to juz kara.
 		return
@@ -194,7 +194,8 @@ static func _advance_hunger(state: FarmState, step: float, out: Dictionary, budg
 
 ## Choroby: zdrowa kura moze zachorowac, chora przestaje znosic i po
 ## `death_minutes` pada. Szczepienie chroni do konca zycia.
-static func _advance_disease(state: FarmState, step: float, out: Dictionary, budget: int) -> void:
+static func _advance_disease(state: FarmState, step: float, out: Dictionary, budget: int,
+		offline: bool) -> void:
 	var disease: Dictionary = GameData.balance().get("disease", {})
 	var death_seconds := float(disease.get("death_minutes", 7.0)) * 60.0
 
@@ -212,8 +213,21 @@ static func _advance_disease(state: FarmState, step: float, out: Dictionary, bud
 	# Potem losowanie nowego zachorowania — jedno na cale gospodarstwo, nie na
 	# kura. Wczesniejsza stawka od sztuki sprawiala, ze duze stado chorowalo
 	# bez przerwy, a male prawie wcale.
-	if not _event_fires(state, step, "disease", disease):
+	# Nowe zachorowanie: w grze AKTYWNEJ co active_minutes minut realnych,
+	# w NIEaktywnej co offline_hours godzin. Prosty zegar zamiast dawnej
+	# krzywej narastania — wlasciciel podal tempo wprost.
+	var real := step / maxf(0.0001, GameData.time_scale())
+	var played_real := state.played_seconds() / maxf(0.0001, GameData.time_scale())
+	if played_real < float(disease.get("grace_minutes", 30.0)) * 60.0:
 		return
+	if state.chickens.size() < int(disease.get("min_hens", 5)):
+		return
+	state.disease_timer += real
+	var interval := float(disease.get("offline_hours", 4.0)) * 3600.0 if offline \
+			else float(disease.get("active_minutes", 1.0)) * 60.0
+	if state.disease_timer < interval:
+		return
+	state.disease_timer = 0.0
 	# Droga rasa choruje czesciej. Waga to pierwiastek z ceny, a nie sama cena:
 	# przy cenach od 40 do 8000 zl sama cena dawalaby cemani dwiescie razy
 	# wieksza szanse niz leghornowi, czyli w praktyce tylko cemani by chorowaly.
@@ -302,62 +316,126 @@ static func _event_fires(state: FarmState, step: float, key: String,
 static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget: int,
 		offline: bool) -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})
+	var real := step / maxf(0.0001, GameData.time_scale())
 
+	# 1. Wizyta w toku. Lis zabiera po jednej kurze przez caly swoj pobyt,
+	#    a nie wszystkie naraz na koniec. Dzieki temu kazda sekunda, o ktora
+	#    skrocisz mu wizyte — palcem albo psem — to uratowana kura.
 	if state.fox_visit_left > 0.0:
-		state.fox_visit_left -= step
-		if state.fox_visit_left > 0.0:
-			return
-		state.fox_visit_left = 0.0
-		_fox_takes(state, out, budget)
+		state.fox_visit_left -= real
+		state.fox_kill_timer -= real
+		while state.fox_kill_timer <= 0.0 and state.fox_kill_left > 0:
+			if not _fox_grabs_one(state, out, budget):
+				break
+			state.fox_kill_timer += maxf(1.0, state.fox_kill_pace)
+		if state.fox_visit_left <= 0.0:
+			_fox_leaves(state)
+			out["fox_left"] = int(out.get("fox_left", 0)) + 1
 		return
 
-	if not _event_fires(state, step, "fox", fox):
+	# 2. Warunki wstepne: karencja na starcie gry i minimalne stado.
+	# Karencja liczona ZEGARKIEM: wlasciciel mowi o pol godzinie grania,
+	# a `played_seconds()` zwraca sekundy gry, ktore plyna trzy razy wolniej.
+	var played_real := state.played_seconds() / maxf(0.0001, GameData.time_scale())
+	if played_real < float(fox.get("grace_minutes", 30.0)) * 60.0:
+		return
+	if state.chickens.size() < int(fox.get("min_hens", 5)):
 		return
 
-	# Plot, pies i nocne swiatla nie odwlekaja wizyty — po prostu zawracaja
-	# lisa od zagrody. Losujemy przy KAZDYM podejsciu, wiec nawet najlepsza
-	# obrona kiedys przepusci. Wczesniej obrona rozciagala przerwe miedzy
-	# wizytami, co przy cenie 600 zl bylo za malo odczuwalne.
+	# 3. Kostka. W grze aktywnej raz na active_roll_minutes, w nieaktywnej
+	#    raz na offline_roll_hours — dokladnie tak, jak chcial wlasciciel.
+	state.fox_roll_timer += real
+	var interval := float(fox.get("offline_roll_hours", 24.0)) * 3600.0 if offline \
+			else float(fox.get("active_roll_minutes", 60.0)) * 60.0
+	# Przegoniony golymi rekami lis wraca szybciej. Pies albo plot zdejmuja
+	# te kare — gospodarstwo wyglada na pilnowane.
+	if state.fox_hand_scared and state.dog_level <= 0 and state.guard_level <= 0:
+		interval *= clampf(float(fox.get("hand_return_factor", 0.1)), 0.01, 1.0)
+	if state.fox_roll_timer < interval:
+		return
+	state.fox_roll_timer = 0.0
+
+	var chance := float(fox.get("offline_chance", 0.1667)) if offline \
+			else float(fox.get("active_chance", 0.3333))
+	if randf() >= chance:
+		return
+
+	# 4. Plot decyduje, czy lis w ogole wejdzie.
 	if randf() < state.fox_block_chance():
 		out["fox_blocked"] = int(out["fox_blocked"]) + 1
 		return
 
-	var share := randf_range(float(fox.get("min_share", 0.2)), float(fox.get("max_share", 0.9)))
-	# Pies nie zatrzymuje lisa przy bramie (od tego jest plot) — rzuca sie na
-	# niego, gdy ten juz wszedl. Skraca mu czas i przycina lup, ale lis ZAWSZE
-	# zdazy porwac co najmniej jedna kure. Zero strat jest tylko wtedy, gdy
-	# gracz przegoni go palcem.
-	share *= state.fox_dog_share()
-	state.fox_pending = clampi(int(round(state.chickens.size() * share)), 1, state.chickens.size() - 1)
-	# Lis, ktory podchodzi pod nieobecnosc gracza, NIE zabiera po cichu.
-	# Zostaje na wybiegu i czeka — gracz zastanie go po powrocie i bedzie mial
-	# te same kilka sekund na reakcje co zwykle. Wczesniej strata liczyla sie
-	# od razu i wlasciciel przez cztery wersje nie zobaczyl lisa ani razu.
-	state.fox_visit_left = state.fox_visit_seconds()
-	out["fox_arrived"] = int(out["fox_arrived"]) + 1
-	if state.dog_level > 0:
-		out["fox_dog"] = int(out.get("fox_dog", 0)) + 1
+	_fox_arrives(state, out, budget, offline)
 
 
-## Koniec wizyty: lis zabiera upatrzone kury, o ile nikt go nie przegonil.
-static func _fox_takes(state: FarmState, out: Dictionary, budget: int) -> void:
-	var taken := mini(state.fox_pending, maxi(0, budget - _losses(out)))
-	taken = mini(taken, maxi(0, state.chickens.size() - 1))
-	state.fox_pending = 0
-	if taken <= 0:
+## Lis wchodzi na wybieg. Limit lupu to 30-60% stada; rozklada go sobie na
+## cala wizyte. Pierwsza kura ginie od razu — lis ZAWSZE cos zabiera.
+static func _fox_arrives(state: FarmState, out: Dictionary, budget: int,
+		offline: bool) -> void:
+	var fox: Dictionary = GameData.balance().get("fox", {})
+	var share := randf_range(float(fox.get("min_share", 0.3)), float(fox.get("max_share", 0.6)))
+	var quota := clampi(int(round(state.chickens.size() * share)), 1, state.chickens.size())
+	var full := state.fox_visit_seconds()
+
+	state.fox_kill_left = quota
+	state.fox_kill_pace = full / float(maxi(1, quota))
+	state.fox_taps_left = maxi(1, int(fox.get("scare_taps", 20)))
+	state.fox_hand_scared = false
+
+	# Gdy gracza nie ma przy grze, nie ma kogo straszyc ani komu pokazywac
+	# wizyty: lis robi swoje od razu i odchodzi. Gracz dostaje po powrocie
+	# jedna informacje, ile kur zginelo.
+	if offline:
+		while state.fox_kill_left > 0:
+			if not _fox_grabs_one(state, out, budget):
+				break
+		_fox_leaves(state)
 		return
-	# Czesc lupu lis wynosi, ale reszte zagryza na miejscu. Zwloki i krew maja
-	# zostac na wybiegu na dlugo — bez tego po napasci nie ma po niej sladu
-	# i gracz, ktory akurat nie patrzyl, nie wie, co sie stalo.
+
+	# Pies rusza za lisem. Jesli da rade, skraca wizyte do swojego czasu —
+	# lis przez te sekundy dalej zabija, uciekajac.
+	state.fox_visit_left = full
+	if state.dog_level > 0 and randf() < state.dog_chance():
+		state.fox_visit_left = minf(full, state.dog_seconds())
+		out["fox_dog"] = int(out.get("fox_dog", 0)) + 1
+	out["fox_arrived"] = int(out["fox_arrived"]) + 1
+	# Pierwsza ofiara zaraz po wejsciu.
+	if _fox_grabs_one(state, out, budget):
+		state.fox_kill_timer = state.fox_kill_pace
+
+
+## Jedna kura z lupu lisa. Czesc zostaje na wybiegu jako zwloki, reszte lis
+## wynosi. Zwraca false, gdy nie ma juz czego brac.
+static func _fox_grabs_one(state: FarmState, out: Dictionary, budget: int) -> bool:
+	if state.fox_kill_left <= 0 or state.chickens.is_empty():
+		return false
+	if _losses(out) >= budget:
+		return false
 	var share := clampf(float(GameData.balance().get("fox", {}).get("carcass_share", 0.5)), 0.0, 1.0)
-	var left_behind := clampi(int(round(taken * share)), 1, taken)
-	for i in taken:
-		var index := randi() % state.chickens.size()
-		if i < left_behind:
-			_kill_hen(state, index, "fox")
-		else:
-			state.chickens.remove_at(index)
-	out["fox_took"] = int(out["fox_took"]) + taken
+	var index := randi() % state.chickens.size()
+	if randf() < share:
+		_kill_hen(state, index, "fox")
+	else:
+		state.chickens.remove_at(index)
+	state.fox_kill_left -= 1
+	out["fox_took"] = int(out["fox_took"]) + 1
+	return true
+
+
+## Koniec wizyty, z kazdego powodu. Jedno miejsce, ktore sprzata stan lisa —
+## wczesniej bylo ich kilka i jedna sciezka potrafila zostawic lisa na zawsze.
+## Publiczna furtka dla Game.poke_fox — ta sama sciezka sprzatania.
+static func fox_leaves(state: FarmState) -> void:
+	_fox_leaves(state)
+
+
+static func _fox_leaves(state: FarmState) -> void:
+	state.fox_visit_left = 0.0
+	state.fox_kill_left = 0
+	state.fox_kill_timer = 0.0
+	state.fox_taps_left = 0
+	state.fox_pending = 0
+
 
 
 ## Znoszenie jaj. Nie znosza: koguty, chore kury i kury rasy, ktora nie ma

@@ -145,7 +145,7 @@ func _report(result: Dictionary) -> void:
 		Events.fox_repelled.emit()
 	var arrived := int(result["fox_arrived"])
 	if arrived > 0:
-		Events.fox_arrived.emit(state.fox_pending, state.fox_visit_left)
+		Events.fox_arrived.emit(state.fox_kill_left, state.fox_visit_left)
 		# Gracz ma wiedziec, ze pies pracuje — inaczej 200 zl wyglada
 		# jak wyrzucone w bloto.
 		Events.notice.emit(tr("HINT_FOX_HERE_DOG") if state.dog_level > 0 else tr("HINT_FOX_HERE"))
@@ -340,7 +340,7 @@ func _apply_elapsed(elapsed: float) -> void:
 	# zabrac kury po cichu. Inaczej gracz nigdy by go nie zobaczyl, a wlasnie
 	# o to mial najwieksza pretensje.
 	if int(result["fox_arrived"]) > 0:
-		Events.fox_arrived.emit(state.fox_pending, state.fox_visit_left)
+		Events.fox_arrived.emit(state.fox_kill_left, state.fox_visit_left)
 		# Gracz ma wiedziec, ze pies pracuje — inaczej 200 zl wyglada
 		# jak wyrzucone w bloto.
 		Events.notice.emit(tr("HINT_FOX_HERE_DOG") if state.dog_level > 0 else tr("HINT_FOX_HERE"))
@@ -457,11 +457,18 @@ func sell_hen(breed_id: String, rooster: bool = false) -> float:
 ## Ubija jednego chorego ptaka danej rasy. Za darmo i bez zaplaty — to wyjscie
 ## awaryjne dla kogos, kogo nie stac na lek, a chora kura blokuje miejsce
 ## w kurniku i i tak za chwile padnie.
+## Chora sztuka idzie do skupu — tanio, bo chora, ale lepiej to niz nic.
+## Wczesniej byl darmowy ubic; wlasciciel wolal, zeby cos z tego bylo.
+func mcdonalds_price() -> float:
+	return float(GameData.balance().get("disease", {}).get("mcdonalds_price", 5))
+
+
 func cull_hen(breed_id: String, rooster: bool = false) -> bool:
 	var index := _find_hen(breed_id, true, rooster)
 	if index < 0:
 		return false
 	state.chickens.remove_at(index)
+	state.money += mcdonalds_price()
 	Events.hen_removed.emit(breed_id)
 	Events.resources_changed.emit()
 	if rooster and state.hens_of_breed(breed_id) > 0 and not state.has_rooster(breed_id):
@@ -554,14 +561,26 @@ func buy_vaccine() -> bool:
 
 ## Przegania lisa, ktory wlasnie jest na wybiegu. Zwraca false, gdy nie ma
 ## kogo przeganiac — wtedy scena nie ma po co reagowac na dotkniecie.
-func scare_fox() -> bool:
+## Jedno trafienie palcem w lisa. Zwraca true dopiero wtedy, gdy to trafienie
+## go przegonilo — wczesniej lis tylko odskakuje w inne miejsce.
+func poke_fox() -> bool:
 	if state.fox_visit_left <= 0.0:
 		return false
-	state.fox_visit_left = 0.0
-	state.fox_pending = 0
+	state.fox_taps_left -= 1
+	if state.fox_taps_left > 0:
+		return false
+	# Przegoniony golymi rekami wraca szybciej, chyba ze gospodarstwo ma psa
+	# albo plot.
+	state.fox_hand_scared = true
+	Simulation.fox_leaves(state)
 	Events.fox_scared.emit()
 	Events.notice.emit(tr("HINT_FOX_SCARED"))
 	return true
+
+
+## Ile jeszcze trafien dzieli gracza od przegonienia lisa.
+func fox_taps_left() -> int:
+	return maxi(0, state.fox_taps_left)
 
 
 # --- budynki ------------------------------------------------------------

@@ -581,7 +581,7 @@ func _on_buy_hen(breed_id: String, breed_name: String, rooster: bool = false) ->
 func _on_cull_hen(breed_id: String, breed_name: String) -> void:
 	var rooster := not Game.has_sick(breed_id)
 	if Game.cull_hen(breed_id, rooster):
-		_flash(tr("PANEL_HEN_CULLED") % breed_name)
+		_flash(tr("PANEL_HEN_MCDONALDS") % [breed_name, NumberFormat.money(Game.mcdonalds_price())])
 
 
 func _on_sell_hen(breed_id: String, breed_name: String, rooster: bool = false) -> void:
@@ -676,9 +676,11 @@ func _guard_name(level: int) -> String:
 		1:
 			return "PANEL_FOX_GUARD_FENCE"
 		2:
-			return "PANEL_FOX_GUARD_HIGH"
+			return "PANEL_FOX_GUARD_SOLID"
 		3:
-			return "PANEL_FOX_GUARD_MESH"
+			return "PANEL_FOX_GUARD_HIGH"
+		4:
+			return "PANEL_FOX_GUARD_ELECTRIC"
 	return "PANEL_FOX_GUARD_NONE"
 
 
@@ -709,9 +711,11 @@ func _guard_buy_name(level: int) -> String:
 		1:
 			return "GUARD_BUY_FENCE"
 		2:
-			return "GUARD_BUY_HIGH"
+			return "GUARD_BUY_SOLID"
 		3:
-			return "GUARD_BUY_MESH"
+			return "GUARD_BUY_HIGH"
+		4:
+			return "GUARD_BUY_ELECTRIC"
 	return "PANEL_FOX_GUARD_NONE"
 
 
@@ -908,7 +912,7 @@ func _add_breed_card(breed: Dictionary) -> void:
 			NumberFormat.money(FarmState.hen_sell_price(breed_id)), healthy_cocks]
 		var sick := owned - healthy + cocks - healthy_cocks
 		cull.visible = sick > 0
-		cull.text = tr("PANEL_CULL_HEN") % sick
+		cull.text = tr("PANEL_CULL_HEN") % [NumberFormat.money(Game.mcdonalds_price()), sick]
 		subtitle.text = "%s · %s" % [tr(breed.get("rarity", "")), tr(breed.get("desc", ""))]
 		numbers.text = tr("PANEL_BREED_NUMBERS") % [
 			NumberFormat.small_money(FarmState.egg_value(breed_id)),

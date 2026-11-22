@@ -40,6 +40,7 @@ func _ready() -> void:
 	_test_body_unpacking()
 	_test_dog()
 	_test_guard_migration()
+	_test_fox_return_speed()
 	_test_event_rules()
 	_test_starving_farm()
 	_test_lay_fairness()
@@ -638,7 +639,6 @@ func _test_disease() -> void:
 ## czesc stada — nigdy calosci.
 func _test_fox() -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})
-	var visit := float(fox.get("visit_seconds", 7.0))
 	var hens: Array[String] = []
 	for i in 20:
 		hens.append("leghorn")
@@ -652,121 +652,142 @@ func _test_fox() -> void:
 			"w okresie ochronnym lis nie podchodzi ani razu")
 
 	# Male stado lis zostawia w spokoju nawet po karencji.
-	_force_event("fox")
 	var tiny := _fresh_state(["leghorn", "leghorn"], 100.0)
-	_arm_event(tiny, "fox")
+	_arm_fox(tiny)
 	var tiny_result := Simulation.advance(tiny, 5.0)
 	_check(int(tiny_result["fox_arrived"]) == 0, "przy malym stadzie lis nie przychodzi")
 	_check(tiny.hen_count() == 2, "male stado zostaje nietkniete")
 
-	# Etap pierwszy: lis jest na wybiegu, ale jeszcze nic nie zabral.
+	# Wejscie: lis od razu porywa pierwsza kure i zostaje na wybiegu.
 	var state := _fresh_state(hens, 100000.0)
-	_arm_event(state, "fox")
+	_arm_fox(state)
 	var arrival := Simulation.advance(state, 1.0)
-	_check(int(arrival["fox_arrived"]) == 1, "lis przychodzi, gdy minie jego czas")
-	_check(int(arrival["fox_took"]) == 0, "po wejsciu lis jeszcze nic nie zabiera")
-	_check(state.hen_count() == 20, "stado na razie w komplecie")
-	_check(state.fox_pending > 0, "lis ma juz upatrzony lup")
-	_check(state.fox_visit_left > 0.0, "trwa okno na przegonienie lisa")
+	_check(int(arrival["fox_arrived"]) == 1, "lis przychodzi, gdy kostka padnie")
+	_check(int(arrival["fox_took"]) >= 1, "pierwsza kura ginie zaraz po wejsciu")
+	_check(state.fox_visit_left > 0.0, "wizyta trwa dalej")
+	_check(state.fox_kill_left >= 1, "lis ma jeszcze lup do wziecia")
+	_check(state.fox_taps_left == int(fox.get("scare_taps", 20)),
+			"gracz dostaje pelna pule trafien")
 
-	# Etap drugi: nikt nie zareagowal, wiec lis zabiera lup.
-	var pending := state.fox_pending
-	var result := Simulation.advance(state, visit + 1.0)
-	var taken := int(result["fox_took"])
-	_check(taken == pending, "po wizycie lis zabiera to, co upatrzyl")
-	_check(state.hen_count() == 20 - taken, "stado maleje dokladnie o lup lisa")
-	_check(state.hen_count() > 0, "lis nigdy nie zabiera calego stada")
-	_check(float(taken) / 20.0 >= float(fox.get("min_share", 0.2)) - 0.08, "lup nie mniejszy niz minimum")
-	_check(float(taken) / 20.0 <= float(fox.get("max_share", 0.9)) + 0.08, "lup nie wiekszy niz maksimum")
-	# Czesc lupu lis zagryza na miejscu — slad po napasci ma zostac.
-	_check(not state.corpses.is_empty(), "po napasci zostaja zwloki na wybiegu")
-	for corpse: Corpse in state.corpses:
-		_check(corpse.cause == "fox", "zwloki podpisane sa jako robota lisa")
-		break
-	_check(state.corpses.size() < taken, "czesc lupu lis jednak wynosi")
+	# Lup lisa miesci sie w widelkach 30-60% stada.
+	var limit := int(arrival["fox_took"]) + state.fox_kill_left
+	_check(limit >= int(floor(20 * float(fox.get("min_share", 0.3)))),
+			"lup nie mniejszy niz minimum (%d)" % limit)
+	_check(limit <= int(ceil(20 * float(fox.get("max_share", 0.6)))),
+			"lup nie wiekszy niz maksimum (%d)" % limit)
 
-	# Przegoniony lis odchodzi z niczym.
+	# Lis zabija STOPNIOWO. Po polowie wizyty ma za soba mniej wiecej polowe.
+	var polowa := state.fox_visit_seconds() * 0.5 * GameData.time_scale()
+	var w_trakcie := Simulation.advance(state, polowa)
+	_check(int(w_trakcie["fox_took"]) > 0, "w trakcie wizyty gina kolejne kury")
+	_check(state.fox_visit_left > 0.0, "ale wizyta jeszcze trwa")
+	_check(state.hen_count() > 20 - limit, "nie wszystkie od razu — zabija po kolei")
+
+	# Koniec czasu konczy wizyte i czysci caly stan lisa.
+	Simulation.advance(state, state.fox_visit_left * GameData.time_scale() + 1.0)
+	_check(state.fox_visit_left <= 0.0, "po swoim czasie lis odchodzi")
+	_check(state.fox_kill_left == 0 and state.fox_taps_left == 0,
+			"stan lisa wyczyszczony do zera")
+
+	# Po napasci zostaja slady na wybiegu.
+	_check(state.corpses.size() > 0, "po napasci zostaja zwloki na wybiegu")
+
+	# Trzy lisy naraz nie moga sie zdarzyc: dopoki jeden jest na wybiegu,
+	# zaden drugi nie wejdzie. To jest blad, z ktorym zyl wlasciciel.
+	var busy := _fresh_state(hens, 100000.0)
+	_arm_fox(busy)
+	Simulation.advance(busy, 1.0)
+	var przyjscia := 0
+	for i in 200:
+		przyjscia += int(Simulation.advance(busy, 5.0)["fox_arrived"])
+		if busy.fox_visit_left <= 0.0:
+			break
+	_check(przyjscia == 0, "drugi lis nie wchodzi, gdy pierwszy jeszcze jest")
+
+	# Przeganianie palcem: dopiero ostatnie trafienie wyprasza lisa.
 	Game.new_game()
-	Game.state.chickens.clear()
 	for i in 20:
 		Game.state.chickens.append(Chicken.create("leghorn"))
-	Game.state.feed = 100000.0
-	_arm_event(Game.state, "fox")
-	_check(not Game.scare_fox(), "bez lisa nie ma kogo przeganiac")
-	Simulation.advance(Game.state, 2.0)
-	_check(Game.state.fox_visit_left > 0.0, "lis wszedl na wybieg")
-	_check(Game.scare_fox(), "lisa da sie przegonic w trakcie wizyty")
-	_check(Game.state.fox_pending == 0 and is_zero_approx(Game.state.fox_visit_left),
-			"po przegonieniu nie ma ani lupu, ani wizyty")
-	# Bez tego wymuszony lis wrocilby w tej samej chwili i zjadl wynik testu.
-	_never_event("fox")
-	var after := Simulation.advance(Game.state, visit + 2.0)
-	_check(int(after["fox_took"]) == 0, "przegoniony lis nie zabiera nic")
-	_check(Game.state.hen_count() == 20, "stado w komplecie po przegonieniu")
-
-	# Lis, ktory podszedl pod nieobecnosc gracza, NIE zabiera po cichu —
-	# zostaje na wybiegu i czeka. Inaczej gracz nigdy by go nie zobaczyl.
-	_force_event("fox")
-	var away := _laying_state(hens, 100000.0)
-	var flock_before := away.hen_count()
-	_arm_event(away, "fox")
-	var offline := Simulation.advance(away, 1.0, true)
-	_check(int(offline["fox_arrived"]) == 1, "lis z nieobecnosci czeka na wybiegu")
-	_check(int(offline["fox_took"]) == 0, "i niczego jeszcze nie zabral")
-	_check(away.hen_count() == flock_before, "stado w komplecie do czasu powrotu")
-	_check(away.fox_visit_left > 0.0, "gracz dostaje swoje okno na reakcje")
-
-	# Obrona zawraca lisa przy zagrodzie, zamiast odwlekac jego przyjscie.
-	var guarded := _fresh_state(hens, 100000.0)
-	_check(is_equal_approx(guarded.fox_block_chance(), 0.0), "bez obrony nic nie zatrzymuje lisa")
-	guarded.guard_level = 1
-	_check(guarded.fox_block_chance() >= 0.6, "plot zawraca wiekszosc podejsc")
-	guarded.guard_level = 2
-	var higher := guarded.fox_block_chance()
-	guarded.guard_level = 1
-	_check(higher > guarded.fox_block_chance(), "wyzszy plot zawraca czesciej")
-	# Ostatni poziom daje pelne 100% i wylacza lisa calkowicie. Argumentowalem
-	# przeciw, wlasciciel zdecydowal inaczej — test pilnuje jego decyzji.
-	guarded.guard_level = 3
-	_check(is_equal_approx(guarded.fox_block_chance(), 1.0),
-			"najwyzszy plot zatrzymuje kazde podejscie")
-	# Pies to OSOBNA sciezka: nie ma wplywu na to, czy lis wejdzie.
-	guarded.guard_level = 1
-	var sam_plot := guarded.fox_block_chance()
-	guarded.dog_level = 2
-	_check(is_equal_approx(guarded.fox_block_chance(), sam_plot),
-			"pies nie zmienia szansy, ze lis wejdzie — od tego jest plot")
-	var walled := _fresh_state(hens, 100000.0)
-	walled.guard_level = 3
-	var tries := 0
-	for i in 50:
-		_arm_event(walled, "fox")
-		var tally := Simulation.advance(walled, 1.0)
-		tries += int(tally["fox_arrived"])
-	_check(tries == 0, "przy pelnej obronie lis nie wszedl ani razu na 50 prob")
-
-	# Plot w dzialaniu: przy stu podejsciach wiekszosc konczy sie zawroceniem,
-	# a bez plotu nie zawraca ani jedno.
-	var blocked := 0
-	var walked_in := 0
-	for i in 100:
-		var yard := _fresh_state(hens, 100000.0)
-		yard.guard_level = 1
-		_arm_event(yard, "fox")
-		var tally := Simulation.advance(yard, 1.0)
-		blocked += int(tally["fox_blocked"])
-		walked_in += int(tally["fox_arrived"])
-	_check(blocked > 40 and walked_in > 0,
-			"plot zawrocil %d na 100 podejsc, wszedl %d razy" % [blocked, walked_in])
-	var bare := _fresh_state(hens, 100000.0)
-	_arm_event(bare, "fox")
-	_check(int(Simulation.advance(bare, 1.0)["fox_blocked"]) == 0, "bez plotu nikt lisa nie zawraca")
-
-	GameData.reload()
-	Game.new_game()
+	_arm_fox(Game.state)
+	Simulation.advance(Game.state, 1.0)
+	_check(Game.state.fox_visit_left > 0.0, "lis na wybiegu przed przeganianiem")
+	var trafienia := int(fox.get("scare_taps", 20))
+	for i in trafienia - 1:
+		_check(not Game.poke_fox(), "trafienie %d jeszcze nie wyprasza" % (i + 1))
+	_check(Game.poke_fox(), "ostatnie trafienie przegania lisa")
+	_check(Game.state.fox_visit_left <= 0.0, "po przegonieniu lisa nie ma")
+	_check(Game.state.fox_hand_scared, "gra pamieta, ze przegonil go golymi rekami")
+	_check(not Game.poke_fox(), "bez lisa nie ma kogo przeganiac")
+	_disarm_fox()
 
 
-## Weterynaria i sprzedaz na mieso.
+## Ustawia stan tak, zeby lis wszedl przy najblizszym kroku: po karencji,
+## z pelnym licznikiem do losowania, bez plotu i z kostka ustawiona na pewniak.
+## Kostka siedzi we WSPOLNYM slowniku balansu, wiec po tescie trzeba oddac
+## stan przez `_disarm_fox()`.
+var _fox_backup: Dictionary = {}
+
+func _arm_fox(state: FarmState) -> void:
+	if _fox_backup.is_empty():
+		_fox_backup = _snapshot_event("fox")
+	var fox: Dictionary = GameData.balance().get("fox", {})
+	fox["active_chance"] = 1.0
+	fox["offline_chance"] = 1.0
+	# Pol godziny ZEGARKA to tyle sekund gry razy skala czasu.
+	var grace_game := float(_fox_backup.get("grace_minutes", 30.0)) * 60.0 * GameData.time_scale()
+	state.days = int(grace_game / 600.0) + 2
+	state.guard_level = 0
+	state.fox_roll_timer = 1000000.0
+
+
+func _disarm_fox() -> void:
+	if _fox_backup.is_empty():
+		return
+	_restore_event("fox", _fox_backup)
+	_fox_backup = {}
+
+
+## Lis przegoniony golymi rekami wraca szybciej — chyba ze gospodarstwo ma
+## psa albo plot. Sprawdzamy sam odstep miedzy losowaniami, bo to on decyduje.
+func _test_fox_return_speed() -> void:
+	var fox: Dictionary = GameData.balance().get("fox", {})
+	var odstep := float(fox.get("active_roll_minutes", 60.0)) * 60.0
+	var kara := float(fox.get("hand_return_factor", 0.1))
+	_check(kara < 1.0, "kara za reczne przegonienie skraca odstep")
+
+	var hens: Array[String] = []
+	for i in 20:
+		hens.append("leghorn")
+
+	# Bez psa i plotu: po recznym przegonieniu lis ma szanse wrocic juz po
+	# dziesiatej czesci zwyklego odstepu.
+	var goly := _fresh_state(hens, 0.0)
+	_arm_fox(goly)
+	goly.fox_hand_scared = true
+	goly.fox_roll_timer = odstep * kara + 1.0
+	var wrocil := 0
+	for i in 60:
+		var kopia := _fresh_state(hens, 0.0)
+		_arm_fox(kopia)
+		kopia.fox_hand_scared = true
+		kopia.fox_roll_timer = odstep * kara * 0.99
+		wrocil += int(Simulation.advance(kopia, 60.0 * GameData.time_scale())["fox_arrived"])
+	_check(wrocil > 0, "po recznym przegonieniu lis wraca duzo szybciej")
+
+	# Z psem kara nie dziala: po skroconym odstepie lis jeszcze nie wraca.
+	var z_psem := 0
+	for i in 60:
+		var kopia := _fresh_state(hens, 0.0)
+		_arm_fox(kopia)
+		kopia.dog_level = 1
+		kopia.fox_hand_scared = true
+		kopia.fox_roll_timer = odstep * kara * 0.99
+		z_psem += int(Simulation.advance(kopia, 60.0 * GameData.time_scale())["fox_arrived"])
+	_check(z_psem == 0, "pies zdejmuje kare za reczne przegonienie")
+	_disarm_fox()
+
+
+
 func _test_vet_and_selling() -> void:
 	Game.new_game()
 	Game.state.chickens.clear()
@@ -801,10 +822,14 @@ func _test_vet_and_selling() -> void:
 	_check(is_zero_approx(Game.sell_hen("rhode")), "chorej kury nie da sie sprzedac")
 	_check(Game.state.chickens.size() == 1, "nieudana sprzedaz nie usuwa kury ze stada")
 
+	# Chora sztuka idzie do skupu za drobne zamiast byc ubijana za darmo.
 	var purse := Game.state.money
-	_check(Game.cull_hen("rhode"), "chora kure da sie ubic")
-	_check(Game.state.chickens.is_empty(), "ubita kura znika ze stada")
-	_check(is_equal_approx(Game.state.money, purse), "ubicie jest za darmo i nic nie placi")
+	_check(Game.cull_hen("rhode"), "chora kure da sie oddac do skupu")
+	_check(Game.state.chickens.is_empty(), "oddana kura znika ze stada")
+	_check(is_equal_approx(Game.state.money, purse + Game.mcdonalds_price()),
+			"za chora kure jest kilka zlotych, a nie zero")
+	_check(is_equal_approx(Game.mcdonalds_price(), 5.0), "skup placi 5 zl za sztuke")
+	_check(is_equal_approx(Game.medicine_price(), 20.0), "lek kosztuje 20 zl")
 	_check(not Game.cull_hen("rhode"), "nie ma juz czego ubijac")
 
 	# Zdrowa idzie normalnie, za pelna stawke.
@@ -1057,8 +1082,15 @@ func _test_dog() -> void:
 	var dogs: Array = GameData.balance().get("buildings", {}).get("dog", {}).get("upgrades", [])
 	var fences: Array = GameData.balance().get("buildings", {}).get("guard", {}).get("upgrades", [])
 	_check(dogs.size() == 2, "sa dwa psy do kupienia")
-	_check(float(dogs[0].get("price", 0)) < float(fences[0].get("price", 0)),
-			"kundel jest tanszy niz plot (%s < %s)" % [dogs[0].get("price"), fences[0].get("price")])
+	_check(float(dogs[0].get("price", 0)) <= float(fences[0].get("price", 0)),
+			"kundel nie drozszy niz najtanszy plot (%s wobec %s)"
+			% [dogs[0].get("price"), fences[0].get("price")])
+	_check(is_equal_approx(float(dogs[1].get("chance", 0.0)), 1.0),
+			"owczarek przegania zawsze")
+	_check(float(dogs[0].get("chance", 0.0)) > 0.5 and float(dogs[0].get("chance", 1.0)) < 1.0,
+			"kundel czasem nie daje rady")
+	_check(float(dogs[1].get("seconds", 99.0)) < float(dogs[0].get("seconds", 0.0)),
+			"owczarek zalatwia sprawe szybciej niz kundel")
 
 	# Pies kupowalny od poczatku, bez plotu jako warunku.
 	Game.new_game()
@@ -1078,33 +1110,42 @@ func _test_dog() -> void:
 	kundel.dog_level = 1
 	var owczarek := _fresh_state(hens, 0.0)
 	owczarek.dog_level = 2
-	_check(kundel.fox_visit_seconds() < bez.fox_visit_seconds(), "kundel skraca wizyte lisa")
-	_check(owczarek.fox_visit_seconds() < kundel.fox_visit_seconds(), "owczarek skraca ja bardziej")
-	_check(is_equal_approx(bez.fox_dog_share(), 1.0), "bez psa lis bierze caly upatrzony lup")
-	_check(owczarek.fox_dog_share() < kundel.fox_dog_share(), "owczarek zostawia lisowi mniej")
-	_check(kundel.fox_dog_share() < 1.0, "kundel tez przycina lup")
+	_check(is_zero_approx(bez.dog_chance()), "bez psa nikt lisa nie goni")
+	_check(kundel.dog_chance() > 0.0 and kundel.dog_chance() < 1.0, "kundel bywa skuteczny")
+	_check(is_equal_approx(owczarek.dog_chance(), 1.0), "owczarek skuteczny zawsze")
+	_check(owczarek.dog_seconds() < kundel.dog_seconds(), "owczarek goni krocej")
+	_check(kundel.dog_seconds() < bez.fox_visit_seconds(),
+			"nawet kundel skraca wizyte wzgledem pelnych trzech minut")
 
 	# W symulacji: pies zmniejsza straty, ale ich nie zeruje.
-	var kopia := _snapshot_event("fox")
 	var straty_bez := 0
 	var straty_z := 0
 	var porwal_zawsze := true
-	for i in 40:
+	for i in 30:
 		var a := _fresh_state(hens, 0.0)
-		_arm_event(a, "fox")
-		Simulation.advance(a, 1.0)
-		straty_bez += a.fox_pending
+		_arm_fox(a)
+		straty_bez += _przezyj_wizyte(a)
 		var b := _fresh_state(hens, 0.0)
 		b.dog_level = 2
-		_arm_event(b, "fox")
-		Simulation.advance(b, 1.0)
-		straty_z += b.fox_pending
-		if b.fox_pending < 1:
+		_arm_fox(b)
+		var zabral := _przezyj_wizyte(b)
+		straty_z += zabral
+		if zabral < 1:
 			porwal_zawsze = false
 	_check(straty_z < straty_bez, "z psem lis zabiera mniej (%d wobec %d)" % [straty_z, straty_bez])
 	_check(straty_z > 0, "pies nie zeruje strat — lis zawsze cos porwie")
 	_check(porwal_zawsze, "nawet przy owczarku lis bierze co najmniej jedna kure")
-	_restore_event("fox", kopia)
+	_disarm_fox()
+
+
+## Puszcza cala wizyte lisa i zwraca, ile kur zginelo.
+func _przezyj_wizyte(state: FarmState) -> int:
+	var zabral := int(Simulation.advance(state, 1.0)["fox_took"])
+	var bezpiecznik := 0
+	while state.fox_visit_left > 0.0 and bezpiecznik < 2000:
+		zabral += int(Simulation.advance(state, 1.0)["fox_took"])
+		bezpiecznik += 1
+	return zabral
 
 
 ## Migracja zapisow 5 -> 6: stara jedna drabinka obrony rozbita na plot
@@ -1117,15 +1158,16 @@ func _test_guard_migration() -> void:
 		var zapis := SaveGame.to_dict(stan)
 		zapis["version"] = 5
 		zapis.erase("dog_level")
-		var wczytany := SaveGame.from_dict(zapis)
-		_check(wczytany != null, "stary zapis z obrona %d daje sie wczytac" % stary)
-		if wczytany == null:
+		var wczytany: Dictionary = SaveGame.from_dict(zapis)
+		_check(not wczytany.is_empty(), "stary zapis z obrona %d daje sie wczytac" % stary)
+		if wczytany.is_empty():
 			continue
+		var odczyt: FarmState = wczytany["state"]
 		var chciane: Array = oczekiwane[stary]
-		_check(wczytany.guard_level == chciane[0],
-				"obrona %d -> plot %d (jest %d)" % [stary, chciane[0], wczytany.guard_level])
-		_check(wczytany.dog_level == chciane[1],
-				"obrona %d -> pies %d (jest %d)" % [stary, chciane[1], wczytany.dog_level])
+		var plot := odczyt.guard_level
+		var pies := odczyt.dog_level
+		_check(plot == chciane[0], "obrona %d -> plot %d (jest %d)" % [stary, chciane[0], plot])
+		_check(pies == chciane[1], "obrona %d -> pies %d (jest %d)" % [stary, chciane[1], pies])
 
 func _test_event_rules() -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})
@@ -1142,111 +1184,48 @@ func _test_event_rules() -> void:
 	_check(absf(state.played_seconds() - 1800.0) < 1.0,
 			"po pol godziny licznik pokazuje pol godziny (%.0f s)" % state.played_seconds())
 
-	# Czestosc i gwarancja. Mierzymy odstepy miedzy zdarzeniami przez dluga
-	# gre, bo wlasciciel podal cel wprost: lis srednio raz na 30-60 minut,
-	# choroba raz na 10-20, i ma przyjsc NA PEWNO, a nie "statystycznie".
-	var hens: Array[String] = []
+	# Czestosc. Wlasciciel podal ja wprost i inaczej niz dotad:
+	#   lis    — w grze aktywnej kostka raz na godzine realna, szansa 1/3,
+	#            czyli srednio jeden lis na trzy godziny grania;
+	#   lis    — w grze nieaktywnej kostka raz na dobe, szansa 1/6;
+	#   choroba— aktywna gra: kolejna kura co minute realna;
+	#            nieaktywna: co cztery godziny.
+	# Mierzymy to na samych ustawieniach, bo pelny pomiar statystyczny
+	# trwalby minuty, a liczby maja byc dokladnie takie, jak powiedzial.
+	_check(is_equal_approx(float(fox.get("active_roll_minutes", 0.0)), 60.0),
+			"lis: kostka raz na godzine grania")
+	_check(absf(float(fox.get("active_chance", 0.0)) - 1.0 / 3.0) < 0.01,
+			"lis: szansa jedna trzecia")
+	_check(is_equal_approx(float(fox.get("offline_roll_hours", 0.0)), 24.0),
+			"lis: przy nieaktywnej grze kostka raz na dobe")
+	_check(absf(float(fox.get("offline_chance", 0.0)) - 1.0 / 6.0) < 0.01,
+			"lis: przy nieaktywnej grze szansa jeden do szesciu")
+	_check(is_equal_approx(float(fox.get("visit_minutes", 0.0)), 3.0),
+			"lis: wizyta trwa trzy minuty")
+	_check(is_equal_approx(float(disease.get("active_minutes", 0.0)), 1.0),
+			"choroba: w aktywnej grze kolejna kura co minute")
+	_check(is_equal_approx(float(disease.get("offline_hours", 0.0)), 4.0),
+			"choroba: w nieaktywnej co cztery godziny")
+
+	# I pomiar na zywo, zeby liczby z balansu faktycznie cos robily.
+	var chore: Array[String] = []
 	for i in 12:
-		hens.append("leghorn")
-	# Dzien w grze trwa `day.seconds`, czyli dziesiec minut — pol godziny
-	# karencji to trzy dni. Stado trzeba po kazdej minucie uzupelniac: po
-	# napasci spada ponizej pieciu sztuk i lis przestaje podchodzic, co
-	# zanizyloby pomiar do zera.
-	var runs := 20
-	var minutes := 1200
-	var gaps: Dictionary = {"fox": [] as Array[int], "disease": [] as Array[int]}
-	# Kazde zdarzenie mierzymy osobno, z wylaczonym drugim. Inaczej lis
-	# wycina stado ponizej progu pieciu sztuk, furtka choroby sie zamyka
-	# i pomiar pokazuje cisze, ktorej w rzeczywistosci nie ma.
-	for key: String in ["fox", "disease"]:
-		_never_event("fox" if key == "disease" else "disease")
-		for r in runs:
-			var yard := _fresh_state(hens, 10000000.0)
-			yard.days = 10
-			var since := 0
-			for i in minutes:
-				var out := Simulation.advance(yard, 60.0)
-				var happened := int(out["got_sick"]) > 0 if key == "disease" \
-						else int(out["fox_arrived"]) + int(out["fox_blocked"]) > 0
-				since += 1
-				if happened:
-					(gaps[key] as Array).append(since)
-					since = 0
-				yard.fox_visit_left = 0.0
-				yard.fox_pending = 0
-				for bird: Chicken in yard.chickens:
-					bird.sick = false
-					bird.sick_seconds = 0.0
-				while yard.chickens.size() < hens.size():
-					yard.chickens.append(Chicken.create("leghorn"))
-		GameData.reload()
+		chore.append("leghorn")
+	var yard := _fresh_state(chore, 10000000.0)
+	yard.days = 40
+	var zachorowania := 0
+	for i in 20:
+		zachorowania += int(Simulation.advance(yard, 60.0 * GameData.time_scale())["got_sick"])
+	_check(zachorowania >= 8, "w aktywnej grze w 20 minut choruje kilkanascie kur (%d)" % zachorowania)
 
-	for key: String in ["fox", "disease"]:
-		var list: Array = gaps[key]
-		_check(list.size() > 50, "%s: zebralo sie %d odstepow do pomiaru" % [key, list.size()])
-		if list.is_empty():
-			continue
-		var total := 0
-		var worst := 0
-		for gap: int in list:
-			total += gap
-			worst = maxi(worst, gap)
-		# Odstepy mierzymy w minutach gry, a progi w balansie podane sa
-		# w minutach rzeczywistych — stad przeliczenie przez skale czasu.
-		var scale := GameData.time_scale()
-		var average := float(total) / list.size() / scale
-		var worst_real := float(worst) / scale
-		var config: Dictionary = GameData.balance().get(key, {})
-		var hard := float(config.get("hard_minutes", 0.0))
-		var mean := float(config.get("mean_minutes", 15.0))
-		_check(average >= mean * 0.4 and average <= hard,
-				"%s: sredni odstep %.1f min miesci sie miedzy %.0f a %.0f" % [
-					key, average, mean * 0.4, hard])
-		# To jest sedno prosby wlasciciela: po tylu minutach grania zdarzenie
-		# wypada NA PEWNO, bez zadnego losowania.
-		# Pomiar idzie w kubelkach po jednej minucie GRY, czyli 1/scale minut
-		# rzeczywistych — o tyle zmierzona cisza moze przekroczyc gwarancje,
-		# zanim zdarzenie zdazy sie zameldowac.
-		var bucket := 1.0 / scale
-		_check(worst_real <= hard + bucket + 0.5,
-				"%s: najdluzsza cisza to %.1f min, gwarancja %.0f min" % [key, worst_real, hard])
-	_check(float(GameData.balance().get("disease", {}).get("mean_minutes", 15))
-			< float(GameData.balance().get("fox", {}).get("mean_minutes", 45)),
-			"choroba zdarza sie czesciej niz lis")
+	var spiace := _fresh_state(chore, 10000000.0)
+	spiace.days = 40
+	var offline_chore := 0
+	for i in 20:
+		offline_chore += int(Simulation.advance(spiace, 60.0 * GameData.time_scale(), true)["got_sick"])
+	_check(offline_chore == 0,
+			"w nieaktywnej grze te same 20 minut nie daje zachorowan (%d)" % offline_chore)
 
-	# Droga rasa choruje czesciej od taniej.
-	_force_event("disease")
-	var cheap := 0
-	var dear := 0
-	for r in 300:
-		var mixed := _fresh_state(
-				["leghorn", "leghorn", "leghorn", "cemani", "cemani", "cemani"], 100000.0)
-		mixed.days = 40
-		_arm_event(mixed, "disease")
-		Simulation.advance(mixed, 1.0)
-		for bird: Chicken in mixed.chickens:
-			if not bird.sick:
-				continue
-			if bird.breed_id == "cemani":
-				dear += 1
-			else:
-				cheap += 1
-	_check(dear > cheap * 2,
-			"cemani choruje czesciej niz leghorn (%d do %d)" % [dear, cheap])
-
-	# Choroba dotyka jednej kury na raz, nie calego stada naraz.
-	var flock := _fresh_state(hens, 1000000.0)
-	flock.days = 10
-	_arm_event(flock, "disease")
-	Simulation.advance(flock, 1.0)
-	_check(flock.sick_count() == 1, "jedno losowanie to jedna chora kura")
-	GameData.reload()
-	Game.new_game()
-
-
-## Diagnoza polaczenia z serwerem. Wlasciciel dostawal naprzemiennie "serwer
-## nie odpowiada" i "nie ma takiej farmy" i nie bylo jak zgadnac, co naprawic.
-## Kazdy kod HTTP ma teraz wlasne zdanie, ktore mowi, co z nim zrobic.
 func _test_server_diagnosis() -> void:
 	var cases := [
 		[HTTPRequest.RESULT_SUCCESS, 401, -1, "RLS"],
@@ -1567,7 +1546,18 @@ func _test_buildings() -> void:
 	# Obrona przed lisem.
 	_check(is_equal_approx(Game.state.fox_block_chance(), 0.0), "na starcie brak obrony")
 	_check(Game.upgrade_building("guard"), "plot da sie postawic")
-	_check(Game.state.fox_block_chance() >= 0.6, "plot zawraca lisa od zagrody")
+	# Drabinka plotow wedlug wlasciciela: 200/50%, 400/65%, 800/80%, 2000/95%.
+	_check(is_equal_approx(Game.state.fox_block_chance(), 0.5),
+			"lichy plot zawraca lisa w polowie podejsc")
+	var plot_ceny := [200, 400, 800, 2000]
+	var plot_szanse := [0.5, 0.65, 0.8, 0.95]
+	var plot_upgrades: Array = GameData.balance().get("buildings", {}).get("guard", {}).get("upgrades", [])
+	_check(plot_upgrades.size() == 4, "sa cztery poziomy plotu")
+	for i in mini(4, plot_upgrades.size()):
+		_check(int(plot_upgrades[i].get("price", 0)) == plot_ceny[i],
+				"plot %d kosztuje %d zl" % [i + 1, plot_ceny[i]])
+		_check(is_equal_approx(float(plot_upgrades[i].get("block_chance", 0.0)), plot_szanse[i]),
+				"plot %d zawraca w %d%% podejsc" % [i + 1, int(plot_szanse[i] * 100)])
 
 	# Bez pieniedzy nie ma rozbudowy.
 	Game.state.money = 0.0

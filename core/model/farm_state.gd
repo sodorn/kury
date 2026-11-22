@@ -40,7 +40,24 @@ var event_dry: Dictionary = {}
 ## Trwajaca wizyta lisa: ile sekund jeszcze biega po wybiegu. Dopoki trwa,
 ## kury sa tylko zagrozone — zabiera je dopiero na koniec wizyty. Dzieki temu
 ## gracz, ktory akurat patrzy na ekran, ma szanse go przegonic.
+## Wizyta lisa, liczona w sekundach REALNYCH. Dotad czesc pol liczyla czas
+## gry, a czesc zegarek, i na tym sie przewrocilismy — tutaj wszystko, co
+## dotyczy lisa i choroby, jest w czasie realnym.
 var fox_visit_left: float = 0.0
+## Ile kur lis zamierza jeszcze porwac w tej wizycie i ile sekund zostalo do
+## nastepnej. Zabija po jednej przez cala wizyte, a nie wszystkie na koniec.
+var fox_kill_left: int = 0
+var fox_kill_timer: float = 0.0
+## Co ile sekund lis siega po kolejna kure w tej wizycie.
+var fox_kill_pace: float = 1.0
+## Ile jeszcze trafien palcem trzeba, zeby go przegonic.
+var fox_taps_left: int = 0
+## Sekundy uzbierane do nastepnego losowania i znacznik, ze ostatnim razem
+## gracz przegonil lisa recznie — wtedy wraca szybciej.
+var fox_roll_timer: float = 0.0
+var fox_hand_scared: bool = false
+## Sekundy do nastepnego zachorowania.
+var disease_timer: float = 0.0
 ## Ile kur lis zabierze, jesli nikt go nie przegoni.
 var fox_pending: int = 0
 ## Poziomy rozbudowy budynkow: kurnik, magazyn i obrona przed lisem.
@@ -382,20 +399,24 @@ func feed_pack() -> Dictionary:
 ## Ile razy rzadziej przychodzi lis dzieki plotowi albo psu.
 ## Szansa, ze obrona zawroci lisa od zagrody, zanim ten w ogole wejdzie.
 ## Losowana przy kazdym podejsciu, wiec nawet pelna obrona kiedys przepusci.
-## Ile sekund lis ma na wybiegu, zanim pies go wygoni. Bez psa tyle, ile
-## mowi balans lisa — czyli caly jego spacer.
+## Pelna dlugosc wizyty lisa w sekundach REALNYCH, gdy nikt mu nie przeszkadza.
 func fox_visit_seconds() -> float:
-	var full := maxf(1.0, float(GameData.balance().get("fox", {}).get("visit_seconds", 7.0)))
-	if dog_level <= 0:
-		return full
-	return minf(full, maxf(0.5, float(current_building_upgrade("dog").get("seconds", full))))
+	return maxf(5.0, float(GameData.balance().get("fox", {}).get("visit_minutes", 3.0)) * 60.0)
 
 
-## Jaka czesc upatrzonego lupu lis zdazy zabrac, zanim pies go dopadnie.
-func fox_dog_share() -> float:
+## Szansa, ze pies w ogole da rade przegonic lisa. Bez psa zero.
+func dog_chance() -> float:
 	if dog_level <= 0:
-		return 1.0
-	return clampf(float(current_building_upgrade("dog").get("share", 1.0)), 0.0, 1.0)
+		return 0.0
+	return clampf(float(current_building_upgrade("dog").get("chance", 0.0)), 0.0, 1.0)
+
+
+## Ile realnych sekund zajmuje psu przegonienie lisa. Przez ten czas lis
+## dalej zabija, uciekajac.
+func dog_seconds() -> float:
+	if dog_level <= 0:
+		return 0.0
+	return maxf(1.0, float(current_building_upgrade("dog").get("seconds", 60.0)))
 
 
 func fox_block_chance() -> float:

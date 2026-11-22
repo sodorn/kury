@@ -76,27 +76,31 @@
     "reference_hens": 10
   },
   "disease": {
-    "_opis": "Te same zasady co u lisa, liczone w minutach rzeczywistych. Chorob liczy sie na cale gospodarstwo, nie na kure. Szansa, ze padnie na konkretna kure, rosnie z jej cena: droga rasa choruje czesciej (waga = pierwiastek z ceny). Chorej kury skup nie przyjmuje.",
+    "_opis": "CHOROBA. W grze AKTYWNEJ co active_minutes minut realnych choruje kolejna kura, w NIEaktywnej co offline_hours godzin realnych. Przez pierwsze grace_minutes i przy stadzie mniejszym niz min_hens nikt nie choruje. Drozsza rasa choruje czesciej (waga to pierwiastek z ceny). Chora kura pada po death_minutes minutach GRY, jesli jej nie wyleczysz.",
     "death_minutes": 7.0,
-    "medicine_price": 10,
+    "medicine_price": 20,
     "vaccine_price": 200,
     "vaccine_price_per_hen": 0,
     "grace_minutes": 30,
     "min_hens": 5,
-    "mean_minutes": 10,
-    "hard_minutes": 20
+    "active_minutes": 1.0,
+    "offline_hours": 4.0,
+    "mcdonalds_price": 5
   },
   "fox": {
-    "_opis": "Przez pierwsze grace_minutes gry lis nie przychodzi i nie przychodzi do stada mniejszego niz min_hens. Potem co minute leci kostka ze szansa rosnaca wraz z cisza, a po hard_minutes bez lisa przychodzi NA PEWNO - bez losowania. Wszystkie te minuty liczone sa w czasie RZECZYWISTYM, nie w czasie gry; przeliczenie robi Simulation._event_fires.",
-    "min_share": 0.3,
-    "max_share": 0.9,
+    "_opis": "LIS. Losowanie jest proste i dokladnie takie, jak chcial wlasciciel: w grze AKTYWNEJ co active_roll_minutes minut realnych leci kostka z szansa active_chance; w grze NIEaktywnej co offline_roll_hours godzin realnych z szansa offline_chance. Lis nigdy nie przychodzi, gdy inny jest jeszcze na wybiegu, ani do stada mniejszego niz min_hens, ani przez pierwsze grace_minutes gry. Wizyta trwa visit_minutes minut realnych i przez caly ten czas lis zabija po jednej kurze, az wybierze swoj limit (min_share..max_share stada). Pierwsza kura ginie zaraz po wejsciu — lis ZAWSZE cos zabija. Gracz moze go przegonic, trafiajac w niego scare_taps razy; po takim przegonieniu lis wraca hand_return_factor raza szybciej, chyba ze gospodarstwo ma psa albo plot — wtedy kara nie dziala.",
+    "grace_minutes": 30.0,
     "min_hens": 5,
-    "visit_seconds": 10,
-    "scare_taps": 3,
-    "grace_minutes": 30,
-    "mean_minutes": 15,
-    "carcass_share": 0.5,
-    "hard_minutes": 30
+    "active_roll_minutes": 60.0,
+    "active_chance": 0.3333333333,
+    "offline_roll_hours": 24.0,
+    "offline_chance": 0.1666666667,
+    "visit_minutes": 3.0,
+    "min_share": 0.3,
+    "max_share": 0.6,
+    "scare_taps": 20,
+    "hand_return_factor": 0.1,
+    "carcass_share": 0.5
   },
   "win": {
     "_opis": "Jeden cel: pieniadze. Kolekcja ras przestala byc wyzwaniem, gdy zniknely progi odblokowania — po jednej sztuce kazdej rasy da sie kupic w niecale szesc godzin.",
@@ -173,32 +177,36 @@
       "_opis": "PLOT. block_chance to szansa, ze lis w ogole nie wejdzie na wybieg — losowana przy kazdym podejsciu. Plot nie ma nic wspolnego z psem: pies dziala dopiero wtedy, gdy lis juz wszedl.",
       "upgrades": [
         {
-          "block_chance": 0.6,
-          "price": 800
+          "block_chance": 0.5,
+          "price": 200
+        },
+        {
+          "block_chance": 0.65,
+          "price": 400
         },
         {
           "block_chance": 0.8,
-          "price": 1800
+          "price": 800
         },
         {
-          "block_chance": 1.0,
-          "price": 4000
+          "block_chance": 0.95,
+          "price": 2000
         }
       ]
     },
     "dog": {
-      "_opis": "PIES. Kupujesz raz, zostaje na zawsze i rzuca sie na kazdego lisa, ktory wejdzie na wybieg. Nie zatrzymuje go przy bramie (od tego jest plot) — skraca mu czas i zmniejsza lup. seconds: ile sekund lis ma, zanim pies go wygoni. share: jaka czesc planowanego lupu zdazy zabrac. Lis ZAWSZE zabiera co najmniej jedna kure — tak zyczyl sobie wlasciciel. Zero strat jest tylko wtedy, gdy gracz przegoni lisa palcem.",
+      "_opis": "PIES. Kupiony raz, zostaje i jest WIDOCZNY na podworku. Gdy lis wejdzie na wybieg, pies rusza za nim. chance to szansa, ze w ogole da rade; seconds to ile realnych sekund zajmuje mu przegonienie. Przez ten czas lis dalej zabija, uciekajac. Kundel radzi sobie w dwoch przypadkach na trzy i goni minute; owczarek zawsze i w trzy sekundy.",
       "upgrades": [
         {
           "name": "kundel",
-          "seconds": 5.0,
-          "share": 0.5,
+          "chance": 0.6666666667,
+          "seconds": 60.0,
           "price": 200
         },
         {
           "name": "owczarek",
-          "seconds": 2.0,
-          "share": 0.2,
+          "chance": 1.0,
+          "seconds": 3.0,
           "price": 500
         }
       ]

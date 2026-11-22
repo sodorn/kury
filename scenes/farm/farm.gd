@@ -16,13 +16,19 @@ const CHICKEN_SCENE: PackedScene = preload("res://scenes/farm/farm_chicken.tscn"
 const EGG_SCENE: PackedScene = preload("res://scenes/farm/ground_egg.tscn")
 const CORPSE_SCENE: PackedScene = preload("res://scenes/farm/farm_corpse.tscn")
 const FOX_SCENE: PackedScene = preload("res://scenes/farm/fox.tscn")
+const DOG_SCENE: PackedScene = preload("res://scenes/farm/dog.tscn")
+## Gdzie siedzi pies, gdy nic sie nie dzieje: pod kurnikiem, przy wybiegu.
+const DOG_HOME := Vector2(196.0, 905.0)
 
 var _sync_left := 0.0
 ## Obszar, po ktorym chodza kury. Czytany z balance.json, zeby symulacja
 ## (kladzie zwloki) i scena uzywaly tych samych wspolrzednych.
 var _run := Rect2()
 
+var _dog: FarmDog = null
+
 @onready var _objects: Node2D = $Objects
+@onready var _decals: Node2D = $Decals
 
 
 func _ready() -> void:
@@ -32,6 +38,7 @@ func _ready() -> void:
 	Events.fox_repelled.connect(_on_fox_repelled)
 	_center_world()
 	_sync_livestock()
+	_sync_dog()
 
 
 func _process(delta: float) -> void:
@@ -39,6 +46,7 @@ func _process(delta: float) -> void:
 	if _sync_left <= 0.0:
 		_sync_left = SYNC_SECONDS
 		_sync_livestock()
+		_sync_dog()
 
 
 func _center_world() -> void:
@@ -224,17 +232,55 @@ func _sync_corpses() -> void:
 
 ## Lis wszedl na wybieg. Scena go pokazuje; o tym, czy cos zabierze,
 ## decyduje symulacja — albo gracz, jesli zdazy go przegonic.
+## Na wybiegu moze byc najwyzej JEDEN lis. Wczesniej kazdy sygnal przyjscia
+## dokladal nowego, a stare nie mialy jak zniknac — wlasciciel skonczyl
+## z trzema lisami naraz, ktore nie odchodzily.
 func _on_fox_arrived(_count: int, seconds: float) -> void:
-	var fox: Node2D = FOX_SCENE.instantiate()
+	for node in _objects.get_children():
+		if node is FarmFox:
+			return
+	var fox: FarmFox = FOX_SCENE.instantiate()
 	_objects.add_child(fox)
+	fox.set_decals(_decals)
 	fox.run_through(_run, seconds)
+	if _dog != null:
+		_dog.chase(fox, _run)
+
+
+## Pies pojawia sie na podworku, gdy tylko gracz go kupi, i znika razem
+## z farma, na ktorej go nie ma. Wlasciciel kupil psa i go nie zobaczyl —
+## bo wczesniej pies istnial wylacznie jako liczba w panelu.
+func _sync_dog() -> void:
+	if Game.state == null:
+		return
+	var powinien := Game.state.dog_level > 0
+	if powinien == (_dog != null and is_instance_valid(_dog)):
+		return
+	if powinien:
+		_dog = DOG_SCENE.instantiate()
+		_dog.position = DOG_HOME
+		_objects.add_child(_dog)
+	elif _dog != null:
+		_dog.queue_free()
+		_dog = null
+
+
+## Sprzatanie po wczytaniu gry: zaden lis nie przezywa przeladowania.
+func clear_foxes() -> void:
+	for node in _objects.get_children():
+		if node is FarmFox:
+			node.queue_free()
 
 
 ## Plot zawrocil lisa. Pokazujemy go mimo wszystko: wbiega, rozglada sie
 ## i wychodzi z niczym. Bez tego zakup plotu wyglada, jakby nic nie zmienil.
 func _on_fox_repelled() -> void:
+	for node in _objects.get_children():
+		if node is FarmFox:
+			return
 	var fox: FarmFox = FOX_SCENE.instantiate()
 	_objects.add_child(fox)
+	fox.set_decals(_decals)
 	fox.sniff_and_leave(_run)
 
 

@@ -30,6 +30,8 @@ script = ExtResource("1")
 texture = ExtResource("2")
 centered = false
 
+[node name="Decals" type="Node2D" parent="."]
+
 [node name="Objects" type="Node2D" parent="."]
 y_sort_enabled = true
 

@@ -4,9 +4,11 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.0): plot i pies rozdzielone na
-  dwie niezalezne sciezki obrony, format zapisu 6 z przeliczeniem
-  starych farm.
+- Aktualny etap: **ETAP 10** (wersja 12.1): lis przebudowany od zera —
+  zawsze odchodzi, nigdy nie ma go kilku naraz, przegania sie go palcem,
+  a pies jest widoczny i goni.
+- Wersja 12.0: plot i pies rozdzielone na dwie niezalezne sciezki
+  obrony, format zapisu 6 z przeliczeniem starych farm.
 - Wersja 11.6: znaleziona i naprawiona przyczyna "serwer nie odpowiada"
   przy wczytywaniu farmy z kodu — Godot nie rozpakowywal odpowiedzi
   serwera (kod 8).
@@ -29,7 +31,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`, `v11.6-rozpakowanie-odpowiedzi`, `v12.0-plot-i-pies`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`, `v11.6-rozpakowanie-odpowiedzi`, `v12.0-plot-i-pies`, `v12.1-lis-od-nowa`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -191,6 +193,66 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## WERSJA 12.1: lis przebudowany od zera
+
+Wlasciciel zglosil, ze ma na farmie TRZY LISY, ktore nie odchodza. Blad
+byl prawdziwy i moj:
+
+    _fox_takes():  taken = min(taken, chickens.size() - 1)
+                   if taken <= 0: return     <- nie emituje fox_visited
+
+Sprite lisa znikal WYLACZNIE po sygnale `fox_visited` albo `fox_scared`.
+Gdy stado bylo male (albo budzet strat wyczerpany), `taken` wychodzilo
+zero, sygnal nie szedl i lis zostawal na wybiegu na zawsze. Kazde
+kolejne przyjscie dokladalo nastepnego.
+
+Dwie poprawki, zeby to sie nie powtorzylo przy zadnej przyszlej zmianie:
+- Lis SAM pilnuje swojego czasu (`_process` odlicza `_life`) i odchodzi,
+  nawet jesli zaden sygnal nie przyjdzie. Zycie sprite'a nie moze
+  zalezec od cudzego sygnalu.
+- Farma nie wpuszcza drugiego lisa, dopoki pierwszy jest na wybiegu.
+
+Nowe zasady, wprost wedlug wlasciciela:
+
+    LOSOWANIE   gra aktywna:    kostka raz na godzine realna, szansa 1/3
+                gra nieaktywna: kostka raz na dobe, szansa 1/6
+    WIZYTA      3 minuty realne, lis zabija po jednej kurze przez caly
+                ten czas, az wybierze 30-60% stada
+    PIERWSZA    ginie zaraz po wejsciu — lis ZAWSZE cos zabiera
+    PALEC       20 trafien przegania lisa; po kazdym odskakuje gdzie
+                indziej, wiec trzeba za nim nadazyc
+    ODWET       przegoniony golymi rekami wraca 10 razy szybciej, chyba
+                ze gospodarstwo ma psa albo plot — wtedy kara nie dziala
+    OFFLINE     lis rozlicza sie od razu i odchodzi; gracz dostaje po
+                powrocie informacje, ile kur zginelo (nie zastaje lisa)
+
+PIES jest wreszcie WIDOCZNY. Dotad istnial tylko jako liczba w panelu —
+wlasciciel kupil go i nie zobaczyl. Teraz siedzi przy kurniku, a gdy lis
+wejdzie, rusza za nim i trzyma sie tuz za jego ogonem.
+
+    kundel    200 zl  daje rade w 2 przypadkach na 3, goni ok. minuty
+    owczarek  500 zl  daje rade zawsze, przegania w 3 sekundy
+
+Pies nie zatrzymuje lisa przy bramie — skraca mu wizyte. Poniewaz lis
+zabija stopniowo, kazda sekunda skrocenia to uratowana kura.
+
+PLOT, nowa drabinka: 200/50%, 400/65%, 800/80%, 2000/95%.
+
+CHOROBA: lek 20 zl zamiast 10. Nowe tempo — w grze aktywnej kolejna kura
+choruje co minute realna, w nieaktywnej co cztery godziny. Chora sztuka
+idzie do skupu za 5 zl zamiast darmowego uboju.
+
+Odpowiedz na pytanie wlasciciela, czy da sie odroznic gre aktywna od
+nieaktywnej: TAK, i bylo to mozliwe od poczatku. `Simulation.advance`
+dostaje flage `offline`; nadrabianie czasu po powrocie woła ja z `true`,
+a zwykla klatka z `false`. Teraz obie sciezki maja osobne liczby.
+
+GRAFIKA: lis nizszy i wyrazniej podluzny (viewBox 230x104 zamiast
+190x130), kica po wybiegu zamiast bujac sie w jednym miejscu jak kon na
+biegunach. Plamy krwi przeniesione do warstwy `Decals` miedzy trawa
+a zwierzetami i splaszczone w pionie — wczesniej lezaly nad wszystkim
+i wygladaly, jakby unosily sie w powietrzu.
 
 ## WERSJA 12.0: plot i pies to dwie osobne rzeczy
 

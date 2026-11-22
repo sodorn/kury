@@ -1,17 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="190" height="130" viewBox="0 0 190 130">
-  <!-- Lis skradajacy sie w prawo. Ten sam styl co kury: gruby jasny kontur,
+<svg xmlns="http://www.w3.org/2000/svg" width="230" height="104" viewBox="0 0 230 104">
+  <!-- Lis skradajacy sie w prawo. Nizszy i wyrazniej podluzny niz poprzednia
+       wersja: wlasciciel slusznie zauwazyl, ze byl za wysoki jak na zwierze,
+       ktore ma smigac po wybiegu. Ten sam styl co kury: gruby jasny kontur,
        gradienty, zadnych filtrow SVG (ThorVG ich nie obsluguje). -->
   <defs>
-    <radialGradient id="fxBody" cx="76" cy="62" r="70" gradientUnits="userSpaceOnUse">
+    <radialGradient id="fxBody" cx="96" cy="56" r="78" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#FFA863"/>
       <stop offset="0.6" stop-color="#F08A42"/>
       <stop offset="1" stop-color="#D46A28"/>
     </radialGradient>
-    <radialGradient id="fxHead" cx="146" cy="48" r="38" gradientUnits="userSpaceOnUse">
+    <radialGradient id="fxHead" cx="182" cy="50" r="32" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#FFB273"/>
       <stop offset="1" stop-color="#E67D36"/>
     </radialGradient>
-    <linearGradient id="fxTail" x1="4" y1="40" x2="56" y2="86" gradientUnits="userSpaceOnUse">
+    <linearGradient id="fxTail" x1="2" y1="42" x2="62" y2="72" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#FFF3DF"/>
       <stop offset="0.45" stop-color="#F59A4E"/>
       <stop offset="1" stop-color="#D46A28"/>
@@ -19,36 +21,35 @@
   </defs>
 
   <g stroke="#8A6A55" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
-    <ellipse cx="96" cy="120" rx="68" ry="8" fill="#6B8F4E" fill-opacity="0.26" stroke="none"/>
+    <ellipse cx="112" cy="96" rx="84" ry="7" fill="#6B8F4E" fill-opacity="0.26" stroke="none"/>
 
-    <!-- puszysta kita z bialym koncem -->
-    <path d="M44 78Q6 86 10 48Q26 30 44 46Q58 62 50 80Z" fill="url(#fxTail)"/>
-    <path d="M14 54Q8 72 24 80Q14 68 20 56Z" fill="#FFF6E6" stroke="none"/>
+    <!-- kita wyciagnieta poziomo za lisem, jak w biegu -->
+    <path d="M52 62Q10 50 6 70Q10 88 34 80Q50 74 56 68Z" fill="url(#fxTail)"/>
+    <path d="M12 66Q6 76 16 81Q10 73 16 67Z" fill="#FFF6E6" stroke="none"/>
 
-    <!-- nogi w pol kroku -->
-    <path d="M62 92v22M78 96v18" stroke="#C4601F" stroke-width="9"/>
-    <path d="M108 92v22M124 96v18" stroke="#D46A28" stroke-width="9"/>
+    <!-- nogi w pol susa: tylne wyrzucone w tyl, przednie wyciagniete -->
+    <path d="M70 76l-8 16M88 80l-4 14" stroke="#C4601F" stroke-width="9"/>
+    <path d="M140 80l2 14M158 76l8 16" stroke="#D46A28" stroke-width="9"/>
 
-    <!-- tulow przyczajony, niski -->
-    <ellipse cx="94" cy="70" rx="56" ry="29" fill="url(#fxBody)"/>
-    <path d="M52 84Q94 98 138 82Q96 92 52 84Z" fill="#FFF3DF" stroke="none"/>
+    <!-- tulow dlugi i plaski -->
+    <ellipse cx="112" cy="62" rx="68" ry="22" fill="url(#fxBody)"/>
+    <path d="M56 72Q112 86 170 70Q114 80 56 72Z" fill="#FFF3DF" stroke="none"/>
 
-    <!-- glowa -->
-    <circle cx="146" cy="52" r="28" fill="url(#fxHead)"/>
-    <!-- uszy -->
-    <path d="M128 32L122 4l24 14Z" fill="#E67D36"/>
-    <path d="M156 28L166 4l10 24Z" fill="#E67D36"/>
-    <path d="M131 28l-3-14l12 7Z" fill="#8A5A3C" stroke="none"/>
-    <path d="M160 26l6-13l5 13Z" fill="#8A5A3C" stroke="none"/>
+    <!-- glowa nisko, wysunieta do przodu -->
+    <ellipse cx="184" cy="52" rx="26" ry="23" fill="url(#fxHead)"/>
+    <!-- male, przylozone uszy -->
+    <path d="M170 34L164 14l20 12Z" fill="#E67D36"/>
+    <path d="M194 32L204 14l8 20Z" fill="#E67D36"/>
+    <path d="M172 31l-2-10l9 5Z" fill="#8A5A3C" stroke="none"/>
+    <path d="M197 30l5-9l4 9Z" fill="#8A5A3C" stroke="none"/>
 
-    <!-- jasny pysk -->
-    <path d="M150 50q28 0 32 14q-6 14-32 12q-10-14 0-26Z" fill="#FFF6E6"/>
-    <!-- nos -->
-    <ellipse cx="184" cy="62" rx="6" ry="5" fill="#5C4030" stroke="none"/>
+    <!-- jasny, wydluzony pysk -->
+    <path d="M188 46q30 2 34 14q-7 12-34 10q-9-12 0-24Z" fill="#FFF6E6"/>
+    <ellipse cx="223" cy="59" rx="6" ry="5" fill="#5C4030" stroke="none"/>
 
     <!-- oko przymkniete, lis sie skrada -->
-    <path d="M150 44q7-4 13 0" fill="none" stroke-width="4"/>
-    <circle cx="156" cy="48" r="4" fill="#5C4030" stroke="none"/>
-    <circle cx="157.4" cy="46.6" r="1.5" fill="#FFFFFF" stroke="none"/>
+    <path d="M188 40q7-4 13 0" fill="none" stroke-width="4"/>
+    <circle cx="194" cy="45" r="4" fill="#5C4030" stroke="none"/>
+    <circle cx="195.4" cy="43.6" r="1.5" fill="#FFFFFF" stroke="none"/>
   </g>
 </svg>

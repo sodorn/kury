@@ -47,6 +47,9 @@ static func to_dict(state: FarmState) -> Dictionary:
 		"storage_level": state.storage_level,
 		"guard_level": state.guard_level,
 		"dog_level": state.dog_level,
+		"fox_roll_timer": state.fox_roll_timer,
+		"fox_hand_scared": state.fox_hand_scared,
+		"disease_timer": state.disease_timer,
 		"fox_visit_left": state.fox_visit_left,
 		"fox_pending": state.fox_pending,
 		"event_dry": state.event_dry,
@@ -82,6 +85,14 @@ static func from_dict(data: Dictionary) -> Dictionary:
 	# w trakcie, nie ma czego przeganiac po powrocie.
 	state.fox_visit_left = 0.0
 	state.fox_pending = 0
+	state.fox_kill_left = 0
+	state.fox_kill_timer = 0.0
+	state.fox_taps_left = 0
+	# Licznik do losowania i znacznik recznego przegonienia przenosza sie —
+	# dzieki temu kara za przegonienie golymi rekami przezywa wylaczenie gry.
+	state.fox_roll_timer = maxf(0.0, float(data.get("fox_roll_timer", 0.0)))
+	state.fox_hand_scared = bool(data.get("fox_hand_scared", false))
+	state.disease_timer = maxf(0.0, float(data.get("disease_timer", 0.0)))
 	# Licznik suchych minut przenosi sie przez zapis — na tym polega narastanie
 	# szansy przy graniu z doskoku. Stare zapisy zaczynaja od zera.
 	state.event_dry = {}

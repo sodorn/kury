@@ -749,6 +749,12 @@ func _test_sick_and_fox_look() -> void:
 	await _frames(60)
 	var foxes := _nodes_of_type("FarmFox")
 	_check(foxes.size() == 1, "lis wszedl na wybieg")
+	# Drugi sygnal przyjscia NIE moze dolozyc drugiego lisa. Wlasciciel
+	# skonczyl z trzema naraz, ktore nie odchodzily.
+	Events.fox_arrived.emit(3, 7.0)
+	Events.fox_arrived.emit(3, 7.0)
+	await _frames(20)
+	_check(_nodes_of_type("FarmFox").size() == 1, "na wybiegu jest najwyzej JEDEN lis")
 	_shot("lis_na_wybiegu.png")
 	Events.fox_visited.emit(3)
 	await _frames(20)
@@ -760,17 +766,35 @@ func _test_sick_and_fox_look() -> void:
 	_check(feathers_on, "po napasci leca piora")
 	_check(blood_on, "po napasci leci krew")
 	# Plamy krwi zostaja na wybiegu, wiec sa dziecmi kontenera, nie lisa.
+	# Plamy krwi leza w warstwie dekoracji POD zwierzetami, zeby nie zaslanialy
+	# kur i nie wygladaly, jakby unosily sie w powietrzu.
 	var splats := 0
-	for child in _main.get_node("Farm/Objects").get_children():
+	var splat_scale := Vector2.ONE
+	for child in _main.get_node("Farm/Decals").get_children():
 		var sprite := child as Sprite2D
 		if sprite != null and sprite.texture != null \
 				and sprite.texture.resource_path.ends_with("blood_splat.svg"):
 			splats += 1
-	_check(splats > 0, "na wybiegu zostaly plamy krwi (jest %d)" % splats)
+			splat_scale = sprite.scale
+	_check(splats > 0, "plamy krwi leza w warstwie dekoracji (jest %d)" % splats)
+	var decals: Node2D = _main.get_node("Farm/Decals")
+	var objects: Node2D = _main.get_node("Farm/Objects")
+	_check(decals.get_index() > (_main.get_node("Farm/Ground") as Node2D).get_index(),
+			"warstwa plam jest NAD trawa, inaczej plam w ogole nie widac")
+	_check(decals.get_index() < objects.get_index(),
+			"warstwa plam jest POD zwierzetami")
+	_check(splat_scale.y < splat_scale.x,
+			"plama jest splaszczona, czyli lezy na ziemi (%.2f x %.2f)" % [splat_scale.x, splat_scale.y])
 	_shot("lis_piora.png")
-	await _seconds(2.0)
-	_check(_nodes_of_type("FarmFox").is_empty(), "lis odszedl z wybiegu")
+
+	# Napasc NIE konczy wizyty: lis poluje dalej, az skonczy mu sie czas.
+	await _seconds(1.5)
+	_check(_nodes_of_type("FarmFox").size() == 1, "po napasci lis zostaje i poluje dalej")
 	_shot("lis_krew.png")
+
+	# Ale po swoim czasie odchodzi sam, bez zadnego sygnalu z gry.
+	await _seconds(7.0)
+	_check(_nodes_of_type("FarmFox").is_empty(), "lis odchodzi sam, gdy minie jego czas")
 
 	# Lis zawrocony przez plot: ma przebiec i zniknac, nic nie zabierajac.
 	var flock_before := Game.state.hen_count()
