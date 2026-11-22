@@ -770,7 +770,8 @@ func _test_sick_and_fox_look() -> void:
 	# kur i nie wygladaly, jakby unosily sie w powietrzu.
 	var splats := 0
 	var splat_scale := Vector2.ONE
-	for child in _main.get_node("Farm/Decals").get_children():
+	var decals_children := _main.get_node("Farm/Decals").get_children()
+	for child in decals_children:
 		var sprite := child as Sprite2D
 		if sprite != null and sprite.texture != null \
 				and sprite.texture.resource_path.ends_with("blood_splat.svg"):
@@ -783,6 +784,14 @@ func _test_sick_and_fox_look() -> void:
 			"warstwa plam jest NAD trawa, inaczej plam w ogole nie widac")
 	_check(decals.get_index() < objects.get_index(),
 			"warstwa plam jest POD zwierzetami")
+	# Urwane glowy wylatuja z miejsca napasci i laduja na wybiegu.
+	var heads := 0
+	for child in decals_children:
+		var sprite := child as Sprite2D
+		if sprite != null and sprite.texture != null \
+				and sprite.texture.resource_path.ends_with("hen_head.svg"):
+			heads += 1
+	_check(heads > 0, "po napasci lataja urwane glowy (jest %d)" % heads)
 	_check(splat_scale.y < splat_scale.x,
 			"plama jest splaszczona, czyli lezy na ziemi (%.2f x %.2f)" % [splat_scale.x, splat_scale.y])
 	_shot("lis_piora.png")

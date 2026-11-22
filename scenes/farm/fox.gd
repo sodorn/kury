@@ -19,6 +19,10 @@ const TAP_MAX_MOVE := 36.0
 const SPLATS_MAX := 6
 const SPLAT_SECONDS := 300.0
 const SPLAT := preload("res://assets/ui/blood_splat.svg")
+## Urwana glowa, ktora wylatuje z kury w chwili napasci.
+const HEAD := preload("res://assets/sprites/animals/hen_head.svg")
+## Ile glow moze fruwac naraz, zeby przy duzym lupie nie zrobil sie deszcz.
+const HEADS_MAX := 3
 
 var _leaving := false
 var _pressed_touch: int = -1
@@ -92,6 +96,7 @@ func _on_caught(count: int) -> void:
 	_feathers.emitting = true
 	_blood.emitting = true
 	_spill_blood(count)
+	_pop_heads(count)
 	var farm := get_parent().get_parent() as Node2D
 	if farm != null:
 		var base := farm.position
@@ -105,6 +110,44 @@ func _on_caught(count: int) -> void:
 			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	pounce.tween_property(_sprite, "position:y", _sprite.position.y, 0.1) \
 			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+
+
+## Urwane glowy wylatuja z miejsca napasci, kreca sie w powietrzu i laduja
+## na wybiegu, gdzie powoli znikaja razem z krwia. Groteska jest zamierzona:
+## cala reszta gry jest cukierkowa i wlasnie o ten kontrast chodzi.
+func _pop_heads(count: int) -> void:
+	var host: Node = _decals if _decals != null else get_parent()
+	if host == null:
+		return
+	for i in mini(maxi(1, count), HEADS_MAX):
+		var head := Sprite2D.new()
+		head.texture = HEAD
+		head.z_index = 1
+		head.position = position + Vector2(randf_range(-20.0, 20.0), randf_range(-30.0, -10.0))
+		head.scale = Vector2.ONE * randf_range(0.7, 0.95)
+		host.add_child(head)
+
+		var away := head.position + Vector2(
+				randf_range(-260.0, 260.0), randf_range(40.0, 120.0))
+		var peak := head.position.y - randf_range(90.0, 170.0)
+		var flight := randf_range(0.45, 0.7)
+
+		var spin := head.create_tween()
+		spin.tween_property(head, "rotation", randf_range(-9.0, 9.0), flight)
+
+		var arc := head.create_tween()
+		arc.set_parallel()
+		arc.tween_property(head, "position:x", away.x, flight).set_trans(Tween.TRANS_LINEAR)
+		var up := arc.chain()
+		up.tween_property(head, "position:y", peak, flight * 0.45) \
+				.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		up.tween_property(head, "position:y", away.y, flight * 0.55) \
+				.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		# Po ladowaniu glowa kladzie sie plasko i zostaje razem z kaluza.
+		up.tween_property(head, "scale:y", head.scale.y * 0.72, 0.1)
+		up.tween_interval(SPLAT_SECONDS * 0.4)
+		up.tween_property(head, "modulate:a", 0.0, SPLAT_SECONDS * 0.6)
+		up.tween_callback(head.queue_free)
 
 
 ## Plamy krwi zostaja na wybiegu i powoli znikaja. Ida do warstwy dekoracji

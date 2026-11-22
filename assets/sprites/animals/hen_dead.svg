@@ -1,40 +1,51 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="140" height="90" viewBox="0 0 140 90">
-  <!-- Padla kura lezaca na boku. Kolory zgaszone, bez krwi: scena ma byc
-       smutna, nie makabryczna. Grafika jest bialoszara, a kod podbarwia ja
-       na kolor rasy i wygasza w miare rozkladu. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="96" viewBox="0 0 160 96">
+  <!-- Kura po wizycie lisa: bez glowy, w kaluzy, nogi sztywno w gore.
+       Groteska jest tu zamierzona — wlasciciel chce kontrastu miedzy
+       cukierkowa resztą gry a tym, co zostaje po napasci. Kaluza jest
+       mocno splaszczona, bo na wybieg patrzymy pod katem; okragla
+       wygladalaby jak stojaca tarcza.
+       Grafika jest bialoszara, kod podbarwia ja na kolor rasy i wygasza
+       w miare rozkladu. Zadnych filtrow SVG — ThorVG ich nie obsluguje. -->
   <defs>
-    <radialGradient id="dBody" cx="62" cy="48" r="48" gradientUnits="userSpaceOnUse">
+    <radialGradient id="dBody" cx="70" cy="50" r="48" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#E8E2D6"/>
       <stop offset="1" stop-color="#C7BFB1"/>
+    </radialGradient>
+    <radialGradient id="dPool" cx="78" cy="76" r="62" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A51B1B"/>
+      <stop offset="0.7" stop-color="#7E1212"/>
+      <stop offset="1" stop-color="#5E0C0C" stop-opacity="0"/>
     </radialGradient>
   </defs>
 
   <g stroke="#8A6A55" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
-    <ellipse cx="68" cy="78" rx="46" ry="8" fill="#6B8F4E" fill-opacity="0.22" stroke="none"/>
+    <!-- kaluza pod spodem, rozlana nieregularnie -->
+    <ellipse cx="80" cy="78" rx="62" ry="15" fill="url(#dPool)" stroke="none"/>
+    <ellipse cx="122" cy="82" rx="17" ry="5" fill="#8E1515" stroke="none"/>
+    <ellipse cx="34" cy="74" rx="11" ry="3.5" fill="#8E1515" stroke="none"/>
 
-    <!-- rozsypane piora obok -->
-    <path d="M18 70q-10-6-6-14q9 3 11 11Z" fill="#EFEAE0" stroke-width="3"/>
-    <path d="M118 66q10-5 7-13q-9 3-12 10Z" fill="#EFEAE0" stroke-width="3"/>
+    <!-- rozsypane piora, jedno zakrwawione -->
+    <path d="M18 66q-10-6-6-14q9 3 11 11Z" fill="#EFEAE0" stroke-width="3"/>
+    <path d="M134 60q10-5 7-13q-9 3-12 10Z" fill="#E8C9C4" stroke-width="3"/>
 
     <!-- ogon opuszczony na ziemie -->
-    <path d="M26 56Q8 50 10 36Q26 42 34 52Z" fill="#B6AC9C"/>
+    <path d="M28 54Q10 48 12 34Q28 40 36 50Z" fill="#B6AC9C"/>
 
     <!-- tulow lezacy poziomo -->
-    <ellipse cx="64" cy="52" rx="42" ry="24" fill="url(#dBody)"/>
+    <ellipse cx="66" cy="50" rx="42" ry="24" fill="url(#dBody)"/>
 
     <!-- skrzydlo odstajace do gory -->
-    <path d="M48 42Q66 24 86 38Q70 54 50 52Q44 47 48 42Z" fill="#DCD4C6"/>
+    <path d="M50 40Q68 22 88 36Q72 52 52 50Q46 45 50 40Z" fill="#DCD4C6"/>
 
     <!-- nogi sztywno w gore -->
-    <path d="M58 32v-16M58 16h-8M58 16h8" stroke="#C49B63" stroke-width="3.6"/>
-    <path d="M78 34v-14M78 20h-8M78 20h8" stroke="#C49B63" stroke-width="3.6"/>
+    <path d="M60 30v-16M60 14h-8M60 14h8" stroke="#C49B63" stroke-width="3.6"/>
+    <path d="M80 32v-14M80 18h-8M80 18h8" stroke="#C49B63" stroke-width="3.6"/>
 
-    <!-- glowa opadla w dol -->
-    <circle cx="104" cy="58" r="18" fill="#DED6C8"/>
-    <path d="M100 24q4-6 8-1" fill="none" stroke-width="3" stroke="#B6A99A"/>
-    <!-- dziob -->
-    <path d="M120 58l14 4-14 5Z" fill="#D2B178"/>
-    <!-- zamkniete oko -->
-    <path d="M106 54q5 2 9 0" fill="none" stroke-width="3.4"/>
+    <!-- kikut szyi: ciemna rana i strugi krwi splywajace po pierzu -->
+    <path d="M104 40q12 4 12 14q0 10-12 13q-9-13 0-27Z" fill="#C9C1B3"/>
+    <ellipse cx="112" cy="54" rx="9" ry="11" fill="#8E1515" stroke="#6E1010" stroke-width="3"/>
+    <ellipse cx="112" cy="54" rx="4" ry="5.5" fill="#B82323" stroke="none"/>
+    <path d="M110 65q-3 9 2 13" fill="none" stroke="#8E1515" stroke-width="5"/>
+    <path d="M118 62q2 8 7 10" fill="none" stroke="#8E1515" stroke-width="4"/>
   </g>
 </svg>

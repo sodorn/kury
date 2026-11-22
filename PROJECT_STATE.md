@@ -4,7 +4,9 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.1): lis przebudowany od zera —
+- Aktualny etap: **ETAP 10** (wersja 12.2): groteskowa smierc kur —
+  urwane glowy, kaluze krwi, kontrast z cukierkowa oprawa jest celowy.
+- Wersja 12.1: lis przebudowany od zera —
   zawsze odchodzi, nigdy nie ma go kilku naraz, przegania sie go palcem,
   a pies jest widoczny i goni.
 - Wersja 12.0: plot i pies rozdzielone na dwie niezalezne sciezki
@@ -31,7 +33,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`, `v11.6-rozpakowanie-odpowiedzi`, `v12.0-plot-i-pies`, `v12.1-lis-od-nowa`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`, `v11.6-rozpakowanie-odpowiedzi`, `v12.0-plot-i-pies`, `v12.1-lis-od-nowa`, `v12.2-groteska`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -193,6 +195,28 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## WERSJA 12.2: groteska zamiast stonowanej smierci
+
+Wlasciciel wyjasnil zamysl, ktory wczesniej zle odczytalem. Pastelowa,
+cukierkowa oprawa nie jest powodem, zeby lagodzic smierc kur — jest
+powodem, zeby tego NIE robic. Kontrast miedzy slodka grafika a tym, co
+zostaje po lisie, jest zartem. Ta sama mysl stoi za skupem chorych kur
+do McDonalda za 5 zl.
+
+Wprowadzone:
+- `hen_dead.svg` przerobiona: kura bez glowy, kikut szyi z rana, strugi
+  krwi po pierzu, kaluza splaszczona w poziomie (bo na wybieg patrzymy
+  pod katem), rozsypane piora, jedno zakrwawione.
+- Nowy `hen_head.svg`: urwana glowa, oko na krzyzyk, poszarpana szyja.
+  W chwili napasci wylatuje z kury, kreci sie w locie, laduje na wybiegu
+  i powoli znika razem z krwia. Najwyzej trzy naraz, zeby przy duzym
+  lupie nie robil sie deszcz glow.
+- Krew z chmurki zrobila sie strumieniem: 70 czastek zamiast 30, waski
+  rozrzut (55 zamiast 110 stopni), predkosc do 760 zamiast 470.
+
+Rejestr jest kreskowkowy, nie realistyczny — o to chodzi, zeby to bylo
+smieszne, a nie paskudne.
 
 ## WERSJA 12.1: lis przebudowany od zera
 

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="84" height="84" viewBox="0 0 84 84">
+  <!-- Urwana kurza glowa. Wylatuje z kury w chwili, gdy dopadnie ja lis,
+       krecac sie w powietrzu, i laduje na wybiegu. Oczy na krzyzyk, zeby
+       bylo jasne, ze to groteska, a nie proba realizmu.
+       Bialoszara — kod podbarwia ja na kolor rasy. -->
+  <defs>
+    <radialGradient id="hdSkull" cx="38" cy="34" r="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F2EDE3"/>
+      <stop offset="1" stop-color="#D6CEC0"/>
+    </radialGradient>
+  </defs>
+
+  <g stroke="#8A6A55" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <!-- grzebien -->
+    <path d="M26 18q4-10 10-2q5-9 10 0q5-8 8 2q-14 5-28 0Z" fill="#D86B6B"/>
+
+    <!-- czaszka -->
+    <circle cx="40" cy="36" r="22" fill="url(#hdSkull)"/>
+
+    <!-- dziob -->
+    <path d="M60 34l18 5-18 6Z" fill="#D2B178"/>
+
+    <!-- koralek -->
+    <path d="M52 50q6 2 5 9q-7 1-9-5Z" fill="#D86B6B" stroke-width="3"/>
+
+    <!-- oko na krzyzyk -->
+    <path d="M32 29l10 10M42 29l-10 10" stroke="#5C4030" stroke-width="4.5"/>
+
+    <!-- urwana szyja: poszarpana rana i kapiaca krew -->
+    <path d="M22 52q-8 6-6 16q10 6 20 0q2-11-6-16Z" fill="#C9C1B3"/>
+    <path d="M18 66q6 7 18 5q-2 6-10 6q-8 0-8-11Z" fill="#8E1515" stroke="#6E1010" stroke-width="3"/>
+    <ellipse cx="24" cy="78" rx="4" ry="5" fill="#B82323" stroke="none"/>
+  </g>
+</svg>
