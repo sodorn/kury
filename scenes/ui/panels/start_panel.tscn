@@ -51,6 +51,13 @@ theme_type_variation = &"NoteLabel"
 text = "START_ABOUT"
 autowrap_mode = 3
 
+[node name="Gate" type="Label" parent="Sheet/Content"]
+layout_mode = 2
+theme_type_variation = &"NoteLabel"
+autowrap_mode = 3
+visible = false
+text = "kod"
+
 [node name="Choice" type="VBoxContainer" parent="Sheet/Content"]
 layout_mode = 2
 theme_override_constants/separation = 20

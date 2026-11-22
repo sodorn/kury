@@ -21,6 +21,7 @@ const FADE_TIME := 0.3
 ## nie zmienialo sie nic.
 @onready var _status: Label = $Sheet/Content/Choice/CodeRow/Status
 @onready var _version: Label = $Sheet/Content/Version
+@onready var _gate: Label = $Sheet/Content/Gate
 @onready var _load_button: Button = $Sheet/Content/Choice/CodeRow/Load
 @onready var _code_label: Label = $Sheet/Content/Created/Code
 @onready var _play_button: Button = $Sheet/Content/Created/Play
@@ -54,7 +55,15 @@ func _open() -> void:
 	# jednym dotknieciem bylaby nie do cofniecia.
 	# "Graj dalej" dostaje kazdy, kto ma juz jakakolwiek farme — ekran wyskakuje
 	# teraz przy kazdym uruchomieniu, wiec to on musi byc pierwszym przyciskiem.
-	var has_farm := not Game.is_new_player
+	# Po dluzszej przerwie "Graj dalej" znika i trzeba wpisac kod. Wlasciciel
+	# poprosil o to wprost: chce testowac wczytywanie i przeskakiwac miedzy
+	# farmami bez czyszczenia ciasteczek. Zeby nikt sie nie zablokowal, panel
+	# pokazuje wtedy WLASNY kod gracza — wystarczy go przepisac.
+	var must_code := Game.must_enter_code()
+	var has_farm := not Game.is_new_player and not must_code
+	_gate.visible = must_code
+	if must_code:
+		_gate.text = tr("START_CODE_REQUIRED") % Cloud.player_id
 	_continue_button.visible = has_farm
 	_continue_button.theme_type_variation = &"PrimaryButton" if has_farm else &""
 	_new_button.theme_type_variation = &"" if has_farm else &"PrimaryButton"

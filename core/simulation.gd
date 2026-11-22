@@ -67,6 +67,9 @@ static func _step(state: FarmState, step: float, out: Dictionary, loss_budget: i
 		out["hatched"] = int(out["hatched"]) + _advance_incubator(state, step)
 		out["grown_up"] = int(out["grown_up"]) + _advance_chicks(state, step)
 	out["rotted"] = int(out["rotted"]) + _advance_corpses(state, step)
+	# Jaja starzeja sie niezaleznie od tego, czy stado jeszcze zyje — stad
+	# miejsce PRZED wyjsciem dla pustej farmy nizej.
+	_advance_egg_spoilage(state, step, out)
 	_advance_fox(state, step, out, loss_budget, offline)
 
 	# Karmienie rozliczamy przed sprawdzeniem, czy stado istnieje: inaczej
@@ -194,6 +197,19 @@ static func _advance_hunger(state: FarmState, step: float, out: Dictionary, budg
 
 ## Choroby: zdrowa kura moze zachorowac, chora przestaje znosic i po
 ## `death_minutes` pada. Szczepienie chroni do konca zycia.
+## Jaja maja termin przydatnosci liczony ZEGARKIEM. Bez tego gra zostawiona
+## na noc witala gracza magazynem pelnym jaj sprzed doby i cala ekonomia
+## stawala na glowie.
+static func _advance_egg_spoilage(state: FarmState, step: float, out: Dictionary) -> void:
+	var hours := float(GameData.balance().get("economy", {}).get("egg_spoil_hours", 0.0))
+	if hours <= 0.0:
+		return
+	var real := step / maxf(0.0001, GameData.time_scale())
+	var spoiled := state.age_eggs(real, hours * 3600.0)
+	if spoiled > 0:
+		out["eggs_spoiled"] = int(out.get("eggs_spoiled", 0)) + spoiled
+
+
 static func _advance_disease(state: FarmState, step: float, out: Dictionary, budget: int,
 		offline: bool) -> void:
 	var disease: Dictionary = GameData.balance().get("disease", {})

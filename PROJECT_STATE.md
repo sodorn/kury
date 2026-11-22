@@ -4,7 +4,10 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.3): nazwane poziomy rozbudowy
+- Aktualny etap: **ETAP 10** (wersja 12.4): jaja psuja sie po szesciu
+  godzinach, szczepionka liczona od kury, kod wymagany po 15 minutach
+  przerwy.
+- Wersja 12.3: nazwane poziomy rozbudowy
   kurnika, inkubatora i magazynu; choroba na tej samej kostce co lis.
 - Wersja 12.2: groteskowa smierc kur —
   urwane glowy, kaluze krwi, kontrast z cukierkowa oprawa jest celowy.
@@ -35,7 +38,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`, `v11.6-rozpakowanie-odpowiedzi`, `v12.0-plot-i-pies`, `v12.1-lis-od-nowa`, `v12.2-groteska`, `v12.3-poziomy`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`, `v11.6-rozpakowanie-odpowiedzi`, `v12.0-plot-i-pies`, `v12.1-lis-od-nowa`, `v12.2-groteska`, `v12.3-poziomy`, `v12.4-termin-jaj`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -197,6 +200,45 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## WERSJA 12.4: jaja sie psuja, szczepionka od kury, kod po przerwie
+
+JAJA MAJA TERMIN. Niesprzedane psuja sie po szesciu godzinach ZEGARKA.
+Wlasciciel zglosil, ze przy nieaktywnej grze "jajek od chuja sie robi" —
+i mial racje, bo nic ich nie ograniczalo.
+
+Mechanika: obok `state.eggs` (liczby sztuk) stoi `state.egg_ages` —
+metryka wieku. Rasa -> lista wiaderek [sztuk, wiek w sekundach
+realnych], od najstarszego. Wiaderko zbiera jaja z jednej godziny, wiec
+przy szesciogodzinnym terminie jest ich najwyzej siedem na rase, a nie
+tysiac wpisow po jednym jaju. Sprzedaz zabiera NAJSTARSZE najpierw —
+tak jak w prawdziwym gospodarstwie, a przy okazji gracz nie traci
+swiezych przez to, ze w magazynie lezy stara partia.
+
+Starzenie stoi PRZED wyjsciem dla pustej farmy: jaja psuja sie takze
+wtedy, gdy stado wyginelo. Za pierwszym razem wstawilem je nizej
+i wylozylo sie to na tescie.
+
+Zapisy sprzed 12.4 nie maja metryki — caly magazyn traktujemy wtedy jako
+swiezy. Gdy metryka jest, przycinamy ja do faktycznego stanu magazynu,
+zeby obie liczby nigdy sie nie rozjechaly.
+
+SZCZEPIONKA kosztuje teraz 5 zl od niezaszczepionej kury zamiast 200 zl
+ryczaltem (`vaccine_price` 0, `vaccine_price_per_hen` 5).
+
+KOD PO PRZERWIE. Jesli od ostatniego zapisu minelo wiecej niz 15 minut,
+ekran powitalny chowa "Graj dalej" i trzeba wpisac kod farmy. Wlasciciel
+chce tego do testowania wczytywania i zeby przeskakiwac miedzy farmami
+bez czyszczenia ciasteczek. Prog siedzi w `session.require_code_after_minutes`
+— zero wylacza wymog calkiem.
+
+Zeby nikt sie nie zablokowal, ekran pokazuje wtedy WLASNY kod urzadzenia:
+"Kod tego urzadzenia to 327733". Wystarczy go przepisac.
+
+UWAGA NA PRZYSZLOSC: ustawienie trafilo najpierw do sekcji `start`
+w balance.json i SKASOWALO konfiguracje startowej farmy (150 zl, trzy
+kury, kogut). Dziesiec testow od razu to pokazalo. Sekcja `start` opisuje
+stado poczatkowe; ustawienia sesji maja wlasna sekcje `session`.
 
 ## WERSJA 12.3: nazwane poziomy rozbudowy, choroba jak lis
 

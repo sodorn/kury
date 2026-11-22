@@ -14,11 +14,12 @@
     ]
   },
   "economy": {
-    "_opis": "feed_per_hen_minute w kilogramach na ptaka na minute. Wartosc jest cztery razy wyzsza niz w 10.1: wczesniej worek starczal na pol godziny i pasza w ogole nie byla problemem. Razem z nia spadla cena kilograma, zeby karma nie zjadala calego zarobku.",
+    "_opis": "feed_per_hen_minute w kilogramach na ptaka na minute. Wartosc jest cztery razy wyzsza niz w 10.1: wczesniej worek starczal na pol godziny i pasza w ogole nie byla problemem. Razem z nia spadla cena kilograma, zeby karma nie zjadala calego zarobku. egg_spoil_hours: po tylu godzinach REALNYCH niesprzedane jaja sie psuja. Bez tego gra zostawiona na noc witala gracza magazynem pelnym jaj sprzed doby.",
     "feed_pack_size": 25,
     "feed_pack_price": 25,
     "feed_per_hen_minute": 0.34,
-    "chick_feed_multiplier": 0.5
+    "chick_feed_multiplier": 0.5,
+    "egg_spoil_hours": 6.0
   },
   "run": {
     "_opis": "max_eggs_on_ground to tylko tyle, ile jaj lezy naraz na wybiegu do zebrania palcem. Nadmiar idzie prosto do magazynu. area musi sie zgadzac z piaskowym prostokatem w ground.svg - oba biora sie z RUN w tools/gen_ground.py.",
@@ -99,8 +100,8 @@
     "_opis": "CHOROBA. Ta sama logika co lis, tylko DWA RAZY czesciej: w grze aktywnej kostka co active_roll_minutes minut realnych z szansa active_chance, w nieaktywnej co offline_roll_hours godzin z szansa offline_chance. Lis losuje co 60 minut i co 24 godziny — choroba co 30 i co 12. Przez pierwsze grace_minutes i przy stadzie mniejszym niz min_hens nikt nie choruje. Drozsza rasa choruje czesciej (waga to pierwiastek z ceny). Chora kura pada po death_minutes minutach GRY, jesli jej nie wyleczysz.",
     "death_minutes": 7.0,
     "medicine_price": 20,
-    "vaccine_price": 200,
-    "vaccine_price_per_hen": 0,
+    "vaccine_price": 0,
+    "vaccine_price_per_hen": 5,
     "grace_minutes": 30,
     "min_hens": 5,
     "mcdonalds_price": 5,
@@ -267,5 +268,9 @@
         }
       ]
     }
+  },
+  "session": {
+    "_opis": "require_code_after_minutes: jesli od ostatniego zapisu minelo wiecej niz tyle minut realnych, ekran powitalny nie pozwala kliknac 'Graj dalej' — trzeba wpisac kod farmy. Wlasciciel chcial tego do testowania wczytywania i zeby dalo sie przeskoczyc na inna farme bez czyszczenia ciasteczek. Zero wylacza wymog.",
+    "require_code_after_minutes": 15.0
   }
 }

@@ -47,6 +47,7 @@ static func to_dict(state: FarmState) -> Dictionary:
 		"storage_level": state.storage_level,
 		"guard_level": state.guard_level,
 		"dog_level": state.dog_level,
+		"egg_ages": state.egg_ages,
 		"fox_roll_timer": state.fox_roll_timer,
 		"fox_hand_scared": state.fox_hand_scared,
 		"disease_timer": state.disease_timer,
@@ -110,6 +111,38 @@ static func from_dict(data: Dictionary) -> Dictionary:
 		var count := int(Dictionary(data.get("eggs", {}))[breed_id])
 		if count > 0:
 			state.eggs[breed_id] = count
+	# Metryka wieku jaj. Zapisy sprzed wersji 12.4 jej nie maja — wtedy
+	# traktujemy caly magazyn jako swiezy, bo karanie gracza za zmiane
+	# w kodzie byloby nie w porzadku. Gdy metryka jest, przycinamy ja do
+	# faktycznego stanu magazynu, zeby obie liczby nigdy sie nie rozjechaly.
+	for breed_id: String in state.eggs:
+		var zapisane: Array = (data.get("egg_ages", {}) as Dictionary).get(breed_id, [])
+		var buckets: Array = []
+		var razem := 0
+		for bucket: Variant in zapisane:
+			if not (bucket is Array) or (bucket as Array).size() < 2:
+				continue
+			var count2 := maxi(0, int((bucket as Array)[0]))
+			if count2 <= 0:
+				continue
+			razem += count2
+			buckets.append([count2, maxf(0.0, float((bucket as Array)[1]))])
+		var maja := int(state.eggs[breed_id])
+		if razem > maja:
+			# Wiecej w metryce niz w magazynie: scinamy od najstarszych.
+			var nadmiar := razem - maja
+			while nadmiar > 0 and not buckets.is_empty():
+				var w_wiaderku := int(buckets[0][0])
+				if w_wiaderku > nadmiar:
+					buckets[0][0] = w_wiaderku - nadmiar
+					nadmiar = 0
+				else:
+					nadmiar -= w_wiaderku
+					buckets.remove_at(0)
+		elif razem < maja:
+			buckets.append([maja - razem, 0.0])
+		if not buckets.is_empty():
+			state.egg_ages[breed_id] = buckets
 	for breed_id: String in data.get("eggs_on_ground", []):
 		if not GameData.breed(breed_id).is_empty():
 			state.eggs_on_ground.append(breed_id)

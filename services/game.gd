@@ -279,17 +279,44 @@ func restore_from_code(raw_code: String) -> bool:
 	return true
 
 
+## Furtka dla testow: wczytuje gotowy slownik tak samo jak zwykle wczytanie
+## zapisu, zeby dalo sie sprawdzic zachowanie po roznej dlugosci przerwy.
+func apply_loaded_for_test(loaded: Dictionary) -> void:
+	is_new_player = false
+	_apply_loaded(loaded)
+
+
 func _apply_loaded(loaded: Dictionary) -> void:
 	state = loaded["state"]
 	_reported_no_feed = false
 	_shown_feed = -1
 	_away_seconds = 0.0
 	_last_tick = Time.get_unix_time_from_system()
-	_apply_elapsed(float(loaded["elapsed"]))
+	_last_gap = maxf(0.0, float(loaded["elapsed"]))
+	_apply_elapsed(_last_gap)
 	Events.resources_changed.emit()
 
 
+## Ile sekund realnych minelo od ostatniego zapisu do wlaczenia gry. Na tej
+## podstawie ekran powitalny decyduje, czy wymagac wpisania kodu.
+var _last_gap := 0.0
+
+
+## Czy po tej przerwie gracz musi wpisac kod, zamiast klikac "Graj dalej".
+## Wlasciciel poprosil o to wprost: chce testowac wczytywanie i przeskakiwac
+## miedzy farmami bez czyszczenia ciasteczek. Zero w balansie wylacza wymog.
+func must_enter_code() -> bool:
+	if is_new_player or not Cloud.is_enabled():
+		return false
+	var minutes := float(GameData.balance().get("session", {}).get(
+			"require_code_after_minutes", 0.0))
+	if minutes <= 0.0:
+		return false
+	return _last_gap >= minutes * 60.0
+
+
 func new_game() -> void:
+	_last_gap = 0.0
 	_reported_no_feed = false
 	_shown_feed = -1
 	_away_seconds = 0.0
@@ -378,6 +405,7 @@ func sell_eggs() -> float:
 		return 0.0
 	state.money += earned
 	state.eggs.clear()
+	state.egg_ages.clear()
 	Events.resources_changed.emit()
 	return earned
 

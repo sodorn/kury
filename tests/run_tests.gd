@@ -42,6 +42,9 @@ func _ready() -> void:
 	_test_guard_migration()
 	_test_fox_return_speed()
 	_test_upgrade_ladders()
+	_test_egg_spoilage()
+	_test_vaccine_price()
+	_test_require_code_after_break()
 	_test_event_rules()
 	_test_starving_farm()
 	_test_lay_fairness()
@@ -1226,6 +1229,84 @@ func _test_upgrade_ladders() -> void:
 	_check(incu_max < coop_max, "pelny inkubator (%d) miesci sie w pelnym kurniku (%d)"
 			% [incu_max, coop_max])
 
+
+## Jaja psuja sie po szesciu godzinach ZEGARKA. Wlasciciel zglosil, ze po
+## nocy magazyn pekal w szwach i cala ekonomia stawala na glowie.
+func _test_egg_spoilage() -> void:
+	var hours := float(GameData.balance().get("economy", {}).get("egg_spoil_hours", 0.0))
+	_check(is_equal_approx(hours, 6.0), "termin przydatnosci to szesc godzin realnych")
+	var spoil_game := hours * 3600.0 * GameData.time_scale()
+
+	var state := FarmState.new()
+	state.add_egg("leghorn", 10)
+	_check(state.egg_count() == 10, "dziesiec jaj w magazynie")
+
+	# Pol terminu: nic sie jeszcze nie psuje.
+	var polowa := Simulation.advance(state, spoil_game * 0.5)
+	_check(int(polowa.get("eggs_spoiled", 0)) == 0, "po trzech godzinach jaja sa dobre")
+	_check(state.egg_count() == 10, "magazyn nietkniety")
+
+	# Dokladamy swieza partie — ona ma przetrwac dluzej niz pierwsza.
+	state.add_egg("leghorn", 4)
+	var reszta := Simulation.advance(state, spoil_game * 0.6)
+	_check(int(reszta.get("eggs_spoiled", 0)) == 10, "stara dziesiatka sie zepsula")
+	_check(state.egg_count() == 4, "swieza czworka zostaje (jest %d)" % state.egg_count())
+
+	# I ona tez w koncu schodzi.
+	var koniec := Simulation.advance(state, spoil_game)
+	_check(int(koniec.get("eggs_spoiled", 0)) == 4, "swieza partia tez ma swoj termin")
+	_check(state.egg_count() == 0, "magazyn pusty")
+	_check(state.egg_ages.is_empty(), "metryka wieku posprzatana")
+
+	# Sprzedajemy NAJSTARSZE najpierw: po dolozeniu swiezych i sprzedaniu
+	# czesci w magazynie maja zostac te mlodsze.
+	var sklep := FarmState.new()
+	sklep.add_egg("leghorn", 6)
+	Simulation.advance(sklep, spoil_game * 0.8)
+	sklep.add_egg("leghorn", 6)
+	_check(sklep.take_eggs("leghorn", 6) == 6, "sprzedane szesc jaj")
+	var dalej := Simulation.advance(sklep, spoil_game * 0.3)
+	_check(int(dalej.get("eggs_spoiled", 0)) == 0,
+			"zostaly te swieze, wiec nic sie nie psuje tuz po sprzedazy")
+	_check(sklep.egg_count() == 6, "w magazynie zostalo szesc mlodszych jaj")
+
+
+## Szczepionka kosztuje wedlug wielkosci stada: 5 zl od kury.
+func _test_vaccine_price() -> void:
+	Game.new_game()
+	Game.state.chickens.clear()
+	_check(is_zero_approx(Game.vaccine_price()), "bez kur nie ma za co placic")
+	for i in 7:
+		Game.state.chickens.append(Chicken.create("leghorn"))
+	_check(is_equal_approx(Game.vaccine_price(), 35.0),
+			"siedem kur to 35 zl (jest %.0f)" % Game.vaccine_price())
+	Game.state.chickens[0].vaccinated = true
+	_check(is_equal_approx(Game.vaccine_price(), 30.0),
+			"za juz zaszczepiona kure nie placimy drugi raz")
+
+
+## Po dluzszej przerwie ekran powitalny ma wymagac kodu zamiast "Graj dalej".
+func _test_require_code_after_break() -> void:
+	var minutes := float(GameData.balance().get("session", {}).get(
+			"require_code_after_minutes", 0.0))
+	_check(is_equal_approx(minutes, 15.0), "prog to pietnascie minut")
+
+	Game.new_game()
+	_check(not Game.must_enter_code(), "swiezo zalozona farma nie pyta o kod")
+
+	# Zapis sprzed pieciu minut: gracz wchodzi bez kodu.
+	var state := FarmState.new()
+	state.intro_seen = true
+	var zapis := SaveGame.to_dict(state)
+	zapis["saved_at"] = Time.get_unix_time_from_system() - 5.0 * 60.0
+	Game.apply_loaded_for_test(SaveGame.from_dict(zapis))
+	_check(not Game.must_enter_code(), "po pieciu minutach przerwy kod nie jest potrzebny")
+
+	# Zapis sprzed godziny: kod wymagany.
+	zapis["saved_at"] = Time.get_unix_time_from_system() - 3600.0
+	Game.apply_loaded_for_test(SaveGame.from_dict(zapis))
+	_check(Game.must_enter_code(), "po godzinie przerwy trzeba wpisac kod")
+
 func _test_event_rules() -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})
 	var disease: Dictionary = GameData.balance().get("disease", {})
@@ -1496,8 +1577,11 @@ func _test_offline_eggs() -> void:
 	var live_result := Simulation.advance(live, 3.0 * 3600.0)
 	_check(live.eggs_on_ground.size() <= capacity, "na zywo wybieg nie przekracza limitu")
 	_check(live.egg_count() > 0, "na zywo nadmiar trafia do magazynu")
-	_check(live.egg_count() + live.eggs_on_ground.size() == int(live_result["eggs_laid"]),
-			"na zywo nic nie ginie: wybieg plus magazyn to cala produkcja")
+	# Ksiegowanie musi sie zgadzac z uwzglednieniem jaj, ktore przelezaly
+	# swoje szesc godzin i sie zepsuly.
+	_check(live.egg_count() + live.eggs_on_ground.size() + int(live_result.get("eggs_spoiled", 0))
+			== int(live_result["eggs_laid"]),
+			"na zywo nic nie ginie bez sladu: wybieg + magazyn + zepsute = cala produkcja")
 
 	# Offline: te same kury przez ten sam czas odkladaja tyle samo, tylko
 	# wszystko od razu w magazynie.
@@ -1507,7 +1591,8 @@ func _test_offline_eggs() -> void:
 	var away_result := Simulation.advance(away, 3.0 * 3600.0, true)
 	_check(away.eggs_on_ground.is_empty(), "offline nic nie laduje na wybiegu")
 	_check(away.egg_count() > capacity, "offline magazyn zbiera wiecej, niz miesci wybieg")
-	_check(int(away_result["eggs_laid"]) == away.egg_count(), "licznik zgadza sie z magazynem")
+	_check(int(away_result["eggs_laid"]) == away.egg_count() + int(away_result.get("eggs_spoiled", 0)),
+			"licznik zgadza sie z magazynem po odjeciu zepsutych")
 	# Offline wychodzi nawet odrobine lepiej, bo `offline_max_share` ogranicza
 	# straty od lisa do polowy stada. Chodzi o to, zeby nieobecnosc niczego
 	# nie marnowala — nie o to, zeby wyszlo co do jajka tyle samo.

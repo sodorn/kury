@@ -7,6 +7,10 @@ var money: float = 0.0
 ## Jaja zebrane do magazynu, policzone wedlug rasy kury, ktora je zniosla:
 ## {"leghorn": 12, "cemani": 2}. Rasa decyduje o cenie sprzedazy.
 var eggs: Dictionary = {}
+## Metryka wieku jaj: rasa -> lista wiaderek [sztuk, wiek w sekundach
+## REALNYCH], od najstarszego. Liczba sztuk w `eggs` zawsze zgadza sie
+## z suma wiaderek — pilnuja tego `add_egg`, `take_eggs` i `age_eggs`.
+var egg_ages: Dictionary = {}
 ## Jaja lezace na wybiegu, w kolejnosci zniesienia. Kazdy wpis to id rasy.
 var eggs_on_ground: Array[String] = []
 ## Pasza w kilogramach; ulamkowa, bo zuzywa sie w sposob ciagly.
@@ -252,8 +256,22 @@ func eggs_value() -> float:
 	return total
 
 
+## Do ilu sekund realnych jaja z jednego "wiaderka" sa traktowane razem.
+## Godzina wystarcza: przy szesciogodzinnym terminie przydatnosci daje to
+## najwyzej siedem wiaderek na rase, a nie tysiac wpisow po jednym jaju.
+const EGG_BUCKET_SECONDS := 3600.0
+
+
 func add_egg(breed_id: String, count: int = 1) -> void:
 	eggs[breed_id] = int(eggs.get(breed_id, 0)) + count
+	# Rownolegle prowadzimy metryke wieku, zeby wiedziec, ktore jaja sie
+	# zestarzaly. Najmlodsze wiaderko dobieramy, dopoki nie ma godziny.
+	var buckets: Array = egg_ages.get(breed_id, [])
+	if buckets.is_empty() or float(buckets[buckets.size() - 1][1]) >= EGG_BUCKET_SECONDS:
+		buckets.append([count, 0.0])
+	else:
+		buckets[buckets.size() - 1][0] = int(buckets[buckets.size() - 1][0]) + count
+	egg_ages[breed_id] = buckets
 
 
 ## Zabiera `count` jaj danej rasy z magazynu. Zwraca, ile udalo sie zabrac.
@@ -266,7 +284,48 @@ func take_eggs(breed_id: String, count: int) -> int:
 		eggs.erase(breed_id)
 	else:
 		eggs[breed_id] = have - taken
+	# Sprzedajemy NAJSTARSZE jaja najpierw — i tak robi sie w prawdziwym
+	# gospodarstwie, a przy okazji gracz nie traci swiezych przez to, ze
+	# w magazynie lezy stara partia.
+	var left := taken
+	var buckets: Array = egg_ages.get(breed_id, [])
+	while left > 0 and not buckets.is_empty():
+		var in_bucket := int(buckets[0][0])
+		if in_bucket > left:
+			buckets[0][0] = in_bucket - left
+			left = 0
+		else:
+			left -= in_bucket
+			buckets.remove_at(0)
+	if buckets.is_empty():
+		egg_ages.erase(breed_id)
+	else:
+		egg_ages[breed_id] = buckets
 	return taken
+
+
+## Postarza jaja o `real` sekund i usuwa te, ktore przelezaly termin.
+## Zwraca, ile sztuk sie zmarnowalo. Dzieki temu zostawiona na noc gra nie
+## wita gracza magazynem pelnym jaj sprzed doby.
+func age_eggs(real: float, spoil_seconds: float) -> int:
+	var spoiled := 0
+	for breed_id: String in egg_ages.keys():
+		var buckets: Array = egg_ages[breed_id]
+		var kept: Array = []
+		for bucket: Array in buckets:
+			var age := float(bucket[1]) + real
+			if age >= spoil_seconds:
+				spoiled += int(bucket[0])
+				eggs[breed_id] = maxi(0, int(eggs.get(breed_id, 0)) - int(bucket[0]))
+				if int(eggs.get(breed_id, 0)) <= 0:
+					eggs.erase(breed_id)
+			else:
+				kept.append([int(bucket[0]), age])
+		if kept.is_empty():
+			egg_ages.erase(breed_id)
+		else:
+			egg_ages[breed_id] = kept
+	return spoiled
 
 
 ## Ile paszy zjada cale stado w ciagu minuty. Kazda kura je tyle samo,
