@@ -45,24 +45,44 @@
     "eggs_per_chick": 3,
     "upgrades": [
       {
+        "name": "INCU_T1",
         "slots": 6,
-        "price": 350
+        "price": 300
       },
       {
+        "name": "INCU_T2",
         "slots": 10,
-        "price": 1200
+        "price": 1000
       },
       {
+        "name": "INCU_T3",
         "slots": 16,
-        "price": 3000
+        "price": 2800
       },
       {
+        "name": "INCU_T4",
         "slots": 24,
-        "price": 8000
+        "price": 7000
       },
       {
+        "name": "INCU_T5",
         "slots": 34,
-        "price": 20000
+        "price": 16000
+      },
+      {
+        "name": "INCU_T6",
+        "slots": 48,
+        "price": 36000
+      },
+      {
+        "name": "INCU_T7",
+        "slots": 66,
+        "price": 80000
+      },
+      {
+        "name": "INCU_T8",
+        "slots": 90,
+        "price": 180000
       }
     ],
     "_opis": "slots to liczba partii grzanych naraz; kazda partia to jedno pisklę. eggs_per_chick jaj danej rasy robi jedno pisklę tej rasy."
@@ -76,16 +96,18 @@
     "reference_hens": 10
   },
   "disease": {
-    "_opis": "CHOROBA. W grze AKTYWNEJ co active_minutes minut realnych choruje kolejna kura, w NIEaktywnej co offline_hours godzin realnych. Przez pierwsze grace_minutes i przy stadzie mniejszym niz min_hens nikt nie choruje. Drozsza rasa choruje czesciej (waga to pierwiastek z ceny). Chora kura pada po death_minutes minutach GRY, jesli jej nie wyleczysz.",
+    "_opis": "CHOROBA. Ta sama logika co lis, tylko DWA RAZY czesciej: w grze aktywnej kostka co active_roll_minutes minut realnych z szansa active_chance, w nieaktywnej co offline_roll_hours godzin z szansa offline_chance. Lis losuje co 60 minut i co 24 godziny — choroba co 30 i co 12. Przez pierwsze grace_minutes i przy stadzie mniejszym niz min_hens nikt nie choruje. Drozsza rasa choruje czesciej (waga to pierwiastek z ceny). Chora kura pada po death_minutes minutach GRY, jesli jej nie wyleczysz.",
     "death_minutes": 7.0,
     "medicine_price": 20,
     "vaccine_price": 200,
     "vaccine_price_per_hen": 0,
     "grace_minutes": 30,
     "min_hens": 5,
-    "active_minutes": 1.0,
-    "offline_hours": 4.0,
-    "mcdonalds_price": 5
+    "mcdonalds_price": 5,
+    "active_roll_minutes": 30.0,
+    "active_chance": 0.3333333333,
+    "offline_roll_hours": 12.0,
+    "offline_chance": 0.1666666667
   },
   "fox": {
     "_opis": "LIS. Losowanie jest proste i dokladnie takie, jak chcial wlasciciel: w grze AKTYWNEJ co active_roll_minutes minut realnych leci kostka z szansa active_chance; w grze NIEaktywnej co offline_roll_hours godzin realnych z szansa offline_chance. Lis nigdy nie przychodzi, gdy inny jest jeszcze na wybiegu, ani do stada mniejszego niz min_hens, ani przez pierwsze grace_minutes gry. Wizyta trwa visit_minutes minut realnych i przez caly ten czas lis zabija po jednej kurze, az wybierze swoj limit (min_share..max_share stada). Pierwsza kura ginie zaraz po wejsciu — lis ZAWSZE cos zabija. Gracz moze go przegonic, trafiajac w niego scare_taps razy; po takim przegonieniu lis wraca hand_return_factor raza szybciej, chyba ze gospodarstwo ma psa albo plot — wtedy kara nie dziala.",
@@ -114,32 +136,49 @@
       "capacity": 20,
       "upgrades": [
         {
-          "capacity": 40,
-          "price": 500
+          "name": "COOP_T1",
+          "capacity": 35,
+          "price": 400
         },
         {
-          "capacity": 60,
-          "price": 1400
+          "name": "COOP_T2",
+          "capacity": 55,
+          "price": 1200
         },
         {
+          "name": "COOP_T3",
           "capacity": 80,
-          "price": 3200
+          "price": 3000
         },
         {
+          "name": "COOP_T4",
           "capacity": 110,
           "price": 7000
         },
         {
+          "name": "COOP_T5",
           "capacity": 150,
           "price": 15000
         },
         {
+          "name": "COOP_T6",
           "capacity": 200,
           "price": 30000
         },
         {
-          "capacity": 260,
+          "name": "COOP_T7",
+          "capacity": 270,
           "price": 60000
+        },
+        {
+          "name": "COOP_T8",
+          "capacity": 360,
+          "price": 120000
+        },
+        {
+          "name": "COOP_T9",
+          "capacity": 500,
+          "price": 250000
         }
       ]
     },
@@ -147,29 +186,46 @@
       "_opis": "Hurt na pasze: wiekszy worek i nizsza cena za kilogram.",
       "upgrades": [
         {
+          "name": "STORE_T1",
           "pack_size": 60,
           "pack_price": 57,
-          "price": 350
+          "price": 300
         },
         {
+          "name": "STORE_T2",
           "pack_size": 150,
           "pack_price": 135,
-          "price": 1200
+          "price": 1000
         },
         {
+          "name": "STORE_T3",
           "pack_size": 400,
           "pack_price": 340,
-          "price": 4000
+          "price": 3500
         },
         {
+          "name": "STORE_T4",
           "pack_size": 1000,
           "pack_price": 800,
-          "price": 12000
+          "price": 10000
         },
         {
+          "name": "STORE_T5",
           "pack_size": 2500,
           "pack_price": 1875,
-          "price": 30000
+          "price": 26000
+        },
+        {
+          "name": "STORE_T6",
+          "pack_size": 6000,
+          "pack_price": 4200,
+          "price": 75000
+        },
+        {
+          "name": "STORE_T7",
+          "pack_size": 15000,
+          "pack_price": 9750,
+          "price": 220000
         }
       ]
     },

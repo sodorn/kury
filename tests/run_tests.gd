@@ -41,6 +41,7 @@ func _ready() -> void:
 	_test_dog()
 	_test_guard_migration()
 	_test_fox_return_speed()
+	_test_upgrade_ladders()
 	_test_event_rules()
 	_test_starving_farm()
 	_test_lay_fairness()
@@ -1169,6 +1170,62 @@ func _test_guard_migration() -> void:
 		_check(plot == chciane[0], "obrona %d -> plot %d (jest %d)" % [stary, chciane[0], plot])
 		_check(pies == chciane[1], "obrona %d -> pies %d (jest %d)" % [stary, chciane[1], pies])
 
+
+## Drabinki rozbudowy: kazdy poziom ma nazwe, jest drozszy od poprzedniego
+## i cos realnie dodaje. Pilnuje tez, zeby kolejny poziom nigdy nie byl
+## tanszy za jednostke — inaczej oplacaloby sie przeskakiwac poziomy.
+func _test_upgrade_ladders() -> void:
+	var drabinki := {
+		"coop": ["capacity", GameData.balance().get("buildings", {}).get("coop", {})],
+		"storage": ["pack_size", GameData.balance().get("buildings", {}).get("storage", {})],
+		"incubator": ["slots", GameData.balance().get("incubator", {})],
+	}
+	for id: String in drabinki.keys():
+		var pole: String = drabinki[id][0]
+		var dane: Dictionary = drabinki[id][1]
+		var upgrades: Array = dane.get("upgrades", [])
+		_check(upgrades.size() >= 7, "%s ma co najmniej siedem poziomow (ma %d)"
+				% [id, upgrades.size()])
+		var poprzednia_cena := 0.0
+		var poprzednia_wartosc := float(dane.get(pole, 0))
+		if id == "coop":
+			poprzednia_wartosc = float(dane.get("capacity", 0))
+		var poprzedni_koszt_jednostki := 0.0
+		for i in upgrades.size():
+			var poziom: Dictionary = upgrades[i]
+			var nazwa := String(poziom.get("name", ""))
+			_check(not nazwa.is_empty(), "%s poziom %d ma nazwe" % [id, i + 1])
+			_check(tr(nazwa) != nazwa, "%s: nazwa %s jest przetlumaczona" % [id, nazwa])
+			var cena := float(poziom.get("price", 0))
+			var wartosc := float(poziom.get(pole, 0))
+			_check(cena > poprzednia_cena, "%s poziom %d jest drozszy od poprzedniego" % [id, i + 1])
+			_check(wartosc > poprzednia_wartosc, "%s poziom %d cos dodaje" % [id, i + 1])
+			var koszt_jednostki := cena / maxf(1.0, wartosc - poprzednia_wartosc)
+			_check(koszt_jednostki > poprzedni_koszt_jednostki,
+					"%s poziom %d nie jest tanszy za jednostke niz poprzedni" % [id, i + 1])
+			poprzednia_cena = cena
+			poprzednia_wartosc = wartosc
+			poprzedni_koszt_jednostki = koszt_jednostki
+
+	# Magazyn ma sens tylko wtedy, gdy kilogram paszy z kazdym poziomem tanieje.
+	var economy: Dictionary = GameData.balance().get("economy", {})
+	var za_kg := float(economy.get("feed_pack_price", 25)) / maxf(1.0, float(economy.get("feed_pack_size", 25)))
+	for poziom: Dictionary in (GameData.balance().get("buildings", {}).get("storage", {}).get("upgrades", []) as Array):
+		var nowy := float(poziom.get("pack_price", 0)) / maxf(1.0, float(poziom.get("pack_size", 1)))
+		_check(nowy < za_kg, "%s: kilogram paszy tanieje (%.2f -> %.2f)"
+				% [String(poziom.get("name", "")), za_kg, nowy])
+		za_kg = nowy
+
+	# Inkubator nie moze wyprzedzic kurnika: nie ma gdzie wstawic piskląt.
+	var coop_max := 0
+	for poziom: Dictionary in (GameData.balance().get("buildings", {}).get("coop", {}).get("upgrades", []) as Array):
+		coop_max = maxi(coop_max, int(poziom.get("capacity", 0)))
+	var incu_max := 0
+	for poziom: Dictionary in (GameData.balance().get("incubator", {}).get("upgrades", []) as Array):
+		incu_max = maxi(incu_max, int(poziom.get("slots", 0)))
+	_check(incu_max < coop_max, "pelny inkubator (%d) miesci sie w pelnym kurniku (%d)"
+			% [incu_max, coop_max])
+
 func _test_event_rules() -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})
 	var disease: Dictionary = GameData.balance().get("disease", {})
@@ -1202,10 +1259,20 @@ func _test_event_rules() -> void:
 			"lis: przy nieaktywnej grze szansa jeden do szesciu")
 	_check(is_equal_approx(float(fox.get("visit_minutes", 0.0)), 3.0),
 			"lis: wizyta trwa trzy minuty")
-	_check(is_equal_approx(float(disease.get("active_minutes", 0.0)), 1.0),
-			"choroba: w aktywnej grze kolejna kura co minute")
-	_check(is_equal_approx(float(disease.get("offline_hours", 0.0)), 4.0),
-			"choroba: w nieaktywnej co cztery godziny")
+	# Choroba dziala tak samo jak lis, tylko dwa razy czesciej: ten sam
+	# ksztalt kostki, polowa odstepu.
+	_check(is_equal_approx(float(disease.get("active_roll_minutes", 0.0)),
+			float(fox.get("active_roll_minutes", 0.0)) / 2.0),
+			"choroba: kostka dwa razy czesciej niz u lisa w aktywnej grze")
+	_check(is_equal_approx(float(disease.get("offline_roll_hours", 0.0)),
+			float(fox.get("offline_roll_hours", 0.0)) / 2.0),
+			"choroba: dwa razy czesciej takze przy nieaktywnej grze")
+	_check(is_equal_approx(float(disease.get("active_chance", 0.0)),
+			float(fox.get("active_chance", 0.0))),
+			"choroba: ta sama szansa co u lisa")
+	_check(is_equal_approx(float(disease.get("offline_chance", 0.0)),
+			float(fox.get("offline_chance", 0.0))),
+			"choroba: ta sama szansa offline co u lisa")
 
 	# I pomiar na zywo, zeby liczby z balansu faktycznie cos robily.
 	var chore: Array[String] = []
@@ -1213,10 +1280,27 @@ func _test_event_rules() -> void:
 		chore.append("leghorn")
 	var yard := _fresh_state(chore, 10000000.0)
 	yard.days = 40
-	var zachorowania := 0
-	for i in 20:
-		zachorowania += int(Simulation.advance(yard, 60.0 * GameData.time_scale())["got_sick"])
-	_check(zachorowania >= 8, "w aktywnej grze w 20 minut choruje kilkanascie kur (%d)" % zachorowania)
+	# Pomiar na zywo: w aktywnej grze, przez wiele dob grania, choroba
+	# wypada mniej wiecej dwa razy czesciej niz lis. Mierzymy same kostki,
+	# zeby nie zalezec od tego, ktora kura akurat zachoruje.
+	var godzina := 3600.0 * GameData.time_scale()
+	var chorych := 0
+	var lisow := 0
+	for i in 60:
+		var dzien := _fresh_state(chore, 10000000.0)
+		dzien.days = 40
+		dzien.guard_level = 0
+		for h in 10:
+			var krok := Simulation.advance(dzien, godzina)
+			chorych += int(krok["got_sick"])
+			lisow += int(krok["fox_arrived"])
+			# Leczymy od razu, zeby stado nie znikalo i kostka miala kogo wybierac.
+			for chicken: Chicken in dzien.chickens:
+				chicken.sick = false
+	_check(chorych > 0, "w aktywnej grze kury choruja (%d)" % chorych)
+	_check(lisow > 0, "w aktywnej grze lis tez przychodzi (%d)" % lisow)
+	_check(chorych > lisow,
+			"choroba wypada czesciej niz lis (%d wobec %d)" % [chorych, lisow])
 
 	var spiace := _fresh_state(chore, 10000000.0)
 	spiace.days = 40
@@ -1224,7 +1308,7 @@ func _test_event_rules() -> void:
 	for i in 20:
 		offline_chore += int(Simulation.advance(spiace, 60.0 * GameData.time_scale(), true)["got_sick"])
 	_check(offline_chore == 0,
-			"w nieaktywnej grze te same 20 minut nie daje zachorowan (%d)" % offline_chore)
+			"w nieaktywnej grze 20 minut nie wystarcza na zachorowanie (%d)" % offline_chore)
 
 func _test_server_diagnosis() -> void:
 	var cases := [

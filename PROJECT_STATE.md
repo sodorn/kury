@@ -4,7 +4,9 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.2): groteskowa smierc kur —
+- Aktualny etap: **ETAP 10** (wersja 12.3): nazwane poziomy rozbudowy
+  kurnika, inkubatora i magazynu; choroba na tej samej kostce co lis.
+- Wersja 12.2: groteskowa smierc kur —
   urwane glowy, kaluze krwi, kontrast z cukierkowa oprawa jest celowy.
 - Wersja 12.1: lis przebudowany od zera —
   zawsze odchodzi, nigdy nie ma go kilku naraz, przegania sie go palcem,
@@ -33,7 +35,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`, `v11.6-rozpakowanie-odpowiedzi`, `v12.0-plot-i-pies`, `v12.1-lis-od-nowa`, `v12.2-groteska`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`, `v11.6-rozpakowanie-odpowiedzi`, `v12.0-plot-i-pies`, `v12.1-lis-od-nowa`, `v12.2-groteska`, `v12.3-poziomy`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -195,6 +197,41 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## WERSJA 12.3: nazwane poziomy rozbudowy, choroba jak lis
+
+CHOROBA dostala dokladnie te sama logike co lis, tylko dwa razy czesciej:
+kostka co 30 minut realnych z szansa 1/3 w grze aktywnej, co 12 godzin
+z szansa 1/6 w nieaktywnej (lis: 60 minut i 24 godziny). Poprzednie
+"kolejna kura co minute" bylo za czeste i wlasciciel slusznie to zglosil.
+
+DRABINKI ROZBUDOWY wydluzone i nazwane. Kazdy poziom ma teraz nazwe,
+ktora widac na przycisku i w wierszu "Poziom":
+
+    KURNIK     20 -> 35 -> 55 -> 80 -> 110 -> 150 -> 200 -> 270 -> 360 -> 500
+               powiekszony, sredni, duzy, bardzo duzy, dwukondygnacyjny,
+               hala drobiowa, wielka hala, ferma, ferma przemyslowa
+               400 / 1,2k / 3k / 7k / 15k / 30k / 60k / 120k / 250k
+
+    INKUBATOR   3 -> 6 -> 10 -> 16 -> 24 -> 34 -> 48 -> 66 -> 90
+               wiekszy, sredni, duzy, bardzo duzy, dwukomorowy,
+               hodowlany, przemyslowy, wylegarnia
+               300 / 1k / 2,8k / 7k / 16k / 36k / 80k / 180k
+
+    MAGAZYN    25 -> 60 -> 150 -> 400 -> 1000 -> 2500 -> 6000 -> 15000 kg
+               wiekszy, sredni, duzy, bardzo duzy, silos, wielki silos,
+               elewator
+               300 / 1k / 3,5k / 10k / 26k / 75k / 220k
+
+Zasady, ktorych pilnuje nowy test `_test_upgrade_ladders`:
+- kazdy poziom ma nazwe i jest ona przetlumaczona,
+- kazdy kolejny poziom jest drozszy i cos realnie dodaje,
+- koszt JEDNOSTKI (miejsca, slotu, kilograma) rosnie z poziomem — inaczej
+  oplacaloby sie przeskakiwac srodek drabinki. Na tym tescie wylozyly sie
+  pierwsze ceny silosu i elewatora i trzeba je bylo podniesc,
+- kilogram paszy tanieje z kazdym poziomem magazynu,
+- pelny inkubator (90) miesci sie w pelnym kurniku (500) — pisklęta maja
+  gdzie trafic.
 
 ## WERSJA 12.2: groteska zamiast stonowanej smierci
 

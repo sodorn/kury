@@ -158,7 +158,9 @@ func _build_content(building_id: String) -> void:
 
 
 func _build_coop() -> void:
-	_add_level_row(func() -> int: return Game.state.coop_level, _building_levels("coop"))
+	_add_level_row(func() -> int: return Game.state.coop_level, _building_levels("coop"),
+			func() -> String: return tr(String(
+					Game.state.current_building_upgrade("coop").get("name", ""))))
 	_add_row("PANEL_HENS", func() -> String: return str(Game.state.laying_hen_count()))
 	_add_row("PANEL_ROOSTERS", func() -> String: return str(Game.state.rooster_count()))
 	# Jaja w inkubatorze i pisklęta rezerwuja miejsca w kurniku, wiec musza byc
@@ -217,6 +219,7 @@ func _build_coop() -> void:
 			func() -> String:
 				var upgrade := Game.state.next_building_upgrade("coop")
 				return tr("PANEL_UPGRADE_COOP") % [
+					tr(String(upgrade.get("name", ""))),
 					int(upgrade.get("capacity", 0)),
 					NumberFormat.money(float(upgrade.get("price", 0)))],
 			func() -> void: _on_upgrade("coop"),
@@ -262,7 +265,9 @@ func _build_coop() -> void:
 
 
 func _build_storage() -> void:
-	_add_level_row(func() -> int: return Game.state.storage_level, _building_levels("storage"))
+	_add_level_row(func() -> int: return Game.state.storage_level, _building_levels("storage"),
+			func() -> String: return tr(String(
+					Game.state.current_building_upgrade("storage").get("name", ""))))
 	_add_row("PANEL_EGGS_STORED", func() -> String: return NumberFormat.grouped(Game.state.egg_count()))
 	_add_row("PANEL_EGGS_WORTH", func() -> String: return NumberFormat.money(Game.state.eggs_value()))
 	_add_row("PANEL_FEED_LEFT", func() -> String: return _feed_text())
@@ -290,6 +295,7 @@ func _build_storage() -> void:
 				var upgrade := Game.state.next_building_upgrade("storage")
 				var size := float(upgrade.get("pack_size", 1))
 				return tr("PANEL_UPGRADE_STORAGE") % [
+					tr(String(upgrade.get("name", ""))),
 					NumberFormat.money(float(upgrade.get("price", 0))),
 					int(size),
 					NumberFormat.money(float(upgrade.get("pack_price", 0)) / maxf(1.0, size))],
@@ -303,7 +309,13 @@ func _build_storage() -> void:
 func _build_incubator() -> void:
 	var incubator: Dictionary = GameData.balance().get("incubator", {})
 	var levels: int = (incubator.get("upgrades", []) as Array).size() + 1
-	_add_level_row(func() -> int: return Game.state.incubator_level, levels)
+	_add_level_row(func() -> int: return Game.state.incubator_level, levels,
+			func() -> String:
+				if Game.state.incubator_level <= 0:
+					return ""
+				var biezacy: Array = incubator.get("upgrades", [])
+				var i := clampi(Game.state.incubator_level - 1, 0, biezacy.size() - 1)
+				return tr(String(biezacy[i].get("name", ""))) if i >= 0 else "")
 	_add_row("PANEL_INCUBATOR_SLOTS",
 			func() -> String: return "%d / %d" % [Game.state.incubating.size(), Game.incubator_slots()])
 	_add_row("PANEL_EGGS_STORED", func() -> String: return NumberFormat.grouped(Game.state.egg_count()))
@@ -396,7 +408,9 @@ func _build_incubator() -> void:
 			func() -> String:
 				var upgrade := Game.state.next_incubator_upgrade()
 				return tr("PANEL_UPGRADE_INCUBATOR") % [
-					int(upgrade.get("slots", 0)), NumberFormat.money(float(upgrade.get("price", 0)))],
+					tr(String(upgrade.get("name", ""))),
+					int(upgrade.get("slots", 0)),
+					NumberFormat.money(float(upgrade.get("price", 0)))],
 			_on_upgrade_incubator,
 			func() -> bool: return not Game.state.next_incubator_upgrade().is_empty())
 
@@ -774,7 +788,8 @@ func _add_group(label_key: String, visible_provider: Callable) -> void:
 ## Wiersz "Poziom: 2 / 6". Poziom poczatkowy liczymy jako pierwszy, bo
 ## "0 / 5" gracz czyta jako brak budynku. `levels` to liczba poziomow razem
 ## z poczatkowym.
-func _add_level_row(level_provider: Callable, levels: int) -> void:
+func _add_level_row(level_provider: Callable, levels: int,
+		name_provider: Callable = Callable()) -> void:
 	var row := HBoxContainer.new()
 	var label := Label.new()
 	label.text = tr("PANEL_LEVEL")
@@ -787,7 +802,11 @@ func _add_level_row(level_provider: Callable, levels: int) -> void:
 	_refreshers.append(func() -> void:
 		var shown: int = int(level_provider.call()) + 1
 		var key := "PANEL_LEVEL_MAX" if shown >= levels else "PANEL_LEVEL_VALUE"
-		value.text = tr(key) % [shown, levels])
+		value.text = tr(key) % [shown, levels]
+		# Przy nazwanych poziomach ("duży inkubator") sam numer nic nie mowi.
+		var named: String = name_provider.call() if name_provider.is_valid() else ""
+		if not named.is_empty():
+			value.text = "%s · %s" % [named, value.text])
 
 
 ## Ile poziomow ma budynek razem z poczatkowym.

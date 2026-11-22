@@ -222,12 +222,18 @@ static func _advance_disease(state: FarmState, step: float, out: Dictionary, bud
 		return
 	if state.chickens.size() < int(disease.get("min_hens", 5)):
 		return
+	# Ta sama kostka co u lisa, tylko dwa razy czesciej: lis losuje co
+	# godzine i co dobe, choroba co pol godziny i co dwanascie godzin.
 	state.disease_timer += real
-	var interval := float(disease.get("offline_hours", 4.0)) * 3600.0 if offline \
-			else float(disease.get("active_minutes", 1.0)) * 60.0
+	var interval := float(disease.get("offline_roll_hours", 12.0)) * 3600.0 if offline \
+			else float(disease.get("active_roll_minutes", 30.0)) * 60.0
 	if state.disease_timer < interval:
 		return
 	state.disease_timer = 0.0
+	var chance := float(disease.get("offline_chance", 0.1667)) if offline \
+			else float(disease.get("active_chance", 0.3333))
+	if randf() >= chance:
+		return
 	# Droga rasa choruje czesciej. Waga to pierwiastek z ceny, a nie sama cena:
 	# przy cenach od 40 do 8000 zl sama cena dawalaby cemani dwiescie razy
 	# wieksza szanse niz leghornowi, czyli w praktyce tylko cemani by chorowaly.
