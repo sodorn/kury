@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="112" viewBox="0 0 1080 112">
+<!-- WYGENEROWANE przez tools/gen_fence.py - nie edytuj recznie.
+     Poziom 3: drewniane slupki z napieta stalowa siatka. -->
+<defs>
+<linearGradient id="post" x1="0" y1="0" x2="0" y2="112" gradientUnits="userSpaceOnUse">
+  <stop offset="0" stop-color="#F4E3C2"/>
+  <stop offset="1" stop-color="#CFB58A"/>
+</linearGradient>
+</defs>
+<g stroke="#9AA6B1" stroke-width="2.2" stroke-opacity="0.75" fill="none">
+<path d="M50 48 76 22"/>
+<path d="M50 74 102 22"/>
+<path d="M50 100 128 22"/>
+<path d="M74 102 154 22"/>
+<path d="M100 102 180 22"/>
+<path d="M126 102 206 22"/>
+<path d="M152 102 232 22"/>
+<path d="M178 102 258 22"/>
+<path d="M204 102 284 22"/>
+<path d="M230 102 310 22"/>
+<path d="M256 102 336 22"/>
+<path d="M282 102 362 22"/>
+<path d="M308 102 388 22"/>
+<path d="M334 102 414 22"/>
+<path d="M360 102 440 22"/>
+<path d="M386 102 466 22"/>
+<path d="M412 102 480 34"/>
+<path d="M438 102 480 60"/>
+<path d="M464 102 480 86"/>
+<path d="M76 102 50 76"/>
+<path d="M102 102 50 50"/>
+<path d="M128 102 50 24"/>
+<path d="M154 102 74 22"/>
+<path d="M180 102 100 22"/>
+<path d="M206 102 126 22"/>
+<path d="M232 102 152 22"/>
+<path d="M258 102 178 22"/>
+<path d="M284 102 204 22"/>
+<path d="M310 102 230 22"/>
+<path d="M336 102 256 22"/>
+<path d="M362 102 282 22"/>
+<path d="M388 102 308 22"/>
+<path d="M414 102 334 22"/>
+<path d="M440 102 360 22"/>
+<path d="M466 102 386 22"/>
+<path d="M480 90 412 22"/>
+<path d="M480 64 438 22"/>
+<path d="M480 38 464 22"/>
+<path d="M600 48 626 22"/>
+<path d="M600 74 652 22"/>
+<path d="M600 100 678 22"/>
+<path d="M624 102 704 22"/>
+<path d="M650 102 730 22"/>
+<path d="M676 102 756 22"/>
+<path d="M702 102 782 22"/>
+<path d="M728 102 808 22"/>
+<path d="M754 102 834 22"/>
+<path d="M780 102 860 22"/>
+<path d="M806 102 886 22"/>
+<path d="M832 102 912 22"/>
+<path d="M858 102 938 22"/>
+<path d="M884 102 964 22"/>
+<path d="M910 102 990 22"/>
+<path d="M936 102 1016 22"/>
+<path d="M962 102 1030 34"/>
+<path d="M988 102 1030 60"/>
+<path d="M1014 102 1030 86"/>
+<path d="M626 102 600 76"/>
+<path d="M652 102 600 50"/>
+<path d="M678 102 600 24"/>
+<path d="M704 102 624 22"/>
+<path d="M730 102 650 22"/>
+<path d="M756 102 676 22"/>
+<path d="M782 102 702 22"/>
+<path d="M808 102 728 22"/>
+<path d="M834 102 754 22"/>
+<path d="M860 102 780 22"/>
+<path d="M886 102 806 22"/>
+<path d="M912 102 832 22"/>
+<path d="M938 102 858 22"/>
+<path d="M964 102 884 22"/>
+<path d="M990 102 910 22"/>
+<path d="M1016 102 936 22"/>
+<path d="M1030 90 962 22"/>
+<path d="M1030 64 988 22"/>
+<path d="M1030 38 1014 22"/>
+</g>
+<rect x="50" y="16" width="430" height="10" rx="4" fill="#D9BE91" stroke="#6E5240" stroke-width="2.5"/>
+<rect x="600" y="16" width="430" height="10" rx="4" fill="#D9BE91" stroke="#6E5240" stroke-width="2.5"/>
+<rect x="50" y="90" width="430" height="10" rx="4" fill="#D9BE91" stroke="#6E5240" stroke-width="2.5"/>
+<rect x="600" y="90" width="430" height="10" rx="4" fill="#D9BE91" stroke="#6E5240" stroke-width="2.5"/>
+<rect x="42" y="8" width="18" height="98" rx="5" fill="url(#post)" stroke="#6E5240" stroke-width="3.4"/>
+<rect x="132" y="8" width="18" height="98" rx="5" fill="url(#post)" stroke="#6E5240" stroke-width="3.4"/>
+<rect x="222" y="8" width="18" height="98" rx="5" fill="url(#post)" stroke="#6E5240" stroke-width="3.4"/>
+<rect x="312" y="8" width="18" height="98" rx="5" fill="url(#post)" stroke="#6E5240" stroke-width="3.4"/>
+<rect x="402" y="8" width="18" height="98" rx="5" fill="url(#post)" stroke="#6E5240" stroke-width="3.4"/>
+<rect x="582" y="8" width="18" height="98" rx="5" fill="url(#post)" stroke="#6E5240" stroke-width="3.4"/>
+<rect x="672" y="8" width="18" height="98" rx="5" fill="url(#post)" stroke="#6E5240" stroke-width="3.4"/>
+<rect x="762" y="8" width="18" height="98" rx="5" fill="url(#post)" stroke="#6E5240" stroke-width="3.4"/>
+<rect x="852" y="8" width="18" height="98" rx="5" fill="url(#post)" stroke="#6E5240" stroke-width="3.4"/>
+<rect x="942" y="8" width="18" height="98" rx="5" fill="url(#post)" stroke="#6E5240" stroke-width="3.4"/>
+<rect x="1032" y="8" width="18" height="98" rx="5" fill="url(#post)" stroke="#6E5240" stroke-width="3.4"/>
+</svg>

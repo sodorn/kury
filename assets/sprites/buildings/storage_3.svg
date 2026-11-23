@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="440" viewBox="0 0 480 440">
+  <!-- WYGENEROWANE przez tools/gen_buildings.py - nie edytuj recznie.
+       Magazyn, poziom wygladu 3 - przemyslowy. -->
+  <defs>
+    <radialGradient id="sShadow" cx="244" cy="404" r="212" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 323) scale(1 0.2)">
+      <stop offset="0" stop-color="#4F7D2D" stop-opacity="0.45"/>
+      <stop offset="0.7" stop-color="#4F7D2D" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#4F7D2D" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sWall" x1="70" y1="110" x2="300" y2="392" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#87D4E7"/>
+      <stop offset="0.5" stop-color="#68B4CD"/>
+      <stop offset="1" stop-color="#409DC1"/>
+    </linearGradient>
+    <linearGradient id="sSide" x1="300" y1="200" x2="352" y2="380" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#43A1C2"/>
+      <stop offset="1" stop-color="#2F88AB"/>
+    </linearGradient>
+    <linearGradient id="sRoof" x1="60" y1="70" x2="280" y2="230" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#D7DEE4"/>
+      <stop offset="0.5" stop-color="#AEB9C2"/>
+      <stop offset="1" stop-color="#8E9AA5"/>
+    </linearGradient>
+    <linearGradient id="sRoofSide" x1="270" y1="60" x2="370" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#97A3AE"/>
+      <stop offset="1" stop-color="#7A8691"/>
+    </linearGradient>
+    <linearGradient id="sSilo" x1="338" y1="124" x2="438" y2="394" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EAF0F3"/>
+      <stop offset="0.45" stop-color="#CCD6DD"/>
+      <stop offset="1" stop-color="#A4B0B9"/>
+    </linearGradient>
+    <linearGradient id="sSiloTop" x1="338" y1="46" x2="438" y2="124" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#C0CBD2"/>
+      <stop offset="1" stop-color="#939FA8"/>
+    </linearGradient>
+    <linearGradient id="sDoor" x1="118" y1="250" x2="242" y2="392" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FEF6E2"/>
+      <stop offset="1" stop-color="#E8D9B8"/>
+    </linearGradient>
+    <linearGradient id="sSack" x1="20" y1="340" x2="90" y2="406" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EAD0A4"/>
+      <stop offset="1" stop-color="#C8A97A"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="244" cy="404" rx="212" ry="30" fill="url(#sShadow)"/>
+
+  <g stroke="#885635" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round">
+    <!-- silos -->
+    <path d="M338 124h100v244a12 12 0 0 1-12 12h-76a12 12 0 0 1-12-12Z" fill="url(#sSilo)"/>
+    <path d="M338 124q50-82 100 0Z" fill="url(#sSiloTop)"/>
+    <path d="M338 186h100M338 250h100M338 314h100" stroke-width="2.5" stroke-opacity="0.45" fill="none"/>
+    <path d="M356 142v234" stroke="#F7F7F7" stroke-width="7.6" stroke-opacity="0.55" fill="none"/>
+    <path d="M388 72v-22" stroke-width="3.4"/>
+    <circle cx="388" cy="46" r="8" fill="#EECE6C"/>
+
+    <!-- stodola: bok -->
+    <path d="M300 214 352 192v176l-52 24Z" fill="url(#sSide)"/>
+
+    <!-- stodola: front -->
+    <path d="M60 392V214Q74 176 100 150Q140 118 180 104Q220 118 260 150Q286 176 300 214v178Z" fill="url(#sWall)"/>
+    <path d="M62 300h58M242 300h58" stroke-width="2.5" stroke-opacity="0.4" fill="none"/>
+    <path d="M70 220 104 162" stroke="#C3EAF5" stroke-width="5.1" stroke-opacity="0.6" fill="none"/>
+
+    <!-- dach: boki -->
+    <path d="M180 84 234 62Q292 86 322 112l-54 22Q236 104 180 84Z" fill="url(#sRoofSide)"/>
+    <path d="M268 134 322 112Q352 152 370 190l-54 22Q298 170 268 134Z" fill="url(#sRoofSide)"/>
+    <!-- dach: front -->
+    <path d="M180 84Q126 106 92 134Q58 172 44 212l20 12Q84 166 104 150Q140 120 180 106Q220 120 256 150Q276 166 296 224l20-12Q302 172 268 134Q234 106 180 84Z" fill="url(#sRoof)"/>
+    <path d="M186 90 100 138" stroke="#C9D0E3" stroke-width="4.2" stroke-opacity="0.6" fill="none"/>
+
+    <!-- stryszek z sianem -->
+    <path d="M152 156h56v48h-56Z" fill="#396D87"/>
+    <path d="M180 156v48M152 180h56" stroke="#FDF2D6" stroke-width="3.4"/>
+    <g stroke="#E6C162" stroke-width="4.2" fill="none">
+      <path d="M158 204q8 14 18 16M174 204q2 16 8 20M190 204q-2 14-4 18"/>
+    </g>
+
+    <!-- wrota -->
+    <path d="M118 250h124v142H118Z" fill="url(#sDoor)"/>
+    <path d="M180 250v142M118 250l62 142M180 250l-62 142M180 250l62 142M242 250l-62 142" stroke="#58A1BC" stroke-width="4.2" fill="none"/>
+    <path d="M118 250h124v142H118Z" fill="none"/>
+    <circle cx="168" cy="326" r="6" fill="#885635" stroke="none"/>
+    <circle cx="192" cy="326" r="6" fill="#885635" stroke="none"/>
+
+    <!-- worki z pasza -->
+    <path d="M26 404q-10-46 8-64 24-13 46 0 19 18 9 64Z" fill="url(#sSack)"/>
+    <path d="M42 344q16 10 32 0" stroke-width="3.4" fill="none"/>
+    <path d="M58 356v24M48 366l10 8 10-8" stroke="#AF763D" stroke-width="3.4" fill="none"/>
+    <path d="M250 410q-8-38 6-54 19-11 38 0 15 17 6 54Z" fill="#E7D1AA"/>
+    <path d="M262 360q13 8 26 0" stroke-width="3.4" fill="none"/>
+
+    <!-- latarenka -->
+    <path d="M296 214v14" stroke-width="3.4"/>
+    <path d="M286 228h22l5 24h-32Z" fill="#FCE9B2"/>
+    <path d="M284 252h26" stroke-width="3.4"/>
+
+    <!-- trawa -->
+    <path d="M100 398q4-20 10-4 4-22 10-4" fill="none" stroke="#78BF58" stroke-width="4.2"/>
+    <path d="M320 398q4-20 10-4 4-22 10-4" fill="none" stroke="#78BF58" stroke-width="4.2"/>
+  
+    <!-- drugi, chudszy silos tuz obok -->
+    <path d="M296 176h44v192a10 10 0 0 1-10 10h-24a10 10 0 0 1-10-10Z" fill="#CDD5DC"
+          stroke="#885635" stroke-width="4.2"/>
+    <path d="M296 176q22-44 44 0Z" fill="#AEB9C2" stroke="#885635" stroke-width="4.2"/>
+    <path d="M296 226h44M296 276h44M296 326h44" stroke="#885635" stroke-width="2.5" stroke-opacity="0.45"/>
+
+    <!-- przenosnik i drabina -->
+    <path d="M336 150 206 186" stroke="#9AA6B1" stroke-width="16"/>
+    <path d="M336 150 206 186" stroke="#CDD5DC" stroke-width="7"/>
+    <path d="M414 150v212M432 150v212" stroke="#9AA6B1" stroke-width="4"/>
+    <path d="M414 182h18M414 218h18M414 254h18M414 290h18M414 326h18"
+          stroke="#9AA6B1" stroke-width="3.4"/>
+
+    <!-- pas ostrzegawczy przy wrotach -->
+    <path d="M118 374h14l-12 18h-14ZM146 374h14l-12 18h-14ZM174 374h14l-12 18h-14ZM202 374h14l-12 18h-14ZM230 374h12l-12 18h-12Z"
+          fill="#F2C14E" stroke="none"/>
+  </g>
+</svg>

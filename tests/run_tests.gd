@@ -39,6 +39,8 @@ func _ready() -> void:
 	_test_retry_same_code()
 	_test_body_unpacking()
 	_test_dog()
+	_test_dog_in_action()
+	_test_breed_gating()
 	_test_guard_migration()
 	_test_fox_return_speed()
 	_test_upgrade_ladders()
@@ -339,6 +341,7 @@ func _test_economy() -> void:
 	_check(not Game.buy_hen("leghorn"), "brak pieniedzy blokuje zakup kury")
 	_check(not Game.buy_hen("nieistniejaca"), "nieznana rasa nie da sie kupic")
 	Game.state.money = 999999
+	_open_all_breeds()
 	_check(Game.buy_hen("cemani"), "najdrozsza rasa do kupienia, gdy stac gracza")
 
 	# Wartosc jaj zalezy od stada.
@@ -510,6 +513,7 @@ func _test_shop_is_open() -> void:
 	Game.new_game()
 	Game.state.money = 100000.0
 	Game.state.chickens.clear()
+	_open_all_breeds()
 	var price := float(GameData.breed("cemani").get("price", 0))
 	var before := Game.state.money
 	_check(Game.buy_hen("cemani"), "najdrozsza rasa do kupienia od razu")
@@ -527,6 +531,7 @@ func _test_shop_is_open() -> void:
 	Game.new_game()
 	Game.state.money = 100000.0
 	Game.state.unlocked_breeds.clear()
+	_open_all_breeds()
 	_check(not Game.state.has_ever_owned("brahma"), "na starcie gracz nie mial tej rasy")
 	Game.buy_hen("brahma")
 	_check(Game.state.has_ever_owned("brahma"), "pierwsza sztuka zapisuje sie w kolekcji")
@@ -685,19 +690,22 @@ func _test_fox() -> void:
 	_check(state.fox_taps_left == int(fox.get("scare_taps", 20)),
 			"gracz dostaje pelna pule trafien")
 
-	# Lup lisa miesci sie w widelkach 30-60% stada.
+	# Lup lisa to STALA liczba kur z przedzialu kills_min..kills_max,
+	# a nie procent stada — wlasciciel chcial "zabije pare sztuk i pojdzie".
 	var limit := int(arrival["fox_took"]) + state.fox_kill_left
-	_check(limit >= int(floor(20 * float(fox.get("min_share", 0.3)))),
+	_check(limit >= int(fox.get("kills_min", 3)),
 			"lup nie mniejszy niz minimum (%d)" % limit)
-	_check(limit <= int(ceil(20 * float(fox.get("max_share", 0.6)))),
+	_check(limit <= int(fox.get("kills_max", 10)),
 			"lup nie wiekszy niz maksimum (%d)" % limit)
 
-	# Lis zabija STOPNIOWO. Po polowie wizyty ma za soba mniej wiecej polowe.
-	var polowa := state.fox_visit_seconds() * 0.5 * GameData.time_scale()
-	var w_trakcie := Simulation.advance(state, polowa)
+	# Lis zabija STOPNIOWO, co kilka sekund jedna kure — a nie wszystkie naraz.
+	# Krok dobieramy tak, zeby zmiescil sie miedzy dwoma zabojstwami.
+	var krok := float(fox.get("kill_interval_max", 10.0)) * GameData.time_scale()
+	var w_trakcie := Simulation.advance(state, krok)
 	_check(int(w_trakcie["fox_took"]) > 0, "w trakcie wizyty gina kolejne kury")
-	_check(state.fox_visit_left > 0.0, "ale wizyta jeszcze trwa")
-	_check(state.hen_count() > 20 - limit, "nie wszystkie od razu — zabija po kolei")
+	_check(int(w_trakcie["fox_took"]) <= 2,
+			"ale po jednej, nie hurtem (%d w %ds)" % [int(w_trakcie["fox_took"]), int(krok)])
+	_check(state.hen_count() > 20 - limit - 1, "nie wszystkie od razu — zabija po kolei")
 
 	# Koniec czasu konczy wizyte i czysci caly stan lisa.
 	Simulation.advance(state, state.fox_visit_left * GameData.time_scale() + 1.0)
@@ -1101,12 +1109,20 @@ func _test_dog() -> void:
 	_check(float(dogs[0].get("price", 0)) <= float(fences[0].get("price", 0)),
 			"kundel nie drozszy niz najtanszy plot (%s wobec %s)"
 			% [dogs[0].get("price"), fences[0].get("price")])
-	_check(is_equal_approx(float(dogs[1].get("chance", 0.0)), 1.0),
-			"owczarek przegania zawsze")
-	_check(float(dogs[0].get("chance", 0.0)) > 0.5 and float(dogs[0].get("chance", 1.0)) < 1.0,
-			"kundel czasem nie daje rady")
-	_check(float(dogs[1].get("seconds", 99.0)) < float(dogs[0].get("seconds", 0.0)),
-			"owczarek zalatwia sprawe szybciej niz kundel")
+	# Kundel: co 10 sekund proba z szansa 1/3. Owczarek: co 5 sekund z 2/3,
+	# a udana proba to jeszcze 1/3 szansy na zagryzienie lisa.
+	_check(absf(float(dogs[0].get("chance", 0.0)) - 1.0 / 3.0) < 0.01,
+			"kundel ma jedna trzecia szansy na probe")
+	_check(absf(float(dogs[1].get("chance", 0.0)) - 2.0 / 3.0) < 0.01,
+			"owczarek ma dwie trzecie")
+	_check(is_equal_approx(float(dogs[0].get("interval", 0.0)), 10.0),
+			"kundel probuje co dziesiec sekund")
+	_check(is_equal_approx(float(dogs[1].get("interval", 0.0)), 5.0),
+			"owczarek co piec")
+	_check(is_zero_approx(float(dogs[0].get("kill_chance", 1.0))),
+			"kundel nie zagryza lisa")
+	_check(absf(float(dogs[1].get("kill_chance", 0.0)) - 1.0 / 3.0) < 0.01,
+			"owczarek zagryza lisa w jednym przypadku na trzy")
 
 	# Pies kupowalny od poczatku, bez plotu jako warunku.
 	Game.new_game()
@@ -1127,11 +1143,10 @@ func _test_dog() -> void:
 	var owczarek := _fresh_state(hens, 0.0)
 	owczarek.dog_level = 2
 	_check(is_zero_approx(bez.dog_chance()), "bez psa nikt lisa nie goni")
-	_check(kundel.dog_chance() > 0.0 and kundel.dog_chance() < 1.0, "kundel bywa skuteczny")
-	_check(is_equal_approx(owczarek.dog_chance(), 1.0), "owczarek skuteczny zawsze")
-	_check(owczarek.dog_seconds() < kundel.dog_seconds(), "owczarek goni krocej")
-	_check(kundel.dog_seconds() < bez.fox_visit_seconds(),
-			"nawet kundel skraca wizyte wzgledem pelnych trzech minut")
+	_check(owczarek.dog_chance() > kundel.dog_chance(), "owczarek skuteczniejszy od kundla")
+	_check(owczarek.dog_interval() < kundel.dog_interval(), "owczarek probuje czesciej")
+	_check(owczarek.dog_kill_chance() > 0.0 and is_zero_approx(kundel.dog_kill_chance()),
+			"tylko owczarek zagryza lisa")
 
 	# W symulacji: pies zmniejsza straty, ale ich nie zeruje.
 	var straty_bez := 0
@@ -1438,6 +1453,105 @@ func _test_egg_capacity() -> void:
 	_check(int(wynik.get("eggs_lost", 0)) > 0,
 			"gra liczy jaja, ktore przepadly z braku miejsca (%d)" % int(wynik.get("eggs_lost", 0)))
 
+
+## Pies w akcji: probuje do skutku, a owczarek czasem zagryza lisa.
+func _test_dog_in_action() -> void:
+	var hens: Array[String] = []
+	for i in 40:
+		hens.append("leghorn")
+
+	# Bez psa lis wybiera cala swoja pule.
+	var bez_psa := 0
+	for i in 25:
+		var a := _fresh_state(hens, 0.0)
+		_arm_fox(a)
+		bez_psa += _przezyj_wizyte(a)
+
+	# Z kundlem gina tylko te kury, ktore lis zdazy porwac, zanim pies
+	# trafi swoja kostka.
+	var z_kundlem := 0
+	var przegonien := 0
+	for i in 25:
+		var b := _fresh_state(hens, 0.0)
+		b.dog_level = 1
+		_arm_fox(b)
+		var przed := b.hen_count()
+		_przezyj_wizyte(b)
+		z_kundlem += przed - b.hen_count()
+	_check(z_kundlem < bez_psa, "z kundlem gina mniej kur (%d wobec %d)" % [z_kundlem, bez_psa])
+
+	# Owczarek dziala czesciej i mocniej.
+	var z_owczarkiem := 0
+	var zagryzien := 0
+	for i in 25:
+		var c := _fresh_state(hens, 0.0)
+		c.dog_level = 2
+		_arm_fox(c)
+		var przed := c.hen_count()
+		var wynik := Simulation.advance(c, 1.0)
+		zagryzien += int(wynik.get("fox_killed", 0))
+		var licznik := 0
+		while c.fox_visit_left > 0.0 and licznik < 2000:
+			var krok := Simulation.advance(c, 1.0)
+			zagryzien += int(krok.get("fox_killed", 0))
+			licznik += 1
+		z_owczarkiem += przed - c.hen_count()
+	_check(z_owczarkiem < z_kundlem,
+			"z owczarkiem gina jeszcze mniejsze straty (%d wobec %d)" % [z_owczarkiem, z_kundlem])
+	_check(zagryzien > 0, "owczarek czasem zagryza lisa (%d na 25 wizyt)" % zagryzien)
+
+	# Zagryziony lis odracza nastepnego piec razy.
+	var d := _fresh_state(hens, 0.0)
+	d.dog_level = 2
+	_arm_fox(d)
+	Simulation.advance(d, 1.0)
+	var bezpiecznik := 0
+	while d.fox_visit_left > 0.0 and bezpiecznik < 2000:
+		Simulation.advance(d, 1.0)
+		bezpiecznik += 1
+	if d.fox_next_multiplier > 1.0:
+		_check(is_equal_approx(d.fox_next_multiplier, 5.0),
+				"po zagryzieniu odstep rosnie piec razy")
+	_disarm_fox()
+
+
+## Kurnik na maksa. Testy zakupow i cen nie sa o tym, ktora rasa jest
+## zamknieta za poziomem kurnika — bez tego kupno cemani w nowej grze
+## odpadaloby na bramce i testy mowilyby o czym innym, niz deklaruja.
+## Samo bramkowanie ma wlasny test: `_test_breed_gating`.
+func _open_all_breeds() -> void:
+	Game.state.coop_level = (GameData.balance().get("buildings", {}).get(
+			"coop", {}).get("upgrades", []) as Array).size()
+
+
+## Drozsza rasa wymaga wiekszego kurnika.
+func _test_breed_gating() -> void:
+	Game.new_game()
+	Game.state.money = 1000000.0
+	Game.state.coop_level = 0
+	_check(Game.breed_allowed("leghorn"), "leghorna kupisz od pierwszego dnia")
+	_check(not Game.breed_allowed("cemani"), "cemani nie wstawisz do szopy na 20 sztuk")
+	_check(not Game.buy_hen("cemani"), "zakup cemani odpada na bramce")
+	_check(Game.buy_hen("leghorn"), "leghorn wchodzi bez przeszkod")
+
+	# Progi rosna razem z cena rasy.
+	var poprzedni := 0
+	var rasy: Array = GameData.breeds()
+	var posortowane: Array = rasy.duplicate()
+	posortowane.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return float(a.get("price", 0)) < float(b.get("price", 0)))
+	for rasa: Dictionary in posortowane:
+		var prog := int(rasa.get("coop_level", 0))
+		_check(prog >= poprzedni, "%s nie wymaga mniej niz tansza rasa (%d >= %d)"
+				% [rasa.get("id"), prog, poprzedni])
+		poprzedni = prog
+	_check(poprzedni > 0, "najdrozsza rasa naprawde czegos wymaga (poziom %d)" % poprzedni)
+
+	# Po rozbudowie kurnika rasa sie otwiera.
+	_open_all_breeds()
+	_check(Game.breed_allowed("cemani"), "pelny kurnik otwiera wszystkie rasy")
+	_check(Game.buy_hen("cemani"), "i cemani da sie kupic")
+
 func _test_event_rules() -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})
 	var disease: Dictionary = GameData.balance().get("disease", {})
@@ -1469,8 +1583,14 @@ func _test_event_rules() -> void:
 			"lis: przy nieaktywnej grze kostka raz na dobe")
 	_check(absf(float(fox.get("offline_chance", 0.0)) - 1.0 / 6.0) < 0.01,
 			"lis: przy nieaktywnej grze szansa jeden do szesciu")
-	_check(is_equal_approx(float(fox.get("visit_minutes", 0.0)), 3.0),
-			"lis: wizyta trwa trzy minuty")
+	# Wizyta konczy sie na liczbie zabitych kur, nie na zegarze.
+	_check(int(fox.get("kills_min", 0)) == 3 and int(fox.get("kills_max", 0)) == 10,
+			"lis zabija od trzech do dziesieciu kur i odchodzi")
+	_check(is_equal_approx(float(fox.get("kill_interval_min", 0.0)), 3.0)
+			and is_equal_approx(float(fox.get("kill_interval_max", 0.0)), 10.0),
+			"kolejna kura ginie co 3-10 sekund")
+	_check(is_equal_approx(float(fox.get("killed_return_multiplier", 0.0)), 5.0),
+			"po zagryzieniu lisa nastepny przychodzi piec razy pozniej")
 	# Choroba dziala tak samo jak lis, tylko dwa razy czesciej: ten sam
 	# ksztalt kostki, polowa odstepu.
 	_check(is_equal_approx(float(disease.get("active_roll_minutes", 0.0)),

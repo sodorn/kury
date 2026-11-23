@@ -42,6 +42,14 @@ signal fox_visited(count: int)
 @warning_ignore("unused_signal")
 signal fox_scared()
 
+## Pies wygryzl lisa z wybiegu — lis zyje, po prostu ucieka.
+@warning_ignore("unused_signal")
+signal fox_chased()
+
+## Pies ZABIL lisa. Scena ma pokazac rozszarpanie, a nie zwykle odejscie.
+@warning_ignore("unused_signal")
+signal fox_killed()
+
 ## Plot albo pies zawrocily lisa od zagrody. Nic nie zginelo, ale scena ma go
 ## pokazac, jak przebiega i odchodzi — inaczej gracz nie widzi, za co zaplacil
 ## za obrone, a sam lis bywa rzadkim gosciem.

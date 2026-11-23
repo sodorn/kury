@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="98" viewBox="0 0 1080 98">
+<!-- WYGENEROWANE przez tools/gen_fence.py - nie edytuj recznie.
+     Poziom 2: sztachety - gesty plot z zaostrzonymi koncami. -->
+<defs>
+<linearGradient id="post" x1="0" y1="0" x2="0" y2="98" gradientUnits="userSpaceOnUse">
+  <stop offset="0" stop-color="#FDF0D6"/>
+  <stop offset="1" stop-color="#D9C098"/>
+</linearGradient>
+</defs>
+<rect x="50" y="34" width="430" height="11" rx="4" fill="#E8D4AC" stroke="#7E4F2A" stroke-width="2.5"/>
+<rect x="600" y="34" width="430" height="11" rx="4" fill="#E8D4AC" stroke="#7E4F2A" stroke-width="2.5"/>
+<rect x="50" y="62" width="430" height="11" rx="4" fill="#E8D4AC" stroke="#7E4F2A" stroke-width="2.5"/>
+<rect x="600" y="62" width="430" height="11" rx="4" fill="#E8D4AC" stroke="#7E4F2A" stroke-width="2.5"/>
+<path d="M48 28L54.5 16L61 28V92H48Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M78 28L84.5 16L91 28V92H78Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M108 28L114.5 16L121 28V92H108Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M138 28L144.5 16L151 28V92H138Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M168 28L174.5 16L181 28V92H168Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M198 28L204.5 16L211 28V92H198Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M228 28L234.5 16L241 28V92H228Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M258 28L264.5 16L271 28V92H258Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M288 28L294.5 16L301 28V92H288Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M318 28L324.5 16L331 28V92H318Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M348 28L354.5 16L361 28V92H348Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M378 28L384.5 16L391 28V92H378Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M408 28L414.5 16L421 28V92H408Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M438 28L444.5 16L451 28V92H438Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M468 28L474.5 16L481 28V92H468Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M588 28L594.5 16L601 28V92H588Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M618 28L624.5 16L631 28V92H618Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M648 28L654.5 16L661 28V92H648Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M678 28L684.5 16L691 28V92H678Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M708 28L714.5 16L721 28V92H708Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M738 28L744.5 16L751 28V92H738Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M768 28L774.5 16L781 28V92H768Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M798 28L804.5 16L811 28V92H798Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M828 28L834.5 16L841 28V92H828Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M858 28L864.5 16L871 28V92H858Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M888 28L894.5 16L901 28V92H888Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M918 28L924.5 16L931 28V92H918Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M948 28L954.5 16L961 28V92H948Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M978 28L984.5 16L991 28V92H978Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M1008 28L1014.5 16L1021 28V92H1008Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<path d="M1038 28L1044.5 16L1051 28V92H1038Z" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="42" y="8" width="20" height="84" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="162" y="8" width="20" height="84" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="282" y="8" width="20" height="84" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="402" y="8" width="20" height="84" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="642" y="8" width="20" height="84" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="762" y="8" width="20" height="84" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="882" y="8" width="20" height="84" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="1002" y="8" width="20" height="84" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+</svg>

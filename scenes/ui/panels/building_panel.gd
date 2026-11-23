@@ -32,6 +32,9 @@ var _refreshers: Array[Callable] = []
 @onready var _scrollable: VBoxContainer = $Sheet/Content/Scroll/Gutter/Scrollable
 @onready var _rows: VBoxContainer = $Sheet/Content/Scroll/Gutter/Scrollable/Rows
 @onready var _actions: VBoxContainer = $Sheet/Content/Scroll/Gutter/Scrollable/Actions
+## Paski postepu stoja POD przyciskami: wlasciciel chcial miec przyciski
+## pod palcem u gory, a odliczanie na dole.
+@onready var _bars: VBoxContainer = $Sheet/Content/Scroll/Gutter/Scrollable/Bars
 @onready var _bottom_spacer: Control = $Sheet/Content/BottomSpacer
 
 
@@ -143,7 +146,7 @@ func _on_dim_input(event: InputEvent) -> void:
 
 func _build_content(building_id: String) -> void:
 	_refreshers.clear()
-	for container in [_rows, _actions]:
+	for container in [_rows, _actions, _bars]:
 		for child in container.get_children():
 			child.queue_free()
 			container.remove_child(child)
@@ -343,7 +346,7 @@ func _build_incubator() -> void:
 	empty_note.theme_type_variation = &"NoteLabel"
 	empty_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	empty_note.text = tr("PANEL_INCUBATOR_EMPTY")
-	_rows.add_child(empty_note)
+	_bars.add_child(empty_note)
 	_refreshers.append(func() -> void:
 		empty_note.visible = Game.state.incubating.is_empty() and Game.state.chicks.is_empty())
 
@@ -538,7 +541,7 @@ func _add_progress(label_key: String, value_provider: Callable) -> void:
 	bar.custom_minimum_size.y = 34
 	box.add_child(label)
 	box.add_child(bar)
-	_rows.add_child(box)
+	_bars.add_child(box)
 	_refreshers.append(func() -> void: bar.value = value_provider.call())
 
 
@@ -736,11 +739,16 @@ func _add_code_entry() -> void:
 	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	status.visible = false
 	_actions.add_child(status)
+	# Etykieta znika razem z przebudowa panelu, a polaczenie z Events.notice
+	# zostaje — bez sprawdzenia lambda siega po skasowany wezel. Wyszlo przy
+	# rozbudowie inkubatora, ktora przebudowuje panel w trakcie dzialania.
 	var say := func(text: String) -> void:
+		if not is_instance_valid(status):
+			return
 		status.text = text
 		status.visible = not text.is_empty()
 	Events.notice.connect(func(text: String) -> void:
-		if is_open():
+		if is_instance_valid(status) and is_open():
 			say.call(text))
 
 	button.pressed.connect(func() -> void:
@@ -837,7 +845,7 @@ func _add_progress_dynamic(label_provider: Callable, value_provider: Callable,
 	bar.custom_minimum_size.y = 30
 	box.add_child(head)
 	box.add_child(bar)
-	_rows.add_child(box)
+	_bars.add_child(box)
 	_refreshers.append(func() -> void:
 		var text: String = label_provider.call()
 		box.visible = text != ""
@@ -854,7 +862,7 @@ func _add_group(label_key: String, visible_provider: Callable) -> void:
 	label.text = tr(label_key)
 	label.theme_type_variation = &"GroupLabel"
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_rows.add_child(label)
+	_bars.add_child(label)
 	_refreshers.append(func() -> void: label.visible = visible_provider.call())
 
 
@@ -989,8 +997,16 @@ func _add_breed_card(breed: Dictionary) -> void:
 		var poor := Game.state.money < price
 		# Licznik "(masz N szt.)" jak przy kogucie i przy sprzedazy — bez niego
 		# to jedyny przycisk w sklepie, ktory nie mowi, ile masz.
-		buy.text = tr("PANEL_BUY_HEN") % [NumberFormat.money(price), owned]
-		buy.disabled = poor
+		# Rasa zamknieta za poziomem kurnika mowi wprost, czego brakuje —
+		# wyszarzony przycisk bez wyjasnienia wyglada jak zepsuty.
+		var locked := not Game.breed_allowed(breed_id)
+		if locked:
+			buy.text = tr("PANEL_BREED_LOCKED") % Game.breed_required_level(breed_id)
+			buy_rooster.text = buy.text
+		else:
+			buy.text = tr("PANEL_BUY_HEN") % [NumberFormat.money(price), owned]
+		buy.disabled = poor or locked
+		buy_rooster.disabled = locked or Game.state.money < price
 		buy_rooster.text = tr("PANEL_BUY_ROOSTER") % [NumberFormat.money(price), cocks]
 		buy_rooster.disabled = poor
 		no_rooster.visible = owned > 0 and cocks == 0

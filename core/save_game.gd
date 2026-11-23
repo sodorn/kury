@@ -48,6 +48,7 @@ static func to_dict(state: FarmState) -> Dictionary:
 		"guard_level": state.guard_level,
 		"dog_level": state.dog_level,
 		"egg_ages": state.egg_ages,
+		"rooster_hints": state.rooster_hints,
 		"fox_roll_timer": state.fox_roll_timer,
 		"fox_hand_scared": state.fox_hand_scared,
 		"disease_timer": state.disease_timer,
@@ -94,6 +95,7 @@ static func from_dict(data: Dictionary) -> Dictionary:
 	state.fox_roll_timer = maxf(0.0, float(data.get("fox_roll_timer", 0.0)))
 	state.fox_hand_scared = bool(data.get("fox_hand_scared", false))
 	state.disease_timer = maxf(0.0, float(data.get("disease_timer", 0.0)))
+	state.rooster_hints = Dictionary(data.get("rooster_hints", {}))
 	# Licznik suchych minut przenosi sie przez zapis — na tym polega narastanie
 	# szansy przy graniu z doskoku. Stare zapisy zaczynaja od zera.
 	state.event_dry = {}

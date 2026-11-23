@@ -102,5 +102,9 @@ theme_override_constants/separation = 14
 layout_mode = 2
 theme_override_constants/separation = 18
 
+[node name="Bars" type="VBoxContainer" parent="Sheet/Content/Scroll/Gutter/Scrollable"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
 [node name="BottomSpacer" type="Control" parent="Sheet/Content"]
 layout_mode = 2

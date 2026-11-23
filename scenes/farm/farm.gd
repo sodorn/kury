@@ -20,6 +20,41 @@ const DOG_SCENE: PackedScene = preload("res://scenes/farm/dog.tscn")
 ## Gdzie siedzi pies, gdy nic sie nie dzieje: pod kurnikiem, przy wybiegu.
 const DOG_HOME := Vector2(196.0, 905.0)
 
+## Plot na kolejnych poziomach obrony. Indeks = guard_level, wiec 0 to plot,
+## ktory stoi od pierwszego dnia. Kazdy kolejny jest wyzszy; dol zostaje na
+## tej samej linii trawy, bo offset liczymy z wysokosci tekstury.
+const FENCES: Array[Texture2D] = [
+	preload("res://assets/sprites/world/fence_front.svg"),
+	preload("res://assets/sprites/world/fence_front_1.svg"),
+	preload("res://assets/sprites/world/fence_front_2.svg"),
+	preload("res://assets/sprites/world/fence_front_3.svg"),
+	preload("res://assets/sprites/world/fence_front_4.svg"),
+]
+## Ile pikseli tekstury plotu wystaje PONIZEJ linii, na ktorej stoi sprajt.
+const FENCE_FOOT := 6.0
+
+## Budynki maja po trzy poziomy wygladu: zwykly, rozbudowany, przemyslowy.
+## Mapa: nazwa wezla -> [tekstury] oraz progi poziomow rozbudowy.
+const BUILDING_LOOKS := {
+	"Coop": [
+		preload("res://assets/sprites/buildings/coop.svg"),
+		preload("res://assets/sprites/buildings/coop_2.svg"),
+		preload("res://assets/sprites/buildings/coop_3.svg"),
+	],
+	"Incubator": [
+		preload("res://assets/sprites/buildings/incubator.svg"),
+		preload("res://assets/sprites/buildings/incubator_2.svg"),
+		preload("res://assets/sprites/buildings/incubator_3.svg"),
+	],
+	"Storage": [
+		preload("res://assets/sprites/buildings/storage.svg"),
+		preload("res://assets/sprites/buildings/storage_2.svg"),
+		preload("res://assets/sprites/buildings/storage_3.svg"),
+	],
+}
+## Od ktorego poziomu rozbudowy budynek zmienia wyglad na kolejny.
+const LOOK_STEPS := [3, 6]
+
 var _sync_left := 0.0
 ## Obszar, po ktorym chodza kury. Czytany z balance.json, zeby symulacja
 ## (kladzie zwloki) i scena uzywaly tych samych wspolrzednych.
@@ -39,6 +74,7 @@ func _ready() -> void:
 	_center_world()
 	_sync_livestock()
 	_sync_dog()
+	_sync_buildings()
 
 
 func _process(delta: float) -> void:
@@ -47,6 +83,7 @@ func _process(delta: float) -> void:
 		_sync_left = SYNC_SECONDS
 		_sync_livestock()
 		_sync_dog()
+		_sync_buildings()
 
 
 func _center_world() -> void:
@@ -255,11 +292,14 @@ func _sync_dog() -> void:
 		return
 	var powinien := Game.state.dog_level > 0
 	if powinien == (_dog != null and is_instance_valid(_dog)):
+		if _dog != null and is_instance_valid(_dog):
+			_dog.show_breed(Game.state.dog_level)
 		return
 	if powinien:
 		_dog = DOG_SCENE.instantiate()
 		_dog.position = DOG_HOME
 		_objects.add_child(_dog)
+		_dog.show_breed(Game.state.dog_level)
 	elif _dog != null:
 		_dog.queue_free()
 		_dog = null
@@ -300,3 +340,35 @@ func _egg_position() -> Vector2:
 	return Vector2(
 		clampf(spot.x, _run.position.x, _run.end.x),
 		clampf(spot.y, _run.position.y, _run.end.y))
+
+
+## Ustawia wyglad plotu i budynkow pod aktualne poziomy rozbudowy. Tanie:
+## przypisanie tej samej tekstury drugi raz nic nie kosztuje, wiec mozna to
+## wolac z tym samym rytmem co reszte synchronizacji sceny.
+func _sync_buildings() -> void:
+	if Game.state == null:
+		return
+	var fence := $Objects/FenceFront as Sprite2D
+	if fence != null:
+		var want: Texture2D = FENCES[clampi(Game.state.guard_level, 0, FENCES.size() - 1)]
+		if fence.texture != want:
+			fence.texture = want
+			# Sprajt nie jest wysrodkowany, wiec wyzsza tekstura sama by
+			# urosla w dol i zaklaby trawe. Przesuwamy ja o jej wysokosc.
+			fence.offset.y = -(want.get_height() - FENCE_FOOT)
+	for node_name: String in BUILDING_LOOKS:
+		var building := $Objects.get_node_or_null(node_name)
+		if building == null:
+			continue
+		var sprite := building.get_node_or_null("Sprite") as Sprite2D
+		if sprite == null:
+			continue
+		var looks: Array = BUILDING_LOOKS[node_name]
+		var level := Game.state.building_level(String(building.building_id))
+		var tier := 0
+		for step: int in LOOK_STEPS:
+			if level >= step:
+				tier += 1
+		var texture: Texture2D = looks[mini(tier, looks.size() - 1)]
+		if sprite.texture != texture:
+			sprite.texture = texture

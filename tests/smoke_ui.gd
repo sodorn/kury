@@ -59,6 +59,9 @@ func _run() -> void:
 	await _test_unlock_popup()
 	await _test_farm_code_restore()
 	await _test_sick_and_fox_look()
+	await _test_upgrade_looks()
+	await _test_dog_breeds()
+	await _test_fox_death()
 
 	SaveGame.clear()
 	print("TEST DYMNY: %s" % ("OK" if _failed == 0 else "%d BLEDOW" % _failed))
@@ -341,9 +344,14 @@ func _test_incubator_panel() -> void:
 	# Koledzy zglosili, ze pasek postepu byl goly: nie bylo ani procentow,
 	# ani czasu. Szukamy ich w panelu po wlozeniu jaj.
 	await _frames(20)
+	# Wiersze stanu zostaly w Rows, paski postepu przeniosly sie do Bars pod
+	# przyciskami — zagladamy w oba miejsca.
 	var rows: VBoxContainer = _main.get_node(
 			"Hud/Root/BuildingPanel/Sheet/Content/Scroll/Gutter/Scrollable/Rows")
+	var bars: VBoxContainer = _main.get_node(
+			"Hud/Root/BuildingPanel/Sheet/Content/Scroll/Gutter/Scrollable/Bars")
 	var texts := _labels_in(rows)
+	texts.append_array(_labels_in(bars))
 	var joined := "\n".join(texts)
 	_check(joined.contains("%"), "pasek inkubatora podaje procent postepu")
 	_check(joined.contains(tr("PANEL_INCUBATOR_GROUP")),
@@ -355,11 +363,11 @@ func _test_incubator_panel() -> void:
 	Simulation.advance(Game.state, quarter)
 	await _frames(30)
 	var has_bar := false
-	for bar in _controls_of_type(rows, "ProgressBar"):
+	for bar in _controls_of_type(bars, "ProgressBar"):
 		if (bar as ProgressBar).visible and (bar as ProgressBar).value > 0.0:
 			has_bar = true
 	_check(has_bar, "pasek postepu wypelnia sie, a nie stoi na zerze")
-	var moved := "\n".join(_labels_in(rows))
+	var moved := "\n".join(_labels_in(bars))
 	_check(not moved.contains("0%"), "po cwiartce czasu nie pisze juz 0 procent")
 	_shot("panel_inkubator_postep.png")
 
@@ -458,7 +466,9 @@ func _test_sell_hen() -> void:
 	if tak == null:
 		return
 	tak.emit_signal("pressed")
-	await _frames(40)
+	# Wybieg dogania stan stada dopiero przy nastepnym przegladzie, a doszlo
+	# jedno dodatkowe klikniecie (potwierdzenie) — dajemy mu wiecej czasu.
+	await _seconds(2.0)
 	_check(Game.state.hen_count() == hens_before - 1, "sprzedaz zmniejsza stado")
 	_check(Game.state.money > money_before, "sprzedaz kury daje pieniadze")
 	_check(_nodes_of_type("FarmChicken").size() <= Game.state.hen_count(),
@@ -897,3 +907,165 @@ func _test_sick_and_fox_look() -> void:
 	await _seconds(4.5)
 	_check(_nodes_of_type("FarmFox").is_empty(), "zawrocony lis sam znika z wybiegu")
 	_check(Game.state.hen_count() == flock_before, "zawrocony lis nic nie zabral")
+
+
+## Rozbudowa ma byc WIDOCZNA na farmie, nie tylko w panelu. Plot ma rosnac
+## z kazdym poziomem obrony, a budynki zmieniac wyglad na progach 3 i 6.
+func _test_upgrade_looks() -> void:
+	var farm: Node2D = _main.get_node("Farm")
+	var fence: Sprite2D = farm.get_node("Objects/FenceFront")
+
+	var seen: Array[String] = []
+	var feet: Array[float] = []
+	var heights: Array[float] = []
+	for level in 5:
+		Game.state.guard_level = level
+		farm._sync_buildings()
+		await _frames(2)
+		seen.append(fence.texture.resource_path)
+		heights.append(float(fence.texture.get_height()))
+		# Dol plotu musi zostac na tej samej linii trawy, inaczej wyzszy plot
+		# zaklada sie na wybieg albo wisi w powietrzu.
+		feet.append(fence.position.y + fence.offset.y + fence.texture.get_height())
+
+	var unique := {}
+	for path: String in seen:
+		unique[path] = true
+	_check(unique.size() == 5, "kazdy poziom plotu ma wlasny wyglad (jest %d)" % unique.size())
+
+	var rosnie := true
+	for i in range(1, heights.size()):
+		if heights[i] <= heights[i - 1]:
+			rosnie = false
+	_check(rosnie, "kolejny plot jest wyzszy od poprzedniego")
+
+	var rowno := true
+	for value: float in feet:
+		if absf(value - feet[0]) > 0.5:
+			rowno = false
+	_check(rowno, "dol plotu stoi na tej samej linii na kazdym poziomie")
+
+	Game.state.guard_level = 0
+	farm._sync_buildings()
+
+	# Budynki: trzy wygladay, progi na poziomach 3 i 6.
+	for node_name: String in ["Coop", "Incubator", "Storage"]:
+		var building: Node2D = farm.get_node("Objects/" + node_name)
+		var sprite: Sprite2D = building.get_node("Sprite")
+		var id := String(building.building_id)
+		var base_size: Vector2 = sprite.texture.get_size()
+		var looks: Array[String] = []
+		for level in [0, 2, 3, 5, 6, 8]:
+			Game.state.set_building_level(id, level)
+			farm._sync_buildings()
+			await _frames(1)
+			looks.append(sprite.texture.resource_path)
+			_check(sprite.texture.get_size() == base_size,
+					"'%s' lvl %d ma to samo plotno, wiec nie przeskakuje" % [id, level])
+		_check(looks[0] == looks[1] and looks[2] == looks[3] and looks[4] == looks[5],
+				"'%s' zmienia wyglad tylko na progach" % id)
+		_check(looks[0] != looks[2] and looks[2] != looks[4],
+				"'%s' ma trzy rozne wygladay rozbudowy" % id)
+		Game.state.set_building_level(id, 0)
+	farm._sync_buildings()
+
+
+## Owczarek ma byc INNYM psem niz kundel i ma byc wiekszy.
+func _test_dog_breeds() -> void:
+	var farm: Node2D = _main.get_node("Farm")
+	Game.state.dog_level = 1
+	farm._sync_dog()
+	await _frames(4)
+	var dogs := _nodes_of_type("FarmDog")
+	_check(dogs.size() == 1, "po kupieniu psa stoi na farmie dokladnie jeden (jest %d)" % dogs.size())
+	if dogs.is_empty():
+		return
+	var dog: Node2D = dogs[0]
+	var kundel: Texture2D = dog.get_node("Sprite").texture
+	var maly: float = dog.scale.x * kundel.get_width()
+
+	Game.state.dog_level = 2
+	farm._sync_dog()
+	await _frames(4)
+	var owczarek: Texture2D = dog.get_node("Sprite").texture
+	var duzy: float = dog.scale.x * owczarek.get_width()
+	_check(owczarek != kundel, "owczarek to inny sprajt niz kundel")
+	_check(duzy > maly * 1.12, "owczarek jest wyraznie wiekszy (%.0f vs %.0f)" % [duzy, maly])
+
+	# Lis musi byc mniejszy od psa — wlasciciel zglaszal odwrotnie.
+	var lis: Texture2D = load("res://assets/sprites/animals/fox.svg")
+	_check(lis.get_width() * 1.18 < maly, "lis jest mniejszy od kundla")
+	_shot("psy.png")
+	Game.state.dog_level = 0
+	farm._sync_dog()
+
+
+## Pies wygryziony lis ma odejsc OD RAZU, a zabity — zostac rozszarpany
+## w kaluzy krwi. Wczesniej scena pilnowala wylacznie wlasnego zegara, wiec
+## lis skrocony przez psa dalej stal na wybiegu.
+func _test_fox_death() -> void:
+	var decals: Node2D = _main.get_node("Farm/Decals")
+	for child in decals.get_children():
+		child.queue_free()
+	await _frames(4)
+
+	# 0. Licznik trafien nad lisem: bez niego nikt nie wie, ze lisa odgania
+	# sie palcem. Koledzy zglaszali to jako pierwsza rzecz na liscie.
+	# fox_visit_left musi byc ustawione recznie — sam sygnal tylko stawia
+	# sprajt, a poke_fox() pyta stan gry, czy lis faktycznie jest na wybiegu.
+	Game.state.fox_taps_left = 20
+	Game.state.fox_visit_left = 60.0
+	Events.fox_arrived.emit(5, 60.0)
+	await _frames(40)
+	var lisy := _nodes_of_type("FarmFox")
+	_check(lisy.size() == 1, "lis wszedl przed psem")
+	if not lisy.is_empty():
+		var licznik: Label = null
+		for child in (lisy[0] as Node).get_children():
+			if child is Label:
+				licznik = child
+		_check(licznik != null and licznik.visible and licznik.text == "20",
+				"nad lisem stoi licznik trafien")
+		(lisy[0] as FarmFox)._hit()
+		await _frames(4)
+		_check(licznik != null and licznik.text == "19", "licznik spada po trafieniu")
+		_shot("lis_licznik.png")
+		Game.state.fox_taps_left = 20
+		Game.state.fox_visit_left = 0.0
+	Events.fox_chased.emit()
+	await _seconds(1.2)
+	_check(_nodes_of_type("FarmFox").is_empty(),
+			"wygryziony lis schodzi z wybiegu od razu, nie czeka na swoj zegar")
+
+	# 2. Zabity: krew, strzepy i zwloki, ktore znikaja dopiero po chwili.
+	Events.fox_arrived.emit(5, 60.0)
+	await _frames(40)
+	var foxes := _nodes_of_type("FarmFox")
+	_check(foxes.size() == 1, "drugi lis wszedl na wybieg")
+	if foxes.is_empty():
+		return
+	var fox := foxes[0] as FarmFox
+	var before := fox.position
+	Events.fox_killed.emit()
+	await _frames(30)
+	_check((fox.get_node("Blood") as CPUParticles2D).emitting, "przy zabiciu leci krew")
+	var czerwone := 0
+	var najwieksza := 0.0
+	for child in decals.get_children():
+		var sprite := child as Sprite2D
+		if sprite == null or sprite.texture == null:
+			continue
+		if not sprite.texture.resource_path.ends_with("blood_splat.svg"):
+			continue
+		czerwone += 1
+		najwieksza = maxf(najwieksza, sprite.scale.x)
+	_check(czerwone >= 8, "po lisie zostaje kaluza i strzepy (plam: %d)" % czerwone)
+	_check(najwieksza >= 3.0, "kaluza po lisie jest wieksza niz po kurze (%.1f)" % najwieksza)
+	_check(absf(fox.position.x - before.x) < 40.0,
+			"zabity lis zostaje na miejscu, nie ucieka za ekran")
+	var martwy: Vector2 = (fox.get_node("Sprite") as Sprite2D).scale
+	_check(martwy.y < martwy.x * 0.5,
+			"zwloki lisa leza plasko na trawie (%.2f x %.2f)" % [martwy.x, martwy.y])
+	_shot("lis_rozszarpany.png")
+	await _seconds(3.6)
+	_check(_nodes_of_type("FarmFox").is_empty(), "zwloki lisa w koncu znikaja")

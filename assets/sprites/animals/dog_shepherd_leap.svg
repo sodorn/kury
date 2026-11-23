@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="248" height="134" viewBox="0 0 248 134">
+  <!-- KLATKA LOTU. Druga klatka susa: zadnie nogi wyrzucone w tyl, przednie
+       wyciagniete w przod, cien mniejszy, bo zwierzak jest w powietrzu.
+       Scena przelacza ta teksture ze zwykla w rytm skoku — dzieki temu
+       lapy pracuja, a zwierzak nie sunie jak sanie. Zmieniajac sylwetke
+       w pliku podstawowym, popraw tez te klatke. -->
+  <!-- Owczarek niemiecki. Celowo wyraznie wiekszy i inaczej zbudowany niz
+       kundel: dluzszy tulow, opadajacy zad, spiczaste postawione uszy,
+       czarne siodlo na grzbiecie i czarna maska na pysku. Gracz ma od razu
+       widziec, ze to inny, powazniejszy pies.
+       Styl jak reszta zwierzat: gruby jasny kontur, gradienty, zadnych
+       filtrow SVG (ThorVG ich nie obsluguje). -->
+  <defs>
+    <linearGradient id="shBody" x1="60" y1="40" x2="150" y2="104" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#D9A868"/>
+      <stop offset="0.55" stop-color="#B98743"/>
+      <stop offset="1" stop-color="#8E6330"/>
+    </linearGradient>
+    <linearGradient id="shSaddle" x1="70" y1="36" x2="150" y2="84" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4A4036"/>
+      <stop offset="1" stop-color="#2E2823"/>
+    </linearGradient>
+    <radialGradient id="shHead" cx="196" cy="48" r="34" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#DDAE6E"/>
+      <stop offset="1" stop-color="#B98743"/>
+    </radialGradient>
+  </defs>
+
+  <g stroke="#5E4630" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="122" cy="128" rx="62" ry="5" fill="#6B8F4E" fill-opacity="0.16" stroke="none"/>
+
+    <!-- ogon gesty, opuszczony w dol i lekko zakrecony -->
+    <path d="M44 66Q18 84 22 108Q36 116 44 98Q50 82 58 72Z" fill="#8E6330"/>
+
+    <!-- tylne nogi: udo szersze, bo zad owczarka jest nisko -->
+    <path d="M70 86q-20 16-30 24" stroke="#8E6330" stroke-width="13"/>
+    <path d="M92 90q-14 13-22 22" stroke="#A3763B" stroke-width="12"/>
+    <!-- przednie nogi proste -->
+    <path d="M156 88l22 15M176 84l30 11" stroke="#B98743" stroke-width="12"/>
+
+    <!-- tulow: dluzszy od kundla, z opadajaca linia grzbietu -->
+    <path d="M58 68Q74 38 120 36Q168 34 188 56Q192 80 168 88Q110 98 70 90Q54 84 58 68Z"
+          fill="url(#shBody)"/>
+    <!-- czarne siodlo -->
+    <path d="M74 60Q96 40 132 40Q166 40 182 56Q150 70 112 68Q88 66 74 60Z"
+          fill="url(#shSaddle)" stroke="none"/>
+    <!-- jasny podbrzusze -->
+    <path d="M72 88Q120 98 170 86Q120 94 72 88Z" fill="#EFDCBC" stroke="none"/>
+
+    <!-- szyja i glowa -->
+    <path d="M176 60q10-20 26-22q18-2 24 14" fill="#B98743" stroke="none"/>
+    <ellipse cx="200" cy="52" rx="28" ry="25" fill="url(#shHead)"/>
+
+    <!-- spiczaste, wysoko postawione uszy -->
+    <path d="M182 30L176 2l24 18Z" fill="#8E6330"/>
+    <path d="M212 28L226 2l10 26Z" fill="#8E6330"/>
+    <path d="M184 27l-3-13l12 8Z" fill="#4A4036" stroke="none"/>
+    <path d="M215 26l7-11l5 12Z" fill="#4A4036" stroke="none"/>
+
+    <!-- czarna maska i dlugi pysk -->
+    <path d="M206 44q32 2 36 14q-8 13-36 11q-9-13 0-25Z" fill="#3A322B"/>
+    <ellipse cx="241" cy="57" rx="6.5" ry="5.5" fill="#1F1A16" stroke="none"/>
+    <path d="M214 66q10 5 20 1" fill="none" stroke="#EFDCBC" stroke-width="3.5"/>
+
+    <!-- oko czujne, jasna brew -->
+    <path d="M190 38q8-5 15 0" fill="none" stroke="#E8CFA6" stroke-width="4"/>
+    <circle cx="197" cy="45" r="5" fill="#2E2823" stroke="none"/>
+    <circle cx="198.8" cy="43.2" r="1.8" fill="#FFFFFF" stroke="none"/>
+
+    <!-- obroza robocza -->
+    <path d="M172 52q6 16 20 20" fill="none" stroke="#6E4B2A" stroke-width="9"/>
+    <circle cx="184" cy="68" r="5" fill="#C9C1B3" stroke="#5E4630" stroke-width="2"/>
+  </g>
+</svg>

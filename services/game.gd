@@ -154,6 +154,7 @@ func _report(result: Dictionary) -> void:
 		Events.fox_visited.emit(fox)
 		Events.notice.emit(tr("HINT_FOX") % fox)
 		Events.resources_changed.emit()
+	_report_fox_end(result)
 
 
 func _check_unlocks() -> void:
@@ -335,6 +336,21 @@ func must_enter_code() -> bool:
 	return minutes <= 0.0 or _last_gap >= minutes * 60.0
 
 
+## Ostrzezenie o braku koguta pokazujemy najwyzej ROOSTER_HINTS razy na rase.
+## Wlasciciel slusznie zglosil, ze przy kazdym zakupie to juz tylko
+## przeszkadza — raz zrozumiana zasada nie wymaga powtarzania w kolko.
+const ROOSTER_HINTS := 3
+
+
+func _warn_no_rooster(breed_id: String, breed_name: String) -> void:
+	var shown := int(state.rooster_hints.get(breed_id, 0))
+	if shown >= ROOSTER_HINTS:
+		return
+	state.rooster_hints[breed_id] = shown + 1
+	Events.alert.emit(tr("ALERT_NO_ROOSTER_TITLE"),
+			tr("ALERT_NO_ROOSTER_BODY") % tr(breed_name))
+
+
 func new_game() -> void:
 	_last_gap = 0.0
 	_reported_no_feed = false
@@ -422,6 +438,20 @@ func _apply_elapsed(elapsed: float) -> void:
 	if int(result["fox_blocked"]) > 0:
 		Events.notice.emit(tr("HINT_FOX_BLOCKED"))
 		Events.fox_repelled.emit()
+	_report_fox_end(result)
+
+
+## Koniec wizyty lisa. WAZNE: scena lisa sama pilnuje tylko wlasnego zegara,
+## wiec gdy symulacja skroci wizyte (pies!), trzeba jej o tym powiedziec —
+## inaczej zabity albo wygoniony lis dalej siedzi na wybiegu. Na tym samym
+## bledzie gra juz raz sie wylozyla przy trzech niesmiertelnych lisach.
+func _report_fox_end(result: Dictionary) -> void:
+	if int(result.get("fox_killed", 0)) > 0:
+		Events.notice.emit(tr("HINT_FOX_KILLED"))
+		Events.fox_killed.emit()
+	elif int(result.get("fox_chased", 0)) > 0:
+		Events.notice.emit(tr("HINT_FOX_CHASED"))
+		Events.fox_chased.emit()
 
 
 # --- jaja ---------------------------------------------------------------
@@ -483,9 +513,26 @@ func buy_feed() -> bool:
 ## Kupuje kure podanej rasy. Rasa musi byc odblokowana.
 ## Kupuje jednego ptaka danej rasy. `rooster` decyduje o plci; cena jest ta sama,
 ## bo kogut je tyle samo i zajmuje tyle samo miejsca co kura.
+## Czy kurnik jest juz dosc duzy na te rase.
+func breed_allowed(breed_id: String) -> bool:
+	return state.coop_level >= int(GameData.breed(breed_id).get("coop_level", 0))
+
+
+## Poziom kurnika (liczony od 1, jak w panelu), od ktorego rasa jest dostepna.
+func breed_required_level(breed_id: String) -> int:
+	return int(GameData.breed(breed_id).get("coop_level", 0)) + 1
+
+
 func buy_hen(breed_id: String, rooster: bool = false) -> bool:
 	var def := GameData.breed(breed_id)
 	if def.is_empty() or not state.is_unlocked(breed_id):
+		return false
+	# Drozsza rasa wymaga wiekszego kurnika: cemani nie wstawisz do szopy
+	# na dwadziescia sztuk. Daje to drabince rozbudowy drugi sens poza
+	# samym miejscem.
+	if not breed_allowed(breed_id):
+		Events.notice.emit(tr("HINT_BREED_NEEDS_COOP") % [
+				tr(String(def.get("name", ""))), int(def.get("coop_level", 0)) + 1])
 		return false
 	var price := float(def.get("price", 0))
 	if state.money < price:
@@ -500,8 +547,7 @@ func buy_hen(breed_id: String, rooster: bool = false) -> bool:
 	# Kura bez koguta swojej rasy nie zniesie ani jednego jajka. Lepiej
 	# powiedziec to od razu, niz pozwolic graczowi myslec, ze gra jest zepsuta.
 	if not rooster and not state.has_rooster(breed_id):
-		Events.alert.emit(tr("ALERT_NO_ROOSTER_TITLE"),
-				tr("ALERT_NO_ROOSTER_BODY") % tr(String(def.get("name", ""))))
+		_warn_no_rooster(breed_id, String(def.get("name", "")))
 	# Pierwsza sztuka danej rasy to wydarzenie: pokazujemy jej historie.
 	if not state.has_ever_owned(breed_id):
 		state.mark_owned(breed_id)
@@ -528,8 +574,7 @@ func sell_hen(breed_id: String, rooster: bool = false) -> float:
 	# Sprzedany kogut moze byc ostatnim kogutem swojej rasy — wtedy cala
 	# reszta tej rasy przestaje niesc i gracz musi o tym wiedziec.
 	if rooster and state.hens_of_breed(breed_id) > 0 and not state.has_rooster(breed_id):
-		Events.alert.emit(tr("ALERT_NO_ROOSTER_TITLE"),
-				tr("ALERT_NO_ROOSTER_BODY") % tr(String(GameData.breed(breed_id).get("name", ""))))
+		_warn_no_rooster(breed_id, String(GameData.breed(breed_id).get("name", "")))
 	return price
 
 
@@ -551,8 +596,7 @@ func cull_hen(breed_id: String, rooster: bool = false) -> bool:
 	Events.hen_removed.emit(breed_id)
 	Events.resources_changed.emit()
 	if rooster and state.hens_of_breed(breed_id) > 0 and not state.has_rooster(breed_id):
-		Events.alert.emit(tr("ALERT_NO_ROOSTER_TITLE"),
-				tr("ALERT_NO_ROOSTER_BODY") % tr(String(GameData.breed(breed_id).get("name", ""))))
+		_warn_no_rooster(breed_id, String(GameData.breed(breed_id).get("name", "")))
 	save()
 	return true
 

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="210" height="112" viewBox="0 0 210 112">
+  <!-- KLATKA LOTU. Druga klatka susa: zadnie nogi wyrzucone w tyl, przednie
+       wyciagniete w przod, cien mniejszy, bo zwierzak jest w powietrzu.
+       Scena przelacza ta teksture ze zwykla w rytm skoku — dzieki temu
+       lapy pracuja, a zwierzak nie sunie jak sanie. Zmieniajac sylwetke
+       w pliku podstawowym, popraw tez te klatke. -->
+  <!-- Kundel podworzowy, zwrocony w prawo. Ten sam styl co lis i kury:
+       gruby jasny kontur, gradienty, zadnych filtrow SVG. Sylwetka celowo
+       inna niz lisia — krepszy tulow, klapniete ucho, zadarty ogon
+       i obroza, zeby na pierwszy rzut oka bylo widac, ze to swoj. -->
+  <defs>
+    <radialGradient id="dgBody" cx="92" cy="58" r="72" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#C9A276"/>
+      <stop offset="0.6" stop-color="#A9815A"/>
+      <stop offset="1" stop-color="#8A6442"/>
+    </radialGradient>
+    <radialGradient id="dgHead" cx="166" cy="48" r="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#D4AE84"/>
+      <stop offset="1" stop-color="#A9815A"/>
+    </radialGradient>
+  </defs>
+
+  <g stroke="#6E5240" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="104" cy="106" rx="52" ry="5" fill="#6B8F4E" fill-opacity="0.16" stroke="none"/>
+
+    <!-- ogon zadarty do gory, zakrecony -->
+    <path d="M44 58Q22 40 30 22Q44 14 48 30Q50 44 56 56Z" fill="#A9815A"/>
+
+    <!-- nogi -->
+    <path d="M66 78l-24 12M86 82l-18 14" stroke="#8A6442" stroke-width="10"/>
+    <path d="M132 82l20 10M152 78l26 7" stroke="#A9815A" stroke-width="10"/>
+
+    <!-- tulow krepy -->
+    <ellipse cx="104" cy="62" rx="62" ry="26" fill="url(#dgBody)"/>
+    <path d="M52 74Q104 88 158 72Q106 82 52 74Z" fill="#EFE0CB" stroke="none"/>
+
+    <!-- lata na boku, zeby byl wyraznie kundlem -->
+    <path d="M80 48q16-8 26 4q-12 12-26 6Z" fill="#7C5A3C" stroke="none"/>
+
+    <!-- glowa -->
+    <ellipse cx="168" cy="50" rx="27" ry="25" fill="url(#dgHead)"/>
+    <!-- jedno ucho klapniete, drugie postawione -->
+    <path d="M152 30q-14-6-18 10q2 18 16 14Z" fill="#8A6442"/>
+    <path d="M182 28L192 8l10 22Z" fill="#8A6442"/>
+
+    <!-- pysk -->
+    <path d="M172 48q28 2 32 12q-7 12-32 9q-8-11 0-21Z" fill="#EFE0CB"/>
+    <ellipse cx="205" cy="57" rx="6" ry="5" fill="#4A3324" stroke="none"/>
+
+    <!-- oko, czujne -->
+    <circle cx="176" cy="42" r="5" fill="#4A3324" stroke="none"/>
+    <circle cx="177.6" cy="40.4" r="1.8" fill="#FFFFFF" stroke="none"/>
+
+    <!-- obroza -->
+    <path d="M146 58q8 12 20 14" fill="none" stroke="#C4552F" stroke-width="8"/>
+    <circle cx="156" cy="70" r="4.5" fill="#F2C14E" stroke="#6E5240" stroke-width="2"/>
+  </g>
+</svg>

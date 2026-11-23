@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="86" viewBox="0 0 1080 86">
+<!-- WYGENEROWANE przez tools/gen_fence.py - nie edytuj recznie.
+     Poziom 1: mocny plot - wyzszy, trzy poprzeczki. -->
+<defs>
+<linearGradient id="post" x1="0" y1="0" x2="0" y2="86" gradientUnits="userSpaceOnUse">
+  <stop offset="0" stop-color="#FBEBCB"/>
+  <stop offset="1" stop-color="#DCC79F"/>
+</linearGradient>
+</defs>
+<rect x="50" y="24" width="430" height="11" rx="4" fill="#F2E4C4" stroke="#7E4F2A" stroke-width="2.5"/>
+<rect x="600" y="24" width="430" height="11" rx="4" fill="#F2E4C4" stroke="#7E4F2A" stroke-width="2.5"/>
+<rect x="50" y="44" width="430" height="11" rx="4" fill="#F2E4C4" stroke="#7E4F2A" stroke-width="2.5"/>
+<rect x="600" y="44" width="430" height="11" rx="4" fill="#F2E4C4" stroke="#7E4F2A" stroke-width="2.5"/>
+<rect x="50" y="64" width="430" height="11" rx="4" fill="#F2E4C4" stroke="#7E4F2A" stroke-width="2.5"/>
+<rect x="600" y="64" width="430" height="11" rx="4" fill="#F2E4C4" stroke="#7E4F2A" stroke-width="2.5"/>
+<rect x="42" y="10" width="16" height="70" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="102" y="10" width="16" height="70" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="162" y="10" width="16" height="70" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="222" y="10" width="16" height="70" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="282" y="10" width="16" height="70" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="342" y="10" width="16" height="70" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="402" y="10" width="16" height="70" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="462" y="10" width="16" height="70" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="582" y="10" width="16" height="70" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="642" y="10" width="16" height="70" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="702" y="10" width="16" height="70" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="762" y="10" width="16" height="70" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="822" y="10" width="16" height="70" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="882" y="10" width="16" height="70" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="942" y="10" width="16" height="70" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="1002" y="10" width="16" height="70" rx="5" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+</svg>

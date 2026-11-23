@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="196" height="116" viewBox="0 0 196 116">
+  <!-- KLATKA LOTU. Druga klatka susa: zadnie nogi wyrzucone w tyl, przednie
+       wyciagniete w przod, cien mniejszy, bo zwierzak jest w powietrzu.
+       Scena przelacza ta teksture ze zwykla w rytm skoku — dzieki temu
+       lapy pracuja, a zwierzak nie sunie jak sanie. Zmieniajac sylwetke
+       w pliku podstawowym, popraw tez te klatke. -->
+  <!-- Lis skradajacy sie w prawo.
+       Historia rozmiaru: do 12.0 byl wysoki i bujal sie w miejscu; w 12.1
+       zrobilem go dlugim i niskim (230x104) i wyszedl za bardzo wyciagniety,
+       w dodatku wiekszy od psa. Teraz jest krotszy i odrobine wyzszy —
+       przy skali ze sceny wychodzi mniejszy od psa w obu wymiarach.
+       Styl jak u kur: gruby jasny kontur, gradienty, zadnych filtrow SVG
+       (ThorVG ich nie obsluguje). -->
+  <defs>
+    <radialGradient id="fxBody" cx="86" cy="58" r="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFA863"/>
+      <stop offset="0.6" stop-color="#F08A42"/>
+      <stop offset="1" stop-color="#D46A28"/>
+    </radialGradient>
+    <radialGradient id="fxHead" cx="152" cy="46" r="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFB273"/>
+      <stop offset="1" stop-color="#E67D36"/>
+    </radialGradient>
+    <linearGradient id="fxTail" x1="4" y1="34" x2="54" y2="72" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF3DF"/>
+      <stop offset="0.45" stop-color="#F59A4E"/>
+      <stop offset="1" stop-color="#D46A28"/>
+    </linearGradient>
+  </defs>
+
+  <g stroke="#8A6A55" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="96" cy="110" rx="48" ry="5" fill="#6B8F4E" fill-opacity="0.16" stroke="none"/>
+
+    <!-- kita uniesiona, a nie wyciagnieta w poziom: skraca sylwetke -->
+    <path d="M48 62Q18 54 10 34Q26 24 38 42Q46 56 54 64Z" fill="url(#fxTail)"/>
+    <path d="M14 38Q10 28 20 26Q14 32 18 40Z" fill="#FFF6E6" stroke="none"/>
+
+    <!-- nogi w pol susa -->
+    <path d="M62 80l-26 11M80 84l-20 15" stroke="#C4601F" stroke-width="9"/>
+    <path d="M118 84l20 10M134 80l26 6" stroke="#D46A28" stroke-width="9"/>
+
+    <!-- tulow krotszy i wyzszy niz w 12.1 -->
+    <ellipse cx="96" cy="64" rx="52" ry="24" fill="url(#fxBody)"/>
+    <path d="M50 74Q96 88 142 72Q98 82 50 74Z" fill="#FFF3DF" stroke="none"/>
+
+    <!-- glowa wyzej, blizej tulowia -->
+    <ellipse cx="152" cy="48" rx="26" ry="24" fill="url(#fxHead)"/>
+    <!-- uszy wieksze, postawione: dodaja wysokosci -->
+    <path d="M138 28L132 4l20 16Z" fill="#E67D36"/>
+    <path d="M163 26L175 4l9 24Z" fill="#E67D36"/>
+    <path d="M140 25l-2-12l10 7Z" fill="#8A5A3C" stroke="none"/>
+    <path d="M166 24l6-11l4 11Z" fill="#8A5A3C" stroke="none"/>
+
+    <!-- pysk krotszy niz poprzednio -->
+    <path d="M156 42q24 2 28 13q-6 11-28 9q-8-11 0-22Z" fill="#FFF6E6"/>
+    <ellipse cx="185" cy="54" rx="6" ry="5" fill="#5C4030" stroke="none"/>
+
+    <!-- oko przymkniete, lis sie skrada -->
+    <path d="M155 35q7-4 13 0" fill="none" stroke-width="4"/>
+    <circle cx="161" cy="40" r="4" fill="#5C4030" stroke="none"/>
+    <circle cx="162.4" cy="38.6" r="1.5" fill="#FFFFFF" stroke="none"/>
+  </g>
+</svg>

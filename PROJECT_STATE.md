@@ -4,7 +4,10 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.7): limit jaj w magazynie,
+- Aktualny etap: **ETAP 10** (wersja 12.8): nowa walka lis-pies, susy
+  zamiast slizgania sie, owczarek jako osobny pies, rozbudowa widoczna
+  na plocie i budynkach, licznik trafien nad lisem.
+- Wersja 12.7: limit jaj w magazynie,
   gnicie po czterech godzinach, potwierdzenie sprzedazy ptaka, mniejszy lis.
 - Wersja 12.6: trzy bezpieczniki przy
   wysylce na serwer i codzienne kopie zapasowe farm w repozytorium.

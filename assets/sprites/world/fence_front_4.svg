@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="128" viewBox="0 0 1080 128">
+<!-- WYGENEROWANE przez tools/gen_fence.py - nie edytuj recznie.
+     Poziom 4: betonowe slupki, stalowa siatka i drut kolczasty. -->
+<defs>
+<linearGradient id="post" x1="0" y1="0" x2="0" y2="128" gradientUnits="userSpaceOnUse">
+  <stop offset="0" stop-color="#E7E3D8"/>
+  <stop offset="1" stop-color="#B9B4A6"/>
+</linearGradient>
+</defs>
+<g stroke="#B6C0C8" stroke-width="2.2" stroke-opacity="0.75" fill="none">
+<path d="M50 52 72 30"/>
+<path d="M50 74 94 30"/>
+<path d="M50 96 116 30"/>
+<path d="M62 106 138 30"/>
+<path d="M84 106 160 30"/>
+<path d="M106 106 182 30"/>
+<path d="M128 106 204 30"/>
+<path d="M150 106 226 30"/>
+<path d="M172 106 248 30"/>
+<path d="M194 106 270 30"/>
+<path d="M216 106 292 30"/>
+<path d="M238 106 314 30"/>
+<path d="M260 106 336 30"/>
+<path d="M282 106 358 30"/>
+<path d="M304 106 380 30"/>
+<path d="M326 106 402 30"/>
+<path d="M348 106 424 30"/>
+<path d="M370 106 446 30"/>
+<path d="M392 106 468 30"/>
+<path d="M414 106 480 40"/>
+<path d="M436 106 480 62"/>
+<path d="M458 106 480 84"/>
+<path d="M72 106 50 84"/>
+<path d="M94 106 50 62"/>
+<path d="M116 106 50 40"/>
+<path d="M138 106 62 30"/>
+<path d="M160 106 84 30"/>
+<path d="M182 106 106 30"/>
+<path d="M204 106 128 30"/>
+<path d="M226 106 150 30"/>
+<path d="M248 106 172 30"/>
+<path d="M270 106 194 30"/>
+<path d="M292 106 216 30"/>
+<path d="M314 106 238 30"/>
+<path d="M336 106 260 30"/>
+<path d="M358 106 282 30"/>
+<path d="M380 106 304 30"/>
+<path d="M402 106 326 30"/>
+<path d="M424 106 348 30"/>
+<path d="M446 106 370 30"/>
+<path d="M468 106 392 30"/>
+<path d="M480 96 414 30"/>
+<path d="M480 74 436 30"/>
+<path d="M480 52 458 30"/>
+<path d="M600 52 622 30"/>
+<path d="M600 74 644 30"/>
+<path d="M600 96 666 30"/>
+<path d="M612 106 688 30"/>
+<path d="M634 106 710 30"/>
+<path d="M656 106 732 30"/>
+<path d="M678 106 754 30"/>
+<path d="M700 106 776 30"/>
+<path d="M722 106 798 30"/>
+<path d="M744 106 820 30"/>
+<path d="M766 106 842 30"/>
+<path d="M788 106 864 30"/>
+<path d="M810 106 886 30"/>
+<path d="M832 106 908 30"/>
+<path d="M854 106 930 30"/>
+<path d="M876 106 952 30"/>
+<path d="M898 106 974 30"/>
+<path d="M920 106 996 30"/>
+<path d="M942 106 1018 30"/>
+<path d="M964 106 1030 40"/>
+<path d="M986 106 1030 62"/>
+<path d="M1008 106 1030 84"/>
+<path d="M622 106 600 84"/>
+<path d="M644 106 600 62"/>
+<path d="M666 106 600 40"/>
+<path d="M688 106 612 30"/>
+<path d="M710 106 634 30"/>
+<path d="M732 106 656 30"/>
+<path d="M754 106 678 30"/>
+<path d="M776 106 700 30"/>
+<path d="M798 106 722 30"/>
+<path d="M820 106 744 30"/>
+<path d="M842 106 766 30"/>
+<path d="M864 106 788 30"/>
+<path d="M886 106 810 30"/>
+<path d="M908 106 832 30"/>
+<path d="M930 106 854 30"/>
+<path d="M952 106 876 30"/>
+<path d="M974 106 898 30"/>
+<path d="M996 106 920 30"/>
+<path d="M1018 106 942 30"/>
+<path d="M1030 96 964 30"/>
+<path d="M1030 74 986 30"/>
+<path d="M1030 52 1008 30"/>
+</g>
+<rect x="50" y="102" width="430" height="20" rx="5" fill="#C8C2B4" stroke="#5E5A52" stroke-width="3.8"/>
+<rect x="600" y="102" width="430" height="20" rx="5" fill="#C8C2B4" stroke="#5E5A52" stroke-width="3.8"/>
+<rect x="50" y="24" width="430" height="9" rx="4" fill="#CFC9BA" stroke="#5E5A52" stroke-width="2.5"/>
+<rect x="600" y="24" width="430" height="9" rx="4" fill="#CFC9BA" stroke="#5E5A52" stroke-width="2.5"/>
+<rect x="42" y="4" width="24" height="118" rx="5" fill="url(#post)" stroke="#5E5A52" stroke-width="3.8"/>
+<rect x="152" y="4" width="24" height="118" rx="5" fill="url(#post)" stroke="#5E5A52" stroke-width="3.8"/>
+<rect x="262" y="4" width="24" height="118" rx="5" fill="url(#post)" stroke="#5E5A52" stroke-width="3.8"/>
+<rect x="372" y="4" width="24" height="118" rx="5" fill="url(#post)" stroke="#5E5A52" stroke-width="3.8"/>
+<rect x="592" y="4" width="24" height="118" rx="5" fill="url(#post)" stroke="#5E5A52" stroke-width="3.8"/>
+<rect x="702" y="4" width="24" height="118" rx="5" fill="url(#post)" stroke="#5E5A52" stroke-width="3.8"/>
+<rect x="812" y="4" width="24" height="118" rx="5" fill="url(#post)" stroke="#5E5A52" stroke-width="3.8"/>
+<rect x="922" y="4" width="24" height="118" rx="5" fill="url(#post)" stroke="#5E5A52" stroke-width="3.8"/>
+<rect x="1032" y="4" width="24" height="118" rx="5" fill="url(#post)" stroke="#5E5A52" stroke-width="3.8"/>
+<g stroke="#8C98A2" stroke-width="2.4" fill="none">
+<path d="M50 12 480 12"/>
+<path d="M58 4 70 20M70 4 58 20"/>
+<path d="M86 4 98 20M98 4 86 20"/>
+<path d="M114 4 126 20M126 4 114 20"/>
+<path d="M142 4 154 20M154 4 142 20"/>
+<path d="M170 4 182 20M182 4 170 20"/>
+<path d="M198 4 210 20M210 4 198 20"/>
+<path d="M226 4 238 20M238 4 226 20"/>
+<path d="M254 4 266 20M266 4 254 20"/>
+<path d="M282 4 294 20M294 4 282 20"/>
+<path d="M310 4 322 20M322 4 310 20"/>
+<path d="M338 4 350 20M350 4 338 20"/>
+<path d="M366 4 378 20M378 4 366 20"/>
+<path d="M394 4 406 20M406 4 394 20"/>
+<path d="M422 4 434 20M434 4 422 20"/>
+<path d="M450 4 462 20M462 4 450 20"/>
+<path d="M600 12 1030 12"/>
+<path d="M608 4 620 20M620 4 608 20"/>
+<path d="M636 4 648 20M648 4 636 20"/>
+<path d="M664 4 676 20M676 4 664 20"/>
+<path d="M692 4 704 20M704 4 692 20"/>
+<path d="M720 4 732 20M732 4 720 20"/>
+<path d="M748 4 760 20M760 4 748 20"/>
+<path d="M776 4 788 20M788 4 776 20"/>
+<path d="M804 4 816 20M816 4 804 20"/>
+<path d="M832 4 844 20M844 4 832 20"/>
+<path d="M860 4 872 20M872 4 860 20"/>
+<path d="M888 4 900 20M900 4 888 20"/>
+<path d="M916 4 928 20M928 4 916 20"/>
+<path d="M944 4 956 20M956 4 944 20"/>
+<path d="M972 4 984 20M984 4 972 20"/>
+<path d="M1000 4 1012 20M1012 4 1000 20"/>
+</g>
+</svg>

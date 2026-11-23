@@ -349,8 +349,29 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 		while state.fox_kill_timer <= 0.0 and state.fox_kill_left > 0:
 			if not _fox_grabs_one(state, out, budget):
 				break
-			state.fox_kill_timer += maxf(1.0, state.fox_kill_pace)
-		if state.fox_visit_left <= 0.0:
+			# Kazda kura ma wlasne, losowane od nowa odliczanie.
+			state.fox_kill_timer += randf_range(
+					float(fox.get("kill_interval_min", 3.0)),
+					float(fox.get("kill_interval_max", 10.0)))
+		# Pies probuje do skutku: co `interval` sekund rzuca kostka.
+		if state.dog_level > 0:
+			state.dog_timer -= real
+			while state.dog_timer <= 0.0:
+				state.dog_timer += state.dog_interval()
+				if randf() >= state.dog_chance():
+					continue
+				if randf() < state.dog_kill_chance():
+					# Zagryziony lis nie wraca. Nastepny dlugo sie nie pokaze.
+					state.fox_next_multiplier = maxf(1.0,
+							float(fox.get("killed_return_multiplier", 5.0)))
+					out["fox_killed"] = int(out.get("fox_killed", 0)) + 1
+				else:
+					out["fox_chased"] = int(out.get("fox_chased", 0)) + 1
+				_fox_leaves(state)
+				return
+		# Lis odchodzi, gdy wybierze swoja pule albo gdy skonczy mu sie czas.
+		if state.fox_kill_left <= 0 or state.fox_visit_left <= 0.0 \
+				or state.chickens.is_empty():
 			_fox_leaves(state)
 			out["fox_left"] = int(out.get("fox_left", 0)) + 1
 		return
@@ -373,9 +394,11 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 	# te kare — gospodarstwo wyglada na pilnowane.
 	if state.fox_hand_scared and state.dog_level <= 0 and state.guard_level <= 0:
 		interval *= clampf(float(fox.get("hand_return_factor", 0.1)), 0.01, 1.0)
+	interval *= maxf(1.0, state.fox_next_multiplier)
 	if state.fox_roll_timer < interval:
 		return
 	state.fox_roll_timer = 0.0
+	state.fox_next_multiplier = 1.0
 
 	var chance := float(fox.get("offline_chance", 0.1667)) if offline \
 			else float(fox.get("active_chance", 0.3333))
@@ -395,14 +418,18 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 static func _fox_arrives(state: FarmState, out: Dictionary, budget: int,
 		offline: bool) -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})
-	var share := randf_range(float(fox.get("min_share", 0.3)), float(fox.get("max_share", 0.6)))
-	var quota := clampi(int(round(state.chickens.size() * share)), 1, state.chickens.size())
+	# Lis bierze z gory ustalona liczbe kur, nie procent stada: wlasciciel
+	# chcial, zeby przychodzil, zabil pare sztuk i poszedl.
+	var quota := randi_range(int(fox.get("kills_min", 3)), int(fox.get("kills_max", 10)))
+	quota = clampi(quota, 1, maxi(1, state.chickens.size()))
 	var full := state.fox_visit_seconds()
 
 	state.fox_kill_left = quota
-	state.fox_kill_pace = full / float(maxi(1, quota))
+	state.fox_kill_pace = randf_range(float(fox.get("kill_interval_min", 3.0)),
+			float(fox.get("kill_interval_max", 10.0)))
 	state.fox_taps_left = maxi(1, int(fox.get("scare_taps", 20)))
 	state.fox_hand_scared = false
+	state.dog_timer = state.dog_interval()
 
 	# Gdy gracza nie ma przy grze, nie ma kogo straszyc ani komu pokazywac
 	# wizyty: lis robi swoje od razu i odchodzi. Gracz dostaje po powrocie
@@ -417,11 +444,10 @@ static func _fox_arrives(state: FarmState, out: Dictionary, budget: int,
 	# Pies rusza za lisem. Jesli da rade, skraca wizyte do swojego czasu —
 	# lis przez te sekundy dalej zabija, uciekajac.
 	state.fox_visit_left = full
-	if state.dog_level > 0 and randf() < state.dog_chance():
-		state.fox_visit_left = minf(full, state.dog_seconds())
+	if state.dog_level > 0:
 		out["fox_dog"] = int(out.get("fox_dog", 0)) + 1
 	out["fox_arrived"] = int(out["fox_arrived"]) + 1
-	# Pierwsza ofiara zaraz po wejsciu.
+	# Pierwsza ofiara zaraz po wejsciu — lis ZAWSZE cos zabiera.
 	if _fox_grabs_one(state, out, budget):
 		state.fox_kill_timer = state.fox_kill_pace
 
@@ -457,6 +483,7 @@ static func _fox_leaves(state: FarmState) -> void:
 	state.fox_kill_timer = 0.0
 	state.fox_taps_left = 0
 	state.fox_pending = 0
+	state.dog_timer = 0.0
 
 
 

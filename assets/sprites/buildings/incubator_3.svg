@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="420" viewBox="0 0 440 420">
+  <!-- WYGENEROWANE przez tools/gen_buildings.py - nie edytuj recznie.
+       Inkubator, poziom wygladu 3 - przemyslowy. -->
+  <defs>
+    <radialGradient id="iShadow" cx="226" cy="388" r="186" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 310) scale(1 0.2)">
+      <stop offset="0" stop-color="#4F7D2D" stop-opacity="0.45"/>
+      <stop offset="0.7" stop-color="#4F7D2D" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#4F7D2D" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="iBody" x1="70" y1="196" x2="300" y2="372" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FDF3D9"/>
+      <stop offset="0.55" stop-color="#F6E1B8"/>
+      <stop offset="1" stop-color="#E1C695"/>
+    </linearGradient>
+    <linearGradient id="iSide" x1="330" y1="196" x2="386" y2="370" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E3D4B1"/>
+      <stop offset="1" stop-color="#C6B48E"/>
+    </linearGradient>
+    <linearGradient id="iRoof" x1="60" y1="134" x2="300" y2="206" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#D7DEE4"/>
+      <stop offset="0.5" stop-color="#AEB9C2"/>
+      <stop offset="1" stop-color="#8E9AA5"/>
+    </linearGradient>
+    <linearGradient id="iRoofSide" x1="348" y1="134" x2="404" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#97A3AE"/>
+      <stop offset="1" stop-color="#7A8691"/>
+    </linearGradient>
+    <linearGradient id="iBase" x1="66" y1="338" x2="66" y2="376" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9AA6B1"/>
+      <stop offset="1" stop-color="#78848F"/>
+    </linearGradient>
+    <radialGradient id="iGlow" cx="168" cy="252" r="78" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FEFBEA"/>
+      <stop offset="0.45" stop-color="#FCEEBC"/>
+      <stop offset="1" stop-color="#F9CD78"/>
+    </radialGradient>
+    <linearGradient id="iGlass" x1="110" y1="196" x2="230" y2="330" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F7F7F7" stop-opacity="0.75"/>
+      <stop offset="0.5" stop-color="#F7F7F7" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#F7F7F7" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="iBrass" x1="150" y1="92" x2="200" y2="150" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FCE9B2"/>
+      <stop offset="1" stop-color="#D3AD60"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="226" cy="388" rx="186" ry="28" fill="url(#iShadow)"/>
+
+  <g stroke="#885635" stroke-width="4.2" stroke-linejoin="round" stroke-linecap="round">
+    <!-- dymki z kominka -->
+    <g fill="#F7F7F7" fill-opacity="0.75" stroke="none">
+      <circle cx="176" cy="60" r="11"/>
+      <circle cx="196" cy="38" r="8"/>
+      <circle cx="210" cy="20" r="5.5"/>
+    </g>
+    <!-- kominek -->
+    <path d="M152 92h46v52h-46Z" fill="url(#iBrass)"/>
+    <ellipse cx="175" cy="92" rx="23" ry="9" fill="#FDF1CC"/>
+
+    <!-- nogi -->
+    <path d="M96 376v22M330 376v22" stroke-width="15.3" stroke="#A56734"/>
+
+    <!-- bok -->
+    <path d="M330 196 386 170v180l-56 26Z" fill="url(#iSide)"/>
+    <path d="M330 340 386 314v36l-56 26Z" fill="#40BCA6"/>
+
+    <!-- korpus -->
+    <path d="M92 196h216a22 22 0 0 1 22 22v136a22 22 0 0 1-22 22H92a22 22 0 0 1-22-22V218a22 22 0 0 1 22-22Z" fill="url(#iBody)" rx="14"/>
+    <path d="M70 338h260v16a22 22 0 0 1-22 22H92a22 22 0 0 1-22-22Z" fill="url(#iBase)"/>
+
+    <!-- dach -->
+    <path d="M50 170Q76 146 106 136h298q-30 10-56 34Z" fill="url(#iRoof)"/>
+    <path d="M348 170 404 136v34l-56 34Z" fill="url(#iRoofSide)"/>
+    <path d="M50 170h298v32H50Z" fill="#40BCA6"/>
+    <path d="M56 170 108 140" stroke="#D2F4EB" stroke-width="4.2" stroke-opacity="0.7" fill="none"/>
+
+    <!-- szklana kopula z jajami -->
+    <circle cx="168" cy="268" r="72" fill="url(#iGlow)" stroke-width="6"/>
+    <ellipse cx="169" cy="316" rx="48" ry="13" fill="#D8A95B" stroke-width="3.4"/>
+    <ellipse cx="137" cy="290" rx="18" ry="24" fill="#FEF9ED" stroke-width="3.4"/>
+    <ellipse cx="201" cy="291" rx="18" ry="24" fill="#FEF4DF" stroke-width="3.4"/>
+    <ellipse cx="169" cy="281" rx="20" ry="27" fill="#F7F7F7" stroke-width="3.4"/>
+    <path d="M108 250a72 72 0 0 1 56-44 72 72 0 0 0-50 54Z" fill="#F7F7F7" fill-opacity="0.5" stroke="none"/>
+    <path d="M120 234a60 60 0 0 1 42-28" stroke="#F7F7F7" stroke-width="6.8" stroke-opacity="0.85" fill="none"/>
+
+    <!-- termometr -->
+    <rect x="272" y="212" width="26" height="94" rx="13" fill="#F7F7F7" stroke-width="3.4"/>
+    <rect x="280" y="248" width="10" height="56" rx="5" fill="#E67362" stroke="none"/>
+    <circle cx="285" cy="310" r="16" fill="#E67362" stroke-width="3.4"/>
+    <path d="M304 232h12M304 252h12M304 272h12" stroke-width="2.5"/>
+
+    <!-- pokretlo i wskaznik -->
+    <circle cx="285" cy="356" r="13" fill="#FCE9B2" stroke-width="3.4"/>
+    <path d="M285 356l8-7" stroke-width="3.4"/>
+    <circle cx="110" cy="356" r="9" fill="#A1E384" stroke-width="3.4"/>
+    <circle cx="140" cy="356" r="9" fill="#F9D570" stroke-width="3.4"/>
+
+    <!-- nity -->
+    <g fill="#CEB584" stroke="none">
+      <circle cx="84" cy="212" r="5"/>
+      <circle cx="316" cy="212" r="5"/>
+      <circle cx="84" cy="324" r="5"/>
+      <circle cx="316" cy="324" r="5"/>
+    </g>
+
+    <!-- trawa przy nogach -->
+    <path d="M78 398q4-20 10-4 4-22 10-4" fill="none" stroke="#78BF58" stroke-width="4.2"/>
+    <path d="M340 398q4-20 10-4 4-22 10-4" fill="none" stroke="#78BF58" stroke-width="4.2"/>
+  
+    <!-- rury chlodzenia po bokach -->
+    <path d="M60 210v150M44 226v118" stroke="#9AA6B1" stroke-width="11"/>
+    <path d="M44 226q-8-24 16-24h18" stroke="#9AA6B1" stroke-width="11" fill="none"/>
+    <path d="M60 252h-16M60 300h-16M60 344h-16" stroke="#CDD5DC" stroke-width="5"/>
+
+    <!-- panel sterowania z wyswietlaczem -->
+    <rect x="248" y="196" width="76" height="46" rx="8" fill="#3A4852"/>
+    <rect x="256" y="204" width="60" height="22" rx="4" fill="#7FE3C2" stroke="none"/>
+    <path d="M262 215h12M280 209v12M292 215h18" stroke="#1F3029" stroke-width="3" fill="none"/>
+    <circle cx="264" cy="234" r="4" fill="#A1E384" stroke="none"/>
+    <circle cx="280" cy="234" r="4" fill="#F9D570" stroke="none"/>
+    <circle cx="296" cy="234" r="4" fill="#E67362" stroke="none"/>
+
+    <!-- pas ostrzegawczy na podstawie -->
+    <path d="M86 352h12l-10 16H86ZM110 352h12l-10 16h-12ZM134 352h12l-10 16h-12ZM158 352h12l-10 16h-12Z"
+          fill="#F2C14E" stroke="none"/>
+  </g>
+</svg>
