@@ -45,6 +45,7 @@ func _ready() -> void:
 	_test_egg_spoilage()
 	_test_vaccine_price()
 	_test_require_code_after_break()
+	_test_failed_restore_keeps_identity()
 	_test_event_rules()
 	_test_starving_farm()
 	_test_lay_fairness()
@@ -103,14 +104,17 @@ func _restore_event(kind: String, snapshot: Dictionary) -> void:
 
 
 ## Odwrotnie: zdarzenie nie wypadnie przez cala rozsadna dlugosc testu.
+## Wylacza zdarzenie na czas testu. Od wersji 12.1 lis i choroba chodza na
+## kostce (`active_chance` / `offline_chance`), a nie na dawnych
+## `mean_minutes` / `hard_minutes`. Ta funkcja zerowala stare klucze, ktorych
+## juz nie ma, wiec NIC nie wylaczala — test ksiegowania jaj losowo dostawal
+## lisa, ktory zjadal stado, i swiecil sie na czerwono bez bledu w kodzie.
 func _never_event(kind: String) -> void:
 	var cfg: Dictionary = GameData.balance().get(kind, {})
-	cfg["grace_minutes"] = 0.0
-	cfg["mean_minutes"] = 1000000.0
-	# Twarda gwarancja tez musi zniknac, inaczej zdarzenie i tak wypadnie po
-	# `hard_minutes` — przez to test produkcji jaj dostawal lisa mimo
-	# "wylaczenia" go i pokazywal roznice, ktorej nie bylo.
-	cfg["hard_minutes"] = 0.0
+	cfg["active_chance"] = 0.0
+	cfg["offline_chance"] = 0.0
+	cfg["min_hens"] = 1000000
+	cfg["grace_minutes"] = 1000000.0
 
 
 func _fresh_state(hens: Array[String] = ["leghorn"], feed := 100.0) -> FarmState:
@@ -1287,12 +1291,17 @@ func _test_vaccine_price() -> void:
 
 ## Po dluzszej przerwie ekran powitalny ma wymagac kodu zamiast "Graj dalej".
 func _test_require_code_after_break() -> void:
-	var minutes := float(GameData.balance().get("session", {}).get(
-			"require_code_after_minutes", 0.0))
-	_check(is_equal_approx(minutes, 15.0), "prog to pietnascie minut")
+	var session: Dictionary = GameData.balance().get("session", {})
+	_check(bool(session.get("require_code", false)), "wymog kodu jest wlaczony")
+	_check(is_zero_approx(float(session.get("require_code_after_minutes", -1.0))),
+			"zero znaczy: pytaj ZAWSZE")
 
 	Game.new_game()
-	_check(not Game.must_enter_code(), "swiezo zalozona farma nie pyta o kod")
+	Game.is_new_player = true
+	_check(not Game.must_enter_code(),
+			"gracz bez farmy nie jest pytany — nie ma czego wczytywac")
+	Game.is_new_player = false
+	_check(Game.must_enter_code(), "gracz z farma jest pytany o kod przy kazdym wejsciu")
 
 	# Zapis sprzed pieciu minut: gracz wchodzi bez kodu.
 	var state := FarmState.new()
@@ -1300,12 +1309,44 @@ func _test_require_code_after_break() -> void:
 	var zapis := SaveGame.to_dict(state)
 	zapis["saved_at"] = Time.get_unix_time_from_system() - 5.0 * 60.0
 	Game.apply_loaded_for_test(SaveGame.from_dict(zapis))
-	_check(not Game.must_enter_code(), "po pieciu minutach przerwy kod nie jest potrzebny")
+	_check(Game.must_enter_code(), "przy ustawieniu 'zawsze' kod jest potrzebny takze po pieciu minutach")
 
 	# Zapis sprzed godziny: kod wymagany.
 	zapis["saved_at"] = Time.get_unix_time_from_system() - 3600.0
 	Game.apply_loaded_for_test(SaveGame.from_dict(zapis))
 	_check(Game.must_enter_code(), "po godzinie przerwy trzeba wpisac kod")
+
+
+## Nieudane wczytanie kodu NIE MOZE przestawic tozsamosci urzadzenia.
+## Wlasciciel stracil tak dwie farmy: wpisal kod, pobranie sie nie udalo,
+## urzadzenie zostalo z cudzym kodem i najblizszy autozapis wrzucil pod
+## niego lokalna, pusta farme — kasujac prawdziwa.
+func _test_failed_restore_keeps_identity() -> void:
+	Game.new_game()
+	var moj := Cloud.player_id
+	_check(not moj.is_empty(), "urzadzenie ma swoj kod")
+
+	_check(Game.restore_from_code("659722"), "proba wczytania rusza")
+	_check(Cloud.player_id == moj,
+			"w trakcie pobierania kod urzadzenia sie NIE zmienia (jest %s)" % Cloud.player_id)
+
+	# Serwer odpowiada, ze takiej farmy nie ma.
+	Game._on_cloud_pulled({}, true, "659722")
+	_check(Cloud.player_id == moj,
+			"po nieudanym wczytaniu kod zostaje nasz (jest %s)" % Cloud.player_id)
+
+	# A gdy farma jednak przyjdzie, kod przechodzi na nia.
+	var cudza := FarmState.new()
+	cudza.money = 777.0
+	cudza.chickens.append(Chicken.create("rhode"))
+	var payload := SaveGame.to_dict(cudza)
+	_check(Game.restore_from_code("659722"), "druga proba rusza")
+	Game._on_cloud_pulled(payload, true, "659722")
+	_check(Cloud.player_id == "659722",
+			"po udanym wczytaniu urzadzenie przyjmuje kod farmy (jest %s)" % Cloud.player_id)
+	_check(is_equal_approx(Game.state.money, 777.0), "stan przyszedl z serwera")
+	_check(Game.state.chickens.size() == 1, "kury przyszly z serwera")
+	Cloud.set_player_id(moj)
 
 func _test_event_rules() -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})

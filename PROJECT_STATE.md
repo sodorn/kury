@@ -4,7 +4,10 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.4): jaja psuja sie po szesciu
+- Aktualny etap: **ETAP 10** (wersja 12.5): naprawione kasowanie farm
+  przy nieudanym wczytaniu kodu, kod wymagany zawsze, ceny rozbudowy
+  przeliczone symulacja.
+- Wersja 12.4: jaja psuja sie po szesciu
   godzinach, szczepionka liczona od kury, kod wymagany po 15 minutach
   przerwy.
 - Wersja 12.3: nazwane poziomy rozbudowy
@@ -38,7 +41,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`, `v11.6-rozpakowanie-odpowiedzi`, `v12.0-plot-i-pies`, `v12.1-lis-od-nowa`, `v12.2-groteska`, `v12.3-poziomy`, `v12.4-termin-jaj`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`, `v11.6-rozpakowanie-odpowiedzi`, `v12.0-plot-i-pies`, `v12.1-lis-od-nowa`, `v12.2-groteska`, `v12.3-poziomy`, `v12.4-termin-jaj`, `v12.5-ratunek-farm`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -200,6 +203,61 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## WERSJA 12.5: NIEUDANE WCZYTANIE KASOWALO FARMY
+
+Najwazniejsza poprawka w calym projekcie. Wlasciciel stracil przez ten
+blad dwie farmy.
+
+`restore_from_code()` wolalo `Cloud.set_player_id(code)` ZANIM serwer
+odpowiedzial. Gdy pobranie sie nie udalo, urzadzenie zostawalo z cudzym
+kodem, a najblizszy autozapis wrzucal pod niego lokalna — czesto pusta —
+farme i kasowal prawdziwa. Stad dwa objawy, ktore wygladaly na rozne
+bledy: "serwer mowi, ze gry o tym kodzie nie ma" i "gra wczytana, ale
+wszystko puste".
+
+Dowod, ze to nie byla awaria serwera: zapytanie przez GitHub Actions
+pokazalo, ze farma 659722 JEST w bazie i zostala zapisana o 01:42:16
+UTC — minute przed zgloszeniem. To byl zapis NASZEJ pustej farmy pod
+jej kodem.
+
+Poprawka: `Cloud.pull_for(code)` pobiera farme spod podanego kodu, nie
+ruszajac tozsamosci urzadzenia. Kod przechodzi na urzadzenie DOPIERO
+w `_on_cloud_pulled`, po udanym pobraniu. Pilnuje tego
+`_test_failed_restore_keeps_identity`.
+
+SESJA WEDLUG WLASCICIELA. `session.require_code` wlaczone,
+`require_code_after_minutes` ustawione na 0, czyli ZAWSZE. Kazde wejscie
+do gry wymaga wpisania kodu i caly stan przychodzi z serwera. Gracz,
+ktory nie ma jeszcze farmy, nie jest o nic pytany.
+
+CENY ROZBUDOWY przeliczone symulacja, nie na oko. Nowe narzedzie
+`tools/upgrade_pacing.py` liczy, ile realnych godzin zajmuje dojscie do
+kolejnych poziomow, na prawdziwych liczbach z balansu.
+
+Wlasciciel poprosil o pierwsza x2, druga x4 "i tak dalej". Proste
+przedluzenie mnoznika (x5, x6, x7...) dawalo 236 godzin do pelnej
+rozbudowy wobec 29 dotad — za duzo. Wybrany wariant ma mnozniki
+2, 4, 4, 3.5, 3, 3, 2.5, 2.5, 2 i wychodzi 70 godzin:
+
+    kurnik     800 / 4800 / 12k / 24,5k / 45k / 90k / 150k / 300k / 500k
+    magazyn    600 / 3000 / 10,5k / 30k / 80k / 200k / 540k
+    inkubator  600 / 4000 / 11k / 24k / 48k / 108k / 200k / 450k
+
+Pelna rozbudowa kosztuje teraz okolo 1,6 mln, wiec cel wygranej poszedl
+z 1,5 mln na 2,5 mln — inaczej gra konczylaby sie, zanim zdazysz
+postawic ferme przemyslowa.
+
+WYSZARZONE PRZYCISKI mowia teraz, ile brakuje: "brakuje 250 zl".
+Wlasciciel zglosil rozbudowe inkubatora jako "nie dziala, caly czas
+wyszarzona" — test dymny klika ten przycisk i rozbudowa dziala, wiec po
+prostu brakowalo pieniedzy, a gra tego nie mowila. Kwote bierzemy
+z osobnego `price_provider`, nie z parsowania napisu.
+
+PRZY OKAZJI: `_never_event()` w testach zerowalo klucze starego modelu
+zdarzen (`mean_minutes`, `hard_minutes`), ktorych od 12.1 juz nie ma —
+czyli NIC nie wylaczalo. Test ksiegowania jaj losowo dostawal lisa,
+ktory zjadal stado, i swiecil sie na czerwono bez bledu w kodzie.
 
 ## WERSJA 12.4: jaja sie psuja, szczepionka od kury, kod po przerwie
 

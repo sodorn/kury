@@ -48,42 +48,42 @@
       {
         "name": "INCU_T1",
         "slots": 6,
-        "price": 300
+        "price": 600
       },
       {
         "name": "INCU_T2",
         "slots": 10,
-        "price": 1000
+        "price": 4000
       },
       {
         "name": "INCU_T3",
         "slots": 16,
-        "price": 2800
+        "price": 11000
       },
       {
         "name": "INCU_T4",
         "slots": 24,
-        "price": 7000
+        "price": 24000
       },
       {
         "name": "INCU_T5",
         "slots": 34,
-        "price": 16000
+        "price": 48000
       },
       {
         "name": "INCU_T6",
         "slots": 48,
-        "price": 36000
+        "price": 108000
       },
       {
         "name": "INCU_T7",
         "slots": 66,
-        "price": 80000
+        "price": 200000
       },
       {
         "name": "INCU_T8",
         "slots": 90,
-        "price": 180000
+        "price": 450000
       }
     ],
     "_opis": "slots to liczba partii grzanych naraz; kazda partia to jedno pisklę. eggs_per_chick jaj danej rasy robi jedno pisklę tej rasy."
@@ -127,7 +127,7 @@
   },
   "win": {
     "_opis": "Jeden cel: pieniadze. Kolekcja ras przestala byc wyzwaniem, gdy zniknely progi odblokowania — po jednej sztuce kazdej rasy da sie kupic w niecale szesc godzin.",
-    "money": 1500000,
+    "money": 2500000,
     "collection": false
   },
   "buildings": {
@@ -139,47 +139,47 @@
         {
           "name": "COOP_T1",
           "capacity": 35,
-          "price": 400
+          "price": 800
         },
         {
           "name": "COOP_T2",
           "capacity": 55,
-          "price": 1200
+          "price": 4800
         },
         {
           "name": "COOP_T3",
           "capacity": 80,
-          "price": 3000
+          "price": 12000
         },
         {
           "name": "COOP_T4",
           "capacity": 110,
-          "price": 7000
+          "price": 24500
         },
         {
           "name": "COOP_T5",
           "capacity": 150,
-          "price": 15000
+          "price": 45000
         },
         {
           "name": "COOP_T6",
           "capacity": 200,
-          "price": 30000
+          "price": 90000
         },
         {
           "name": "COOP_T7",
           "capacity": 270,
-          "price": 60000
+          "price": 150000
         },
         {
           "name": "COOP_T8",
           "capacity": 360,
-          "price": 120000
+          "price": 300000
         },
         {
           "name": "COOP_T9",
           "capacity": 500,
-          "price": 250000
+          "price": 500000
         }
       ]
     },
@@ -190,43 +190,43 @@
           "name": "STORE_T1",
           "pack_size": 60,
           "pack_price": 57,
-          "price": 300
+          "price": 600
         },
         {
           "name": "STORE_T2",
           "pack_size": 150,
           "pack_price": 135,
-          "price": 1000
+          "price": 3000
         },
         {
           "name": "STORE_T3",
           "pack_size": 400,
           "pack_price": 340,
-          "price": 3500
+          "price": 10500
         },
         {
           "name": "STORE_T4",
           "pack_size": 1000,
           "pack_price": 800,
-          "price": 10000
+          "price": 30000
         },
         {
           "name": "STORE_T5",
           "pack_size": 2500,
           "pack_price": 1875,
-          "price": 26000
+          "price": 80000
         },
         {
           "name": "STORE_T6",
           "pack_size": 6000,
           "pack_price": 4200,
-          "price": 75000
+          "price": 200000
         },
         {
           "name": "STORE_T7",
           "pack_size": 15000,
           "pack_price": 9750,
-          "price": 220000
+          "price": 540000
         }
       ]
     },
@@ -270,7 +270,8 @@
     }
   },
   "session": {
-    "_opis": "require_code_after_minutes: jesli od ostatniego zapisu minelo wiecej niz tyle minut realnych, ekran powitalny nie pozwala kliknac 'Graj dalej' — trzeba wpisac kod farmy. Wlasciciel chcial tego do testowania wczytywania i zeby dalo sie przeskoczyc na inna farme bez czyszczenia ciasteczek. Zero wylacza wymog.",
-    "require_code_after_minutes": 15.0
+    "_opis": "require_code: czy ekran powitalny ma wymagac wpisania kodu farmy zamiast pozwalac kliknac 'Graj dalej'. require_code_after_minutes: 0 znaczy ZAWSZE, a liczba wieksza od zera — dopiero gdy od ostatniego zapisu minelo tyle minut realnych. Wlasciciel chce na razie 'zawsze': kazde wejscie ma pobierac caly stan z serwera, zeby bylo pewne, ze wczytywanie dziala i zeby dalo sie przeskakiwac miedzy farmami bez czyszczenia ciasteczek. Gracz, ktory nie ma jeszcze zadnej farmy, nie jest o nic pytany — nie ma czego wczytywac.",
+    "require_code": true,
+    "require_code_after_minutes": 0.0
   }
 }

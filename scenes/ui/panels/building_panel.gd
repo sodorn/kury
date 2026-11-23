@@ -223,7 +223,8 @@ func _build_coop() -> void:
 					int(upgrade.get("capacity", 0)),
 					NumberFormat.money(float(upgrade.get("price", 0)))],
 			func() -> void: _on_upgrade("coop"),
-			func() -> bool: return not Game.state.next_building_upgrade("coop").is_empty())
+			func() -> bool: return not Game.state.next_building_upgrade("coop").is_empty(),
+			func() -> float: return float(Game.state.next_building_upgrade("coop").get("price", 0)))
 
 	_add_action(false,
 			func() -> bool: return Game.state.money >= float(
@@ -234,7 +235,8 @@ func _build_coop() -> void:
 					tr(_dog_buy_name(Game.state.dog_level + 1)),
 					NumberFormat.money(float(upgrade.get("price", 0)))],
 			func() -> void: _on_upgrade("dog"),
-			func() -> bool: return not Game.state.next_building_upgrade("dog").is_empty())
+			func() -> bool: return not Game.state.next_building_upgrade("dog").is_empty(),
+			func() -> float: return float(Game.state.next_building_upgrade("dog").get("price", 0)))
 
 	_add_action(false,
 			func() -> bool: return Game.state.money >= float(
@@ -246,7 +248,8 @@ func _build_coop() -> void:
 					NumberFormat.money(float(upgrade.get("price", 0))),
 					int(round(float(upgrade.get("block_chance", 0.0)) * 100.0))],
 			func() -> void: _on_upgrade("guard"),
-			func() -> bool: return not Game.state.next_building_upgrade("guard").is_empty())
+			func() -> bool: return not Game.state.next_building_upgrade("guard").is_empty(),
+			func() -> float: return float(Game.state.next_building_upgrade("guard").get("price", 0)))
 
 	var hint := Label.new()
 	hint.theme_type_variation = &"NoteLabel"
@@ -300,7 +303,8 @@ func _build_storage() -> void:
 					int(size),
 					NumberFormat.money(float(upgrade.get("pack_price", 0)) / maxf(1.0, size))],
 			func() -> void: _on_upgrade("storage"),
-			func() -> bool: return not Game.state.next_building_upgrade("storage").is_empty())
+			func() -> bool: return not Game.state.next_building_upgrade("storage").is_empty(),
+			func() -> float: return float(Game.state.next_building_upgrade("storage").get("price", 0)))
 
 
 
@@ -412,7 +416,8 @@ func _build_incubator() -> void:
 					int(upgrade.get("slots", 0)),
 					NumberFormat.money(float(upgrade.get("price", 0)))],
 			_on_upgrade_incubator,
-			func() -> bool: return not Game.state.next_incubator_upgrade().is_empty())
+			func() -> bool: return not Game.state.next_incubator_upgrade().is_empty(),
+			func() -> float: return float(Game.state.next_incubator_upgrade().get("price", 0)))
 
 	# Padlo pytanie, czy rozbudowa przyspiesza wykluwanie. Nie — i teraz
 	# panel mowi to wprost, zanim ktos wyda 20 000 zl na zly domysl.
@@ -452,13 +457,15 @@ func _build_shop() -> void:
 			func() -> String: return tr("PANEL_BUY_MEDICINE") % [
 				NumberFormat.money(Game.medicine_price()), Game.state.sick_count()],
 			_on_buy_medicine,
-			func() -> bool: return Game.state.sick_count() > 0)
+			func() -> bool: return Game.state.sick_count() > 0,
+			func() -> float: return Game.medicine_price())
 	_add_action(false,
 			func() -> bool: return Game.state.money >= Game.vaccine_price(),
 			func() -> String: return tr("PANEL_BUY_VACCINE") % [
 				NumberFormat.money(Game.vaccine_price()), Game.state.unvaccinated_count()],
 			_on_buy_vaccine,
-			func() -> bool: return Game.state.unvaccinated_count() > 0)
+			func() -> bool: return Game.state.unvaccinated_count() > 0,
+			func() -> float: return Game.vaccine_price())
 
 	var vaccine_note := Label.new()
 	vaccine_note.theme_type_variation = &"NoteLabel"
@@ -532,7 +539,8 @@ func _add_progress(label_key: String, value_provider: Callable) -> void:
 ## `visible_provider` pozwala ukryc przycisk zupelnie (np. sprzedaz rasy,
 ## ktorej gracz nie ma) zamiast pokazywac go wyszarzonego.
 func _add_action(primary: bool, enabled_provider: Callable, text_provider: Callable,
-		on_pressed: Callable, visible_provider: Callable = Callable()) -> void:
+		on_pressed: Callable, visible_provider: Callable = Callable(),
+		price_provider: Callable = Callable()) -> void:
 	var button := Button.new()
 	if primary:
 		button.theme_type_variation = &"PrimaryButton"
@@ -544,8 +552,19 @@ func _add_action(primary: bool, enabled_provider: Callable, text_provider: Calla
 			button.visible = visible_provider.call()
 			if not button.visible:
 				return
-		button.text = text_provider.call()
-		button.disabled = not enabled_provider.call())
+		# Wyszarzony przycisk bez slowa wyjasnienia wyglada jak zepsuty —
+		# wlasciciel zglosil rozbudowe inkubatora jako "nie dziala", a po
+		# prostu brakowalo mu pieniedzy. Dopisujemy, ile. Dopisek liczymy
+		# ZAWSZE od swiezego napisu, nigdy od poprzedniej zawartosci
+		# przycisku — inaczej dokleja sie przy kazdym odswiezeniu i kwota
+		# rosnie w nieskonczonosc.
+		var base: String = text_provider.call()
+		button.disabled = not enabled_provider.call()
+		if button.disabled and price_provider.is_valid() and Game.state != null:
+			var brak: float = float(price_provider.call()) - Game.state.money
+			if brak > 0.0:
+				base += "\n" + tr("PANEL_MISSING_MONEY") % NumberFormat.money(brak)
+		button.text = base)
 
 
 func _refresh() -> void:

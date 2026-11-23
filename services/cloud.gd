@@ -134,13 +134,29 @@ func push(payload: Dictionary) -> void:
 
 
 ## Pobiera stan z serwera. Wynik przychodzi sygnalem `pulled`.
+## Pobiera farme spod KONKRETNEGO kodu, nie zmieniajac tozsamosci urzadzenia.
+##
+## To jest wazne: wczesniej przepisanie cudzego kodu od razu przestawialo
+## `player_id`, jeszcze zanim serwer odpowiedzial. Gdy pobranie sie nie
+## udalo, urzadzenie zostawalo z nowym kodem i najblizszy autozapis wrzucal
+## lokalna (czesto pusta) farme pod ten kod — kasujac prawdziwa. Wlasciciel
+## stracil tak dwie farmy. Tozsamosc zmienia sie teraz DOPIERO po udanym
+## pobraniu, w `Game._on_cloud_pulled`.
+func pull_for(code: String) -> void:
+	_pull(code.strip_edges())
+
+
 func pull() -> void:
-	if not is_enabled():
-		pulled.emit({}, false, player_id)
+	_pull(player_id)
+
+
+func _pull(who: String) -> void:
+	if not is_enabled() or who.is_empty():
+		pulled.emit({}, false, who)
 		return
-	_pulling_for = player_id
+	_pulling_for = who
 	var url := "%s/rest/v1/%s?player_id=eq.%s&select=payload,updated_at" % [
-			_base_url(), _table(), player_id.uri_encode()]
+			_base_url(), _table(), who.uri_encode()]
 	# Kazde pobranie dostaje WLASNY wezel zapytania. Wczesniej byl jeden wezel
 	# wielokrotnego uzytku, a drugie wolanie zaczynalo sie od `cancel_request()`.
 	# W eksporcie na przegladarke to sie mscilo: przerwanie trwajacego XHR

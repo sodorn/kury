@@ -231,6 +231,9 @@ func _on_cloud_pulled(payload: Dictionary, ok: bool, for_player: String) -> void
 		if forced:
 			Events.notice.emit(tr("HINT_SAVE_BROKEN"))
 		return
+	# Serwer oddal farme — dopiero teraz urzadzenie przyjmuje jej kod.
+	if forced:
+		Cloud.set_player_id(for_player)
 	var local_saved_at := 0.0
 	var local := SaveGame.load_state()
 	if not local.is_empty():
@@ -273,8 +276,12 @@ func restore_from_code(raw_code: String) -> bool:
 		Events.notice.emit(tr("HINT_CODE_SAME"))
 	_force_pull = true
 	_restore_code = code
-	Cloud.set_player_id(code)
-	Cloud.pull()
+	# Tozsamosci urzadzenia NIE zmieniamy tutaj. Dopiero gdy serwer odda
+	# farme, przejmujemy jej kod — patrz `_on_cloud_pulled`. Wczesniej kod
+	# szedl od razu i nieudane pobranie zostawialo urzadzenie z cudzym
+	# kodem; najblizszy autozapis wrzucal pod niego lokalna, pusta farme
+	# i kasowal prawdziwa. Wlasciciel stracil tak dwie.
+	Cloud.pull_for(code)
 	Events.resources_changed.emit()
 	return true
 
@@ -308,11 +315,12 @@ var _last_gap := 0.0
 func must_enter_code() -> bool:
 	if is_new_player or not Cloud.is_enabled():
 		return false
-	var minutes := float(GameData.balance().get("session", {}).get(
-			"require_code_after_minutes", 0.0))
-	if minutes <= 0.0:
+	var session: Dictionary = GameData.balance().get("session", {})
+	if not bool(session.get("require_code", false)):
 		return false
-	return _last_gap >= minutes * 60.0
+	# Zero znaczy ZAWSZE. Liczba wieksza od zera — dopiero po takiej przerwie.
+	var minutes := float(session.get("require_code_after_minutes", 0.0))
+	return minutes <= 0.0 or _last_gap >= minutes * 60.0
 
 
 func new_game() -> void:

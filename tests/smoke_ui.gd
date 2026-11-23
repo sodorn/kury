@@ -86,6 +86,8 @@ func _test_buildings() -> void:
 			_shot("panel_sklep.png")
 		if id == "coop":
 			await _check_dog_offer(panel)
+		if id == "incubator":
+			await _check_incubator_upgrade(panel)
 		await _tap(Vector2(540, 260))
 		await _frames(30)
 		_check(not panel.visible, "panel '%s' zamyka sie dotknieciem tla" % id)
@@ -128,6 +130,50 @@ func _check_dog_offer(panel: Control) -> void:
 	for tekst in teksty:
 		var czysty := tekst.contains("%s") or tekst.contains("%d")
 		_check(not czysty, "przycisk ma podstawione wszystkie wartosci: %s" % tekst)
+
+
+## Wlasciciel zglosil, ze przycisk rozbudowy inkubatora jest "caly czas
+## wyszarzony". Sprawdzamy to wprost: z pusta kiesznia ma byc wyszarzony,
+## a po dosypaniu pieniedzy — klikalny.
+func _check_incubator_upgrade(panel: Control) -> void:
+	var actions: VBoxContainer = panel.get_node(
+			"Sheet/Content/Scroll/Gutter/Scrollable/Actions")
+	var cena := float(Game.state.next_incubator_upgrade().get("price", 0))
+	_check(cena > 0.0, "jest co kupowac w inkubatorze (%.0f zl)" % cena)
+
+	var przycisk: Button = null
+	for node in _controls_of_type(actions, "Button"):
+		var b := node as Button
+		if b.visible and b.text.contains(tr("PANEL_UPGRADE_INCUBATOR").split(":")[0]):
+			przycisk = b
+	_check(przycisk != null, "jest przycisk rozbudowy inkubatora")
+	if przycisk == null:
+		return
+
+	var kasa := Game.state.money
+	Game.state.money = cena - 1.0
+	await _frames(20)
+	_check(przycisk.disabled, "bez pieniedzy przycisk jest wyszarzony")
+	_check(przycisk.text.contains(tr("PANEL_MISSING_MONEY").split(" ")[0]),
+			"wyszarzony przycisk mowi, ze brakuje pieniedzy")
+	# Dopisek nie moze sie mnozyc przy kolejnych odswiezeniach.
+	var raz := przycisk.text
+	await _frames(40)
+	_check(przycisk.text == raz,
+			"napis nie rosnie przy kazdym odswiezeniu (%s)" % przycisk.text)
+
+	Game.state.money = cena + 10.0
+	await _frames(20)
+	_check(not przycisk.disabled,
+			"z pieniedzmi przycisk da sie kliknac (tekst: %s)" % przycisk.text)
+
+	var poziom := Game.state.incubator_level
+	przycisk.emit_signal("pressed")
+	await _frames(20)
+	_check(Game.state.incubator_level == poziom + 1,
+			"klikniecie faktycznie rozbudowuje inkubator (%d -> %d)"
+			% [poziom, Game.state.incubator_level])
+	Game.state.money = kasa
 
 func _test_hens() -> void:
 	var hens := _nodes_of_type("FarmChicken")
