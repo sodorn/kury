@@ -94,14 +94,17 @@ jobs:
           rows = json.load(open("/tmp/spis.json", encoding="utf-8"))
           if not isinstance(rows, list):
               print("Serwer odpowiedzial bledem:", json.dumps(rows)[:200]); raise SystemExit(0)
-          print("%-10s %-22s %8s %7s %7s" % ("kod", "ostatni zapis UTC", "znakow", "kur", "kasa"))
+          print("%-8s %-20s %7s %5s %9s %5s %5s %5s %5s"
+                % ("kod", "ostatni zapis UTC", "znakow", "kur", "kasa", "pies", "plot", "kurn", "inku"))
           for r in rows:
               ts = r.get("updated_at") or 0
-              kiedy = datetime.datetime.fromtimestamp(ts, datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
+              kiedy = datetime.datetime.fromtimestamp(ts, datetime.UTC).strftime("%Y-%m-%d %H:%M")
               p = r.get("payload") or {}
-              kur = len(p.get("chickens") or [])
-              kasa = int(p.get("money") or 0)
-              print("%-10s %-22s %8d %7d %7d" % (r.get("player_id"), kiedy, len(json.dumps(p)), kur, kasa))
+              print("%-8s %-20s %7d %5d %9d %5d %5d %5d %5d" % (
+                  r.get("player_id"), kiedy, len(json.dumps(p)),
+                  len(p.get("chickens") or []), int(p.get("money") or 0),
+                  int(p.get("dog_level") or 0), int(p.get("guard_level") or 0),
+                  int(p.get("coop_level") or 0), int(p.get("incubator_level") or 0)))
           PY
 
       - name: Ile farm jest w bazie w ogole
