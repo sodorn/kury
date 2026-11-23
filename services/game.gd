@@ -432,6 +432,9 @@ func collect_egg_of_breed(breed_id: String) -> bool:
 	var index := state.eggs_on_ground.find(breed_id)
 	if index < 0:
 		return false
+	if state.egg_room() <= 0:
+		Events.notice.emit(tr("PANEL_EGGS_FULL") % NumberFormat.grouped(state.egg_capacity()))
+		return false
 	state.eggs_on_ground.remove_at(index)
 	state.add_egg(breed_id)
 	Events.resources_changed.emit()

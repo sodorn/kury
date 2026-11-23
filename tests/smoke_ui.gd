@@ -175,6 +175,16 @@ func _check_incubator_upgrade(panel: Control) -> void:
 			% [poziom, Game.state.incubator_level])
 	Game.state.money = kasa
 
+
+## Widoczny przycisk o danym napisie, gdziekolwiek w interfejsie.
+func _button_labelled(label: String) -> Button:
+	for node in _controls_of_type(_main, "Button"):
+		var button := node as Button
+		if button.visible and button.is_visible_in_tree() and button.text == label:
+			return button
+	return null
+
+
 func _test_hens() -> void:
 	var hens := _nodes_of_type("FarmChicken")
 	_check(hens.size() == Game.state.hen_count(), "liczba kur w scenie zgadza sie ze stanem gry")
@@ -424,7 +434,31 @@ func _test_sell_hen() -> void:
 	var hens_before: int = Game.state.hen_count()
 	var money_before: float = Game.state.money
 	sell_button.emit_signal("pressed")
-	await _frames(60)
+	await _frames(30)
+	# Sprzedaz ptaka idzie teraz przez potwierdzenie: jedno nieuwazne
+	# dotkniecie nie moze kosztowac wyhodowanej kury.
+	_check(Game.state.hen_count() == hens_before,
+			"samo klikniecie jeszcze nic nie sprzedaje")
+	var tak := _button_labelled(tr("CONFIRM_YES"))
+	var nie := _button_labelled(tr("CONFIRM_NO"))
+	_check(tak != null and nie != null, "pojawilo sie pytanie z dwoma odpowiedziami")
+	if tak == null:
+		return
+
+	# Najpierw sprawdzamy, ze "Nie" naprawde nic nie robi.
+	nie.emit_signal("pressed")
+	await _frames(20)
+	_check(Game.state.hen_count() == hens_before, "'Nie' zostawia kure w spokoju")
+	_check(_button_labelled(tr("CONFIRM_YES")) == null, "pytanie znika po odpowiedzi")
+
+	sell_button.emit_signal("pressed")
+	await _frames(30)
+	tak = _button_labelled(tr("CONFIRM_YES"))
+	_check(tak != null, "pytanie wraca przy kolejnej probie")
+	if tak == null:
+		return
+	tak.emit_signal("pressed")
+	await _frames(40)
 	_check(Game.state.hen_count() == hens_before - 1, "sprzedaz zmniejsza stado")
 	_check(Game.state.money > money_before, "sprzedaz kury daje pieniadze")
 	_check(_nodes_of_type("FarmChicken").size() <= Game.state.hen_count(),

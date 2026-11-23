@@ -262,7 +262,27 @@ func eggs_value() -> float:
 const EGG_BUCKET_SECONDS := 3600.0
 
 
-func add_egg(breed_id: String, count: int = 1) -> void:
+## Limit jaj w magazynie. Bez niego gra przechodzila sie sama: wystarczylo
+## wrocic po dobie i zastac gore jaj. Teraz trzeba zajrzec i sprzedac.
+func egg_capacity() -> int:
+	var storage: Dictionary = GameData.balance().get("buildings", {}).get("storage", {})
+	if storage_level <= 0:
+		return maxi(1, int(storage.get("egg_capacity", 200)))
+	return maxi(1, int(current_building_upgrade("storage").get(
+			"egg_capacity", storage.get("egg_capacity", 200))))
+
+
+## Ile jaj jeszcze sie zmiesci.
+func egg_room() -> int:
+	return maxi(0, egg_capacity() - egg_count())
+
+
+## Dodaje jaja do magazynu i zwraca, ile sie faktycznie zmiescilo.
+## Nadmiar przepada — i o to chodzi.
+func add_egg(breed_id: String, count: int = 1) -> int:
+	count = mini(count, egg_room())
+	if count <= 0:
+		return 0
 	eggs[breed_id] = int(eggs.get(breed_id, 0)) + count
 	# Rownolegle prowadzimy metryke wieku, zeby wiedziec, ktore jaja sie
 	# zestarzaly. Najmlodsze wiaderko dobieramy, dopoki nie ma godziny.
@@ -272,6 +292,7 @@ func add_egg(breed_id: String, count: int = 1) -> void:
 	else:
 		buckets[buckets.size() - 1][0] = int(buckets[buckets.size() - 1][0]) + count
 	egg_ages[breed_id] = buckets
+	return count
 
 
 ## Zabiera `count` jaj danej rasy z magazynu. Zwraca, ile udalo sie zabrac.

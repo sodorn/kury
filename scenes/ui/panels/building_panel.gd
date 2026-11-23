@@ -15,6 +15,8 @@ var _tween: Tween
 var _closing := false
 var _building_id := ""
 var _flash_left := 0.0
+## Otwarte pytanie "na pewno?", zeby nie dalo sie otworzyc dwoch naraz.
+var _confirm: Control = null
 var _refresh_left := 0.0
 ## Odswiezacze pol, ktore zaleza od stanu gry; wolane po kazdej zmianie zasobow.
 var _refreshers: Array[Callable] = []
@@ -271,7 +273,9 @@ func _build_storage() -> void:
 	_add_level_row(func() -> int: return Game.state.storage_level, _building_levels("storage"),
 			func() -> String: return tr(String(
 					Game.state.current_building_upgrade("storage").get("name", ""))))
-	_add_row("PANEL_EGGS_STORED", func() -> String: return NumberFormat.grouped(Game.state.egg_count()))
+	_add_row("PANEL_EGGS_STORED", func() -> String: return "%s / %s" % [
+			NumberFormat.grouped(Game.state.egg_count()),
+			NumberFormat.grouped(Game.state.egg_capacity())])
 	_add_row("PANEL_EGGS_WORTH", func() -> String: return NumberFormat.money(Game.state.eggs_value()))
 	_add_row("PANEL_FEED_LEFT", func() -> String: return _feed_text())
 
@@ -301,7 +305,7 @@ func _build_storage() -> void:
 					tr(String(upgrade.get("name", ""))),
 					NumberFormat.money(float(upgrade.get("price", 0))),
 					int(size),
-					NumberFormat.money(float(upgrade.get("pack_price", 0)) / maxf(1.0, size))],
+					NumberFormat.grouped(int(upgrade.get("egg_capacity", 0)))],
 			func() -> void: _on_upgrade("storage"),
 			func() -> bool: return not Game.state.next_building_upgrade("storage").is_empty(),
 			func() -> float: return float(Game.state.next_building_upgrade("storage").get("price", 0)))
@@ -322,7 +326,9 @@ func _build_incubator() -> void:
 				return tr(String(biezacy[i].get("name", ""))) if i >= 0 else "")
 	_add_row("PANEL_INCUBATOR_SLOTS",
 			func() -> String: return "%d / %d" % [Game.state.incubating.size(), Game.incubator_slots()])
-	_add_row("PANEL_EGGS_STORED", func() -> String: return NumberFormat.grouped(Game.state.egg_count()))
+	_add_row("PANEL_EGGS_STORED", func() -> String: return "%s / %s" % [
+			NumberFormat.grouped(Game.state.egg_count()),
+			NumberFormat.grouped(Game.state.egg_capacity())])
 	# Pisklę nie wyjdzie z inkubatora, dopoki nie ma dla niego miejsca
 	# w kurniku, wiec wolne miejsca licza sie tu razem z tym, co juz w drodze.
 	_add_row("PANEL_COOP_LEFT", func() -> String:
@@ -617,11 +623,59 @@ func _on_cull_hen(breed_id: String, breed_name: String) -> void:
 		_flash(tr("PANEL_HEN_MCDONALDS") % [breed_name, NumberFormat.money(Game.mcdonalds_price())])
 
 
+## Sprzedaz ptaka idzie przez potwierdzenie. Przyciski kupna i sprzedazy
+## stoja obok siebie, a sprzedana kura nie wraca — jedno nieuwazne
+## dotkniecie kosztuje caly wyhodowany egzemplarz.
 func _on_sell_hen(breed_id: String, breed_name: String, rooster: bool = false) -> void:
+	var price := FarmState.hen_sell_price(breed_id)
+	var key := "CONFIRM_SELL_ROOSTER" if rooster else "CONFIRM_SELL_HEN"
+	_ask(tr(key) % [breed_name, NumberFormat.money(price)],
+			func() -> void: _do_sell_hen(breed_id, breed_name, rooster))
+
+
+func _do_sell_hen(breed_id: String, breed_name: String, rooster: bool) -> void:
 	var earned := Game.sell_hen(breed_id, rooster)
 	if earned > 0.0:
 		var key := "PANEL_ROOSTER_SOLD" if rooster else "PANEL_HEN_SOLD"
 		_flash(tr(key) % [breed_name, NumberFormat.money(earned)])
+
+
+## Pytanie "na pewno?" w srodku panelu. Celowo nie jest to okno systemowe:
+## gra chodzi w przegladarce na telefonie, gdzie wlasne okienko wyglada
+## obco i potrafi sie nie zmiescic.
+func _ask(question: String, on_yes: Callable) -> void:
+	if _confirm != null and is_instance_valid(_confirm):
+		_confirm.queue_free()
+	var box := PanelContainer.new()
+	box.theme_type_variation = &"ConfirmBox"
+	box.set_anchors_preset(Control.PRESET_CENTER)
+	var rows := VBoxContainer.new()
+	rows.add_theme_constant_override("separation", 18)
+	var label := Label.new()
+	label.text = question
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.custom_minimum_size.x = 620
+	rows.add_child(label)
+	var buttons := HBoxContainer.new()
+	buttons.add_theme_constant_override("separation", 18)
+	var yes := Button.new()
+	yes.text = tr("CONFIRM_YES")
+	yes.theme_type_variation = &"PrimaryButton"
+	yes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var no := Button.new()
+	no.text = tr("CONFIRM_NO")
+	no.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	buttons.add_child(no)
+	buttons.add_child(yes)
+	rows.add_child(buttons)
+	box.add_child(rows)
+	add_child(box)
+	_confirm = box
+	no.pressed.connect(func() -> void: box.queue_free())
+	yes.pressed.connect(func() -> void:
+		box.queue_free()
+		on_yes.call())
 
 
 func _on_buy_medicine() -> void:
@@ -919,8 +973,8 @@ func _add_breed_card(breed: Dictionary) -> void:
 	sell_rooster.pressed.connect(func() -> void: _on_sell_hen(breed_id, breed_name, true))
 	card.add_child(sell_rooster)
 
-	# Chorej sztuki skup nie przyjmuje. Jedyne, co mozna z nia zrobic bez
-	# pieniedzy na lek, to ubic — za darmo, zeby zwolnic miejsce w kurniku.
+	# Chora sztuke mozna oddac do skupu za drobne, zamiast placic za lek.
+	# To swiadomy zart wlasciciela, nie przeoczenie.
 	var cull := Button.new()
 	cull.theme_type_variation = &"CullButton"
 	cull.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -933,7 +987,9 @@ func _add_breed_card(breed: Dictionary) -> void:
 		var owned := _owned(breed_id)
 		var cocks := Game.state.hens_of_breed(breed_id, false, true)
 		var poor := Game.state.money < price
-		buy.text = tr("PANEL_BUY_HEN") % NumberFormat.money(price)
+		# Licznik "(masz N szt.)" jak przy kogucie i przy sprzedazy — bez niego
+		# to jedyny przycisk w sklepie, ktory nie mowi, ile masz.
+		buy.text = tr("PANEL_BUY_HEN") % [NumberFormat.money(price), owned]
 		buy.disabled = poor
 		buy_rooster.text = tr("PANEL_BUY_ROOSTER") % [NumberFormat.money(price), cocks]
 		buy_rooster.disabled = poor

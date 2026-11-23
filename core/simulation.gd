@@ -496,8 +496,12 @@ static func _lay_eggs(state: FarmState, step: float, out: Dictionary, offline: b
 			hen.since_last_egg -= seconds
 			if offline or state.eggs_on_ground.size() >= capacity:
 				# Pod nieobecnosc gracza i przy zapelnionym wybiegu jajko idzie
-				# prosto do magazynu, zamiast przepadac albo blokowac kure.
-				state.add_egg(hen.breed_id)
+				# prosto do magazynu. Gdy magazyn jest pelny, jajko przepada —
+				# to jest wlasnie hamulec, dzieki ktoremu gra nie przechodzi
+				# sie sama przez noc.
+				if state.add_egg(hen.breed_id) <= 0:
+					out["eggs_lost"] = int(out.get("eggs_lost", 0)) + 1
+					continue
 			else:
 				state.eggs_on_ground.append(hen.breed_id)
 			out["eggs_laid"] = int(out["eggs_laid"]) + 1

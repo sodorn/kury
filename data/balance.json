@@ -19,7 +19,7 @@
     "feed_pack_price": 25,
     "feed_per_hen_minute": 0.34,
     "chick_feed_multiplier": 0.5,
-    "egg_spoil_hours": 6.0
+    "egg_spoil_hours": 4.0
   },
   "run": {
     "_opis": "max_eggs_on_ground to tylko tyle, ile jaj lezy naraz na wybiegu do zebrania palcem. Nadmiar idzie prosto do magazynu. area musi sie zgadzac z piaskowym prostokatem w ground.svg - oba biora sie z RUN w tools/gen_ground.py.",
@@ -184,51 +184,59 @@
       ]
     },
     "storage": {
-      "_opis": "Hurt na pasze: wiekszy worek i nizsza cena za kilogram.",
+      "_opis": "MAGAZYN. pack_size/pack_price to worek paszy, egg_capacity to LIMIT JAJ, ktore moga lezec w magazynie. Limit jest po to, zeby gra nie przechodzila sie sama: bez niego mozna bylo wrocic po dobie i zastac gore jaj. Nadmiar nad limit przepada przy znoszeniu — gracz musi zajrzec i sprzedac.",
       "upgrades": [
         {
           "name": "STORE_T1",
           "pack_size": 60,
           "pack_price": 57,
-          "price": 600
+          "price": 600,
+          "egg_capacity": 500
         },
         {
           "name": "STORE_T2",
           "pack_size": 150,
           "pack_price": 135,
-          "price": 3000
+          "price": 3000,
+          "egg_capacity": 1000
         },
         {
           "name": "STORE_T3",
           "pack_size": 400,
           "pack_price": 340,
-          "price": 10500
+          "price": 10500,
+          "egg_capacity": 2000
         },
         {
           "name": "STORE_T4",
           "pack_size": 1000,
           "pack_price": 800,
-          "price": 30000
+          "price": 30000,
+          "egg_capacity": 10000
         },
         {
           "name": "STORE_T5",
           "pack_size": 2500,
           "pack_price": 1875,
-          "price": 80000
+          "price": 80000,
+          "egg_capacity": 50000
         },
         {
           "name": "STORE_T6",
           "pack_size": 6000,
           "pack_price": 4200,
-          "price": 200000
+          "price": 200000,
+          "egg_capacity": 150000
         },
         {
           "name": "STORE_T7",
           "pack_size": 15000,
           "pack_price": 9750,
-          "price": 540000
+          "price": 540000,
+          "egg_capacity": 500000
         }
-      ]
+      ],
+      "egg_capacity": 200
     },
     "guard": {
       "_opis": "PLOT. block_chance to szansa, ze lis w ogole nie wejdzie na wybieg — losowana przy kazdym podejsciu. Plot nie ma nic wspolnego z psem: pies dziala dopiero wtedy, gdy lis juz wszedl.",

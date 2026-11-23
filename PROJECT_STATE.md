@@ -4,7 +4,9 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.6): trzy bezpieczniki przy
+- Aktualny etap: **ETAP 10** (wersja 12.7): limit jaj w magazynie,
+  gnicie po czterech godzinach, potwierdzenie sprzedazy ptaka, mniejszy lis.
+- Wersja 12.6: trzy bezpieczniki przy
   wysylce na serwer i codzienne kopie zapasowe farm w repozytorium.
 - Wersja 12.5: naprawione kasowanie farm
   przy nieudanym wczytaniu kodu, kod wymagany zawsze, ceny rozbudowy
@@ -43,7 +45,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`, `v11.6-rozpakowanie-odpowiedzi`, `v12.0-plot-i-pies`, `v12.1-lis-od-nowa`, `v12.2-groteska`, `v12.3-poziomy`, `v12.4-termin-jaj`, `v12.5-ratunek-farm`, `v12.6-bezpieczniki`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`, `v11.6-rozpakowanie-odpowiedzi`, `v12.0-plot-i-pies`, `v12.1-lis-od-nowa`, `v12.2-groteska`, `v12.3-poziomy`, `v12.4-termin-jaj`, `v12.5-ratunek-farm`, `v12.6-bezpieczniki`, `v12.7-limit-jaj`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -205,6 +207,52 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## WERSJA 12.7: limit jaj, potwierdzenie sprzedazy, mniejszy lis
+
+SKAD WZIELY SIE KODY 130090 I 586243 — wazne do zapisania, bo wlasciciel
+slusznie zapytal. Tabela `saves` jest WSPOLNA dla wszystkich grajacych
+i nie ma w niej pola z wlascicielem. Wybralem te dwa kody wylacznie po
+liczbie kur w spisie. Nie wiadomo, czyje to farmy; moga nalezec do
+dziewczyny albo kolegow wlasciciela. Przy kazdej takiej podpowiedzi
+trzeba to mowic wprost.
+
+LIMIT JAJ W MAGAZYNIE. Gra przechodzila sie sama: wystarczylo wrocic po
+dobie i zastac gore jaj. Teraz magazyn ma pojemnosc, a nadmiar przy
+znoszeniu przepada (liczony w `eggs_lost`):
+
+    mala szopa (poziom 0)      200
+    solidna szopa              500
+    duza szopa               1 000
+    spichlerz                2 000
+    stodola                 10 000
+    silos                   50 000
+    wielki silos           150 000
+    elewator               500 000
+
+Jaja gnija teraz po CZTERECH godzinach zegarka zamiast szesciu. Razem
+z limitem daje to prosty wniosek dla gracza: trzeba zajrzec, sprzedac
+i kupic, inaczej produkcja idzie w blotо.
+
+POTWIERDZENIE SPRZEDAZY ptaka. Przyciski kupna i sprzedazy stoja obok
+siebie, a sprzedana kura nie wraca. Pytanie pojawia sie w srodku panelu
+(nie jako okno systemowe — gra chodzi w przegladarce na telefonie).
+Test dymny sprawdza oba wyjscia: "Nie" zostawia kure, "Tak" sprzedaje.
+
+PRZYCISK "Kup za X" dostal brakujacy licznik "(masz N szt.)". Byl
+jedynym przyciskiem w sklepie bez tej informacji.
+
+LIS mniejszy i mniej wyciagniety. Historia tego rozmiaru: do 12.0 byl
+wysoki i bujal sie w miejscu; w 12.1 zrobilem go dlugim i niskim
+(230x104 przy skali 1.45) i wyszedl wiekszy od psa oraz za bardzo
+rozciagniety. Teraz 196x116 przy skali 1.18:
+
+              szerokosc  wysokosc  proporcja
+    lis 12.1      334       151       2.21
+    lis 12.7      231       137       1.69
+    pies          273       146       1.88
+
+Jest mniejszy od psa w obu wymiarach i krepszy niz pies, a nie dluzszy.
 
 ## WERSJA 12.6: TRZY BEZPIECZNIKI I KOPIE ZAPASOWE
 

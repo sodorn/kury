@@ -87,15 +87,15 @@ INCU_T5,"inkubator dwukomorowy"
 INCU_T6,"inkubator hodowlany"
 INCU_T7,"inkubator przemysłowy"
 INCU_T8,"wylęgarnia"
-STORE_T1,"większy magazyn"
-STORE_T2,"średni magazyn"
-STORE_T3,"duży magazyn"
-STORE_T4,"bardzo duży magazyn"
+STORE_T1,"solidna szopa"
+STORE_T2,"duża szopa"
+STORE_T3,"spichlerz"
+STORE_T4,"stodoła"
 STORE_T5,"silos"
 STORE_T6,"wielki silos"
 STORE_T7,"elewator"
 PANEL_UPGRADE_GUARD,"Kup %s za %s — lis odejdzie z niczym w %d%% podejść"
-PANEL_UPGRADE_STORAGE,"Rozbuduj: %s za %s — worek %d kg po %s za kg"
+PANEL_UPGRADE_STORAGE,"Rozbuduj: %s za %s — worek %d kg, miejsce na %s jaj"
 PANEL_FEED_PRICE,Cena paszy
 PANEL_FEED_PRICE_VALUE,"worek %d kg · %s/kg"
 PANEL_SICK,Chore kury
@@ -107,6 +107,12 @@ PANEL_FEED_BURN,Zużycie paszy
 PANEL_FEED_BURN_VALUE,"%s kg na dzień"
 PANEL_DAYS,Dzień gospodarstwa
 PANEL_EGGS_STORED,Jaja w magazynie
+STORE_T0,"mała szopa"
+PANEL_EGGS_FULL,"Magazyn jaj pełny (%s). Sprzedaj, bo nowe jaja przepadają."
+CONFIRM_SELL_HEN,"Sprzedać kurę %s za %s?"
+CONFIRM_SELL_ROOSTER,"Sprzedać koguta %s za %s?"
+CONFIRM_YES,"Tak, sprzedaj"
+CONFIRM_NO,"Nie"
 PANEL_EGGS_WORTH,Wartość jaj
 PANEL_NEXT_EGG,Najbliższe jajko
 TIME_SECONDS,"%d s"
@@ -130,7 +136,7 @@ PANEL_BUY_FEED,"Kup paszę (%d kg za %s)"
 PANEL_BUY_MEDICINE,"Kup lek za %s — wyleczy najdroższą chorą kurę (chorych: %d)"
 PANEL_BUY_VACCINE,"Zaszczep stado za %s (bez szczepienia: %d)"
 PANEL_VACCINE_NOTE,"Szczepienie chroni do końca życia, ale tylko kury, które żyją w chwili szczepienia. Nowe pisklęta trzeba zaszczepić osobno."
-PANEL_BUY_HEN,"Kup za %s"
+PANEL_BUY_HEN,"Kup za %s (masz %d szt.)"
 PANEL_SELL_HEN,"Sprzedaj za %s (masz %d szt.)"
 PANEL_UPGRADE_INCUBATOR,"Rozbuduj: %s — %d miejsc za %s"
 PANEL_LOCKED,Zablokowana

@@ -43,6 +43,19 @@ static func build() -> Theme:
 	theme.set_font_size("font_size", "NoteLabel", 32)
 	theme.set_color("font_color", "NoteLabel", INK_SOFT)
 
+	# Okienko "na pewno?" w srodku panelu: jasne tlo, gruba ramka i cien,
+	# zeby bylo jasne, ze jest NAD reszta i czeka na odpowiedz.
+	var confirm := StyleBoxFlat.new()
+	confirm.bg_color = PAPER
+	confirm.border_color = INK_SOFT
+	confirm.set_border_width_all(5)
+	confirm.set_corner_radius_all(28)
+	confirm.set_content_margin_all(34)
+	confirm.shadow_color = Color(0.0, 0.0, 0.0, 0.35)
+	confirm.shadow_size = 18
+	theme.set_type_variation("ConfirmBox", "PanelContainer")
+	theme.set_stylebox("panel", "ConfirmBox", confirm)
+
 	# Naglowek grupy w panelu ("W inkubatorze"). Czcionka tytulowa w malym
 	# stopniu — ma dzielic liste na czesci, a nie krzyczec.
 	theme.set_type_variation("GroupLabel", "Label")

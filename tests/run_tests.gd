@@ -43,6 +43,7 @@ func _ready() -> void:
 	_test_fox_return_speed()
 	_test_upgrade_ladders()
 	_test_egg_spoilage()
+	_test_egg_capacity()
 	_test_vaccine_price()
 	_test_require_code_after_break()
 	_test_failed_restore_keeps_identity()
@@ -130,8 +131,14 @@ func _fresh_state(hens: Array[String] = ["leghorn"], feed := 100.0) -> FarmState
 ## To samo stado plus jeden kogut kazdej wystepujacej rasy, czyli stado, ktore
 ## faktycznie niesie. Koguty sa zaszczepione, zeby nie chorowaly w testach,
 ## ktore mierza co innego.
+## Stan do testow ZNOSZENIA i ksiegowania jaj. Dostaje najwiekszy magazyn,
+## bo te testy nie sa o limicie pojemnosci — przy domyslnych 200 jajach
+## limit przycinalby wyniki i testy mowilyby o czym innym, niz deklaruja.
+## Sam limit ma wlasny test: `_test_egg_capacity`.
 func _laying_state(hens: Array[String] = ["leghorn"], feed := 100.0) -> FarmState:
 	var state := _fresh_state(hens, feed)
+	state.storage_level = (GameData.balance().get("buildings", {}).get(
+			"storage", {}).get("upgrades", []) as Array).size()
 	var added := {}
 	for breed_id in hens:
 		if added.has(breed_id):
@@ -1239,7 +1246,7 @@ func _test_upgrade_ladders() -> void:
 ## nocy magazyn pekal w szwach i cala ekonomia stawala na glowie.
 func _test_egg_spoilage() -> void:
 	var hours := float(GameData.balance().get("economy", {}).get("egg_spoil_hours", 0.0))
-	_check(is_equal_approx(hours, 6.0), "termin przydatnosci to szesc godzin realnych")
+	_check(is_equal_approx(hours, 4.0), "termin przydatnosci to cztery godziny realne")
 	var spoil_game := hours * 3600.0 * GameData.time_scale()
 
 	var state := FarmState.new()
@@ -1394,6 +1401,42 @@ func _test_push_guards() -> void:
 	_check(Cloud.player_id == "888888", "kod przeszedl na nas")
 	_check(Game.may_push_to_cloud(), "teraz wolno zapisywac te farme")
 	Cloud.set_player_id(moj)
+
+
+## Limit jaj w magazynie. Istnieje po to, zeby gra nie przechodzila sie sama:
+## bez niego mozna bylo wrocic po dobie i zastac gore jaj.
+func _test_egg_capacity() -> void:
+	var storage: Dictionary = GameData.balance().get("buildings", {}).get("storage", {})
+	var state := FarmState.new()
+	_check(state.egg_capacity() == 200, "mala szopa miesci 200 jaj (jest %d)" % state.egg_capacity())
+
+	_check(state.add_egg("leghorn", 150) == 150, "pierwsze 150 jaj sie miesci")
+	_check(state.egg_room() == 50, "zostalo miejsca na 50")
+	_check(state.add_egg("leghorn", 90) == 50, "z 90 jaj miesci sie tylko 50")
+	_check(state.egg_count() == 200, "magazyn pelny, ani jednego wiecej")
+	_check(state.add_egg("rhode", 10) == 0, "do pelnego nic juz nie wejdzie")
+
+	# Kazdy poziom magazynu podnosi limit.
+	var poprzedni := 200
+	var ups: Array = storage.get("upgrades", [])
+	for i in ups.size():
+		var lim := int(ups[i].get("egg_capacity", 0))
+		_check(lim > poprzedni, "magazyn %d miesci wiecej jaj niz poprzedni (%d > %d)"
+				% [i + 1, lim, poprzedni])
+		poprzedni = lim
+	_check(poprzedni >= 500000, "elewator miesci co najmniej pol miliona jaj (%d)" % poprzedni)
+
+	# Kura przy pelnym magazynie nie dokłada do niego jaj — i o to chodzi.
+	var farm := _fresh_state(["leghorn", "leghorn"], 1000.0)
+	farm.chickens.append(Chicken.create_rooster("leghorn"))
+	for chicken: Chicken in farm.chickens:
+		chicken.vaccinated = true
+	farm.add_egg("leghorn", farm.egg_capacity())
+	_check(farm.egg_room() == 0, "magazyn zapchany przed testem")
+	var wynik := Simulation.advance(farm, 3600.0)
+	_check(farm.egg_count() == farm.egg_capacity(), "magazyn nie przekracza limitu")
+	_check(int(wynik.get("eggs_lost", 0)) > 0,
+			"gra liczy jaja, ktore przepadly z braku miejsca (%d)" % int(wynik.get("eggs_lost", 0)))
 
 func _test_event_rules() -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})
