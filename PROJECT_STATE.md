@@ -4,7 +4,9 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.5): naprawione kasowanie farm
+- Aktualny etap: **ETAP 10** (wersja 12.6): trzy bezpieczniki przy
+  wysylce na serwer i codzienne kopie zapasowe farm w repozytorium.
+- Wersja 12.5: naprawione kasowanie farm
   przy nieudanym wczytaniu kodu, kod wymagany zawsze, ceny rozbudowy
   przeliczone symulacja.
 - Wersja 12.4: jaja psuja sie po szesciu
@@ -41,7 +43,7 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 - Wersje do cofniecia sie (galezie na GitHubie): `v1.0-grafika-plaska`,
   `v3.0-etap3`, `v4.0-zapis`, `v5.0-inkubator-rasy`, `v6.0-ekonomia-zdarzenia`,
   `v6.1-balans`, `v6.2-rasy`, `v7.0-budynki`, `v8.0-serwer`,
-  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`, `v11.6-rozpakowanie-odpowiedzi`, `v12.0-plot-i-pies`, `v12.1-lis-od-nowa`, `v12.2-groteska`, `v12.3-poziomy`, `v12.4-termin-jaj`, `v12.5-ratunek-farm`.
+  `v8.1-ekran-startowy`, `v9.0-sklep-bez-blokad`, `v10.0-koguty`, `v10.1-plot-i-kurnik`, `v10.2-zdarzenia`, `v10.3-lis-i-jaja`, `v10.4-kwoty-i-czas`, `v11.0-czas-i-wybieg`, `v11.1-klawiatura-kodu`, `v11.2-widoczne-komunikaty`, `v11.3-diagnoza-serwera`, `v11.4-uwagi-kolegow`, `v11.5-do-testow`, `v11.6-rozpakowanie-odpowiedzi`, `v12.0-plot-i-pies`, `v12.1-lis-od-nowa`, `v12.2-groteska`, `v12.3-poziomy`, `v12.4-termin-jaj`, `v12.5-ratunek-farm`, `v12.6-bezpieczniki`.
 - Gra stoi takze pod publicznym adresem (GitHub Pages, galaz `gh-pages`),
   dostepnym bez logowania: https://sodorn.github.io/kury/
 - Silnik: Godot 4.7.2 stable (standard, GDScript), renderer Compatibility.
@@ -203,6 +205,47 @@ tools/       gen_ground.py          generator tla i przedniego plotu
   edytorze na pusta lake); `Config` zastapiony przez `GameData`; obszary dotyku
   zapisane w scenie (znikly ostrzezenia przy wezlach `Shape`); testy przerobione
   ze skryptow `-s` na sceny.
+
+## WERSJA 12.6: TRZY BEZPIECZNIKI I KOPIE ZAPASOWE
+
+Wlasciciel wczytal 659722 i dostal pusta farme. Spis z bazy pokazal, co
+sie stalo naprawde — i ze poprawka z 12.5 dziala, tylko dane zginely
+WCZESNIEJ:
+
+    kod      ostatni zapis UTC   znakow   kur     kasa
+    586243   2026-11-21 02:42     20962   166   84 475
+    130090   2026-11-22 22:57     10935    69      245
+    659722   2026-11-23 14:06      1018     0       15
+    657722   2026-11-23 01:42      1402     0       15
+
+659722 jest pusta od 01:42 w nocy — czyli sprzed wydania 12.5 o 03:00.
+Zapis o 14:06 to juz tylko autozapis tej samej pustki. Prawdziwe stado
+wlasciciela lezy pod 130090 (69 kur, stara obrona 5, ktora po migracji
+daje plot 3 + psa 2) i 586243 (166 kur, 84 tys. zl).
+
+Zauwazalne: kody 659722 i 657722 roznia sie jedna cyfra. Czesc zamieszania
+mogla brac sie z pomylki przy przepisywaniu.
+
+TRZY BEZPIECZNIKI przy wysylce na serwer (`Game.may_push_to_cloud`):
+
+1. Trwa pobieranie farmy spod przepisanego kodu — nie wysylamy nic.
+2. Kod, pod ktorym jestesmy, nie nalezy do tej sesji. Prawo do zapisu
+   daje tylko: zalozenie nowej farmy, wczytanie wlasnego zapisu z dysku
+   albo UDANE pobranie farmy z serwera (`_owned_code`).
+3. Stan jest pusty — zero kur, zwlok, jaj, piskląt i partii w inkubatorze.
+   Pusta farma nie jest warta wyslania nigdy, a gdyby cos znowu
+   przestawilo kod, to wlasnie pustka skasowalaby komus stado.
+
+Kazdy z nich ma test w `_test_push_guards`.
+
+KOPIE ZAPASOWE (`.github/workflows/kopia-farm.yml`). Codziennie o 03:41
+UTC caly stan tabeli ladzie w `kopie/saves-RRRR-MM-DD.json` w repozytorium.
+Powod jest prosty: na serwerze jest tylko OSTATNI zapis, wiec nadpisanie
+bylo nieodwracalne. Teraz cofniecie sie do stanu sprzed wpadki to zwykly
+`git show`. Pierwsza kopia juz jest: 17 farm.
+
+Zabezpieczenie w samej kopii: gdy serwer odda pusta liste, kopia NIE
+powstaje. Inaczej jedna awaria bazy wyczyscilaby takze archiwum.
 
 ## WERSJA 12.5: NIEUDANE WCZYTANIE KASOWALO FARMY
 
