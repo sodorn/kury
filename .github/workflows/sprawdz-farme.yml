@@ -80,6 +80,30 @@ jobs:
           echo "klucz w pasku adresu -> HTTP $code"
           head -c 200 /tmp/pasek.json; echo
 
+      - name: Spis wszystkich farm (kod, data, rozmiar)
+        run: |
+          # Sam SPIS: kod, kiedy zapisana, ile znakow ma zapis. Zawartosci
+          # nie pokazujemy. Po rozmiarze widac, ktora farma jest pelna,
+          # a ktora pusta — to ratuje sytuacje, gdy komus zginie kod.
+          curl -sS --max-time 30 -o /tmp/spis.json \
+            -H "apikey: ${{ steps.cfg.outputs.key }}" \
+            -H "Authorization: Bearer ${{ steps.cfg.outputs.key }}" \
+            "${{ steps.cfg.outputs.url }}/rest/v1/${{ steps.cfg.outputs.table }}?select=player_id,updated_at,payload&order=updated_at.desc"
+          python3 - <<'PY'
+          import json, datetime
+          rows = json.load(open("/tmp/spis.json", encoding="utf-8"))
+          if not isinstance(rows, list):
+              print("Serwer odpowiedzial bledem:", json.dumps(rows)[:200]); raise SystemExit(0)
+          print("%-10s %-22s %8s %7s %7s" % ("kod", "ostatni zapis UTC", "znakow", "kur", "kasa"))
+          for r in rows:
+              ts = r.get("updated_at") or 0
+              kiedy = datetime.datetime.fromtimestamp(ts, datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
+              p = r.get("payload") or {}
+              kur = len(p.get("chickens") or [])
+              kasa = int(p.get("money") or 0)
+              print("%-10s %-22s %8d %7d %7d" % (r.get("player_id"), kiedy, len(json.dumps(p)), kur, kasa))
+          PY
+
       - name: Ile farm jest w bazie w ogole
         run: |
           curl -sS --max-time 30 -I \
