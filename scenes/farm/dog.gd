@@ -50,12 +50,12 @@ func show_breed(level: int) -> void:
 		# wiec skale podbijamy tylko odrobine. Przy 1.5 pies zaslanial pol
 		# kurnika i wygladal jak kon.
 		_sprite.offset = Vector2(0, -64)
-		scale = Vector2(1.34, 1.34)
+		scale = Vector2(1.07, 1.07)
 	else:
 		_stand = MUTT
 		_leap = MUTT_LEAP
 		_sprite.offset = Vector2(0, -56)
-		scale = Vector2(1.3, 1.3)
+		scale = Vector2(1.04, 1.04)
 	_sprite.texture = _stand
 
 

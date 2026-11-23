@@ -4,7 +4,10 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.9): jajka za grosze, pieniadze
+- Aktualny etap: **ETAP 10** (wersja 12.10): kogut dwa razy drozszy od kury
+  swojej rasy (mnoznik w `balance.economy.rooster_price_multiplier`),
+  wszystkie postaci na farmie o 20% mniejsze.
+- Wersja 12.9: jajka za grosze, pieniadze
   z hodowli. Wartosc jajka dziesieciokrotnie nizsza, nowy model ekonomii
   `tools/economy_model.py` liczacy obie petle, trzy testy pilnujace zamyslu.
 - Wersja 12.8: nowa walka lis-pies, susy

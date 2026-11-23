@@ -245,6 +245,18 @@ static func hen_sell_price(breed_id: String, sick: bool = false) -> float:
 	return float(GameData.breed(breed_id).get("sell_price", 0))
 
 
+## Ile kosztuje zakup jednej sztuki. Kogut jest DROZSZY od kury tej samej
+## rasy (mnoznik w balance.economy.rooster_price_multiplier): jeden kogut
+## obsluguje cale stado swojej rasy, wiec przy cenie kury byl najtanszym
+## obowiazkowym zakupem w calej grze.
+static func hen_buy_price(breed_id: String, rooster: bool = false) -> float:
+	var price := float(GameData.breed(breed_id).get("price", 0))
+	if not rooster:
+		return price
+	var economy: Dictionary = GameData.balance().get("economy", {})
+	return price * float(economy.get("rooster_price_multiplier", 2.0))
+
+
 static func egg_value(breed_id: String) -> float:
 	return float(GameData.breed(breed_id).get("egg_value", 0.0))
 

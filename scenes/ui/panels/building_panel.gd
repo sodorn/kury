@@ -1000,15 +1000,19 @@ func _add_breed_card(breed: Dictionary) -> void:
 		# Rasa zamknieta za poziomem kurnika mowi wprost, czego brakuje —
 		# wyszarzony przycisk bez wyjasnienia wyglada jak zepsuty.
 		var locked := not Game.breed_allowed(breed_id)
+		# Kogut ma wlasna, wyzsza cene — i wlasny warunek "nie stac Cie".
+		var cock_price := FarmState.hen_buy_price(breed_id, true)
 		if locked:
 			buy.text = tr("PANEL_BREED_LOCKED") % Game.breed_required_level(breed_id)
 			buy_rooster.text = buy.text
 		else:
 			buy.text = tr("PANEL_BUY_HEN") % [NumberFormat.money(price), owned]
+			buy_rooster.text = tr("PANEL_BUY_ROOSTER") % [
+					NumberFormat.money(cock_price), cocks]
 		buy.disabled = poor or locked
-		buy_rooster.disabled = locked or Game.state.money < price
-		buy_rooster.text = tr("PANEL_BUY_ROOSTER") % [NumberFormat.money(price), cocks]
-		buy_rooster.disabled = poor
+		# Wczesniej ta linijka byla pisana dwa razy i druga gubila `locked`,
+		# wiec koguta dalo sie kupic do rasy zamknietej za poziomem kurnika.
+		buy_rooster.disabled = locked or Game.state.money < cock_price
 		no_rooster.visible = owned > 0 and cocks == 0
 		# Skup bierze tylko zdrowe sztuki, wiec licznik na przycisku sprzedazy
 		# pokazuje zdrowe, a nie cale stado tej rasy.

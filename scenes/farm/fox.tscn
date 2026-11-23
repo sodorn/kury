@@ -10,7 +10,7 @@
 size = Vector2(190, 150)
 
 [node name="Fox" type="Area2D"]
-scale = Vector2(1.18, 1.18)
+scale = Vector2(0.94, 0.94)
 z_index = 50
 input_pickable = true
 script = ExtResource("1")

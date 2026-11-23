@@ -168,7 +168,7 @@ func _pop_heads(count: int) -> void:
 		head.texture = HEAD
 		head.z_index = 1
 		head.position = position + Vector2(randf_range(-20.0, 20.0), randf_range(-30.0, -10.0))
-		head.scale = Vector2.ONE * randf_range(0.7, 0.95)
+		head.scale = Vector2.ONE * randf_range(0.56, 0.76)
 		host.add_child(head)
 
 		var away := head.position + Vector2(

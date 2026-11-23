@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/animals/hen_dead.svg" id="2"]
 
 [node name="FarmCorpse" type="Node2D"]
+scale = Vector2(0.8, 0.8)
 script = ExtResource("1")
 
 [node name="Sprite" type="Sprite2D" parent="."]

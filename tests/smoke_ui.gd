@@ -993,8 +993,14 @@ func _test_dog_breeds() -> void:
 	_check(duzy > maly * 1.12, "owczarek jest wyraznie wiekszy (%.0f vs %.0f)" % [duzy, maly])
 
 	# Lis musi byc mniejszy od psa — wlasciciel zglaszal odwrotnie.
-	var lis: Texture2D = load("res://assets/sprites/animals/fox.svg")
-	_check(lis.get_width() * 1.18 < maly, "lis jest mniejszy od kundla")
+	# Skale czytamy ze scen, a nie wpisujemy w test — inaczej test przestaje
+	# pilnowac czegokolwiek w chwili, w ktorej ktos zmieni rozmiar postaci.
+	var scena_lisa: PackedScene = load("res://scenes/farm/fox.tscn")
+	var lis: Node2D = scena_lisa.instantiate()
+	var lis_szerokosc: float = lis.scale.x * (lis.get_node("Sprite") as Sprite2D).texture.get_width()
+	lis.free()
+	_check(lis_szerokosc < maly,
+			"lis jest mniejszy od kundla (%.0f vs %.0f)" % [lis_szerokosc, maly])
 	_shot("psy.png")
 	Game.state.dog_level = 0
 	farm._sync_dog()

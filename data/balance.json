@@ -17,6 +17,8 @@
     "_opis": "feed_per_hen_minute w kilogramach na ptaka na minute. Wartosc jest cztery razy wyzsza niz w 10.1: wczesniej worek starczal na pol godziny i pasza w ogole nie byla problemem. Razem z nia spadla cena kilograma, zeby karma nie zjadala calego zarobku. egg_spoil_hours: po tylu godzinach REALNYCH niesprzedane jaja sie psuja. Bez tego gra zostawiona na noc witala gracza magazynem pelnym jaj sprzed doby.",
     "feed_pack_size": 25,
     "feed_pack_price": 25,
+    "rooster_price_multiplier": 2.0,
+    "_opis_kogut": "Kogut kosztuje dwa razy tyle, co kura tej samej rasy. Jeden kogut obsluguje cala rase, wiec bez tego byl najtanszym obowiazkowym zakupem w grze.",
     "feed_per_hen_minute": 0.34,
     "chick_feed_multiplier": 0.5,
     "egg_spoil_hours": 4.0

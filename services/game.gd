@@ -534,7 +534,7 @@ func buy_hen(breed_id: String, rooster: bool = false) -> bool:
 		Events.notice.emit(tr("HINT_BREED_NEEDS_COOP") % [
 				tr(String(def.get("name", ""))), int(def.get("coop_level", 0)) + 1])
 		return false
-	var price := float(def.get("price", 0))
+	var price := FarmState.hen_buy_price(breed_id, rooster)
 	if state.money < price:
 		return false
 	if not state.coop_has_room():

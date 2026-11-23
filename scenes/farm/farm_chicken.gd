@@ -13,8 +13,11 @@ const CHICK_SPEED := 58.0
 ## w promieniu `run.pickup_radius`, a przy 60+ sztukach wybieg wygladal jak
 ## tlok — wiec w 11.4 schodzimy o 20%. Jedno miejsce do krecenia, jesli
 ## stado znow ma byc wieksze albo mniejsze.
-const CHICK_SCALE := Vector2(0.81, 0.92)
-const HEN_SCALE := Vector2(0.92, 1.06)
+## Rozmiary postaci. Wszystkie zjechaly o 20% w 12.10 — stado na wiekszym
+## kurniku wygladalo jak tlum olbrzymow na malym podworku.
+## ROOSTER_SCALE jest WZGLEDNY wobec kury, wiec zostaje bez zmian.
+const CHICK_SCALE := Vector2(0.65, 0.74)
+const HEN_SCALE := Vector2(0.74, 0.85)
 ## Kogut jest o oczko wiekszy od swoich kur.
 const ROOSTER_SCALE := 1.12
 ## Chora kura ledwo sie wlecze, jest zzielniala i parauje od niej mgla.
