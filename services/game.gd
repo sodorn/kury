@@ -234,6 +234,7 @@ func _on_cloud_pulled(payload: Dictionary, ok: bool, for_player: String) -> void
 	# Serwer oddal farme — dopiero teraz urzadzenie przyjmuje jej kod.
 	if forced:
 		Cloud.set_player_id(for_player)
+		_owned_code = for_player
 	var local_saved_at := 0.0
 	var local := SaveGame.load_state()
 	if not local.is_empty():
@@ -299,6 +300,9 @@ func _apply_loaded(loaded: Dictionary) -> void:
 	_shown_feed = -1
 	_away_seconds = 0.0
 	_last_tick = Time.get_unix_time_from_system()
+	# Zapis z dysku nalezy do tego urzadzenia, wiec wolno pod ten kod pisac.
+	if _owned_code.is_empty():
+		_owned_code = Cloud.player_id
 	_last_gap = maxf(0.0, float(loaded["elapsed"]))
 	_apply_elapsed(_last_gap)
 	Events.resources_changed.emit()
@@ -307,6 +311,14 @@ func _apply_loaded(loaded: Dictionary) -> void:
 ## Ile sekund realnych minelo od ostatniego zapisu do wlaczenia gry. Na tej
 ## podstawie ekran powitalny decyduje, czy wymagac wpisania kodu.
 var _last_gap := 0.0
+## Kod, do ktorego ta sesja ma prawo pisac. Ustawiamy go w trzech miejscach:
+## przy zalozeniu nowej farmy, przy wczytaniu wlasnego zapisu z dysku i po
+## UDANYM pobraniu farmy z serwera. Push do innego kodu jest odrzucany.
+##
+## To jest siatka bezpieczenstwa po bledzie, ktory skasowal wlascicielowi
+## dwie farmy: gra przestawiala tozsamosc urzadzenia przed odpowiedzia
+## serwera i autozapis wrzucal pusta farme pod cudzy kod.
+var _owned_code := ""
 
 
 ## Czy po tej przerwie gracz musi wpisac kod, zamiast klikac "Graj dalej".
@@ -330,6 +342,7 @@ func new_game() -> void:
 	_away_seconds = 0.0
 	_last_tick = Time.get_unix_time_from_system()
 	state = FarmState.from_start_config(GameData.balance().get("start", {}))
+	_owned_code = Cloud.player_id
 	Events.resources_changed.emit()
 
 
@@ -337,11 +350,38 @@ func save() -> void:
 	if state == null:
 		return
 	SaveGame.save_state(state)
-	# Dopoki czekamy na farme spod przepisanego kodu, nie wolno nic wyslac:
-	# kod farmy jest juz przestawiony, wiec autozapis wrzucilby nasz lokalny
-	# stan na cudze miejsce i skasowal farme, po ktora gracz wlasnie siegnal.
-	if Cloud.is_enabled() and not _force_pull:
+	if Cloud.is_enabled() and may_push_to_cloud():
 		Cloud.push(SaveGame.to_dict(state))
+
+
+## Czy wolno wyslac biezacy stan na serwer. Trzy bezpieczniki, kazdy po
+## przejsciach:
+##
+## 1. Czekamy na farme spod przepisanego kodu — nic nie wysylamy, bo
+##    wysylka trafilaby w miejsce farmy, po ktora gracz wlasnie siegnal.
+## 2. Kod, pod ktorym jestesmy, nie nalezy do tej sesji. Tak wlasnie
+##    ginely farmy wlasciciela: tozsamosc urzadzenia zmieniala sie przed
+##    odpowiedzia serwera i autozapis nadpisywal cudzy zapis.
+## 3. Stan jest pusty. Pusta farma nie jest warta wyslania NIGDY — a gdyby
+##    cos znowu przestawilo kod, to wlasnie pustka skasowalaby komus stado.
+##    Lepiej nie zapisac nic, niz zapisac nic NA CZYMS.
+func may_push_to_cloud() -> bool:
+	if _force_pull:
+		return false
+	if _owned_code.is_empty() or _owned_code != Cloud.player_id:
+		return false
+	return not is_farm_empty()
+
+
+## Farma bez jednej kury, bez jaj i bez niczego w inkubatorze. Taki stan
+## powstaje tylko po wczytaniu pustki albo po calkowitej klesce.
+func is_farm_empty() -> bool:
+	return state != null \
+			and state.chickens.is_empty() \
+			and state.corpses.is_empty() \
+			and state.incubating.is_empty() \
+			and state.chicks.is_empty() \
+			and state.egg_count() == 0
 
 
 ## Kasuje zapis i zaczyna od zera.

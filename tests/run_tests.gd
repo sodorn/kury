@@ -46,6 +46,7 @@ func _ready() -> void:
 	_test_vaccine_price()
 	_test_require_code_after_break()
 	_test_failed_restore_keeps_identity()
+	_test_push_guards()
 	_test_event_rules()
 	_test_starving_farm()
 	_test_lay_fairness()
@@ -1346,6 +1347,52 @@ func _test_failed_restore_keeps_identity() -> void:
 			"po udanym wczytaniu urzadzenie przyjmuje kod farmy (jest %s)" % Cloud.player_id)
 	_check(is_equal_approx(Game.state.money, 777.0), "stan przyszedl z serwera")
 	_check(Game.state.chickens.size() == 1, "kury przyszly z serwera")
+	Cloud.set_player_id(moj)
+
+
+## Trzy bezpieczniki, ktore maja raz na zawsze zamknac droge do kasowania
+## cudzych farm pustym zapisem.
+func _test_push_guards() -> void:
+	Game.new_game()
+	var moj := Cloud.player_id
+	_check(Game.may_push_to_cloud(),
+			"wlasna, swiezo zalozona farma moze isc na serwer")
+
+	# 1. Pusty stan nie idzie na serwer NIGDY.
+	Game.state.chickens.clear()
+	Game.state.corpses.clear()
+	Game.state.incubating.clear()
+	Game.state.chicks.clear()
+	Game.state.eggs.clear()
+	Game.state.egg_ages.clear()
+	_check(Game.is_farm_empty(), "stan jest pusty")
+	_check(not Game.may_push_to_cloud(),
+			"pusta farma nie nadpisze niczego na serwerze")
+
+	# 2. Kod, ktorego ta sesja nie zdobyla, jest zamkniety do zapisu.
+	Game.new_game()
+	Game.state.chickens.append(Chicken.create("leghorn"))
+	_check(Game.may_push_to_cloud(), "pelna wlasna farma znow moze isc")
+	Cloud.set_player_id("999999")
+	_check(not Game.may_push_to_cloud(),
+			"pod cudzy kod nie piszemy, dopoki serwer nie odda nam tej farmy")
+
+	# 3. W trakcie pobierania nic nie wysylamy.
+	Cloud.set_player_id(moj)
+	_check(Game.may_push_to_cloud(), "po powrocie na swoj kod zapis znow wolno")
+	_check(Game.restore_from_code("888888"), "ruszamy po cudza farme")
+	_check(not Game.may_push_to_cloud(), "w trakcie pobierania nic nie wysylamy")
+	Game._on_cloud_pulled({}, true, "888888")
+	_check(Cloud.player_id == moj, "nieudane pobranie nie zmienia kodu")
+	_check(Game.may_push_to_cloud(), "i nie odbiera prawa do wlasnego zapisu")
+
+	# Po UDANYM pobraniu cudzej farmy wolno pod nia pisac.
+	var cudza := FarmState.new()
+	cudza.chickens.append(Chicken.create("rhode"))
+	_check(Game.restore_from_code("888888"), "druga proba")
+	Game._on_cloud_pulled(SaveGame.to_dict(cudza), true, "888888")
+	_check(Cloud.player_id == "888888", "kod przeszedl na nas")
+	_check(Game.may_push_to_cloud(), "teraz wolno zapisywac te farme")
 	Cloud.set_player_id(moj)
 
 func _test_event_rules() -> void:

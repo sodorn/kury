@@ -1,0 +1,75 @@
+# Codzienna kopia zapasowa wszystkich farm.
+#
+# Powstala po tym, jak blad w grze skasowal wlascicielowi dwie farmy, a na
+# serwerze jest tylko OSTATNI zapis — nie bylo z czego odtworzyc. Od teraz
+# kazdy dzien ma swoja kopie w repozytorium, wiec cofniecie sie do stanu
+# sprzed wpadki to zwykly `git show`.
+#
+# Kopia ladzie w `kopie/saves-RRRR-MM-DD.json`. Plik ma tyle, ile trzeba do
+# odtworzenia farmy: kod, czas zapisu i caly stan.
+
+name: Kopia zapasowa farm
+
+on:
+  schedule:
+    # Codziennie o 03:41 UTC, godzine przed budzikiem bazy.
+    - cron: "41 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  kopia:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Odczytaj adres i klucz z data/backend.json
+        id: cfg
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          cfg = json.load(open("data/backend.json", encoding="utf-8"))
+          print("url=%s" % cfg["url"].rstrip("/"))
+          print("key=%s" % cfg["api_key"])
+          print("table=%s" % cfg.get("table", "saves"))
+          PY
+
+      - name: Pobierz wszystkie farmy
+        run: |
+          set -o pipefail
+          mkdir -p kopie
+          code=$(curl -sS --max-time 60 -o /tmp/saves.json -w '%{http_code}' \
+            -H "apikey: ${{ steps.cfg.outputs.key }}" \
+            -H "Authorization: Bearer ${{ steps.cfg.outputs.key }}" \
+            "${{ steps.cfg.outputs.url }}/rest/v1/${{ steps.cfg.outputs.table }}?select=player_id,updated_at,payload&order=player_id")
+          echo "HTTP $code"
+          if [ "$code" != "200" ]; then
+            echo "::error::Nie udalo sie pobrac farm (HTTP $code). Kopia NIE powstala."
+            exit 1
+          fi
+          python3 - <<'PY'
+          import json, datetime, pathlib
+          rows = json.load(open("/tmp/saves.json", encoding="utf-8"))
+          if not isinstance(rows, list) or not rows:
+              raise SystemExit("::error::Serwer oddal pusta liste — nie nadpisujemy kopii niczym.")
+          dzien = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d")
+          out = pathlib.Path("kopie") / ("saves-%s.json" % dzien)
+          out.write_text(json.dumps(rows, ensure_ascii=False, indent=1, sort_keys=True),
+                         encoding="utf-8")
+          pelne = sum(1 for r in rows if (r.get("payload") or {}).get("chickens"))
+          print("Zapisano %s: %d farm, w tym %d ze stadem." % (out, len(rows), pelne))
+          PY
+
+      - name: Zapisz kopie w repozytorium
+        run: |
+          if [ -z "$(git status --porcelain kopie)" ]; then
+            echo "Nic sie nie zmienilo — kopia na dzis juz jest."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add kopie
+          git commit -m "Kopia zapasowa farm z $(date -u +%Y-%m-%d)"
+          git push
