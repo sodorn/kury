@@ -3,6 +3,10 @@
  Zebrane 2026-11-21. Komentarze pod kazdym punktem sa moje (Claude).
 ================================================================================
 
+UWAGA: stan punktow z tego pliku jest przeterminowany. Aktualny,
+sprawdzony w kodzie przeglad znajdziesz na SAMYM KONCU, w sekcji
+"PRZEGLAD NA 2026-11-23 (wersja 12.9)".
+
 LEGENDA
   [ZROBIONE 11.4]  naprawione w tej wersji
   [DO ZROBIENIA]   zgadzam sie, czeka w kolejce
@@ -300,3 +304,101 @@ Liczby czekaja na jutro.
     - 5.5 (gluszec jako obronca)
     - 5.7 (klikalne krzaki)
     - 4.3 (kopia zapasowa saveow)
+
+
+================================================================================
+ PRZEGLAD NA 2026-11-23 (wersja 12.9)
+================================================================================
+
+Tomek poprosil: "Zobacz tez moje wczesniejsze sugestie bo zdaje sie ze nie
+wprowadziles wszystkiego o co prosiles". Przeszedlem ten plik punkt po
+punkcie i sprawdzilem KAZDY w kodzie, zamiast polegac na pamieci.
+
+ZROBIONE OD CZASU 11.4
+----------------------
+1    Jajka za grosze.                                    ZROBIONE w 12.9
+     Wartosc jajka spadla dziesieciokrotnie: leghorn 0,40 -> 0,04 zl,
+     cemani 1,00 -> 0,10 zl. Teraz jedna kura zarabia z jaj 1,8 raza
+     wiecej, niz zjada paszy — czyli dokladnie "grosze na pasze".
+     Hodowla bije jajka kilkanascie razy i to ona jest zrodlem pieniedzy.
+     Pilnuja tego trzy nowe testy (widelki cen, stosunek do paszy,
+     przewaga hodowli nad jajkami), wiec nikt tego przypadkiem nie cofnie.
+
+     Sprawdzone modelem `tools/economy_model.py` (nowy plik, liczy OBIE
+     petle naraz — jajka i hodowle):
+         dzis            pelna rozbudowa po  29 h aktywnej gry
+         jajka 10x tanie pelna rozbudowa po  39 h aktywnej gry
+     Czyli gra zwalnia o jedna trzecia, a nie staje. Stary model
+     `upgrade_pacing.py` liczyl tylko jajka i dlatego straszyl.
+
+4.1  Powiedziec graczowi, ze w lisa sie klika.           ZROBIONE w 12.8
+     Nad lisem stoi duza liczba z pozostalymi trafieniami, spada przy
+     kazdym dotknieciu. Do tego komunikat przy wejsciu lisa.
+
+4.3  Kopia zapasowa saveow.                              ZROBIONE w 12.6
+     Codzienne zadanie GitHub Actions zrzuca cala tabele do katalogu
+     `kopie/` w repozytorium.
+
+5.1  Chore kury do McDonalda.                            ZROBIONE
+     Skup stoi na stalych 5 zl za sztuke, a nie na 30% ceny rasy —
+     dzieki temu nigdy nie oplaca sie hodowac chorych cemani na skup.
+
+5.2  Pies odganiajacy lisa.                              ZROBIONE w 12.8
+     Juz nie "liczba w panelu": sa dwa psy (kundel i owczarek), kazdy
+     z wlasna grafika i tempem, pies biegnie za lisem po wybiegu,
+     a owczarek potrafi lisa zabic i rozszarpac.
+
+5.3  Grafiki poziomow rozbudowy.                         ZROBIONE w 12.8
+     Plot ma piec wygladow (lichy, mocny, sztachety, siatka, mur z drutem
+     kolczastym), kurnik, magazyn i inkubator po trzy (zwykly,
+     rozbudowany od poziomu 3, przemyslowy od poziomu 6).
+
+NIE ZROBIONE — I DLACZEGO
+-------------------------
+4.2  Osobny ETAPY.md.                                    NIE ZROBILEM
+     Podzial na etapy dalej siedzi w PROJECT_STATE.md obok wszystkiego
+     innego. Papierkowa robota, zero wplywu na gre — dlatego ciagle
+     spada na koniec kolejki. Powiedz slowo i wydziele.
+
+4.4  Dwie mapy: podworko + wnetrze kurnika.              CZEKA NA CIEBIE
+     Nie zaczynam bez Twojego "tak". To 2-3 pelne etapy roboty.
+     Doplyw: po 12.8 czesc tego pomyslu jest juz zalatwiona inaczej —
+     rozbudowe WIDAC na budynkach, wiec druga mapa nie jest juz jedynym
+     sposobem, zeby rozbudowa cos znaczyla.
+
+5.4  Gluszec jako boss + minigra Duck Hunt.              CZEKA NA CIEBIE
+     Zdanie bez zmian: najpierw sprawdzmy, czy klikanie w lisa jest
+     frajda (od 12.8 wreszcie widac licznik), a dopiero potem budujmy
+     na tym cala minigre.
+
+5.5  Gluszec jako kupowany obronca.                      NIE ZROBILEM
+     To jest najtansza rzecz z tej listy, ktorej dalej nie ma: trzeci
+     poziom psa, drozszy od owczarka, z wlasna grafika. Mechanika juz
+     stoi (interwal, szansa, szansa na zabicie lisa sa w balance.json),
+     wiec to jedna grafika i trzy liczby. Zrobie jako pierwsze, jesli nie
+     powiesz inaczej.
+
+5.6  Karta "wyjscia z wiezienia" (strzelba / pies sasiada).  NIE ZROBILEM
+     Dalej uwazam, ze nie powinna byc do kupienia za gotowke, tylko do
+     zdobycia za przegonienie lisa golymi rekami. Czekam na Twoja zgode
+     na taki ksztalt.
+
+5.7  Klikalne krzaki z niespodzianka.                    NIE ZROBILEM
+     Tanie i dobre, dalej popieram. Nie weszlo, bo 12.8 poszla cala na
+     lisa, psy i wyglad rozbudowy.
+
+5.8  Kara za niecelne klikniecie.                        ODRZUCONE
+     Zdanie bez zmian: kara za to, ze telefon nie zlapal dotkniecia,
+     bedzie odebrana jako bug. Kontrpropozycja (kara za to, ze w ogole
+     nie przegoniles lisa) dziala juz dzis sama z siebie.
+
+CO SIE ZDEZAKTUALIZOWALO W TYM PLIKU
+------------------------------------
+Punkt 3.2 opisuje stara mechanike lisa (10 sekund wizyty, 3 dotkniecia,
+30-90% stada). Od 12.8 jest inaczej:
+  - lis zabija jedna kure co 3-10 sekund, za kazdym razem losujac na nowo,
+  - odchodzi po 3-10 kurach albo po 10 minutach,
+  - przegania sie go 20 dotknieciami, licznik widac nad lisem,
+  - kundel probuje co 10 sekund z szansa 1/3, owczarek co 5 sekund
+    z szansa 2/3, a udana proba owczarka ma 1/3 szans na zabicie lisa,
+  - po zabitym lisie nastepny przychodzi piec razy pozniej.

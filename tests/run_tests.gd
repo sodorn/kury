@@ -969,10 +969,41 @@ func _test_money_format() -> void:
 				"jajko rasy %s ma widoczna wartosc (%s)" % [breed.get("id", ""), shown])
 
 	# Ceny jaj musza siedziec w widelkach, ktore ustalilismy dla balansu.
+	# Od 12.9 jajko jest groszowe: pieniadze robi sie na sprzedazy
+	# wyhodowanych kur, a jajka maja tylko pokryc pasze.
 	for breed: Dictionary in GameData.breeds():
 		var value := float(breed.get("egg_value", 0))
-		_check(value >= 0.4 and value <= 1.0,
-				"cena jajka rasy '%s' w widelkach 0,40-1,00 zl" % breed.get("id", ""))
+		_check(value >= 0.04 and value <= 0.1,
+				"cena jajka rasy '%s' w widelkach 0,04-0,10 zl" % breed.get("id", ""))
+
+	# Zamysl ekonomii pilnowany liczbami, a nie dobra wola: jedna kura ma
+	# z jaj zarobic WIECEJ, niz zjada, ale tylko troche wiecej. Jesli ktos
+	# kiedys podbije wartosc jajka, ten test ma zapalic sie na czerwono.
+	var scale: float = float(GameData.balance().get("offline", {}).get("scale", 1.0 / 3.0))
+	var eco: Dictionary = GameData.balance().get("economy", {})
+	var kg_na_godzine: float = float(eco.get("feed_per_hen_minute", 0.0)) * scale * 60.0
+	var pasza: float = kg_na_godzine * float(eco.get("feed_pack_price", 25)) \
+			/ float(eco.get("feed_pack_size", 25))
+	_check(pasza > 0.0, "pasza kosztuje cokolwiek na godzine (%.2f zl)" % pasza)
+	for breed: Dictionary in GameData.breeds():
+		var z_jaj: float = float(breed.get("egg_value", 0.0)) \
+				/ float(breed.get("egg_seconds", 1.0)) * scale * 3600.0
+		var krotnosc := z_jaj / pasza
+		_check(krotnosc >= 1.2 and krotnosc <= 3.0,
+				"jajka rasy '%s' pokrywaja pasze, ale nie utrzymuja farmy (%.1fx)"
+						% [breed.get("id", ""), krotnosc])
+
+	# Hodowla musi byc wyraznie lepsza od jajek — na tym stoi cala gra.
+	# Porownanie: jedno miejsce w inkubatorze kontra jedna kura na jajkach.
+	for breed: Dictionary in GameData.breeds():
+		var cykl: float = (float(breed.get("incubate_seconds", 1.0)) \
+				+ float(breed.get("grow_seconds", 1.0))) / scale / 3600.0
+		var z_hodowli: float = float(breed.get("sell_price", 0.0)) / maxf(cykl, 0.0001)
+		var z_jaj2: float = float(breed.get("egg_value", 0.0)) \
+				/ float(breed.get("egg_seconds", 1.0)) * scale * 3600.0
+		_check(z_hodowli > z_jaj2 * 5.0,
+				"hodowla rasy '%s' bije jajka co najmniej piciokrotnie (%.0f vs %.0f zl/h)"
+						% [breed.get("id", ""), z_hodowli, z_jaj2])
 		_check(absf(float(breed.get("sell_price", 0)) - round(float(breed.get("price", 0)) * 0.7)) < 0.51,
 				"sprzedaz kury rasy '%s' to 70%% ceny zakupu" % breed.get("id", ""))
 

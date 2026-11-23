@@ -4,7 +4,10 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.8): nowa walka lis-pies, susy
+- Aktualny etap: **ETAP 10** (wersja 12.9): jajka za grosze, pieniadze
+  z hodowli. Wartosc jajka dziesieciokrotnie nizsza, nowy model ekonomii
+  `tools/economy_model.py` liczacy obie petle, trzy testy pilnujace zamyslu.
+- Wersja 12.8: nowa walka lis-pies, susy
   zamiast slizgania sie, owczarek jako osobny pies, rozbudowa widoczna
   na plocie i budynkach, licznik trafien nad lisem.
 - Wersja 12.7: limit jaj w magazynie,
