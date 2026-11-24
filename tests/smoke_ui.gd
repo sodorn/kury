@@ -1149,7 +1149,9 @@ func _test_fox_death() -> void:
 	var fox := foxes[0] as FarmFox
 	var before := fox.position
 	Events.fox_killed.emit()
-	await _frames(30)
+	# Zegarem, nie klatkami: upadek trwa 0,22 s, a na serwerze CI 30 klatek
+	# mija szybciej (12.18 - CI zlapal lisa w polowie upadku).
+	await _seconds(0.6)
 	_check((fox.get_node("Blood") as CPUParticles2D).emitting, "przy zabiciu leci krew")
 	var czerwone := 0
 	var najwieksza := 0.0
