@@ -312,10 +312,15 @@ i znika z magazynu. Nie da sie zrobic zapasu na tydzien.
 title("6. PASZA I GLOD")
 para("""
 Kazdy dorosly ptak zjada %g kg paszy na godzine, pisklę %g tego. Worek
-kosztuje %s za %d kg; przy rozbudowanym magazynie worki sa wieksze i tansze
-za kilogram.
+kosztuje %s za %d kg (cena jak w sklepie rolniczym); przy rozbudowanym magazynie
+worki sa wieksze i tansze za kilogram. W sklepie jest tez przycisk "Kup %d
+workow" - przy wiekszym stadzie jeden worek znika w kilka minut.
 """ % (round(ECO["feed_per_hen_minute"] * 60 * SCALE, 2), ECO.get("chick_feed_multiplier", 0.5),
-       zl(ECO["feed_pack_price"]), ECO["feed_pack_size"]))
+       zl(ECO["feed_pack_price"]), ECO["feed_pack_size"], ECO.get("feed_bulk_packs", 10)))
+para("""
+ZANIM WYJDZIESZ Z GRY: kup paszy na cala przerwe. Kury jedza tez wtedy, gdy nie
+grasz, a magazyn trzyma tylko tyle jaj, ile sie w nim miesci - reszta przepada.
+""")
 para("""
 Gdy pasza sie skonczy: przez %g minut nic sie nie dzieje, potem kury zaczynaja
 padac - jedna co %g sekund przy stadzie %d sztuk, czesciej przy wiekszym.
@@ -333,6 +338,12 @@ para("""
 Pelny cykl to WYLEG (inkubator) plus ODCHOW (pisklę rosnie na wybiegu). Czasy
 dla kazdej rasy sa w tabeli nizej, w czasie przy zegarku.
 """)
+para("""
+Z jaj wykluwa sie mniej wiecej tyle samo KOGUTKOW co KUREK (jak w naturze -
+%d%% to kogutki). Kogutek nie niesie, ale idzie do skupu za %d%% ceny kury tej
+rasy - jeden kogut na rase wystarczy, reszte sprzedawaj.
+""" % (round(BAL["incubator"].get("rooster_share", 0.5) * 100),
+       round(ECO.get("rooster_price_multiplier", 2.5) * 100)))
 para("""
 Dorosla sztuka sprzedaje sie za 70% ceny zakupu rasy. Kupiona kura to strata;
 WYHODOWANA to czysty zysk, bo jaja byly twoje. Na tym stoi cala gra - i dlatego
@@ -410,6 +421,12 @@ raw("""
     nie przyjdzie      przez pierwsze %g min nowej farmy
                        ani gdy masz mniej niz %d kur
 
+  JAK PRZYCHODZI
+    najpierw CZAI SIE w krzakach na polnoc albo na poludnie od wybiegu
+    (%g-%g s - zza krzaka widac uszy), potem idzie pod plot (%g s).
+    Pod plotem plot losuje, czy lisa zatrzyma. Jesli tak - lis drapie,
+    zawraca i znika w krzakach. Jesli nie - przeskakuje plot.
+
   CO ROBI NA WYBIEGU
     zabija jedna kure co %g-%g sekund REALNYCH
     (czas losowany od nowa po kazdej kurze)
@@ -424,6 +441,7 @@ raw("""
     fox["active_roll_minutes"], fox["active_chance"] * 100,
     fox["offline_roll_hours"], fox["offline_chance"] * 100,
     fox["grace_minutes"], fox["min_hens"],
+    fox.get("lurk_min_seconds", 10), fox.get("lurk_max_seconds", 30), fox.get("approach_seconds", 4),
     fox["kill_interval_min"], fox["kill_interval_max"],
     fox["kills_min"], fox["kills_max"],
     fox["visit_max_minutes"],

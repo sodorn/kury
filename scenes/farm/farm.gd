@@ -69,6 +69,7 @@ var _dog: FarmDog = null
 func _ready() -> void:
 	_run = Simulation.run_area()
 	get_viewport().size_changed.connect(_center_world)
+	Events.fox_lurking.connect(_on_fox_lurking)
 	Events.fox_arrived.connect(_on_fox_arrived)
 	Events.fox_repelled.connect(_on_fox_repelled)
 	_center_world()
@@ -267,19 +268,83 @@ func _sync_corpses() -> void:
 			nodes[id].queue_free()
 
 
-## Lis wszedl na wybieg. Scena go pokazuje; o tym, czy cos zabierze,
-## decyduje symulacja — albo gracz, jesli zdazy go przegonic.
-## Na wybiegu moze byc najwyzej JEDEN lis. Wczesniej kazdy sygnal przyjscia
-## dokladal nowego, a stare nie mialy jak zniknac — wlasciciel skonczyl
-## z trzema lisami naraz, ktore nie odchodzily.
-func _on_fox_arrived(_count: int, seconds: float) -> void:
+## Krzaki, z ktorych wychodzi lis, i punkty pod plotem. Dwa krzaki na
+## polnoc od wybiegu (miedzy budynkami) i dwa na poludnie (przy magazynie
+## i sklepie). Polnocny plot jest narysowany na trawie, poludniowy to sprajt
+## FenceFront - stad rozne wysokosci.
+const BUSHES := ["BushLeftTop", "BushRightTop", "BushLeftBottom", "BushRightBottom"]
+
+
+## Dla kazdego krzaka: gdzie lis sie chowa, pod ktorym miejscem plotu staje
+## i gdzie laduje po przeskoczeniu. Wspolrzedne swiata farmy.
+func _fox_routes() -> Array[Dictionary]:
+	var routes: Array[Dictionary] = []
+	var fence_front := $Objects.get_node_or_null("FenceFront") as Node2D
+	var south_y := (fence_front.position.y if fence_front != null else _run.end.y + 58.0) + 34.0
+	var north_y := _run.position.y - 125.0
+	for bush_name: String in BUSHES:
+		var bush := $Objects.get_node_or_null(bush_name) as Node2D
+		if bush == null:
+			continue
+		var left := bush.position.x < _run.get_center().x
+		var north := bush.position.y < _run.get_center().y
+		var side := 1.0 if left else -1.0
+		# Lis stoi tuz ZA krzakiem (mniejsze y = rysowany pod nim), z pyskiem
+		# wystajacym w strone wybiegu. Znad krzaka widac uszy.
+		var hide := Vector2(bush.position.x + side * 26.0, bush.position.y - 8.0)
+		var fence_x := bush.position.x + side * randf_range(200.0, 330.0)
+		var fence := Vector2(fence_x, north_y if north else south_y)
+		var inside := Vector2(fence_x + side * randf_range(30.0, 90.0),
+				_run.position.y + 40.0 if north else _run.end.y - 45.0)
+		routes.append({"bush": hide, "fence": fence, "inside": inside})
+	return routes
+
+
+func _current_fox() -> FarmFox:
 	for node in _objects.get_children():
-		if node is FarmFox:
-			return
+		var fox := node as FarmFox
+		if fox != null and fox.phase != FarmFox.Phase.DEAD \
+				and fox.phase != FarmFox.Phase.LEAVE and fox.phase != FarmFox.Phase.TURN_BACK:
+			return fox
+	return null
+
+
+func _new_fox() -> FarmFox:
 	var fox: FarmFox = FOX_SCENE.instantiate()
 	_objects.add_child(fox)
 	fox.set_decals(_decals)
-	fox.run_through(_run, seconds)
+	return fox
+
+
+## Lis wyszedl z krzakow. Pokazujemy go za losowym krzakiem; za `seconds`
+## sekund stanie pod plotem i symulacja zdecyduje, czy wejdzie.
+func _on_fox_lurking(seconds: float) -> void:
+	if _current_fox() != null:
+		return
+	var routes := _fox_routes()
+	if routes.is_empty():
+		return
+	var route: Dictionary = routes[randi() % routes.size()]
+	var approach := float(GameData.balance().get("fox", {}).get("approach_seconds", 4.0))
+	_new_fox().lurk(_run, route["bush"], route["fence"], route["inside"], routes,
+			seconds, approach)
+
+
+## Lis wszedl na wybieg. Jesli czail sie w krzakach - przeskakuje plot.
+## Jesli nie (np. sygnal po wczytaniu gry) - pojawia sie pod plotem i skacze.
+## Na wybiegu moze byc najwyzej JEDEN lis (wlasciciel mial kiedys trzy).
+func _on_fox_arrived(_count: int, seconds: float) -> void:
+	var fox := _current_fox()
+	if fox != null and fox.phase == FarmFox.Phase.HUNT:
+		return
+	if fox == null:
+		var routes := _fox_routes()
+		if routes.is_empty():
+			return
+		var route: Dictionary = routes[randi() % routes.size()]
+		fox = _new_fox()
+		fox.stand_at_fence(_run, route["fence"], route["inside"], routes)
+	fox.enter_run(seconds)
 	if _dog != null:
 		_dog.chase(fox, _run)
 
@@ -312,16 +377,22 @@ func clear_foxes() -> void:
 			node.queue_free()
 
 
-## Plot zawrocil lisa. Pokazujemy go mimo wszystko: wbiega, rozglada sie
-## i wychodzi z niczym. Bez tego zakup plotu wyglada, jakby nic nie zmienil.
+## Plot zawrocil lisa. Jesli lis stoi pod plotem - drapie i wraca w krzaki.
+## Jesli nie bylo go widac (np. po powrocie do gry), pokazujemy krotka
+## scenke: lis podchodzi pod plot i odchodzi. Bez tego zakup plotu wyglada,
+## jakby nic nie zmienil.
 func _on_fox_repelled() -> void:
-	for node in _objects.get_children():
-		if node is FarmFox:
-			return
-	var fox: FarmFox = FOX_SCENE.instantiate()
-	_objects.add_child(fox)
-	fox.set_decals(_decals)
-	fox.sniff_and_leave(_run)
+	var fox := _current_fox()
+	if fox != null:
+		fox.repel()
+		return
+	var routes := _fox_routes()
+	if routes.is_empty():
+		return
+	var route: Dictionary = routes[randi() % routes.size()]
+	fox = _new_fox()
+	fox.lurk(_run, route["bush"], route["fence"], route["inside"], routes, 2.2, 1.6)
+	fox.repel()
 
 
 ## Jajko pojawia sie obok losowej kury, a bez stada — gdziekolwiek na wybiegu.

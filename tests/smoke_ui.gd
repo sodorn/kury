@@ -64,6 +64,7 @@ func _run() -> void:
 	await _test_unlock_popup()
 	await _test_farm_code_restore()
 	await _test_sick_and_fox_look()
+	await _test_fox_lurk_and_fence()
 	await _test_feed_panels()
 	await _test_upgrade_looks()
 	await _test_dog_breeds()
@@ -264,7 +265,8 @@ func _test_shop() -> void:
 	await _frames(30)
 	var actions: VBoxContainer = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Gutter/Scrollable/Actions")
 	var rows := actions.get_children()
-	_check(rows.size() == 5 + GameData.breeds().size(),
+	# 12.18: doszedl przycisk "kup 10 workow paszy".
+	_check(rows.size() == 6 + GameData.breeds().size(),
 			"sklep ma przyciski, notke i karte kazdej rasy (jest %d)" % rows.size())
 	if rows.size() < 3:
 		return
@@ -901,9 +903,13 @@ func _test_sick_and_fox_look() -> void:
 	await _frames(40)
 	_check(not alert.visible, "ostrzezenie da sie zamknac")
 
-	# Lis: wejscie, komunikat i chmura piór przy napasci.
+	# Lis: wejscie, komunikat i chmura piór przy napasci. Stan gry musi
+	# mowic, ze wizyta trwa - od 12.18 lis sam sprawdza fox_visit_left
+	# i wychodzi, gdy wizyta w grze sie skonczyla.
+	Game.state.fox_visit_left = 7.0
+	Game.state.fox_taps_left = 20
 	Events.fox_arrived.emit(3, 7.0)
-	await _frames(60)
+	await _seconds(1.0)
 	var foxes := _nodes_of_type("FarmFox")
 	_check(foxes.size() == 1, "lis wszedl na wybieg")
 	# Drugi sygnal przyjscia NIE moze dolozyc drugiego lisa. Wlasciciel
@@ -914,6 +920,7 @@ func _test_sick_and_fox_look() -> void:
 	_check(_nodes_of_type("FarmFox").size() == 1, "na wybiegu jest najwyzej JEDEN lis")
 	_shot("lis_na_wybiegu.png")
 	Events.fox_visited.emit(3)
+	Events.fox_victims.emit(["leghorn", "marans", "cemani"])
 	await _frames(20)
 	var feathers_on := false
 	var blood_on := false
@@ -921,6 +928,20 @@ func _test_sick_and_fox_look() -> void:
 		feathers_on = feathers_on or (node.get_node("Feathers") as CPUParticles2D).emitting
 		blood_on = blood_on or (node.get_node("Blood") as CPUParticles2D).emitting
 	_check(feathers_on, "po napasci leca piora")
+	# Piora w kolorze ofiar: jedna fontanna na kure, barwy z breeds.json.
+	var fontanny := 0
+	var ciemne := false
+	for node in foxes:
+		for child in (node as Node).get_children():
+			var p := child as CPUParticles2D
+			if p == null or p.texture == null or not p.texture.resource_path.ends_with("feather.svg"):
+				continue
+			if p.emitting and p.color_initial_ramp != null:
+				fontanny += 1
+				if p.color_initial_ramp.get_color(0).v < 0.4:
+					ciemne = true
+	_check(fontanny == 3, "trzy ofiary to trzy fontanny piór (jest %d)" % fontanny)
+	_check(ciemne, "piora cemani/marans sa ciemne, nie biale")
 	_check(blood_on, "po napasci leci krew")
 	# Plamy krwi zostaja na wybiegu, wiec sa dziecmi kontenera, nie lisa.
 	# Plamy krwi leza w warstwie dekoracji POD zwierzetami, zeby nie zaslanialy
@@ -958,8 +979,9 @@ func _test_sick_and_fox_look() -> void:
 	_check(_nodes_of_type("FarmFox").size() == 1, "po napasci lis zostaje i poluje dalej")
 	_shot("lis_krew.png")
 
-	# Ale po swoim czasie odchodzi sam, bez zadnego sygnalu z gry.
-	await _seconds(7.0)
+	# Ale po swoim czasie odchodzi sam, bez zadnego sygnalu z gry
+	# (przeskakuje plot i chowa sie w krzakach - to trwa ok. 2 s).
+	await _seconds(9.5)
 	_check(_nodes_of_type("FarmFox").is_empty(), "lis odchodzi sam, gdy minie jego czas")
 
 	# Lis zawrocony przez plot: ma przebiec i zniknac, nic nie zabierajac.
@@ -971,7 +993,7 @@ func _test_sick_and_fox_look() -> void:
 	_check(not (repelled[0] as FarmFox).input_pickable,
 			"zawroconego lisa nie da sie przeganiac, bo juz odchodzi")
 	_shot("lis_zawrocony.png")
-	await _seconds(4.5)
+	await _seconds(9.0)
 	_check(_nodes_of_type("FarmFox").is_empty(), "zawrocony lis sam znika z wybiegu")
 	_check(Game.state.hen_count() == flock_before, "zawrocony lis nic nie zabral")
 
@@ -1064,7 +1086,7 @@ func _test_dog_breeds() -> void:
 	# pilnowac czegokolwiek w chwili, w ktorej ktos zmieni rozmiar postaci.
 	var scena_lisa: PackedScene = load("res://scenes/farm/fox.tscn")
 	var lis: Node2D = scena_lisa.instantiate()
-	var lis_szerokosc: float = lis.scale.x * (lis.get_node("Sprite") as Sprite2D).texture.get_width()
+	var lis_szerokosc: float = lis.scale.x * FarmFox.BODY_WIDTH
 	lis.free()
 	_check(lis_szerokosc < maly,
 			"lis jest mniejszy od kundla (%.0f vs %.0f)" % [lis_szerokosc, maly])
@@ -1089,7 +1111,7 @@ func _test_fox_death() -> void:
 	Game.state.fox_taps_left = 20
 	Game.state.fox_visit_left = 60.0
 	Events.fox_arrived.emit(5, 60.0)
-	await _frames(40)
+	await _seconds(1.2)
 	var lisy := _nodes_of_type("FarmFox")
 	_check(lisy.size() == 1, "lis wszedl przed psem")
 	if not lisy.is_empty():
@@ -1106,13 +1128,20 @@ func _test_fox_death() -> void:
 		Game.state.fox_taps_left = 20
 		Game.state.fox_visit_left = 0.0
 	Events.fox_chased.emit()
-	await _seconds(1.2)
+	await _frames(4)
+	var uciekajacy := _nodes_of_type("FarmFox")
+	_check(not uciekajacy.is_empty() and (uciekajacy[0] as FarmFox).phase == FarmFox.Phase.LEAVE,
+			"wygryziony lis od razu ucieka, nie czeka na swoj zegar")
+	_check(uciekajacy.is_empty() or not (uciekajacy[0] as FarmFox).input_pickable,
+			"uciekajacego lisa nie da sie juz klikac")
+	await _seconds(4.0)
 	_check(_nodes_of_type("FarmFox").is_empty(),
-			"wygryziony lis schodzi z wybiegu od razu, nie czeka na swoj zegar")
+			"wygryziony lis przeskakuje plot i znika w krzakach")
 
 	# 2. Zabity: krew, strzepy i zwloki, ktore znikaja dopiero po chwili.
+	Game.state.fox_visit_left = 60.0
 	Events.fox_arrived.emit(5, 60.0)
-	await _frames(40)
+	await _seconds(1.2)
 	var foxes := _nodes_of_type("FarmFox")
 	_check(foxes.size() == 1, "drugi lis wszedl na wybieg")
 	if foxes.is_empty():
@@ -1136,12 +1165,85 @@ func _test_fox_death() -> void:
 	_check(najwieksza >= 3.0, "kaluza po lisie jest wieksza niz po kurze (%.1f)" % najwieksza)
 	_check(absf(fox.position.x - before.x) < 40.0,
 			"zabity lis zostaje na miejscu, nie ucieka za ekran")
-	var martwy: Vector2 = (fox.get_node("Sprite") as Sprite2D).scale
+	var martwy: Vector2 = fox.rig().scale.abs()
 	_check(martwy.y < martwy.x * 0.5,
 			"zwloki lisa leza plasko na trawie (%.2f x %.2f)" % [martwy.x, martwy.y])
 	_shot("lis_rozszarpany.png")
 	await _seconds(3.6)
 	_check(_nodes_of_type("FarmFox").is_empty(), "zwloki lisa w koncu znikaja")
+
+
+## Od 12.18 lis najpierw czai sie w krzakach, potem podchodzi pod plot.
+## Plot wygral - lis drapie i wraca w krzaki. Plot przegral - przeskakuje
+## i poluje galopem. Wlasciciel: "zeby bylo widac, ze plot cos robi".
+func _test_fox_lurk_and_fence() -> void:
+	for node in _nodes_of_type("FarmFox"):
+		node.queue_free()
+	await _frames(4)
+	var farm: Node2D = _main.get_node("Farm")
+	var run: Rect2 = Simulation.run_area()
+	Game.state.guard_level = 2
+	farm._sync_buildings()
+	Events.fox_lurking.emit(8.0)
+	await _seconds(1.2)
+	var lisy := _nodes_of_type("FarmFox")
+	_check(lisy.size() == 1, "lis pojawia sie w krzakach")
+	if lisy.is_empty():
+		return
+	var lis := lisy[0] as FarmFox
+	_check(lis.phase == FarmFox.Phase.LURK, "lis najpierw czai sie (faza LURK)")
+	_check(not lis.input_pickable, "lisa w krzakach nie da sie klikac")
+	var najblizszy := INF
+	for bush_name: String in ["BushLeftTop", "BushRightTop", "BushLeftBottom", "BushRightBottom"]:
+		var bush := farm.get_node("Objects/" + bush_name) as Node2D
+		najblizszy = minf(najblizszy, bush.position.distance_to(lis.position))
+	_check(najblizszy < 80.0, "lis stoi przy krzaku (%.0f px)" % najblizszy)
+	_check(not run.has_point(lis.position), "w krzakach lis jest poza wybiegiem")
+	_shot("lis_w_krzakach.png")
+	await _seconds(7.4)
+	_check(lis.phase == FarmFox.Phase.AT_FENCE, "po czajeniu lis stoi pod plotem (faza %d)" % lis.phase)
+	_check(not run.has_point(lis.position), "pod plotem lis jest jeszcze poza wybiegiem")
+	_shot("lis_pod_plotem.png")
+	var stado := Game.state.hen_count()
+	Events.fox_repelled.emit()
+	await _seconds(0.6)
+	_check(lis.phase == FarmFox.Phase.TURN_BACK, "plot wygral: lis zawraca")
+	_shot("lis_drapie_pod_plotem.png")
+	await _seconds(6.0)
+	_check(_nodes_of_type("FarmFox").is_empty(), "zawrocony lis znika w krzakach")
+	_check(Game.state.hen_count() == stado, "zawrocony lis nic nie zabral")
+
+	# Plot przegral: przeskok i galop. Lapy musza pracowac.
+	Events.fox_lurking.emit(4.5)
+	await _seconds(5.0)
+	lisy = _nodes_of_type("FarmFox")
+	_check(lisy.size() == 1, "drugi lis pod plotem")
+	if lisy.is_empty():
+		return
+	lis = lisy[0] as FarmFox
+	Game.state.fox_visit_left = 30.0
+	Game.state.fox_taps_left = 20
+	Events.fox_arrived.emit(3, 30.0)
+	await _seconds(0.25)
+	_check(lis.phase == FarmFox.Phase.ENTER, "lis przeskakuje plot")
+	_shot("lis_skacze_przez_plot.png")
+	await _seconds(1.0)
+	_check(lis.phase == FarmFox.Phase.HUNT, "po skoku lis poluje na wybiegu")
+	_check(run.grow(10.0).has_point(lis.position), "lis jest na wybiegu")
+	var lapa := lis.rig().get_node("Body/Front/Leg_front_near") as Node2D
+	var katy: Array[float] = []
+	for i in 24:
+		katy.append(lapa.rotation)
+		await _seconds(0.05)
+	var rozrzut: float = katy.max() - katy.min()
+	_check(rozrzut > 0.4, "lapy pracuja w biegu (rozrzut %.2f rad)" % rozrzut)
+	_shot("lis_galop.png")
+	Game.state.fox_visit_left = 0.0
+	await _seconds(4.0)
+	_check(_nodes_of_type("FarmFox").is_empty(),
+			"po koncu wizyty w grze lis sam odchodzi, bez sygnalu (blad z 272180)")
+	Game.state.guard_level = 0
+	farm._sync_buildings()
 
 
 ## Panele kurnika i magazynu na farmie jak u wlasciciela (22 kury, magazyn
@@ -1165,8 +1267,11 @@ func _test_feed_panels() -> void:
 		var calosc := " | ".join(teksty)
 		if id == "storage":
 			_check(not calosc.contains(" 0 zł/kg"), "cena paszy nie wychodzi jako 0 zl/kg (%s)" % calosc)
-			_check(calosc.contains("90 gr/kg") and calosc.contains("rabat 10%"),
-					"magazyn poziom 1: 90 gr/kg i rabat 10%% (%s)" % calosc)
+			# Cena za kilogram liczona z konfiguracji, nie wpisana na sztywno -
+			# wlasciciel sam zmienia ceny w balance.json.
+			var za_kg := NumberFormat.small_money(float(Game.state.feed_pack()["per_kg"])) + "/kg"
+			_check(calosc.contains(za_kg) and calosc.contains("rabat 10%"),
+					"magazyn poziom 1: %s i rabat 10%% (%s)" % [za_kg, calosc])
 		var akcje: Node = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Gutter/Scrollable/Actions")
 		var przyciski: Array[String] = []
 		for b in akcje.find_children("*", "Button", true, false):

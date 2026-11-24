@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="132" height="18" viewBox="30 98 132 18">
+  <!-- Cien lisa. Zostaje na ziemi, gdy lis skacze.
+       Plik generowany: tools/gen_fox.py. Nie poprawiaj recznie. -->
+  <defs>
+  </defs>
+  <ellipse cx="96" cy="107" rx="64" ry="7" fill="#6B8F4E" fill-opacity="0.26"/>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="56" viewBox="82 36 72 56">
+  <!-- Przednia polowa tulowia lisa z podgardlem.
+       Plik generowany: tools/gen_fox.py. Nie poprawiaj recznie. -->
+  <defs>
+    <radialGradient id="fxBody" cx="86" cy="58" r="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFA863"/>
+      <stop offset="0.6" stop-color="#F08A42"/>
+      <stop offset="1" stop-color="#D46A28"/>
+    </radialGradient>
+  </defs>
+  <path d="M86.00 40.45A52 24 0 1 1 86.00 87.55Z" fill="url(#fxBody)"/>
+  <path d="M88 81Q118 82 142 72Q118 86 88 84Z" fill="#FFF3DF"/>
+  <!-- bialy podgardle, jak u prawdziwego lisa -->
+  <path d="M128 50Q150 58 146 78Q134 84 126 72Q124 60 128 50Z" fill="#FFF3DF"/>
+  <path d="M86.00 40.45A52 24 0 1 1 86.00 87.55" fill="none" stroke="#8A6A55" stroke-width="4" stroke-linecap="round"/>
+</svg>

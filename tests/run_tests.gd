@@ -65,6 +65,10 @@ func _ready() -> void:
 	_test_updater()
 	_test_strings()
 	_test_money_format()
+	_test_hatch_sex()
+	_test_fox_lurk()
+	_test_fox_left_and_victims()
+	_test_feed_bulk()
 	SaveGame.clear()
 	print("TESTY: %d OK, %d BLEDOW" % [_passed, _failed])
 	get_tree().quit(1 if _failed > 0 else 0)
@@ -818,6 +822,11 @@ func _arm_fox(state: FarmState) -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})
 	fox["active_chance"] = 1.0
 	fox["offline_chance"] = 1.0
+	# Bez fazy w krzakach: stare testy sprawdzaja wejscie w tym samym kroku.
+	# Czajenie sie i podchodzenie pod plot ma wlasny test (_test_fox_lurk).
+	fox["lurk_min_seconds"] = 0.0
+	fox["lurk_max_seconds"] = 0.0
+	fox["approach_seconds"] = 0.0
 	# Pol godziny ZEGARKA to tyle sekund gry razy skala czasu.
 	var grace_game := float(_fox_backup.get("grace_minutes", 30.0)) * 60.0 * GameData.time_scale()
 	state.days = int(grace_game / 600.0) + 2
@@ -2377,3 +2386,150 @@ func _test_farm_code() -> void:
 	_check(Cloud.normalize_code("7k73abgc63ck") == "7K73-ABGC-63CK", "stary kod bez myslnikow")
 	_check(Cloud.normalize_code("7K73-ABGC") == "", "ucięty stary kod odrzucony")
 	_check(not Cloud.is_short_code("7K73-ABGC-63CK"), "stary kod nie udaje nowego")
+
+
+## 12.18: z jaj wykluwaja sie kurki i kogutki mniej wiecej po polowie
+## (incubator.rooster_share), plec przezywa zapis, a podrosniety kogutek
+## jest kogutem. Do 12.17 wykluwaly sie same kury.
+func _test_hatch_sex() -> void:
+	var inc: Dictionary = GameData.balance()["incubator"]
+	var stary := float(inc.get("rooster_share", 0.5))
+	var koguty := 0
+	for i in 600:
+		if Chick.roll_rooster():
+			koguty += 1
+	_check(koguty > 230 and koguty < 370,
+			"z 600 piskląt mniej wiecej polowa to kogutki (%d)" % koguty)
+	inc["rooster_share"] = 0.0
+	var zero := 0
+	for i in 200:
+		zero += 1 if Chick.roll_rooster() else 0
+	_check(zero == 0, "rooster_share 0 = same kurki")
+	inc["rooster_share"] = 1.0
+	var state := _fresh_state(["leghorn"])
+	state.incubating.append(EggBatch.create("leghorn", 1))
+	Simulation.advance(state, float(GameData.breed("leghorn")["incubate_seconds"]) + 1.0)
+	_check(state.chicks.size() == 1 and state.chicks[0].rooster, "przy 1.0 wykluwa sie kogutek")
+	var zapis := SaveGame.to_dict(state)
+	var wczytany: FarmState = SaveGame.from_dict(zapis)["state"]
+	_check(wczytany.chicks.size() == 1 and wczytany.chicks[0].rooster,
+			"plec pisklecia przezywa zapis")
+	var koguty_przed := state.rooster_count()
+	Simulation.advance(state, float(GameData.breed("leghorn")["grow_seconds"]) + 1.0)
+	_check(state.rooster_count() == koguty_przed + 1, "z kogutka wyrasta kogut")
+	# Stare zapisy (bez pola "rooster") - pisklę jest kurka.
+	var stary_zapis := zapis.duplicate(true)
+	for entry: Dictionary in stary_zapis["chicks"]:
+		entry.erase("rooster")
+	var ze_starego: FarmState = SaveGame.from_dict(stary_zapis)["state"]
+	_check(ze_starego.chicks.size() == 1 and not ze_starego.chicks[0].rooster,
+			"pisklę ze starego zapisu jest kurka")
+	inc["rooster_share"] = stary
+
+
+## 12.18: lis najpierw czai sie w krzakach i idzie pod plot. Dopiero tam
+## plot losuje. Przy grze w tle tej fazy nie ma.
+func _test_fox_lurk() -> void:
+	var state := _laying_state(["leghorn", "leghorn", "leghorn", "leghorn", "leghorn", "leghorn"])
+	_arm_fox(state)
+	var fox: Dictionary = GameData.balance()["fox"]
+	fox["lurk_min_seconds"] = 6.0
+	fox["lurk_max_seconds"] = 6.0
+	fox["approach_seconds"] = 2.0
+	var scale := GameData.time_scale()
+	var wynik := Simulation.advance(state, 1.0)
+	_check(int(wynik.get("fox_lurking", 0)) == 1, "po kostce lis najpierw czai sie w krzakach")
+	_check(int(wynik["fox_arrived"]) == 0 and int(wynik["fox_took"]) == 0,
+			"czajacy sie lis jeszcze nic nie zabral")
+	_check(absf(state.fox_lurk_left - 8.0) < 1.0, "czai sie 6 s + 2 s drogi (%.1f)" % state.fox_lurk_left)
+	var stado := state.hen_count()
+	var w_krzakach := Simulation.advance(state, 5.0 * scale)
+	_check(int(w_krzakach["fox_arrived"]) == 0 and state.hen_count() == stado,
+			"w trakcie czajenia nic sie nie dzieje")
+	_check(int(w_krzakach.get("fox_lurking", 0)) == 0, "drugi lis nie przychodzi w tym czasie")
+	var pod_plotem := Simulation.advance(state, 4.0 * scale)
+	_check(int(pod_plotem["fox_arrived"]) == 1, "pod plotem (bez plotu) lis wchodzi")
+	_check(state.fox_lurk_left <= 0.0, "po wejsciu faza w krzakach skonczona")
+
+	# Plot, ktory zawsze wygrywa: lis zawraca i nic nie zabiera.
+	var plot := _laying_state(["leghorn", "leghorn", "leghorn", "leghorn", "leghorn", "leghorn"])
+	_arm_fox(plot)
+	fox["lurk_min_seconds"] = 3.0
+	fox["lurk_max_seconds"] = 3.0
+	fox["approach_seconds"] = 1.0
+	var guard: Array = GameData.balance()["buildings"]["guard"]["upgrades"]
+	var stara_szansa := float(guard[0]["block_chance"])
+	guard[0]["block_chance"] = 1.0
+	plot.guard_level = 1
+	var stado_plot := plot.hen_count()
+	Simulation.advance(plot, 1.0)
+	_check(plot.fox_lurk_left > 0.0, "z plotem lis tez najpierw sie czai")
+	var odbity := Simulation.advance(plot, 6.0 * scale)
+	_check(int(odbity["fox_blocked"]) == 1 and int(odbity["fox_arrived"]) == 0,
+			"plot rozstrzyga dopiero pod plotem: lis zawrocony")
+	_check(plot.hen_count() == stado_plot, "zawrocony lis nic nie zabral")
+	guard[0]["block_chance"] = stara_szansa
+
+	# Gra w tle: bez fazy w krzakach, wizyta rozstrzyga sie od razu.
+	var tlo := _laying_state(["leghorn", "leghorn", "leghorn", "leghorn", "leghorn", "leghorn"])
+	_arm_fox(tlo)
+	fox["lurk_min_seconds"] = 6.0
+	fox["lurk_max_seconds"] = 6.0
+	var w_tle := Simulation.advance(tlo, 5.0, true)
+	_check(int(w_tle.get("fox_lurking", 0)) == 0 and tlo.fox_lurk_left <= 0.0,
+			"w tle lis sie nie czai")
+	_check(int(w_tle["fox_took"]) >= 1, "w tle wizyta rozstrzyga sie od razu")
+	# Czajenie nie przechodzi przez zapis (tak jak trwajaca wizyta).
+	var czai := _laying_state(["leghorn", "leghorn", "leghorn", "leghorn", "leghorn", "leghorn"])
+	czai.fox_lurk_left = 5.0
+	_check((SaveGame.from_dict(SaveGame.to_dict(czai))["state"] as FarmState).fox_lurk_left == 0.0,
+			"lis w krzakach znika po wczytaniu gry")
+	_disarm_fox()
+
+
+## Blad z 272180 (24.11): lis, ktory sam skonczyl polowanie, zostawal na
+## wybiegu, bo do sceny nie lecial zaden sygnal. Teraz symulacja liczy
+## "fox_left", a Game wysyla Events.fox_left. Ofiary maja rasy (piora).
+func _test_fox_left_and_victims() -> void:
+	var state := _laying_state(["marans", "marans", "marans", "marans", "marans", "marans"])
+	_arm_fox(state)
+	var wejscie := Simulation.advance(state, 1.0)
+	_check(int(wejscie["fox_arrived"]) == 1, "lis wszedl (test ofiar)")
+	var ofiary: Array = wejscie.get("fox_victims", [])
+	_check(ofiary.size() == int(wejscie["fox_took"]) and ofiary.size() >= 1,
+			"kazda zabita kura ma rase na liscie ofiar (%d/%d)" % [ofiary.size(), int(wejscie["fox_took"])])
+	_check(ofiary.is_empty() or String(ofiary[0]) == "marans", "rasa ofiary sie zgadza")
+	state.fox_kill_left = 1
+	state.fox_kill_timer = 0.0
+	var koniec := Simulation.advance(state, 1.0)
+	_check(int(koniec.get("fox_left", 0)) == 1, "lis, ktory zebral lup, odchodzi (fox_left)")
+	_check(state.fox_visit_left <= 0.0, "po odejsciu wizyta zamknieta")
+	var dostalem := [false]
+	var odbior := func() -> void: dostalem[0] = true
+	Events.fox_left.connect(odbior)
+	Game._report_fox_end({"fox_left": 1})
+	Events.fox_left.disconnect(odbior)
+	_check(dostalem[0], "Game wysyla do sceny Events.fox_left")
+	_check(not GameData.breed("cemani").get("feather_colors", []).is_empty(),
+			"cemani ma kolory piór w breeds.json")
+	for b: Dictionary in GameData.breeds():
+		for hex in b.get("feather_colors", []):
+			_check(Color.html_is_valid(String(hex)), "%s: kolor piora %s poprawny" % [b["id"], hex])
+	_disarm_fox()
+
+
+## Przycisk "kup 10 workow": wszystkie albo zaden.
+func _test_feed_bulk() -> void:
+	Game.new_game()
+	var pack := Game.state.feed_pack()
+	var n := Game.feed_bulk_packs()
+	_check(n >= 2, "hurt to wiecej niz jeden worek (%d)" % n)
+	Game.state.money = float(pack["price"]) * n - 0.01
+	var pasza := Game.state.feed
+	_check(not Game.buy_feed(n), "za malo pieniedzy na 10 workow - nic nie kupuje")
+	_check(Game.state.feed == pasza, "pasza bez zmian po nieudanym zakupie")
+	Game.state.money = float(pack["price"]) * n
+	_check(Game.buy_feed(n), "dokladnie tyle pieniedzy - kupuje")
+	_check(absf(Game.state.feed - pasza - float(pack["size"]) * n) < 0.01, "przybylo 10 workow")
+	_check(Game.state.money < 0.01, "pieniadze zeszly co do grosza")
+	Game.new_game()

@@ -48,6 +48,10 @@ var event_dry: Dictionary = {}
 ## gry, a czesc zegarek, i na tym sie przewrocilismy — tutaj wszystko, co
 ## dotyczy lisa i choroby, jest w czasie realnym.
 var fox_visit_left: float = 0.0
+## Lis czai sie w krzakach i idzie pod plot: ile sekund REALNYCH do chwili,
+## w ktorej stanie pod plotem i plot rozstrzygnie, czy wejdzie. 0 = nie ma
+## lisa w krzakach. Nie idzie do zapisu, tak samo jak trwajaca wizyta.
+var fox_lurk_left: float = 0.0
 ## Ile kur lis zamierza jeszcze porwac w tej wizycie i ile sekund zostalo do
 ## nastepnej. Zabija po jednej przez cala wizyte, a nie wszystkie na koniec.
 var fox_kill_left: int = 0
@@ -588,6 +592,18 @@ static func eggs_worth(lot: Dictionary) -> float:
 ## Losowana przy kazdym podejsciu, wiec nawet pelna obrona kiedys przepusci.
 ## Bezpiecznik: lis nie zostanie na wybiegu dluzej, nawet gdyby cos poszlo
 ## nie tak z licznikiem zabitych kur.
+## Ile sekund realnych lis spedzi w krzakach i w drodze pod plot:
+## losowo lurk_min..lurk_max plus approach_seconds. 0 wylacza te faze.
+func fox_lurk_seconds() -> float:
+	var fox: Dictionary = GameData.balance().get("fox", {})
+	var low := maxf(0.0, float(fox.get("lurk_min_seconds", 10.0)))
+	var high := maxf(low, float(fox.get("lurk_max_seconds", 30.0)))
+	var walk := maxf(0.0, float(fox.get("approach_seconds", 4.0)))
+	if high + walk <= 0.0:
+		return 0.0
+	return randf_range(low, high) + walk
+
+
 func fox_visit_seconds() -> float:
 	return maxf(30.0, float(GameData.balance().get("fox", {}).get("visit_max_minutes", 10.0)) * 60.0)
 

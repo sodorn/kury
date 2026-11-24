@@ -29,6 +29,21 @@ signal breed_unlocked(breed_id: String)
 @warning_ignore("unused_signal")
 signal notice(text: String)
 
+## Lis wyszedl z krzakow obok wybiegu i za `seconds` sekund stanie pod
+## plotem. Scena pokazuje go w krzakach, a potem idacego do zagrody.
+@warning_ignore("unused_signal")
+signal fox_lurking(seconds: float)
+
+## Rasy kur, ktore lis wlasnie dopadl (po jednej pozycji na sztuke).
+## Scena sypie piora w ich kolorach.
+@warning_ignore("unused_signal")
+signal fox_victims(breeds: Array)
+
+## Wizyta lisa skonczyla sie sama: lis wybral swoj lup albo minal mu czas.
+## Do 12.17 scena o tym nie wiedziala i lis bez licznika biegal dalej.
+@warning_ignore("unused_signal")
+signal fox_left()
+
 ## Lis wszedl na wybieg i upatrzyl sobie `count` kur. Scena ma go pokazac;
 ## gracz ma `seconds` na przegonienie go.
 @warning_ignore("unused_signal")

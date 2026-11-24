@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="43" viewBox="-9 -8 20 43">
+  <!-- Lapa lisa (jedna grafika na cztery lapy). Staw w punkcie (0, 0).
+       Plik generowany: tools/gen_fox.py. Nie poprawiaj recznie. -->
+  <defs>
+  </defs>
+  <path d="M0 0V27" stroke="#8A6A55" stroke-width="13" stroke-linecap="round"/>
+  <path d="M0 0V27" stroke="#D46A28" stroke-width="9" stroke-linecap="round"/>
+  <path d="M0 13.5V27" stroke="#4A3328" stroke-width="9" stroke-linecap="round"/>
+  <ellipse cx="2" cy="28" rx="6.5" ry="4" fill="#3A2A20" stroke="#8A6A55" stroke-width="2"/>
+</svg>

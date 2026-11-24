@@ -34,6 +34,9 @@ static func advance(state: FarmState, delta: float, offline: bool = false) -> Di
 		"fox_took": 0,
 		"fox_arrived": 0,
 		"fox_blocked": 0,
+		"fox_lurking": 0,
+		"fox_left": 0,
+		"fox_victims": [],
 		"rotted": 0,
 	}
 	var remaining := maxf(delta, 0.0)
@@ -123,7 +126,7 @@ static func _advance_incubator(state: FarmState, step: float) -> int:
 			still_warming.append(batch)
 			continue
 		for i in batch.count:
-			state.chicks.append(Chick.create(batch.breed_id))
+			state.chicks.append(Chick.create(batch.breed_id, 0.0, Chick.roll_rooster()))
 			hatched += 1
 	state.incubating = still_warming
 	return hatched
@@ -147,7 +150,8 @@ static func _advance_chicks(state: FarmState, step: float) -> int:
 			chick.grown = chick.total_seconds()
 			still_small.append(chick)
 			continue
-		state.chickens.append(Chicken.create(chick.breed_id))
+		state.chickens.append(Chicken.create_rooster(chick.breed_id) if chick.rooster
+				else Chicken.create(chick.breed_id))
 		grown += 1
 	state.chicks = still_small
 	return grown
@@ -318,6 +322,18 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 			out["fox_left"] = int(out.get("fox_left", 0)) + 1
 		return
 
+	# 1b. Lis czai sie w krzakach i podchodzi pod plot. Dopiero gdy dojdzie,
+	#     plot decyduje, czy wejdzie. Wczesniej losowanie plotu szlo w tej
+	#     samej chwili co losowanie przyjscia i gracz nie widzial, ze plot
+	#     cokolwiek robi (wlasciciel, 24.11).
+	if state.fox_lurk_left > 0.0:
+		state.fox_lurk_left -= real
+		if state.fox_lurk_left > 0.0:
+			return
+		state.fox_lurk_left = 0.0
+		_fox_at_fence(state, out, budget, offline)
+		return
+
 	# 2. Warunki wstepne: karencja na starcie gry i minimalne stado.
 	# Karencja liczona ZEGARKIEM: wlasciciel mowi o pol godzinie grania,
 	# a `played_seconds()` zwraca sekundy gry, ktore plyna trzy razy wolniej.
@@ -347,11 +363,22 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 	if randf() >= chance:
 		return
 
-	# 4. Plot decyduje, czy lis w ogole wejdzie.
+	# 4. W grze aktywnej lis najpierw czai sie w krzakach, potem podchodzi
+	#    pod plot. Przy grze w tle nie ma komu tego pokazywac.
+	var lurk := 0.0 if offline else state.fox_lurk_seconds()
+	if lurk > 0.0:
+		state.fox_lurk_left = lurk
+		out["fox_lurking"] = int(out.get("fox_lurking", 0)) + 1
+		return
+	_fox_at_fence(state, out, budget, offline)
+
+
+## Lis stoi pod plotem. Plot losuje, czy go zawroci; jesli nie, lis wchodzi.
+static func _fox_at_fence(state: FarmState, out: Dictionary, budget: int,
+		offline: bool) -> void:
 	if randf() < state.fox_block_chance():
 		out["fox_blocked"] = int(out["fox_blocked"]) + 1
 		return
-
 	_fox_arrives(state, out, budget, offline)
 
 
@@ -402,6 +429,10 @@ static func _fox_grabs_one(state: FarmState, out: Dictionary, budget: int) -> bo
 		return false
 	var share := clampf(float(GameData.balance().get("fox", {}).get("carcass_share", 0.5)), 0.0, 1.0)
 	var index := randi() % state.chickens.size()
+	# Rasa ofiary idzie do sceny: piora sypia sie w jej kolorze.
+	var victims: Array = out.get("fox_victims", [])
+	victims.append(state.chickens[index].breed_id)
+	out["fox_victims"] = victims
 	if randf() < share:
 		_kill_hen(state, index, "fox")
 	else:
@@ -452,6 +483,7 @@ static func _fox_visit_offline(state: FarmState, out: Dictionary, budget: int,
 
 
 static func _fox_leaves(state: FarmState) -> void:
+	state.fox_lurk_left = 0.0
 	state.fox_visit_left = 0.0
 	state.fox_kill_left = 0
 	state.fox_kill_timer = 0.0

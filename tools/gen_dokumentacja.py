@@ -67,6 +67,9 @@ OPISY = {
     "economy.egg_spoil_hours": ("h ZEGARA", "Po tylu godzinach niesprzedane jajo w magazynie gnije "
                                 "i znika. 0 wylacza gnicie. Wiek jaj trzyma FarmState.egg_ages.",
                                 "Simulation._advance_egg_spoilage, FarmState.age_eggs"),
+    "economy.feed_bulk_packs": ("szt.", "Ile workow kupuje przycisk hurtowy w sklepie (\"Kup 10 "
+                                "workow\"). Kupuje wszystkie albo zaden.",
+                                "Game.buy_feed, Game.feed_bulk_packs"),
     # ------------------------------------------------------------------ run
     "run.max_eggs_on_ground": ("szt.", "Ile jaj moze lezec naraz na trawie do zebrania palcem. "
                                "Nadmiar idzie prosto do magazynu (o ile jest miejsce).",
@@ -94,6 +97,9 @@ OPISY = {
                         "(jedno pisklę) naraz.", "FarmState.incubator_slots"),
     "incubator.eggs_per_chick": ("szt.", "Ile jaj tej samej rasy idzie na jedno pisklę.",
                                  "Game.incubate"),
+    "incubator.rooster_share": ("0..1", "Jaka czesc wyklutych piskląt to kogutki. 0.5 = jak w naturze, "
+                                "pol na pol. Plec losowana przy wykluciu, zapisywana w pisklęciu "
+                                "(\"rooster\" w zapisie).", "Chick.roll_rooster, Simulation._advance_incubator"),
     "incubator.upgrades[].name": ("klucz tekstu", "Nazwa poziomu z data/strings.csv.", "panel inkubatora"),
     "incubator.upgrades[].slots": ("szt.", "Miejsca w inkubatorze na tym poziomie.",
                                    "FarmState.incubator_slots"),
@@ -162,6 +168,14 @@ OPISY = {
     "fox.visit_max_minutes": ("min ZEGARA", "Bezpiecznik: lis nie zostaje dluzej, nawet gdy nie zebral "
                               "lupu (np. przez limit strat przy nadrabianiu).",
                               "FarmState.fox_visit_seconds"),
+    "fox.lurk_min_seconds": ("s ZEGARA", "Najkrocej, ile lis czai sie w krzakach (gra AKTYWNA), zanim "
+                             "ruszy pod plot. Przy grze w tle faza jest pomijana.",
+                             "FarmState.fox_lurk_seconds, FarmFox.lurk"),
+    "fox.lurk_max_seconds": ("s ZEGARA", "Najdluzej, ile lis czai sie w krzakach. Czas losowany "
+                             "z przedzialu min..max.", "FarmState.fox_lurk_seconds"),
+    "fox.approach_seconds": ("s ZEGARA", "Ile trwa droga lisa z krzaka pod plot. Dopiero gdy dojdzie, "
+                             "plot losuje (block_chance), czy go zawroci. Wszystkie trzy na 0 "
+                             "wylaczaja faze - lis wchodzi od razu.", "Simulation._fox_at_fence"),
     "fox.killed_return_multiplier": ("mnoznik", "Po ZAGRYZIENIU lisa przez psa odstep do nastepnej "
                                      "kostki jest tyle razy dluzszy.", "Simulation._advance_fox"),
     # ------------------------------------------------------------------ win
@@ -227,6 +241,8 @@ OPISY_RAS = {
     "coop_level": ("poziom", "Od tego poziomu kurnika rasa jest w sklepie."),
     "egg_tint": ("kolor #RRGGBB, opcjonalne", "Kolor skorupki jaja tej rasy na wybiegu. Brak pola = "
                  "jajo biale."),
+    "feather_colors": ("lista kolorow #RRGGBB", "Kolory piór, ktore sypia sie fontanna, gdy lis "
+                       "dopadnie kure tej rasy. Brak pola = biale."),
     "incubation_bonus": ("liczba, opcjonalne", "Kazda DOROSLA kura tej rasy na farmie przyspiesza "
                          "inkubator: predkosc = 1 + suma bonusow, najwyzej 2,5 raza "
                          "(FarmState.incubation_speed). Ma je jedwabista - kwoka."),
@@ -511,6 +527,9 @@ def build():
     smoke_ui.gd          test dymny: prawdziwa gra z grafika, smoke_ui.tscn
     fox_lab.gd           laboratorium lisa (tylko pomiar, poza CI):
                          godot --headless --path . tests/fox_lab.tscn
+    bot_24h.gd           bot gra pierwsza dobe trzema stylami (pomiar balansu,
+                         poza CI): ... --path . tests/bot_24h.tscn
+                         wyniki 12.18: docs/BOT_24H_12.18.txt
   tools/                 skrypty pomocnicze (rozdzial 15)
   docs/supabase.sql      definicja tabeli i polityk w bazie
   kopie/                 codzienne kopie wszystkich farm z serwera (JSON)
@@ -1087,6 +1106,11 @@ def build():
          "i sprawdzaja Cloud.is_test_server(). Workflow ustawia dodatkowo zmienna KURY_BEZ_SERWERA=1, "
          "ktora robi to samo juz w _ready() autoloadu Cloud. Przed 12.17 testy w CI pisaly do "
          "prawdziwej bazy - zostaly po tym farmy 399975 i 439267 (smieci) i zmieniona farma 327733.")
+    para("tests/bot_24h.tscn to tez pomiar: bot gra pierwsza dobe nowej farmy na prawdziwej logice "
+         "(Simulation.advance + akcje Game) w trzech stylach - zaangazowany (sesja co 1,5 h), niedzielny "
+         "(5 sesji) i maniak (16 h). Po \"--\" mozna podac katalog z innymi balance.json/breeds.json, "
+         "zeby porownac dwie ekonomie. Wynik: wartosc farmy co godzine, przychody, pasza, straty, "
+         "godzina pierwszego zakupu kazdego ulepszenia.")
     para("tests/fox_lab.tscn to nie test, tylko pomiar: 60 prob po 24 h na kilku farmach (bez "
          "obrony, plot, owczarek, oba), dwa style gry. Wypisuje pierwszego lisa, lisy na dobe, "
          "kury na lisa i na dobe. Trwa okolo 12 minut, nie jest uruchamiany w CI.")

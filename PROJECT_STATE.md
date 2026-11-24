@@ -4,7 +4,21 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.17): kogut SPRZEDAWANY tez za 250%
+- Aktualny etap: **ETAP 10** (wersja 12.18): REALNE CENY (listopad 2026):
+  kury 35 zl (leghorn) ... 4000 zl (cemani), jaja 0,45-2,00 zl, pasza 50 zl/25 kg,
+  plot 400/1000/2500/6000, owczarek 2500. Pasza 0,65 kg/min gry (bylo 0,34;
+  pelny realizm ~2,0 kg zabijal gracza sesyjnego - bot), limity jaj w magazynie
+  x10 (2000 ... 5 mln). Przycisk "Kup 10 workow". Z jaj wykluwa sie 50/50
+  kurki i kogutki (incubator.rooster_share, Chick.rooster w zapisie). LIS:
+  czai sie 10-30 s w krzakach N/S, idzie pod plot (4 s), dopiero tam plot
+  losuje - zawrocony drapie i wraca w krzaki, wpuszczony przeskakuje plot.
+  Lis z czesci (tools/gen_fox.py -> fox_parts/*.svg, fox_rig_data.gd):
+  galop lapami, zginany tulow, skret lukiem. Fontanna piór w kolorach rasy
+  (breeds.json feather_colors, Events.fox_victims). NAPRAWIONY BLAD 272180:
+  lis, ktory sam skonczyl polowanie, zostawal na wybiegu - teraz
+  Events.fox_left + lis sam pilnuje Game.state.fox_visit_left. Bot 24 h:
+  tests/bot_24h.tscn, wyniki docs/BOT_24H_12.18.txt.
+- Wersja 12.17: kogut SPRZEDAWANY tez za 250%
   ceny kury swojej rasy (FarmState.hen_sell_price(..., rooster) i
   rooster_multiplier()). Testy NIE dotykaja juz bazy produkcyjnej: przed 12.17
   testy w CI pisaly do Supabase (powstaly smieciowe farmy 399975 i 439267,
@@ -861,6 +875,9 @@ niezauwazony).
 
 ## Nastepne zadania
 
+- (po 12.18, do decyzji Tomka) wnioski z bota 24 h: gracz z 5 sesjami dziennie
+  rosnie bardzo wolno i czasem traci kury z glodu; magazyn jaj nadal tnie
+  dochod w przerwach; hodowla (koguty 250% x 50/50) dominuje nad jajami.
 - (12.18, po decyzji Tomka) lis: patrz raport z 24.11 - wspolny zegar losowan
   omija losowanie offline, plot 4 + owczarek prawie wylacza lisa, ofiary 3-10
   sztuk niezaleznie od wielkosci stada. Balans ulepszen: magazyn T5-T7 i

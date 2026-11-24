@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 12.17
+  INSTRUKCJA OBSLUGI *** gra w wersji 12.18
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -115,9 +115,9 @@
 
   WAZNE: kura znosi jaja tylko wtedy, gdy na farmie stoi KOGUT JEJ RASY.
   Kupienie samych kur nic nie da. Kogut kosztuje 250% ceny kury tej samej rasy
-  (kura za 40 zl to kogut za 100 zl), ale wystarczy jeden na cala rase. Przy
+  (kura za 35 zl to kogut za 87,50 zl), ale wystarczy jeden na cala rase. Przy
   sprzedazy dziala ten sam mnoznik: kogut idzie za 250% ceny skupu kury (kura
-  28 zl, kogut 70 zl).
+  24 zl, kogut 60 zl).
 
 ==============================================================================
  5. JAJA: ZNOSZENIE, MAGAZYN, GNICIE
@@ -136,9 +136,14 @@
  6. PASZA I GLOD
 ==============================================================================
 
-  Kazdy dorosly ptak zjada 6.8 kg paszy na godzine, pisklę 0.5 tego. Worek
-  kosztuje 25 zl za 25 kg; przy rozbudowanym magazynie worki sa wieksze i
-  tansze za kilogram.
+  Kazdy dorosly ptak zjada 13 kg paszy na godzine, pisklę 0.5 tego. Worek
+  kosztuje 50 zl za 25 kg (cena jak w sklepie rolniczym); przy rozbudowanym
+  magazynie worki sa wieksze i tansze za kilogram. W sklepie jest tez przycisk
+  "Kup 10 workow" - przy wiekszym stadzie jeden worek znika w kilka minut.
+
+  ZANIM WYJDZIESZ Z GRY: kup paszy na cala przerwe. Kury jedza tez wtedy, gdy
+  nie grasz, a magazyn trzyma tylko tyle jaj, ile sie w nim miesci - reszta
+  przepada.
 
   Gdy pasza sie skonczy: przez 9 minut nic sie nie dzieje, potem kury
   zaczynaja padac - jedna co 150 sekund przy stadzie 10 sztuk, czesciej przy
@@ -155,6 +160,10 @@
   Pelny cykl to WYLEG (inkubator) plus ODCHOW (pisklę rosnie na wybiegu).
   Czasy dla kazdej rasy sa w tabeli nizej, w czasie przy zegarku.
 
+  Z jaj wykluwa sie mniej wiecej tyle samo KOGUTKOW co KUREK (jak w naturze -
+  50% to kogutki). Kogutek nie niesie, ale idzie do skupu za 250% ceny kury
+  tej rasy - jeden kogut na rase wystarczy, reszte sprzedawaj.
+
   Dorosla sztuka sprzedaje sie za 70% ceny zakupu rasy. Kupiona kura to
   strata; WYHODOWANA to czysty zysk, bo jaja byly twoje. Na tym stoi cala gra
   - i dlatego hamulcem jest czas odchowu, a nie pieniadze.
@@ -166,23 +175,23 @@
   +==================+==========+==========+=========+=======+========+=====+
   | rasa             |    kupno |  sprzed. |   jajko | znosi | odchow | lvl |
   +==================+==========+==========+=========+=======+========+=====+
-  | Leghorn          |    40 zl |    28 zl | 0,40 zl |   12s |   7m30 |   0 |
-  | Rhode Island     |    55 zl |    39 zl | 0,44 zl |   14s |   8m57 |   0 |
-  | Kura szabo       |    80 zl |    56 zl | 0,48 zl |   16s |  10m48 |   0 |
-  | Kura nagoszyja   |   110 zl |    77 zl | 0,52 zl |   17s |  12m45 |   1 |
-  | Marans           |   150 zl |   105 zl | 0,55 zl |   19s |  15m06 |   1 |
-  | Araukana         |   210 zl |   147 zl | 0,59 zl |   21s |  17m48 |   2 |
-  | Kura jedwabista  |   290 zl |   203 zl | 0,63 zl |   23s |  20m54 |   2 |
-  | Serama           |   400 zl |   280 zl | 0,66 zl |   25s |  24m21 |   3 |
-  | Brahma olbrzymia |   550 zl |   385 zl | 0,70 zl |   26s |  28m45 |   3 |
-  | Czubatka polska  |   750 zl |   525 zl | 0,74 zl |   28s |  33m36 |   4 |
-  | Kura pawłowska   | 1 050 zl |   735 zl | 0,78 zl |   30s |  39m27 |   4 |
-  | Feniks           | 1 450 zl | 1 015 zl | 0,81 zl |   32s |  45m54 |   5 |
-  | Totleger         | 2 000 zl | 1 400 zl | 0,85 zl |   34s |  53m15 |   5 |
-  | Sułtanka         | 2 800 zl | 1 960 zl | 0,89 zl |   35s |   1h02 |   6 |
-  | Onagadori        | 4 000 zl | 2 800 zl | 0,92 zl |   37s |   1h12 |   7 |
-  | Dong Tao         | 5 600 zl | 3 920 zl | 0,96 zl |   39s |   1h23 |   8 |
-  | Ayam Cemani      | 8 000 zl | 5 600 zl | 1,00 zl |   41s |   1h37 |   9 |
+  | Leghorn          |    35 zl |    24 zl | 0,70 zl |   12s |   7m30 |   0 |
+  | Rhode Island     |    45 zl |    31 zl | 0,75 zl |   14s |   8m57 |   0 |
+  | Kura szabo       |    70 zl |    49 zl | 0,45 zl |   16s |  10m48 |   0 |
+  | Kura nagoszyja   |    90 zl |    63 zl | 0,75 zl |   17s |  12m45 |   1 |
+  | Marans           |   120 zl |    84 zl | 1,20 zl |   19s |  15m06 |   1 |
+  | Araukana         |   150 zl |   105 zl | 1,20 zl |   21s |  17m48 |   2 |
+  | Kura jedwabista  |   180 zl |   126 zl | 0,60 zl |   23s |  20m54 |   2 |
+  | Serama           |   220 zl |   154 zl | 0,45 zl |   25s |  24m21 |   3 |
+  | Brahma olbrzymia |   250 zl |   175 zl | 0,85 zl |   26s |  28m45 |   3 |
+  | Czubatka polska  |   280 zl |   196 zl | 0,80 zl |   28s |  33m36 |   4 |
+  | Kura pawłowska   |   400 zl |   280 zl | 0,90 zl |   30s |  39m27 |   4 |
+  | Feniks           |   500 zl |   350 zl | 0,90 zl |   32s |  45m54 |   5 |
+  | Totleger         |   600 zl |   420 zl | 0,80 zl |   34s |  53m15 |   5 |
+  | Sułtanka         |   800 zl |   560 zl | 1,00 zl |   35s |   1h02 |   6 |
+  | Onagadori        | 1 500 zl | 1 050 zl | 1,20 zl |   37s |   1h12 |   7 |
+  | Dong Tao         | 2 500 zl | 1 750 zl | 1,50 zl |   39s |   1h23 |   8 |
+  | Ayam Cemani      | 4 000 zl | 2 800 zl | 2,00 zl |   41s |   1h37 |   9 |
   +------------------+----------+----------+---------+-------+--------+-----+
 
   "lvl" to poziom kurnika, od ktorego rasa jest w ogole dostepna w sklepie.
@@ -219,14 +228,14 @@
   +===========+===========+==========+============+=======+============+
   |    poziom | limit jaj | worek kg | cena worka | rabat |  rozbudowa |
   +===========+===========+==========+============+=======+============+
-  | 0 (start) |       200 |       25 |      25 zl |     - |          - |
-  |         1 |       500 |       60 |      54 zl |   10% |     600 zl |
-  |         2 |     1 000 |      160 |     136 zl |   15% |   3 000 zl |
-  |         3 |     2 000 |      400 |     320 zl |   20% |  10 500 zl |
-  |         4 |    10 000 |    1 000 |     750 zl |   25% |  30 000 zl |
-  |         5 |    50 000 |    2 500 |   1 750 zl |   30% |  80 000 zl |
-  |         6 |   150 000 |    6 000 |   3 900 zl |   35% | 200 000 zl |
-  |         7 |   500 000 |   15 000 |   9 000 zl |   40% | 540 000 zl |
+  | 0 (start) |     2 000 |       25 |      50 zl |     - |          - |
+  |         1 |     5 000 |      100 |     180 zl |   10% |     600 zl |
+  |         2 |    10 000 |      250 |     425 zl |   15% |   3 000 zl |
+  |         3 |    20 000 |      600 |     960 zl |   20% |  10 500 zl |
+  |         4 |   100 000 |    1 500 |   2 250 zl |   25% |  30 000 zl |
+  |         5 |   500 000 |    3 500 |   4 900 zl |   30% |  80 000 zl |
+  |         6 | 1 500 000 |    8 000 |  10 400 zl |   35% | 200 000 zl |
+  |         7 | 5 000 000 |   20 000 |  24 000 zl |   40% | 540 000 zl |
   +-----------+-----------+----------+------------+-------+------------+
 
   Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i daje HURT -
@@ -263,6 +272,12 @@
     nie przyjdzie      przez pierwsze 30 min nowej farmy
                        ani gdy masz mniej niz 5 kur
 
+  JAK PRZYCHODZI
+    najpierw CZAI SIE w krzakach na polnoc albo na poludnie od wybiegu
+    (10-30 s - zza krzaka widac uszy), potem idzie pod plot (4 s).
+    Pod plotem plot losuje, czy lisa zatrzyma. Jesli tak - lis drapie,
+    zawraca i znika w krzakach. Jesli nie - przeskakuje plot.
+
   CO ROBI NA WYBIEGU
     zabija jedna kure co 3-10 sekund REALNYCH
     (czas losowany od nowa po kazdej kurze)
@@ -282,7 +297,7 @@
   | pies     |     cena | probuje | szansa | szansa na zabicie |
   +==========+==========+=========+========+===================+
   | kundel   |   400 zl | co 10 s |    33% |                0% |
-  | owczarek | 1 000 zl |  co 5 s |    67% |               33% |
+  | owczarek | 2 500 zl |  co 5 s |    67% |               33% |
   +----------+----------+---------+--------+-------------------+
 
   Pies pracuje sam, bez twojego udzialu, takze gdy nie patrzysz. Gdy lis
@@ -294,9 +309,9 @@
   | poziom plotu | szansa, ze lis zawroci |     cena |
   +==============+========================+==========+
   |            1 |                    50% |   400 zl |
-  |            2 |                    65% |   800 zl |
-  |            3 |                    80% | 1 600 zl |
-  |            4 |                    95% | 4 000 zl |
+  |            2 |                    65% | 1 000 zl |
+  |            3 |                    80% | 2 500 zl |
+  |            4 |                    95% | 6 000 zl |
   +--------------+------------------------+----------+
 
   Plot dziala INACZEJ niz pies: nie wygania lisa z wybiegu, tylko z takim

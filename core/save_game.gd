@@ -34,7 +34,7 @@ static func to_dict(state: FarmState, unpaid_seconds: float = 0.0) -> Dictionary
 		batches.append({"breed": batch.breed_id, "elapsed": batch.elapsed, "count": batch.count})
 	var chicks := []
 	for chick: Chick in state.chicks:
-		chicks.append({"breed": chick.breed_id, "grown": chick.grown})
+		chicks.append({"breed": chick.breed_id, "grown": chick.grown, "rooster": chick.rooster})
 	var corpses := []
 	for corpse: Corpse in state.corpses:
 		corpses.append(corpse.to_dict())
@@ -96,6 +96,7 @@ static func from_dict(data: Dictionary) -> Dictionary:
 	# Wizyty lisa nie przenosimy przez zapis: gracz, ktory wylaczyl gre
 	# w trakcie, nie ma czego przeganiac po powrocie.
 	state.fox_visit_left = 0.0
+	state.fox_lurk_left = 0.0
 	state.fox_pending = 0
 	state.fox_kill_left = 0
 	state.fox_kill_timer = 0.0
@@ -178,7 +179,9 @@ static func from_dict(data: Dictionary) -> Dictionary:
 		var breed_id := String(entry.get("breed", ""))
 		if GameData.breed(breed_id).is_empty():
 			continue
-		state.chicks.append(Chick.create(breed_id, float(entry.get("grown", 0.0))))
+		# Zapisy sprzed 12.18 nie znaly plci piskląt - wtedy kazde bylo kurka.
+		state.chicks.append(Chick.create(breed_id, float(entry.get("grown", 0.0)),
+				bool(entry.get("rooster", false))))
 	for entry: Dictionary in data.get("corpses", []):
 		if GameData.breed(String(entry.get("breed", ""))).is_empty():
 			continue

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="50" viewBox="0 20 64 50">
+  <!-- Kita lisa, puszysta, z bialym koncem. Faluje wokol nasady.
+       Plik generowany: tools/gen_fox.py. Nie poprawiaj recznie. -->
+  <defs>
+    <linearGradient id="fxTail" x1="4" y1="30" x2="58" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF3DF"/>
+      <stop offset="0.32" stop-color="#FFF3DF"/>
+      <stop offset="0.36" stop-color="#F59A4E"/>
+      <stop offset="1" stop-color="#D46A28"/>
+    </linearGradient>
+  </defs>
+  <path d="M58 56Q30 70 8 46Q2 30 18 26Q30 26 40 40Q48 50 58 56Z" fill="url(#fxTail)"
+        stroke="#8A6A55" stroke-width="4" stroke-linejoin="round"/>
+</svg>

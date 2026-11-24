@@ -147,6 +147,9 @@ func _report(result: Dictionary) -> void:
 	if died_hunger > 0:
 		Events.notice.emit(tr("HINT_DIED_HUNGER") % died_hunger)
 		Events.resources_changed.emit()
+	if int(result.get("fox_lurking", 0)) > 0:
+		Events.notice.emit(tr("HINT_FOX_LURKING"))
+		Events.fox_lurking.emit(state.fox_lurk_left)
 	# Zawrocony lis tez zasluguje na slowo — inaczej gracz nie widzi,
 	# za co zaplacil za plot.
 	if int(result["fox_blocked"]) > 0:
@@ -161,6 +164,7 @@ func _report(result: Dictionary) -> void:
 	var fox := int(result["fox_took"])
 	if fox > 0:
 		Events.fox_visited.emit(fox)
+		Events.fox_victims.emit(result.get("fox_victims", []))
 		Events.notice.emit(tr("HINT_FOX") % fox)
 		Events.resources_changed.emit()
 	_report_fox_end(result)
@@ -476,6 +480,8 @@ func _report_fox_end(result: Dictionary) -> void:
 	elif int(result.get("fox_chased", 0)) > 0:
 		Events.notice.emit(tr("HINT_FOX_CHASED"))
 		Events.fox_chased.emit()
+	elif int(result.get("fox_left", 0)) > 0:
+		Events.fox_left.emit()
 
 
 # --- jaja ---------------------------------------------------------------
@@ -529,6 +535,11 @@ func sell_eggs(count: int = 0) -> float:
 	return earned
 
 
+## Ile workow kupuje przycisk hurtowy w sklepie.
+func feed_bulk_packs() -> int:
+	return maxi(2, int(GameData.balance().get("economy", {}).get("feed_bulk_packs", 10)))
+
+
 ## Ile jaj idzie w jednej partii sprzedazy.
 func egg_sale_lot() -> int:
 	return maxi(1, int(GameData.balance().get("economy", {}).get("egg_sale_lot", 100)))
@@ -537,14 +548,18 @@ func egg_sale_lot() -> int:
 # --- pasza --------------------------------------------------------------
 
 
-## Kupuje jedna paczke paszy. Zwraca false przy braku pieniedzy.
-func buy_feed() -> bool:
+## Kupuje `packs` workow paszy naraz (wszystkie albo zaden). Zwraca false
+## przy braku pieniedzy. Od 12.18 kura je tyle, co prawdziwa nioska na
+## jajo, wiec przy wiekszym stadzie jeden worek znika w dwie minuty -
+## stad przycisk "kup 10 workow".
+func buy_feed(packs: int = 1) -> bool:
 	var pack := state.feed_pack()
-	var price := float(pack["price"])
+	packs = maxi(1, packs)
+	var price := float(pack["price"]) * packs
 	if state.money < price:
 		return false
 	state.money -= price
-	state.feed += float(pack["size"])
+	state.feed += float(pack["size"]) * packs
 	_reported_no_feed = false
 	Events.resources_changed.emit()
 	return true

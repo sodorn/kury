@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="72" height="56" viewBox="40 36 72 56">
+  <!-- Tylna polowa tulowia lisa. Prawy brzeg chowa sie pod przednia polowa.
+       Plik generowany: tools/gen_fox.py. Nie poprawiaj recznie. -->
+  <defs>
+    <radialGradient id="fxBody" cx="86" cy="58" r="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFA863"/>
+      <stop offset="0.6" stop-color="#F08A42"/>
+      <stop offset="1" stop-color="#D46A28"/>
+    </radialGradient>
+  </defs>
+  <path d="M106.00 40.45A52 24 0 1 0 106.00 87.55Z" fill="url(#fxBody)"/>
+  <path d="M50 74Q74 82 104 81Q80 81 50 74Z" fill="#FFF3DF"/>
+  <path d="M106.00 40.45A52 24 0 1 0 106.00 87.55" fill="none" stroke="#8A6A55" stroke-width="4" stroke-linecap="round"/>
+</svg>

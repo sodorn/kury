@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="74" height="76" viewBox="122 0 74 76">
+  <!-- Glowa lisa. Obraca sie wokol szyi.
+       Plik generowany: tools/gen_fox.py. Nie poprawiaj recznie. -->
+  <defs>
+    <radialGradient id="fxHead" cx="152" cy="46" r="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFB273"/>
+      <stop offset="1" stop-color="#E67D36"/>
+    </radialGradient>
+  </defs>
+  <g stroke="#8A6A55" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="152" cy="48" rx="26" ry="24" fill="url(#fxHead)"/>
+    <path d="M138 28L132 4l20 16Z" fill="#E67D36"/>
+    <path d="M163 26L175 4l9 24Z" fill="#E67D36"/>
+    <path d="M140 25l-2-12l10 7Z" fill="#4A3328" stroke="none"/>
+    <path d="M166 24l6-11l4 11Z" fill="#4A3328" stroke="none"/>
+    <path d="M156 42q24 2 28 13q-6 11-28 9q-8-11 0-22Z" fill="#FFF6E6"/>
+    <ellipse cx="185" cy="54" rx="6" ry="5" fill="#3A2A20" stroke="none"/>
+    <path d="M155 35q7-4 13 0" fill="none"/>
+    <circle cx="161" cy="40" r="4" fill="#3A2A20" stroke="none"/>
+    <circle cx="162.4" cy="38.6" r="1.5" fill="#FFFFFF" stroke="none"/>
+  </g>
+</svg>

@@ -472,6 +472,17 @@ func _build_shop() -> void:
 				return tr("PANEL_BUY_FEED") % [
 					int(pack["size"]), NumberFormat.money(float(pack["price"]))],
 			_on_buy_feed)
+	# Hurtem: dziesiec workow jednym dotknieciem.
+	_add_action(false,
+			func() -> bool: return Game.state.money >= float(Game.state.feed_pack()["price"]) \
+					* Game.feed_bulk_packs(),
+			func() -> String:
+				var pack := Game.state.feed_pack()
+				var n := Game.feed_bulk_packs()
+				return tr("PANEL_BUY_FEED_BULK") % [n,
+					NumberFormat.grouped(int(float(pack["size"]) * n)),
+					NumberFormat.money(float(pack["price"]) * n)],
+			_on_buy_feed_bulk)
 
 	# Weterynaria: lek ratuje jedna chora kure, szczepienie chroni cale stado.
 	_add_action(false,
@@ -622,6 +633,11 @@ func _on_sell_eggs() -> void:
 
 func _on_buy_feed() -> void:
 	if Game.buy_feed():
+		_flash(tr("PANEL_FEED_BOUGHT"))
+
+
+func _on_buy_feed_bulk() -> void:
+	if Game.buy_feed(Game.feed_bulk_packs()):
 		_flash(tr("PANEL_FEED_BOUGHT"))
 
 

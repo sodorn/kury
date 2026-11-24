@@ -1,0 +1,305 @@
+BOT 24 H - wyniki z 25.11.2026 (wersja 12.18)
+Uruchomienie: godot --headless --path . tests/bot_24h.tscn [-- katalog_ze_starymi_danymi]
+
+############ NOWA EKONOMIA (12.18) ############
+BOT 24 H  -  8 prob na profil, dane: res://data
+=== zaangazowany (sesja 20 min co 1,5 h, 4 h gry) ===
+godz        gotowka      wartosc   ptaki   kurn  magaz  inkub   plot  pies
+09:00        389 zł     1 187 zł      14      1      1      1      0     0
+10:00        389 zł     5 494 zł      29      1      1      1      0     0
+11:00      2 103 zł     6 926 zł      29      1      2      1      0     0
+12:00      1 080 zł     3 597 zł      24      2      2      1      2     0
+14:00      5 291 zł    13 857 zł      39      2      2      3      0     0
+16:00      6 259 zł    17 950 zł      48      2      2      3      3     0
+18:00     15 833 zł    17 468 zł      12      2      3      3      4     0
+20:00     13 115 zł    29 790 zł      56      3      3      4      0     0
+00:00     18 093 zł    38 730 zł      56      3      3      4      4     2
+04:00     18 093 zł    46 439 zł      56      3      3      4      4     2
+08:00     18 093 zł    46 421 zł      56      3      3      4      4     2
+  sesje_min            mediana          239   (min 239, max 239)
+  jaja_sprzedane       mediana       49 903   (min 34 729, max 52 276)
+  przychod_jaja        mediana    40 289 zł   (min 26 889 zł, max 47 202 zł)
+  przychod_ptaki       mediana   101 428 zł   (min 61 784 zł, max 102 450 zł)
+  pasza_kg             mediana       14 175   (min 9 725, max 14 950)
+  pasza_zl             mediana    23 125 zł   (min 16 225 zł, max 24 325 zł)
+  jaja_przepadly       mediana        1 967   (min 644, max 4 718)
+  jaja_zgnily          mediana       25 861   (min 20 825, max 30 094)
+  lisy                 mediana            1   (min 0, max 2)
+  lisy_plot            mediana            1   (min 0, max 3)
+  lisy_przegonione     mediana            1   (min 0, max 1)
+  kury_lis             mediana            2   (min 0, max 3)
+  kury_glod            mediana            0   (min 0, max 30)
+  kury_choroba         mediana            0   (min 0, max 0)
+  wyklute              mediana          529   (min 387, max 549)
+  koguty_sprzedane     mediana          237   (min 179, max 264)
+  kupione_kury         mediana          103   (min 79, max 126)
+  wydane_ulepszenia    mediana    81 200 zł   (min 45 200 zł, max 101 300 zł)
+  wygrana_godz         mediana            -   (min -, max -)
+  pierwszy zakup (mediana godziny od startu):
+    pierwszy wyleg             0.0 h   (8/8 prob)
+    inkubator 1                0.5 h   (8/8 prob)
+    kurnik 1                   0.7 h   (8/8 prob)
+    magazyn 1                  1.0 h   (8/8 prob)
+    magazyn 2                  2.3 h   (8/8 prob)
+    kurnik 2                   3.9 h   (8/8 prob)
+    inkubator 2                3.9 h   (8/8 prob)
+    rasa: jedwabista           5.2 h   (8/8 prob)
+    rasa: marans               5.3 h   (5/8 prob)
+    inkubator 3                6.7 h   (8/8 prob)
+    plot 1                     6.7 h   (7/8 prob)
+    plot 2                     6.7 h   (7/8 prob)
+    plot 3                     6.7 h   (7/8 prob)
+    szczepienie                8.2 h   (6/8 prob)
+    magazyn 3                  8.2 h   (8/8 prob)
+    plot 4                     8.2 h   (7/8 prob)
+    kurnik 3                  11.3 h   (7/8 prob)
+    rasa: brahma              11.4 h   (7/8 prob)
+    inkubator 4               14.2 h   (5/8 prob)
+    rasa: szabo               99.0 h   (2/8 prob)
+    magazyn 4                 99.0 h   (2/8 prob)
+    pies 1                    99.0 h   (1/8 prob)
+    pies 2                    99.0 h   (1/8 prob)
+=== niedzielny (5 sesji, 1,5 h gry) ===
+godz        gotowka      wartosc   ptaki   kurn  magaz  inkub   plot  pies
+09:00          3 zł     1 742 zł      17      0      0      0      0     0
+10:00         17 zł     2 017 zł      16      0      0      0      0     0
+11:00         17 zł     2 017 zł      16      0      0      0      0     0
+12:00         18 zł     1 946 zł      16      0      0      0      0     0
+14:00        292 zł     2 244 zł      17      0      0      0      0     0
+16:00        292 zł     2 244 zł      17      0      0      0      0     0
+18:00         24 zł     3 368 zł      18      0      1      1      1     0
+20:00      1 409 zł     3 068 zł      14      0      1      1      2     0
+00:00      2 242 zł     4 420 zł      14      0      1      1      2     0
+04:00      1 699 zł     4 801 zł      14      0      1      1      2     0
+08:00      1 699 zł     4 799 zł      14      0      1      1      2     0
+  sesje_min            mediana           89   (min 89, max 89)
+  jaja_sprzedane       mediana       16 476   (min 13 429, max 19 747)
+  przychod_jaja        mediana     9 288 zł   (min 8 150 zł, max 13 106 zł)
+  przychod_ptaki       mediana     4 164 zł   (min 3 279 zł, max 4 859 zł)
+  pasza_kg             mediana        4 550   (min 4 075, max 4 775)
+  pasza_zl             mediana     8 440 zł   (min 7 770 zł, max 9 050 zł)
+  jaja_przepadly       mediana       32 943   (min 18 693, max 40 693)
+  jaja_zgnily          mediana        8 764   (min 6 904, max 10 000)
+  lisy                 mediana            1   (min 0, max 2)
+  lisy_plot            mediana            0   (min 0, max 2)
+  lisy_przegonione     mediana            1   (min 0, max 2)
+  kury_lis             mediana            2   (min 0, max 5)
+  kury_glod            mediana            8   (min 0, max 44)
+  kury_choroba         mediana            0   (min 0, max 0)
+  wyklute              mediana           87   (min 72, max 108)
+  koguty_sprzedane     mediana           38   (min 27, max 43)
+  kupione_kury         mediana           17   (min 12, max 24)
+  wydane_ulepszenia    mediana     2 600 zł   (min 2 600 zł, max 4 200 zł)
+  wygrana_godz         mediana            -   (min -, max -)
+  pierwszy zakup (mediana godziny od startu):
+    pierwszy wyleg             0.0 h   (8/8 prob)
+    inkubator 1                8.0 h   (8/8 prob)
+    rasa: szabo                8.0 h   (8/8 prob)
+    magazyn 1                  8.2 h   (8/8 prob)
+    plot 1                    11.0 h   (7/8 prob)
+    plot 2                    11.2 h   (7/8 prob)
+    szczepienie               99.0 h   (1/8 prob)
+    pies 1                    99.0 h   (1/8 prob)
+    magazyn 2                 99.0 h   (1/8 prob)
+    kurnik 1                  99.0 h   (1/8 prob)
+=== maniak (16 h bez przerwy) ===
+godz        gotowka      wartosc   ptaki   kurn  magaz  inkub   plot  pies
+09:00      3 167 zł     3 419 zł       9      0      0      0      0     0
+10:00      5 743 zł     6 189 zł      13      1      0      1      0     0
+11:00      6 395 zł     7 879 zł      16      1      1      1      3     0
+12:00      9 134 zł     9 560 zł       8      0      0      1      0     0
+14:00     17 348 zł    20 719 zł      18      3      3      3      4     0
+16:00     58 297 zł    60 142 zł       9      3      3      4      4     0
+18:00     99 836 zł   101 635 zł      15      2      2      3      4     0
+20:00    138 394 zł   140 109 zł      14      2      2      3      4     0
+00:00    205 388 zł   207 271 zł      16      2      2      3      4     2
+04:00    205 388 zł   221 796 zł      39      2      2      3      4     2
+08:00    205 388 zł   221 812 zł      39      2      2      3      4     2
+  sesje_min            mediana          959   (min 959, max 959)
+  jaja_sprzedane       mediana       37 083   (min 12 266, max 43 719)
+  przychod_jaja        mediana    22 586 zł   (min 10 741 zł, max 27 250 zł)
+  przychod_ptaki       mediana   301 698 zł   (min 13 140 zł, max 450 417 zł)
+  pasza_kg             mediana        8 750   (min 3 925, max 11 075)
+  pasza_zl             mediana    15 055 zł   (min 7 850 zł, max 18 040 zł)
+  jaja_przepadly       mediana       13 380   (min 0, max 22 584)
+  jaja_zgnily          mediana       10 000   (min 2 000, max 17 163)
+  lisy                 mediana            1   (min 1, max 2)
+  lisy_plot            mediana            4   (min 1, max 6)
+  lisy_przegonione     mediana            1   (min 1, max 2)
+  kury_lis             mediana            2   (min 2, max 4)
+  kury_glod            mediana            0   (min 0, max 0)
+  kury_choroba         mediana            0   (min 0, max 0)
+  wyklute              mediana        1 718   (min 262, max 1 944)
+  koguty_sprzedane     mediana          831   (min 133, max 952)
+  kupione_kury         mediana          356   (min 102, max 555)
+  wydane_ulepszenia    mediana    34 700 zł   (min 10 500 zł, max 81 200 zł)
+  wygrana_godz         mediana            -   (min -, max -)
+  pierwszy zakup (mediana godziny od startu):
+    pierwszy wyleg             0.0 h   (8/8 prob)
+    inkubator 1                1.2 h   (8/8 prob)
+    rasa: szabo                1.2 h   (8/8 prob)
+    plot 1                     2.5 h   (8/8 prob)
+    plot 2                     2.6 h   (8/8 prob)
+    plot 3                     3.5 h   (8/8 prob)
+    plot 4                     7.2 h   (8/8 prob)
+    kurnik 1                  12.4 h   (5/8 prob)
+    inkubator 2               12.4 h   (5/8 prob)
+    rasa: marans              12.4 h   (5/8 prob)
+    magazyn 1                 12.4 h   (5/8 prob)
+    rasa: jedwabista          12.9 h   (5/8 prob)
+    kurnik 2                  12.9 h   (5/8 prob)
+    magazyn 2                 13.2 h   (5/8 prob)
+    inkubator 3               13.5 h   (5/8 prob)
+    szczepienie               99.0 h   (4/8 prob)
+    kurnik 3                  99.0 h   (2/8 prob)
+    rasa: brahma              99.0 h   (2/8 prob)
+    magazyn 3                 99.0 h   (2/8 prob)
+    inkubator 4               99.0 h   (2/8 prob)
+    pies 1                    99.0 h   (2/8 prob)
+    pies 2                    99.0 h   (2/8 prob)
+
+############ STARA EKONOMIA (12.17, wylegi same kury) ############
+BOT 24 H  -  8 prob na profil, dane: /tmp/old_data
+=== zaangazowany (sesja 20 min co 1,5 h, 4 h gry) ===
+godz        gotowka      wartosc   ptaki   kurn  magaz  inkub   plot  pies
+09:00        511 zł       973 zł      15      1      1      1      0     0
+10:00        511 zł     1 565 zł      29      1      1      1      0     0
+11:00      1 768 zł     3 056 zł      29      1      1      1      0     0
+12:00      3 276 zł     3 889 zł      12      1      1      1      0     0
+14:00      2 102 zł     3 470 zł      29      1      1      1      3     0
+16:00      3 706 zł     5 194 zł      29      1      2      1      0     0
+18:00      3 977 zł     4 421 zł       6      1      2      2      0     0
+20:00        682 zł     6 169 zł      49      2      2      1      3     0
+00:00      2 574 zł     8 374 zł      45      2      2      2      3     0
+04:00      2 574 zł     8 374 zł      45      2      2      2      3     0
+08:00      2 574 zł     8 374 zł      45      2      2      2      3     0
+  sesje_min            mediana          239   (min 239, max 239)
+  jaja_sprzedane       mediana       17 949   (min 15 509, max 22 224)
+  przychod_jaja        mediana     7 874 zł   (min 6 841 zł, max 10 136 zł)
+  przychod_ptaki       mediana    17 430 zł   (min 14 056 zł, max 20 293 zł)
+  pasza_kg             mediana        4 880   (min 4 140, max 5 900)
+  pasza_zl             mediana     4 202 zł   (min 3 600 zł, max 5 072 zł)
+  jaja_przepadly       mediana      141 835   (min 97 107, max 156 256)
+  jaja_zgnily          mediana        2 000   (min 2 000, max 2 000)
+  lisy                 mediana            1   (min 1, max 2)
+  lisy_plot            mediana            2   (min 1, max 3)
+  lisy_przegonione     mediana            1   (min 1, max 1)
+  kury_lis             mediana            3   (min 2, max 4)
+  kury_glod            mediana            0   (min 0, max 26)
+  kury_choroba         mediana            0   (min 0, max 0)
+  wyklute              mediana          441   (min 390, max 537)
+  koguty_sprzedane     mediana            0   (min 0, max 0)
+  kupione_kury         mediana            8   (min 3, max 19)
+  wydane_ulepszenia    mediana    16 600 zł   (min 13 200 zł, max 17 200 zł)
+  wygrana_godz         mediana            -   (min -, max -)
+  pierwszy zakup (mediana godziny od startu):
+    pierwszy wyleg             0.0 h   (8/8 prob)
+    inkubator 1                0.4 h   (8/8 prob)
+    kurnik 1                   0.7 h   (8/8 prob)
+    magazyn 1                  0.9 h   (8/8 prob)
+    rasa: marans               2.2 h   (8/8 prob)
+    szczepienie                6.7 h   (7/8 prob)
+    plot 1                     6.7 h   (8/8 prob)
+    plot 2                     6.7 h   (8/8 prob)
+    magazyn 2                  7.0 h   (8/8 prob)
+    plot 3                     8.2 h   (8/8 prob)
+    inkubator 2               10.0 h   (8/8 prob)
+    kurnik 2                  14.5 h   (5/8 prob)
+    rasa: jedwabista          99.0 h   (3/8 prob)
+    pies 1                    99.0 h   (3/8 prob)
+    pies 2                    99.0 h   (3/8 prob)
+    plot 4                    99.0 h   (2/8 prob)
+=== niedzielny (5 sesji, 1,5 h gry) ===
+godz        gotowka      wartosc   ptaki   kurn  magaz  inkub   plot  pies
+09:00        563 zł     1 161 zł      17      0      0      0      0     0
+10:00        563 zł     1 161 zł      17      0      0      0      0     0
+11:00        563 zł     1 161 zł      17      0      0      0      0     0
+12:00        563 zł     1 161 zł      17      0      0      0      0     0
+14:00        384 zł       982 zł      17      0      0      0      1     0
+16:00        384 zł       982 zł      17      0      0      0      1     0
+18:00        305 zł       931 zł      18      0      0      1      1     0
+20:00        658 zł     1 340 zł      20      0      0      1      1     0
+00:00        147 zł       941 zł      20      0      0      1      1     0
+04:00        147 zł       941 zł      20      0      0      1      1     0
+08:00        147 zł       941 zł      20      0      0      1      1     0
+  sesje_min            mediana           89   (min 89, max 89)
+  jaja_sprzedane       mediana        3 692   (min 3 303, max 3 749)
+  przychod_jaja        mediana     1 476 zł   (min 1 321 zł, max 1 499 zł)
+  przychod_ptaki       mediana     2 800 zł   (min 2 520 zł, max 3 024 zł)
+  pasza_kg             mediana        2 950   (min 2 425, max 2 975)
+  pasza_zl             mediana     2 950 zł   (min 2 425 zł, max 2 975 zł)
+  jaja_przepadly       mediana      113 808   (min 81 574, max 113 967)
+  jaja_zgnily          mediana          400   (min 400, max 1 000)
+  lisy                 mediana            2   (min 0, max 2)
+  lisy_plot            mediana            0   (min 0, max 1)
+  lisy_przegonione     mediana            2   (min 0, max 2)
+  kury_lis             mediana            4   (min 0, max 5)
+  kury_glod            mediana            0   (min 0, max 0)
+  kury_choroba         mediana            0   (min 0, max 0)
+  wyklute              mediana          116   (min 98, max 121)
+  koguty_sprzedane     mediana            0   (min 0, max 0)
+  kupione_kury         mediana            3   (min 1, max 4)
+  wydane_ulepszenia    mediana     1 000 zł   (min 1 000 zł, max 1 200 zł)
+  wygrana_godz         mediana            -   (min -, max -)
+  pierwszy zakup (mediana godziny od startu):
+    pierwszy wyleg             0.0 h   (8/8 prob)
+    plot 1                     4.2 h   (7/8 prob)
+    inkubator 1                8.2 h   (8/8 prob)
+    rasa: szabo               11.1 h   (8/8 prob)
+    magazyn 1                 99.0 h   (1/8 prob)
+    szczepienie               99.0 h   (4/8 prob)
+=== maniak (16 h bez przerwy) ===
+godz        gotowka      wartosc   ptaki   kurn  magaz  inkub   plot  pies
+09:00      1 503 zł     1 825 zł       6      0      0      1      0     0
+10:00      2 493 zł     3 301 zł      15      1      1      1      2     0
+11:00      5 080 zł     5 889 zł      15      1      1      1      3     0
+12:00      3 513 zł     4 801 zł      19      2      1      2      2     0
+14:00     10 313 zł    11 839 zł      11      2      2      2      4     0
+16:00     16 953 zł    18 479 zł      11      2      2      3      4     0
+18:00     34 276 zł    35 200 zł       6      2      2      3      4     0
+20:00     50 402 zł    51 410 zł       9      2      2      3      4     0
+00:00     81 107 zł    82 087 zł       8      2      2      3      4     0
+04:00     81 107 zł    83 355 zł      39      2      2      3      4     0
+08:00     81 107 zł    83 355 zł      39      2      2      3      4     0
+  sesje_min            mediana          959   (min 959, max 959)
+  jaja_sprzedane       mediana       20 757   (min 18 447, max 23 018)
+  przychod_jaja        mediana     9 065 zł   (min 7 823 zł, max 10 404 zł)
+  przychod_ptaki       mediana   109 956 zł   (min 54 992 zł, max 138 285 zł)
+  pasza_kg             mediana        4 350   (min 2 850, max 5 430)
+  pasza_zl             mediana     3 738 zł   (min 2 580 zł, max 4 502 zł)
+  jaja_przepadly       mediana       79 443   (min 47 868, max 83 879)
+  jaja_zgnily          mediana        1 000   (min 500, max 2 000)
+  lisy                 mediana            1   (min 1, max 2)
+  lisy_plot            mediana            5   (min 2, max 6)
+  lisy_przegonione     mediana            1   (min 1, max 1)
+  kury_lis             mediana            3   (min 2, max 3)
+  kury_glod            mediana            0   (min 0, max 0)
+  kury_choroba         mediana            0   (min 0, max 0)
+  wyklute              mediana        3 960   (min 1 984, max 4 125)
+  koguty_sprzedane     mediana            0   (min 0, max 0)
+  kupione_kury         mediana            6   (min 1, max 16)
+  wydane_ulepszenia    mediana    31 600 zł   (min 12 800 zł, max 78 100 zł)
+  wygrana_godz         mediana            -   (min -, max -)
+  pierwszy zakup (mediana godziny od startu):
+    pierwszy wyleg             0.0 h   (8/8 prob)
+    inkubator 1                0.7 h   (8/8 prob)
+    rasa: szabo                0.9 h   (8/8 prob)
+    kurnik 1                   1.1 h   (8/8 prob)
+    magazyn 1                  1.5 h   (8/8 prob)
+    plot 1                     1.6 h   (8/8 prob)
+    rasa: marans               1.7 h   (8/8 prob)
+    plot 2                     1.9 h   (8/8 prob)
+    plot 3                     2.3 h   (8/8 prob)
+    inkubator 2                3.0 h   (8/8 prob)
+    kurnik 2                   4.0 h   (6/8 prob)
+    rasa: jedwabista           4.4 h   (6/8 prob)
+    magazyn 2                  4.7 h   (6/8 prob)
+    plot 4                     5.3 h   (8/8 prob)
+    inkubator 3                6.3 h   (6/8 prob)
+    szczepienie               99.0 h   (4/8 prob)
+    kurnik 3                  99.0 h   (1/8 prob)
+    inkubator 4               99.0 h   (1/8 prob)
+    magazyn 3                 99.0 h   (1/8 prob)
+    rasa: brahma              99.0 h   (1/8 prob)
+    pies 1                    99.0 h   (1/8 prob)
+    pies 2                    99.0 h   (1/8 prob)

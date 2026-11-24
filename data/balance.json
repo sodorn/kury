@@ -14,15 +14,16 @@
     ]
   },
   "economy": {
-    "_opis": "feed_per_hen_minute w kilogramach na ptaka na minute. Wartosc jest cztery razy wyzsza niz w 10.1: wczesniej worek starczal na pol godziny i pasza w ogole nie byla problemem. Razem z nia spadla cena kilograma, zeby karma nie zjadala calego zarobku. egg_spoil_hours: po tylu godzinach REALNYCH niesprzedane jaja sie psuja. Bez tego gra zostawiona na noc witala gracza magazynem pelnym jaj sprzed doby.",
+    "_opis": "Ceny jak na rynku w listopadzie 2026 (wlasciciel, 24.11: 'realizm, o ile nie zepsuje grywalnosci'): worek 25 kg paszy dla niosek 50 zl (2 zl/kg, detal; hurt w magazynie do -40%), jaja w skupie 0,45-2,00 zl zaleznie od rasy. feed_per_hen_minute w kilogramach na ptaka na minute GRY. Pelny realizm (ok. 2,0 kg = tyle paszy na jajo co u prawdziwej nioski) testowal bot 24 h: gracz grajacy sesjami tracil cale stado z glodu w przerwach. 0,65 to najwiecej, przy czym gracz z pieciu sesji dziennie jeszcze utrzymuje farme (stosunek jaja/pasza ok. 8x zamiast 17,6x w 12.17 i 2,5x w rzeczywistosci). egg_spoil_hours: po tylu godzinach REALNYCH niesprzedane jaja sie psuja. feed_bulk_packs: ile workow kupuje przycisk hurtowy.",
     "feed_pack_size": 25,
-    "feed_pack_price": 25,
+    "feed_pack_price": 50,
     "rooster_price_multiplier": 2.5,
     "_opis_kogut": "Kogut kosztuje 250% ceny kury tej samej rasy (Tomek, 2026-11-24). Jeden kogut obsluguje cala rase, wiec przy cenie kury byl najtanszym obowiazkowym zakupem w grze.",
-    "feed_per_hen_minute": 0.34,
+    "feed_per_hen_minute": 0.65,
     "chick_feed_multiplier": 0.5,
     "egg_sale_lot": 100,
-    "egg_spoil_hours": 4.0
+    "egg_spoil_hours": 4.0,
+    "feed_bulk_packs": 10
   },
   "run": {
     "_opis": "max_eggs_on_ground to tylko tyle, ile jaj lezy naraz na wybiegu do zebrania palcem. Nadmiar idzie prosto do magazynu. area musi sie zgadzac z piaskowym prostokatem w ground.svg - oba biora sie z RUN w tools/gen_ground.py.",
@@ -89,7 +90,8 @@
         "price": 450000
       }
     ],
-    "_opis": "slots to liczba partii grzanych naraz; kazda partia to jedno pisklę. eggs_per_chick jaj danej rasy robi jedno pisklę tej rasy."
+    "_opis": "slots to liczba partii grzanych naraz; kazda partia to jedno pisklę. eggs_per_chick jaj danej rasy robi jedno pisklę tej rasy.",
+    "rooster_share": 0.5
   },
   "hunger": {
     "_opis": "Po grace_minutes bez paszy stado zaczyna padac. Odstep miedzy zgonami to death_interval_seconds przy stadzie wielkosci reference_hens i skraca sie proporcjonalnie przy wiekszym - przy stalym odstepie stado liczace dwiescie sztuk gloddzilo godzinami i pasza przestawala byc problemem. Bez paszy stoi tez inkubator i odchow piskląt.",
@@ -129,7 +131,10 @@
     "kills_min": 3,
     "kills_max": 10,
     "visit_max_minutes": 10.0,
-    "killed_return_multiplier": 5.0
+    "killed_return_multiplier": 5.0,
+    "lurk_min_seconds": 10.0,
+    "lurk_max_seconds": 30.0,
+    "approach_seconds": 4.0
   },
   "win": {
     "_opis": "Jeden cel: pieniadze. Kolekcja ras przestala byc wyzwaniem, gdy zniknely progi odblokowania — po jednej sztuce kazdej rasy da sie kupic w niecale szesc godzin.",
@@ -190,59 +195,59 @@
       ]
     },
     "storage": {
-      "_opis": "MAGAZYN. pack_size/pack_price to worek paszy, egg_capacity to LIMIT JAJ, ktore moga lezec w magazynie. Limit jest po to, zeby gra nie przechodzila sie sama: bez niego mozna bylo wrocic po dobie i zastac gore jaj. Nadmiar nad limit przepada przy znoszeniu — gracz musi zajrzec i sprzedac.",
+      "_opis": "MAGAZYN. pack_size/pack_price to worek paszy, egg_capacity to LIMIT JAJ, ktore moga lezec w magazynie. Limit jest po to, zeby gra nie przechodzila sie sama: bez niego mozna bylo wrocic po dobie i zastac gore jaj. Nadmiar nad limit przepada przy znoszeniu — gracz musi zajrzec i sprzedac. Od 12.18 limity jaj sa 10 razy wieksze: przy realnej cenie paszy kura je w przerwie wiecej niz zarabia, jesli magazyn miesci tylko kilka minut niesienia - bot 24 h pokazal, ze bez tego gracz sesyjny bankrutuje w nocy.",
       "upgrades": [
         {
           "name": "STORE_T1",
-          "pack_size": 60,
-          "pack_discount": 0.10,
+          "pack_size": 100,
+          "pack_discount": 0.1,
           "price": 600,
-          "egg_capacity": 500
+          "egg_capacity": 5000
         },
         {
           "name": "STORE_T2",
-          "pack_size": 160,
+          "pack_size": 250,
           "pack_discount": 0.15,
           "price": 3000,
-          "egg_capacity": 1000
-        },
-        {
-          "name": "STORE_T3",
-          "pack_size": 400,
-          "pack_discount": 0.20,
-          "price": 10500,
-          "egg_capacity": 2000
-        },
-        {
-          "name": "STORE_T4",
-          "pack_size": 1000,
-          "pack_discount": 0.25,
-          "price": 30000,
           "egg_capacity": 10000
         },
         {
+          "name": "STORE_T3",
+          "pack_size": 600,
+          "pack_discount": 0.2,
+          "price": 10500,
+          "egg_capacity": 20000
+        },
+        {
+          "name": "STORE_T4",
+          "pack_size": 1500,
+          "pack_discount": 0.25,
+          "price": 30000,
+          "egg_capacity": 100000
+        },
+        {
           "name": "STORE_T5",
-          "pack_size": 2500,
-          "pack_discount": 0.30,
+          "pack_size": 3500,
+          "pack_discount": 0.3,
           "price": 80000,
-          "egg_capacity": 50000
+          "egg_capacity": 500000
         },
         {
           "name": "STORE_T6",
-          "pack_size": 6000,
+          "pack_size": 8000,
           "pack_discount": 0.35,
           "price": 200000,
-          "egg_capacity": 150000
+          "egg_capacity": 1500000
         },
         {
           "name": "STORE_T7",
-          "pack_size": 15000,
-          "pack_discount": 0.40,
+          "pack_size": 20000,
+          "pack_discount": 0.4,
           "price": 540000,
-          "egg_capacity": 500000
+          "egg_capacity": 5000000
         }
       ],
-      "egg_capacity": 200
+      "egg_capacity": 2000
     },
     "guard": {
       "_opis": "PLOT. block_chance to szansa, ze lis w ogole nie wejdzie na wybieg — losowana przy kazdym podejsciu. Plot nie ma nic wspolnego z psem: pies dziala dopiero wtedy, gdy lis juz wszedl.",
@@ -253,15 +258,15 @@
         },
         {
           "block_chance": 0.65,
-          "price": 800
+          "price": 1000
         },
         {
           "block_chance": 0.8,
-          "price": 1600
+          "price": 2500
         },
         {
           "block_chance": 0.95,
-          "price": 4000
+          "price": 6000
         }
       ]
     },
@@ -280,7 +285,7 @@
           "interval": 5.0,
           "chance": 0.6666666667,
           "kill_chance": 0.3333333333,
-          "price": 1000
+          "price": 2500
         }
       ]
     }

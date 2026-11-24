@@ -9,12 +9,17 @@
     "rooster_sprite": "res://assets/sprites/animals/rooster_leghorn.svg",
     "photo": "res://assets/photos/leghorn.jpg",
     "egg_seconds": 4.0,
-    "egg_value": 0.4,
-    "price": 40,
-    "sell_price": 28,
+    "egg_value": 0.7,
+    "price": 35,
+    "sell_price": 24,
     "incubate_seconds": 60,
     "grow_seconds": 90,
-    "coop_level": 0
+    "coop_level": 0,
+    "feather_colors": [
+      "#FFFFFF",
+      "#F0F0F0",
+      "#E4E4E4"
+    ]
   },
   {
     "id": "rhode",
@@ -26,12 +31,17 @@
     "rooster_sprite": "res://assets/sprites/animals/rooster_rhode.svg",
     "photo": "res://assets/photos/rhode.jpg",
     "egg_seconds": 4.6,
-    "egg_value": 0.44,
-    "price": 55,
-    "sell_price": 39,
+    "egg_value": 0.75,
+    "price": 45,
+    "sell_price": 31,
     "incubate_seconds": 72,
     "grow_seconds": 107,
-    "coop_level": 0
+    "coop_level": 0,
+    "feather_colors": [
+      "#E0A06A",
+      "#C8824C",
+      "#9A4A24"
+    ]
   },
   {
     "id": "szabo",
@@ -43,12 +53,17 @@
     "rooster_sprite": "res://assets/sprites/animals/rooster_szabo.svg",
     "photo": "res://assets/photos/szabo.jpg",
     "egg_seconds": 5.2,
-    "egg_value": 0.48,
-    "price": 80,
-    "sell_price": 56,
+    "egg_value": 0.45,
+    "price": 70,
+    "sell_price": 49,
     "incubate_seconds": 87,
     "grow_seconds": 129,
-    "coop_level": 0
+    "coop_level": 0,
+    "feather_colors": [
+      "#FBEAD0",
+      "#F3DCB8",
+      "#FFF6E8"
+    ]
   },
   {
     "id": "nagoszyja",
@@ -60,12 +75,17 @@
     "rooster_sprite": "res://assets/sprites/animals/rooster_nagoszyja.svg",
     "photo": "res://assets/photos/nagoszyja.jpg",
     "egg_seconds": 5.8,
-    "egg_value": 0.52,
-    "price": 110,
-    "sell_price": 77,
+    "egg_value": 0.75,
+    "price": 90,
+    "sell_price": 63,
     "incubate_seconds": 104,
     "grow_seconds": 151,
-    "coop_level": 1
+    "coop_level": 1,
+    "feather_colors": [
+      "#F0C098",
+      "#DFA471",
+      "#C08350"
+    ]
   },
   {
     "id": "marans",
@@ -77,13 +97,18 @@
     "rooster_sprite": "res://assets/sprites/animals/rooster_marans.svg",
     "photo": "res://assets/photos/marans.jpg",
     "egg_seconds": 6.4,
-    "egg_value": 0.55,
-    "price": 150,
-    "sell_price": 105,
+    "egg_value": 1.2,
+    "price": 120,
+    "sell_price": 84,
     "incubate_seconds": 122,
     "grow_seconds": 180,
     "egg_tint": "#8B5A3C",
-    "coop_level": 1
+    "coop_level": 1,
+    "feather_colors": [
+      "#4C4441",
+      "#2B2624",
+      "#D8C9A8"
+    ]
   },
   {
     "id": "araukana",
@@ -95,13 +120,18 @@
     "rooster_sprite": "res://assets/sprites/animals/rooster_araukana.svg",
     "photo": "res://assets/photos/araukana.jpg",
     "egg_seconds": 7.0,
-    "egg_value": 0.59,
-    "price": 210,
-    "sell_price": 147,
+    "egg_value": 1.2,
+    "price": 150,
+    "sell_price": 105,
     "incubate_seconds": 143,
     "grow_seconds": 213,
     "egg_tint": "#A8DCD2",
-    "coop_level": 2
+    "coop_level": 2,
+    "feather_colors": [
+      "#B7C9D8",
+      "#7B96AE",
+      "#9FB6C9"
+    ]
   },
   {
     "id": "jedwabista",
@@ -113,14 +143,19 @@
     "rooster_sprite": "res://assets/sprites/animals/rooster_jedwabista.svg",
     "photo": "res://assets/photos/jedwabista.jpg",
     "egg_seconds": 7.6,
-    "egg_value": 0.63,
-    "price": 290,
-    "sell_price": 203,
+    "egg_value": 0.6,
+    "price": 180,
+    "sell_price": 126,
     "incubate_seconds": 167,
     "grow_seconds": 251,
     "egg_tint": "#F6E7CC",
     "incubation_bonus": 0.5,
-    "coop_level": 2
+    "coop_level": 2,
+    "feather_colors": [
+      "#FFFFFF",
+      "#FBF3E6",
+      "#E9DBC4"
+    ]
   },
   {
     "id": "serama",
@@ -132,12 +167,17 @@
     "rooster_sprite": "res://assets/sprites/animals/rooster_serama.svg",
     "photo": "res://assets/photos/serama.jpg",
     "egg_seconds": 8.2,
-    "egg_value": 0.66,
-    "price": 400,
-    "sell_price": 280,
+    "egg_value": 0.45,
+    "price": 220,
+    "sell_price": 154,
     "incubate_seconds": 194,
     "grow_seconds": 293,
-    "coop_level": 3
+    "coop_level": 3,
+    "feather_colors": [
+      "#F0C272",
+      "#E7B45F",
+      "#FFE7B8"
+    ]
   },
   {
     "id": "brahma",
@@ -149,13 +189,18 @@
     "rooster_sprite": "res://assets/sprites/animals/rooster_brahma.svg",
     "photo": "res://assets/photos/brahma.jpg",
     "egg_seconds": 8.8,
-    "egg_value": 0.7,
-    "price": 550,
-    "sell_price": 385,
+    "egg_value": 0.85,
+    "price": 250,
+    "sell_price": 175,
     "incubate_seconds": 229,
     "grow_seconds": 346,
     "egg_tint": "#F0DCC0",
-    "coop_level": 3
+    "coop_level": 3,
+    "feather_colors": [
+      "#F6ECD6",
+      "#DFCDAE",
+      "#2E2C36"
+    ]
   },
   {
     "id": "czubatka",
@@ -167,12 +212,17 @@
     "rooster_sprite": "res://assets/sprites/animals/rooster_czubatka.svg",
     "photo": "res://assets/photos/czubatka.jpg",
     "egg_seconds": 9.4,
-    "egg_value": 0.74,
-    "price": 750,
-    "sell_price": 525,
+    "egg_value": 0.8,
+    "price": 280,
+    "sell_price": 196,
     "incubate_seconds": 268,
     "grow_seconds": 404,
-    "coop_level": 4
+    "coop_level": 4,
+    "feather_colors": [
+      "#C9C2D4",
+      "#504D5C",
+      "#FFFFFF"
+    ]
   },
   {
     "id": "pavlovskaya",
@@ -184,12 +234,17 @@
     "rooster_sprite": "res://assets/sprites/animals/rooster_pavlovskaya.svg",
     "photo": "res://assets/photos/pavlovskaya.jpg",
     "egg_seconds": 10.0,
-    "egg_value": 0.78,
-    "price": 1050,
-    "sell_price": 735,
+    "egg_value": 0.9,
+    "price": 400,
+    "sell_price": 280,
     "incubate_seconds": 315,
     "grow_seconds": 474,
-    "coop_level": 4
+    "coop_level": 4,
+    "feather_colors": [
+      "#F3E7D2",
+      "#C8A165",
+      "#3A3038"
+    ]
   },
   {
     "id": "feniks",
@@ -201,12 +256,17 @@
     "rooster_sprite": "res://assets/sprites/animals/rooster_feniks.svg",
     "photo": "res://assets/photos/feniks.jpg",
     "egg_seconds": 10.6,
-    "egg_value": 0.81,
-    "price": 1450,
-    "sell_price": 1015,
+    "egg_value": 0.9,
+    "price": 500,
+    "sell_price": 350,
     "incubate_seconds": 366,
     "grow_seconds": 552,
-    "coop_level": 5
+    "coop_level": 5,
+    "feather_colors": [
+      "#E8B063",
+      "#DFA254",
+      "#2E2822"
+    ]
   },
   {
     "id": "deathlayer",
@@ -218,12 +278,17 @@
     "rooster_sprite": "res://assets/sprites/animals/rooster_deathlayer.svg",
     "photo": "res://assets/photos/deathlayer.jpg",
     "egg_seconds": 11.2,
-    "egg_value": 0.85,
-    "price": 2000,
-    "sell_price": 1400,
+    "egg_value": 0.8,
+    "price": 600,
+    "sell_price": 420,
     "incubate_seconds": 425,
     "grow_seconds": 640,
-    "coop_level": 5
+    "coop_level": 5,
+    "feather_colors": [
+      "#FFFFFF",
+      "#8E9AA3",
+      "#D2CBBD"
+    ]
   },
   {
     "id": "sultanka",
@@ -235,12 +300,17 @@
     "rooster_sprite": "res://assets/sprites/animals/rooster_sultanka.svg",
     "photo": "res://assets/photos/sultanka.jpg",
     "egg_seconds": 11.8,
-    "egg_value": 0.89,
-    "price": 2800,
-    "sell_price": 1960,
+    "egg_value": 1.0,
+    "price": 800,
+    "sell_price": 560,
     "incubate_seconds": 493,
     "grow_seconds": 749,
-    "coop_level": 6
+    "coop_level": 6,
+    "feather_colors": [
+      "#FFFFFF",
+      "#E6DAC4",
+      "#FDF8EE"
+    ]
   },
   {
     "id": "onagadori",
@@ -252,13 +322,18 @@
     "rooster_sprite": "res://assets/sprites/animals/rooster_onagadori.svg",
     "photo": "res://assets/photos/onagadori.jpg",
     "egg_seconds": 12.4,
-    "egg_value": 0.92,
-    "price": 4000,
-    "sell_price": 2800,
+    "egg_value": 1.2,
+    "price": 1500,
+    "sell_price": 1050,
     "incubate_seconds": 574,
     "grow_seconds": 879,
     "egg_tint": "#FFF6E4",
-    "coop_level": 7
+    "coop_level": 7,
+    "feather_colors": [
+      "#F0DCB4",
+      "#DEC390",
+      "#FFF4DE"
+    ]
   },
   {
     "id": "dongtao",
@@ -270,12 +345,17 @@
     "rooster_sprite": "res://assets/sprites/animals/rooster_dongtao.svg",
     "photo": "res://assets/photos/dongtao.jpg",
     "egg_seconds": 13.0,
-    "egg_value": 0.96,
-    "price": 5600,
-    "sell_price": 3920,
+    "egg_value": 1.5,
+    "price": 2500,
+    "sell_price": 1750,
     "incubate_seconds": 654,
     "grow_seconds": 1021,
-    "coop_level": 8
+    "coop_level": 8,
+    "feather_colors": [
+      "#C08A58",
+      "#9E4529",
+      "#D9A878"
+    ]
   },
   {
     "id": "cemani",
@@ -287,12 +367,17 @@
     "rooster_sprite": "res://assets/sprites/animals/rooster_cemani.svg",
     "photo": "res://assets/photos/cemani.jpg",
     "egg_seconds": 13.6,
-    "egg_value": 1.0,
-    "price": 8000,
-    "sell_price": 5600,
+    "egg_value": 2.0,
+    "price": 4000,
+    "sell_price": 2800,
     "incubate_seconds": 758,
     "grow_seconds": 1190,
     "egg_tint": "#E6D2B4",
-    "coop_level": 9
+    "coop_level": 9,
+    "feather_colors": [
+      "#4A4654",
+      "#2A2832",
+      "#605C69"
+    ]
   }
 ]
