@@ -15,7 +15,17 @@ const VERSION := 6
 
 
 ## Zamienia stan gry na slownik gotowy do zapisu.
-static func to_dict(state: FarmState) -> Dictionary:
+##
+## `unpaid_seconds` to czas, ktory JUZ uplynal, ale nie zostal jeszcze
+## rozliczony w symulacji — tyle uzbieralo sie, gdy okno bylo nieaktywne.
+## Odejmujemy go od stempla czasu, bo `saved_at` ma oznaczac ostatnia
+## POLICZONA chwile gospodarstwa, a nie moment zapisu na dysk.
+##
+## Bez tego ginela cala noc: karta stala w tle, gospodarstwo nie liczylo
+## nic, a autozapis co osiem sekund wbijal swiezy stempel. Po przeladowaniu
+## gra widziala "od ostatniego zapisu minela sekunda" i caly uzbierany czas
+## przepadal razem z jajami i pieniedzmi z nocy.
+static func to_dict(state: FarmState, unpaid_seconds: float = 0.0) -> Dictionary:
 	var hens := []
 	for hen: Chicken in state.chickens:
 		hens.append(hen.to_dict())
@@ -30,7 +40,7 @@ static func to_dict(state: FarmState) -> Dictionary:
 		corpses.append(corpse.to_dict())
 	return {
 		"version": VERSION,
-		"saved_at": Time.get_unix_time_from_system(),
+		"saved_at": Time.get_unix_time_from_system() - maxf(0.0, unpaid_seconds),
 		"money": state.money,
 		"eggs": state.eggs,
 		"eggs_on_ground": state.eggs_on_ground,
@@ -181,12 +191,12 @@ static func from_dict(data: Dictionary) -> Dictionary:
 
 
 ## Zapisuje stan do pliku. Zwraca false, jesli zapis sie nie powiodl.
-static func save_state(state: FarmState, path: String = PATH) -> bool:
+static func save_state(state: FarmState, path: String = PATH, unpaid_seconds: float = 0.0) -> bool:
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
 		push_error("SaveGame: nie moge zapisac do %s (blad %d)" % [path, FileAccess.get_open_error()])
 		return false
-	file.store_string(JSON.stringify(to_dict(state)))
+	file.store_string(JSON.stringify(to_dict(state, unpaid_seconds)))
 	file.close()
 	return true
 

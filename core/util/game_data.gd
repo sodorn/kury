@@ -11,7 +11,7 @@ const DATA_DIR := "res://data/"
 ## Numer wersji gry. Jedno miejsce do podbicia przy wydaniu — pokazuje sie
 ## na ekranie powitalnym, zeby bylo widac, czy przegladarka wczytala nowa
 ## wersje, czy podsunela stara z pamieci.
-const VERSION := "12.10"
+const VERSION := "12.11"
 
 static var _balance: Dictionary = {}
 static var _buildings: Array = []

@@ -1434,8 +1434,13 @@ func _test_failed_restore_keeps_identity() -> void:
 func _test_push_guards() -> void:
 	Game.new_game()
 	var moj := Cloud.player_id
+	_check(not Game.may_push_to_cloud(),
+			"farma zalozona przed ekranem powitalnym czeka, nie leci na serwer")
+	# Tak robi "Nowa farma" na ekranie powitalnym: dopiero to jest decyzja
+	# gracza, zeby prowadzic wlasnie ta farme.
+	Game.state.intro_seen = true
 	_check(Game.may_push_to_cloud(),
-			"wlasna, swiezo zalozona farma moze isc na serwer")
+			"wlasna, potwierdzona farma moze isc na serwer")
 
 	# 1. Pusty stan nie idzie na serwer NIGDY.
 	Game.state.chickens.clear()
@@ -1450,6 +1455,10 @@ func _test_push_guards() -> void:
 
 	# 2. Kod, ktorego ta sesja nie zdobyla, jest zamkniety do zapisu.
 	Game.new_game()
+	# `new_game()` daje farme jeszcze NIEPOTWIERDZONA przez gracza, a takiej
+	# nie wysylamy (osobny bezpiecznik, sprawdzany w tescie przerwy).
+	# Tutaj udajemy farme, ktora gracz juz prowadzi.
+	Game.state.intro_seen = true
 	Game.state.chickens.append(Chicken.create("leghorn"))
 	_check(Game.may_push_to_cloud(), "pelna wlasna farma znow moze isc")
 	Cloud.set_player_id("999999")
@@ -1467,6 +1476,7 @@ func _test_push_guards() -> void:
 
 	# Po UDANYM pobraniu cudzej farmy wolno pod nia pisac.
 	var cudza := FarmState.new()
+	cudza.intro_seen = true
 	cudza.chickens.append(Chicken.create("rhode"))
 	_check(Game.restore_from_code("888888"), "druga proba")
 	Game._on_cloud_pulled(SaveGame.to_dict(cudza), true, "888888")
@@ -1951,6 +1961,50 @@ func _test_time_gap() -> void:
 	_check(Game.apply_gap(1.0, true), "po powrocie uzbierany czas rozlicza sie naraz")
 	_check(Game.state.feed < feed_before, "pasza zeszla za caly czas nieobecnosci")
 	_check(Game.state.egg_count() > 0, "jaja z nieobecnosci czekaja w magazynie")
+
+	# NOC W TLE. Wpadka z 24 listopada: karta stala otwarta przez noc, okno
+	# nieaktywne. Gospodarstwo nic nie liczylo, ale autozapis co osiem sekund
+	# wbijal swiezy stempel czasu. Po wyczyszczeniu ciasteczek i wczytaniu
+	# farmy gra widziala "od zapisu minela chwila" i cala noc przepadala.
+	# Serwer potwierdzil: miedzy 19:56 a 7:04 nie przyszedl zaden zapis.
+	# Zapis musi niesc NIEROZLICZONY czas, a nie moment zapisania pliku.
+	Game.new_game()
+	Game.state.feed = 100000.0
+	for i in 10:
+		Game.state.chickens.append(Chicken.create("leghorn"))
+	var noc := 8.0 * 3600.0
+	Game.apply_gap(noc, false)
+	var jaja_przed := Game.state.egg_count()
+	var sciezka := "user://test_noc.json"
+	_check(SaveGame.save_state(Game.state, sciezka, Game._away_seconds),
+			"zapis w czasie nieaktywnego okna sie udaje")
+	var nocny := SaveGame.load_state(sciezka)
+	_check(not nocny.is_empty(), "nocny zapis sie wczytuje")
+	# Tolerancja, bo miedzy zapisem a odczytem uplywa ulamek sekundy.
+	_check(absf(float(nocny["elapsed"]) - noc) < 30.0,
+			"zapis niesie cala noc do rozliczenia (%.0f s zamiast %.0f)"
+					% [float(nocny["elapsed"]), noc])
+	Game.apply_loaded_for_test(nocny)
+	_check(Game.state.egg_count() > jaja_przed,
+			"po wczytaniu noc zostaje rozliczona, a nie wyrzucona")
+	_check(is_zero_approx(Game._away_seconds), "dlug czasu zostal spłacony przy wczytaniu")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(sciezka))
+
+	# A zwykly zapis, bez zaleglosci, ma miec stempel z teraz.
+	Game.new_game()
+	var zwykly := SaveGame.from_dict(SaveGame.to_dict(Game.state))
+	_check(float(zwykly["elapsed"]) < 2.0, "zapis bez zaleglosci nie wymysla czasu")
+
+	# Farma zalozona ZANIM gracz cokolwiek wybral nie moze isc na serwer.
+	# Po wyczyszczeniu ciasteczek gra zaklada taka farme od razu, a gracz
+	# dopiero potem przepisuje kod swojej. Wysylka w tym oknie zasmieca baze.
+	Game.new_game()
+	Game.state.intro_seen = false
+	_check(not Game.may_push_to_cloud(),
+			"niepotwierdzona farma startowa nie leci na serwer")
+	Game.state.intro_seen = true
+	_check(Game.may_push_to_cloud(),
+			"po potwierdzeniu ta sama farma juz sie wysyla")
 
 	# Czas plynie tak samo, gdy gracz patrzy i gdy go nie ma. Dawny dzielnik 60
 	# dla nieobecnosci zostal usuniety na zyczenie wlasciciela.

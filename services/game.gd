@@ -45,6 +45,12 @@ func _notification(what: int) -> void:
 	if what in [NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_WM_CLOSE_REQUEST,
 			NOTIFICATION_WM_GO_BACK_REQUEST, NOTIFICATION_EXIT_TREE]:
 		save()
+	# Przejscie na inna karte albo inne okno to w przegladarce ostatni pewny
+	# moment, w ktorym gra jeszcze dziala. Potem Chrome potrafi zamrozic
+	# strone i nie zglosic juz niczego. Zapisujemy wiec od razu, zeby na
+	# serwerze zawsze lezal stan z chwili odejscia od gry.
+	if what in [NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_WINDOW_FOCUS_OUT]:
+		save()
 
 
 func _process(delta: float) -> void:
@@ -71,7 +77,10 @@ func _process(delta: float) -> void:
 	_check_unlocks()
 	_check_win()
 
-	_autosave_left -= delta
+	# Odliczanie do autozapisu idzie ZEGAREM SCIENNYM, nie delta klatki.
+	# W karcie w tle przegladarka zwalnia petle gry kilkukrotnie, wiec przy
+	# delcie "co osiem sekund" robilo sie co kilka minut.
+	_autosave_left -= elapsed
 	if _autosave_left <= 0.0:
 		_autosave_left = AUTOSAVE_SECONDS
 		save()
@@ -365,9 +374,12 @@ func new_game() -> void:
 func save() -> void:
 	if state == null:
 		return
-	SaveGame.save_state(state)
+	# `_away_seconds` to czas uzbierany przy nieaktywnym oknie, jeszcze
+	# nierozliczony. Musi pojechac razem z zapisem, inaczej kolejny
+	# autozapis skasuje go na zawsze — tak przepadla wlascicielowi cala noc.
+	SaveGame.save_state(state, SaveGame.PATH, _away_seconds)
 	if Cloud.is_enabled() and may_push_to_cloud():
-		Cloud.push(SaveGame.to_dict(state))
+		Cloud.push(SaveGame.to_dict(state, _away_seconds))
 
 
 ## Czy wolno wyslac biezacy stan na serwer. Trzy bezpieczniki, kazdy po
@@ -381,10 +393,19 @@ func save() -> void:
 ## 3. Stan jest pusty. Pusta farma nie jest warta wyslania NIGDY — a gdyby
 ##    cos znowu przestawilo kod, to wlasnie pustka skasowalaby komus stado.
 ##    Lepiej nie zapisac nic, niz zapisac nic NA CZYMS.
+## 4. Gracz nie potwierdzil jeszcze, ze chce TE farme. Po wyczyszczeniu
+##    ciasteczek gra zaklada swieza farme, zanim pokaze ekran powitalny.
+##    Taka farma nie moze trafic na serwer, dopoki gracz nie wybierze
+##    "Nowa farma" albo nie przepisze kodu — inaczej samo otwarcie gry
+##    po czyszczeniu ciasteczek zasmieca baze startowymi farmami
+##    (w tabeli lezy ich kilka: 131090, 187265, 367990 — wszystkie
+##    4 kury i 150 zl, nikt nimi nigdy nie gral).
 func may_push_to_cloud() -> bool:
 	if _force_pull:
 		return false
 	if _owned_code.is_empty() or _owned_code != Cloud.player_id:
+		return false
+	if state != null and not state.intro_seen:
 		return false
 	return not is_farm_empty()
 
