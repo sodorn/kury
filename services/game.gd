@@ -198,7 +198,10 @@ func load_or_start() -> void:
 ## szukania go w Kurniku. Dla gracza z farma pierwszym przyciskiem jest
 ## "Graj dalej", wiec jedno dotkniecie wraca do gry.
 func should_show_intro() -> bool:
-	return true
+	# Wyjatek: strona przeladowala sie SAMA, bo przyszla nowa wersja gry.
+	# Stan zostal zapisany sekunde wczesniej, wiec pytanie o kod tylko
+	# wyrzucaloby gracza z gry w srodku zabawy.
+	return not Updater.just_updated
 
 
 ## Zamyka sprawe ekranu powitalnego, zeby wiecej nie wyskakiwal.

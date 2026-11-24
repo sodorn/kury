@@ -57,6 +57,7 @@ func _ready() -> void:
 	_test_buildings()
 	_test_farm_code()
 	_test_instrukcja_aktualna()
+	_test_updater()
 	_test_strings()
 	_test_money_format()
 	SaveGame.clear()
@@ -2085,6 +2086,47 @@ func _test_buildings() -> void:
 	_check(back.coop_capacity() == Game.state.coop_capacity(), "pojemnosc po odczycie sie zgadza")
 	SaveGame.clear()
 	Game.new_game()
+
+
+## Dowozenie nowych wersji do otwartych kart. Logika decyzji jest czysta,
+## wiec da sie ja sprawdzic bez przegladarki. Samo przeladowanie strony
+## sprawdza test w prawdziwym Chrome (opisany w PROJECT_STATE.md).
+func _test_updater() -> void:
+	_check(Updater.parse_version('{"version": "12.14"}') == "12.14", "odczyt version.json")
+	_check(Updater.parse_version('{"version": " 12.14 "}') == "12.14", "spacje wokol numeru nie szkodza")
+	_check(Updater.parse_version("<html>404</html>") == "", "strona bledu to nie wersja")
+	_check(Updater.parse_version('{"inne": 1}') == "", "plik bez pola version to nie wersja")
+
+	_check(Updater.decide("12.14", "12.14", {}) == "none", "ta sama wersja - nic nie robimy")
+	_check(Updater.decide("", "12.14", {}) == "none", "brak odpowiedzi - nic nie robimy")
+	_check(Updater.decide("12.15", "12.14", {}) == "reload", "nowa wersja - przeladowanie")
+	_check(Updater.decide("12.15", "12.14", {"to": "12.15", "attempts": 1}) == "reload",
+			"pierwsza nieudana proba - jeszcze raz")
+	_check(Updater.decide("12.15", "12.14", {"to": "12.15", "attempts": 2}) == "stuck",
+			"druga nieudana proba - koniec przeladowan, prosba o reczne odswiezenie")
+	_check(Updater.decide("12.16", "12.14", {"to": "12.15", "attempts": 5}) == "reload",
+			"jeszcze nowsza wersja zaczyna liczenie prob od nowa")
+
+	# Po automatycznym przeladowaniu gra nie pyta o kod.
+	var bylo := Updater.just_updated
+	Updater.just_updated = true
+	_check(not Game.should_show_intro(), "po aktualizacji ekran powitalny nie wyskakuje")
+	Updater.just_updated = false
+	_check(Game.should_show_intro(), "przy zwyklym wejsciu ekran powitalny jest")
+	Updater.just_updated = bylo
+
+	# Znacznik: udana aktualizacja go kasuje, nieudana zostawia do liczenia prob.
+	var teraz := Time.get_unix_time_from_system()
+	Updater._write_flag({"to": GameData.VERSION, "attempts": 1, "at": teraz})
+	_check(Updater._consume_flag(), "swiezy znacznik z nasza wersja = wlasnie zaktualizowano")
+	_check(Updater._read_flag().is_empty(), "udana aktualizacja kasuje znacznik")
+	Updater._write_flag({"to": GameData.VERSION, "attempts": 1, "at": teraz - 3600.0})
+	_check(not Updater._consume_flag(), "stary znacznik nie udaje swiezej aktualizacji")
+	Updater._write_flag({"to": "99.0", "attempts": 1, "at": teraz})
+	_check(not Updater._consume_flag(), "nie doszlismy do wersji 99.0 - to nie aktualizacja")
+	_check(int(Updater._read_flag().get("attempts", 0)) == 1,
+			"nieudana proba zostaje zapamietana")
+	Updater._clear_flag()
 
 
 ## INSTRUKCJA.txt sklada sie z prawdziwych danych gry (tools/gen_instrukcja.py).

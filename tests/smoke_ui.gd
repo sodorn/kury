@@ -453,6 +453,28 @@ func _test_sell_hen() -> void:
 	if tak == null:
 		return
 
+	# Okienko ma byc CALE na ekranie. Wczesniej test sprawdzal tylko, czy
+	# przyciski istnieja — a one istnialy, tylko polowa wystawala za prawa
+	# krawedz telefonu. Wlasciciel zobaczyl to na zrzucie, test nie.
+	var ekran := Rect2(Vector2.ZERO, get_viewport().get_visible_rect().size)
+	for przycisk: Button in [tak, nie]:
+		var r := przycisk.get_global_rect()
+		_check(ekran.encloses(r),
+				"przycisk '%s' miesci sie na ekranie (%s w %s)" % [przycisk.text, r, ekran])
+	var pytanie: Label = null
+	var w_gore: Node = tak.get_parent()
+	while w_gore != null and pytanie == null:
+		for dziecko in w_gore.get_children():
+			if dziecko is Label:
+				pytanie = dziecko
+		w_gore = w_gore.get_parent()
+	_check(pytanie != null and ekran.encloses(pytanie.get_global_rect()),
+			"tekst pytania miesci sie na ekranie")
+	var srodek_okna := (tak.get_global_rect().merge(nie.get_global_rect())).get_center().x
+	_check(absf(srodek_okna - ekran.size.x * 0.5) < ekran.size.x * 0.1,
+			"okienko stoi na srodku ekranu (%.0f vs %.0f)" % [srodek_okna, ekran.size.x * 0.5])
+	_shot("pytanie_sprzedaz.png")
+
 	# Najpierw sprawdzamy, ze "Nie" naprawde nic nie robi.
 	nie.emit_signal("pressed")
 	await _frames(20)

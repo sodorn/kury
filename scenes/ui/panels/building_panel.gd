@@ -649,9 +649,21 @@ func _do_sell_hen(breed_id: String, breed_name: String, rooster: bool) -> void:
 func _ask(question: String, on_yes: Callable) -> void:
 	if _confirm != null and is_instance_valid(_confirm):
 		_confirm.queue_free()
+	# Zaslona na caly panel: przyciemnia tlo, lapie dotkniecia, zeby nie
+	# trafialy w przyciski pod spodem, a dotkniecie obok okienka znaczy "Nie".
+	var veil := ColorRect.new()
+	veil.color = Color(0.18, 0.12, 0.08, 0.45)
+	veil.mouse_filter = Control.MOUSE_FILTER_STOP
+	veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# CenterContainer liczy srodek z rozmiaru okienka. Wczesniej bylo
+	# PRESET_CENTER na samym okienku — Godot stawial wtedy w srodku panelu
+	# LEWY GORNY ROG okienka i reszta wyjezdzala za prawa krawedz ekranu.
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	veil.add_child(center)
 	var box := PanelContainer.new()
 	box.theme_type_variation = &"ConfirmBox"
-	box.set_anchors_preset(Control.PRESET_CENTER)
 	var rows := VBoxContainer.new()
 	rows.add_theme_constant_override("separation", 18)
 	var label := Label.new()
@@ -673,12 +685,17 @@ func _ask(question: String, on_yes: Callable) -> void:
 	buttons.add_child(yes)
 	rows.add_child(buttons)
 	box.add_child(rows)
-	add_child(box)
-	_confirm = box
-	no.pressed.connect(func() -> void: box.queue_free())
+	center.add_child(box)
+	add_child(veil)
+	_confirm = veil
+	no.pressed.connect(func() -> void: veil.queue_free())
 	yes.pressed.connect(func() -> void:
-		box.queue_free()
+		veil.queue_free()
 		on_yes.call())
+	veil.gui_input.connect(func(event: InputEvent) -> void:
+		var tap := event as InputEventMouseButton
+		if tap != null and tap.pressed:
+			veil.queue_free())
 
 
 func _on_buy_medicine() -> void:

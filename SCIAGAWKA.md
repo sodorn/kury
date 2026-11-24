@@ -105,6 +105,19 @@ i katalog `D:\GIT\kury`.
 
      Minuta i strona chodzi na 11.5. Sprawdz numer na ekranie powitalnym.
 
+     Od wersji 12.14 cofniecie dociera tez do OTWARTYCH kart: gra co
+     minute sprawdza version.json na serwerze i sama sie przeladowuje,
+     gdy numer sie rozni - w gore i w dol.
+
+  C) WDROZYC NOWA WERSJE  (od 12.14)
+     -------------------------------
+      tools/build_web.sh /tmp/web_build
+      tools/deploy_pages.sh /tmp/web_build
+
+     Skrypt zostawia na serwerze trzy ostatnie pakiety gry
+     (pack-<wersja>.txt). Otwarte karty przejda na nowa wersje same,
+     w ciagu minuty, bez pytania o kod.
+
      Co to psuje: nic poza galezia gh-pages (sama zbudowana gra).
      Zrodla zostaja. Farmy graczy zostaja - sa w Supabase.
 

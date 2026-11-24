@@ -23,6 +23,11 @@
 		return;
 	}
 
+	// Nazwe pliku silnika wstawia tools/build_web.sh. Silnik zmienia sie tylko
+	// razem z wersja Godota, wiec jego nazwa niesie wersje Godota, a nie gry:
+	// przegladarka pobiera 10 MB tylko wtedy, gdy naprawde jest nowy silnik.
+	var ENGINE_FILE = "engine.txt";
+
 	var originalFetch = window.fetch.bind(window);
 
 	window.fetch = function (input, init) {
@@ -30,7 +35,7 @@
 		if (!/index\.wasm$/.test(url)) {
 			return originalFetch(input, init);
 		}
-		var engineUrl = url.replace(/index\.wasm$/, "engine.txt");
+		var engineUrl = url.replace(/index\.wasm$/, ENGINE_FILE);
 		return originalFetch(engineUrl, init).then(function (response) {
 			if (!response.ok || !response.body) {
 				return response;

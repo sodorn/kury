@@ -4,7 +4,15 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.13): kogut kosztuje 250% ceny kury
+- Aktualny etap: **ETAP 10** (wersja 12.14): nowe wersje docieraja do
+  otwartych kart same. Pliki maja numer wersji w nazwie (pack-12.14.txt,
+  engine-4.7.2.txt), a autoload Updater co minute czyta version.json
+  i przeladowuje gre po zapisie. Test w prawdziwym Chrome: karta z 12.13.9,
+  w trakcie gry wdrozona 12.14 -> gra sama przeszla na 12.14 bez pytania
+  o kod, z ta sama farma. Wdrazanie: tools/deploy_pages.sh. Do tego:
+  okienko potwierdzenia sprzedazy stoi na srodku ekranu (wczesniej
+  wyjezdzalo za prawa krawedz).
+- Wersja 12.13: kogut kosztuje 250% ceny kury
   tej samej rasy (`balance.economy.rooster_price_multiplier`).
 - Wersja 12.12: ceny jaj cofniete do stanu
   z 12.8 (leghorn 0,40 zl ... cemani 1,00 zl). Obnizka z 12.9 byla moja
