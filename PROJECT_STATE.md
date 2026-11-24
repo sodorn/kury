@@ -4,13 +4,16 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.11): naprawa gubienia czasu przy
+- Aktualny etap: **ETAP 10** (wersja 12.12): ceny jaj cofniete do stanu
+  z 12.8 (leghorn 0,40 zl ... cemani 1,00 zl). Obnizka z 12.9 byla moja
+  wlasna inicjatywa, nie polecenie wlasciciela. Doszedl user manual.
+- Wersja 12.11: naprawa gubienia czasu przy
   nieaktywnym oknie. Zapis niesie teraz NIEROZLICZONY czas, autozapis idzie
   zegarem sciennym, a odejscie od karty zapisuje stan natychmiast.
 - Wersja 12.10: kogut dwa razy drozszy od kury
   swojej rasy (mnoznik w `balance.economy.rooster_price_multiplier`),
   wszystkie postaci na farmie o 20% mniejsze.
-- Wersja 12.9: jajka za grosze, pieniadze
+- Wersja 12.9: jajka za grosze — COFNIETE w 12.12, pieniadze
   z hodowli. Wartosc jajka dziesieciokrotnie nizsza, nowy model ekonomii
   `tools/economy_model.py` liczacy obie petle, trzy testy pilnujace zamyslu.
 - Wersja 12.8: nowa walka lis-pies, susy

@@ -316,7 +316,16 @@ punkcie i sprawdzilem KAZDY w kodzie, zamiast polegac na pamieci.
 
 ZROBIONE OD CZASU 11.4
 ----------------------
-1    Jajka za grosze.                                    ZROBIONE w 12.9
+1    Jajka za grosze.                             COFNIETE — NIE ROBIC
+     2026-11-24, Tomek: "kto ci kazal obnizyc cene jajek x10. Mialem
+     ograniczyc ich magazynowanie a nie obnizac cene. Ceny byly dobre."
+     Ceny wrocily do stanu z 12.8 (leghorn 0,40 zl ... cemani 1,00 zl).
+     Zamyslem bylo ograniczenie MAGAZYNOWANIA jaj (limit + gnicie po 4 h)
+     i to zostalo zrobione w 12.7. Obnizka cen byla moja wlasna
+     inicjatywa i nie mialem na nia polecenia. Nie ruszac cen jaj bez
+     wyraznego polecenia.
+
+     [stary opis, nieaktualny]                           ZROBIONE w 12.9
      Wartosc jajka spadla dziesieciokrotnie: leghorn 0,40 -> 0,04 zl,
      cemani 1,00 -> 0,10 zl. Teraz jedna kura zarabia z jaj 1,8 raza
      wiecej, niz zjada paszy — czyli dokladnie "grosze na pasze".

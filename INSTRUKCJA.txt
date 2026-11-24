@@ -1,0 +1,361 @@
+==============================================================================
+
+   ####  #   # #   # #   # #     #####  ##### #####  ####
+  #      #  #  #   # ##  # #       #    #     #   #  #   #
+   ###   ###   #   # # # # #       #    ###   #####  ####
+      #  #  #  #   # #  ## #       #    #     #  #   #   #
+  ####   #   #  ###  #   # #####   #    ##### #   #  ####
+
+           S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
+==============================================================================
+
+  INSTRUKCJA OBSLUGI *** gra w wersji 12.12
+
+  Gra dziala w przegladarce: https://sodorn.github.io/kury/
+
+  Plik generowany automatycznie przez tools/gen_instrukcja.py - nie poprawiaj
+  go recznie, bo kolejne uruchomienie skryptu nadpisze zmiany.
+
+==============================================================================
+ 1. O CO CHODZI W TEJ GRZE
+==============================================================================
+
+  Prowadzisz hodowle kur. Kury znosza jaja, jaja sprzedajesz albo wkladasz do
+  inkubatora. Z jaj wykluwaja sie pisklęta, pisklęta rosna i staja sie
+  doroslymi kurami, ktore mozesz sprzedac drozej, niz kosztowalo ich
+  wyhodowanie.
+
+  Jest siedemnascie ras. Im drozsza rasa, tym drozsze jaja i tym wiecej
+  dostaniesz za dorosla sztuke - ale tym dluzej trwa odchow i tym czesciej
+  taka kura choruje.
+
+  Przeszkody sa trzy: PASZA (kosztuje i konczy sie sama), CHOROBA (zabija kure
+  w kilka minut, jesli jej nie wyleczysz) i LIS (wchodzi na wybieg i zabija
+  kury jedna po drugiej).
+
+  CEL: uzbierac 2 500 000 zl.
+
+==============================================================================
+ 2. PIERWSZE URUCHOMIENIE I KOD FARMY
+==============================================================================
+
+  Przy wejsciu do gry zobaczysz ekran powitalny. Sa na nim dwie drogi:
+
+    NOWA FARMA        - zaklada swieze gospodarstwo i nadaje mu nowy kod.
+    WCZYTAJ Z KODU    - wpisujesz szesciocyfrowy kod i wracasz na swoja farme.
+
+  +--------------------------------------------------------------------------+
+  |  ZAPISZ SOBIE KOD SWOJEJ FARMY. GDZIES POZA GRA.                         |
+  |                                                                          |
+  |  Kod to jedyny sposob, zeby wrocic do gospodarstwa. Gra trzyma go        |
+  |  w pamieci przegladarki. Wyczyszczenie ciasteczek, tryb prywatny         |
+  |  albo inne urzadzenie oznaczaja, ze przegladarka tego kodu juz nie       |
+  |  zna - i bez zapisanego kodu nie ma jak odnalezc farmy.                  |
+  |                                                                          |
+  |  Stan farmy lezy na serwerze, nie w przegladarce. Z kodem wrocisz        |
+  |  do niej z kazdego telefonu i kazdego komputera.                         |
+  +--------------------------------------------------------------------------+
+
+  Kod widzisz na ekranie powitalnym przy kazdym wejsciu do gry. Ten sam kod
+  mozesz podac koledze - wejdzie na TWOJA farme i bedzie na niej gral razem z
+  toba.
+
+==============================================================================
+ 3. EKRAN GRY
+==============================================================================
+
+  +------------------------------------------------------------------------+
+  |  [monety]  150      [jajko]  12      [worek]  20      [kura]  4/20     |
+  +------------------------------------------------------------------------+
+         kasa           jaja w         pasza          ptaki / miejsca
+                        magazynie      w kg           w kurniku
+  |                                                                        |
+  |     KURNIK                    INKUBATOR                                |
+  |     (dotknij, zeby otworzyc    (dotknij, zeby wlozyc jaja              |
+  |      panel kurnika)             i odebrac pisklęta)                    |
+  |                                                                        |
+  |   ========================= WYBIEG ==================================  |
+  |                                                                        |
+  |     kury chodza, znosza jaja. Jaja lezace na trawie ZBIERASZ PALCEM.   |
+  |     Tu tez wchodzi lis - w lisa sie KLIKA, zeby go przegonic.          |
+  |                                                                        |
+  |   =====================================================================|
+  |                                                                        |
+  |     MAGAZYN                   SKLEP                                    |
+  |     (pasza i pojemnosc        (sprzedaz jaj, kupno paszy,              |
+  |      na jaja)                  kupno kur i kogutow, leki)              |
+  +------------------------------------------------------------------------+
+
+  Pies, jesli go kupisz, stoi przy kurniku. Plot widac dookola wybiegu -
+  zmienia wyglad przy kazdej rozbudowie.
+
+==============================================================================
+ 4. PETLA GRY - OD CZEGO ZACZAC
+==============================================================================
+
+  1. ZBIERAJ JAJA z wybiegu. Dotknij jajka palcem, idzie do magazynu.
+     Jaj powyzej 40 sztuk naraz gra nie kladzie na trawie - nadmiar
+     ladzie prosto w magazynie.
+
+  2. SPRZEDAWAJ JAJA w sklepie. To biezacy przychod na pasze.
+
+  3. KUPUJ PASZE, zanim sie skonczy. Pusty magazyn = stado zaczyna padac
+     po 3 minutach.
+
+  4. WKLADAJ JAJA DO INKUBATORA. 3 jaja jednej rasy = jedno pisklę tej rasy.
+     Pisklę rosnie i zmienia sie w dorosla kure.
+
+  5. SPRZEDAWAJ WYHODOWANE KURY. Za dorosla sztuke dostajesz 70% jej ceny
+     zakupu - a wyhodowana z wlasnych jaj nie kosztowala cie nic poza pasza.
+
+  6. ROZBUDOWUJ. Wiekszy kurnik to wiecej kur, wiekszy inkubator to wiecej
+     piskląt naraz, wiekszy magazyn to wiecej jaj i tanszy worek paszy.
+
+
+  WAZNE: kura znosi jaja tylko wtedy, gdy na farmie stoi KOGUT JEJ RASY.
+  Kupienie samych kur nic nie da. Kogut kosztuje 2 raza tyle, co kura tej
+  samej rasy, ale wystarczy jeden na cala rase.
+
+==============================================================================
+ 5. JAJA: ZNOSZENIE, MAGAZYN, GNICIE
+==============================================================================
+
+  Kazda rasa znosi w swoim tempie (tabela ras nizej). Jaja z wybiegu zbierasz
+  palcem; gdy nie ma cie w grze, jaja omijaja wybieg i ida prosto do magazynu.
+
+  MAGAZYN MA LIMIT. Przy pelnym magazynie kury przestaja odkladac jaja - nowe
+  po prostu przepadaja. Limit podnosisz rozbudowa magazynu.
+
+  JAJA GNIJA. Niesprzedane jajko psuje sie po 4 godzinach REALNEGO czasu i
+  znika z magazynu. Nie da sie zrobic zapasu na tydzien.
+
+==============================================================================
+ 6. PASZA I GLOD
+==============================================================================
+
+  Kazdy dorosly ptak zjada 0.34 kg paszy na minute gry, pisklę 0.5 tego. Worek
+  kosztuje 25 zl za 25 kg; przy rozbudowanym magazynie worki sa wieksze i
+  tansze za kilogram.
+
+  Gdy pasza sie skonczy: przez 3 minut nic sie nie dzieje, potem kury
+  zaczynaja padac - jedna co 50 sekund przy stadzie 10 sztuk, czesciej przy
+  wiekszym. Bez paszy STOI TEZ INKUBATOR I ODCHOW piskląt.
+
+==============================================================================
+ 7. ROZMNAZANIE - TU SA PIENIADZE
+==============================================================================
+
+  3 jaja jednej rasy wlozone do inkubatora daja jedno pisklę tej rasy.
+  Inkubator ma miejsca - kazde miejsce grzeje jedna partie naraz. Na starcie
+  masz 3 miejsca.
+
+  Pelny cykl to WYLEG (inkubator) plus ODCHOW (pisklę rosnie na wybiegu).
+  Czasy dla kazdej rasy sa w tabeli nizej, w czasie przy zegarku.
+
+  Dorosla sztuka sprzedaje sie za 70% ceny zakupu rasy. Kupiona kura to
+  strata; WYHODOWANA to czysty zysk, bo jaja byly twoje. Na tym stoi cala gra
+  - i dlatego hamulcem jest czas odchowu, a nie pieniadze.
+
+==============================================================================
+ 8. TABELA RAS
+==============================================================================
+
+  +==================+==========+==========+=========+=======+========+=====+
+  | rasa             |    kupno |  sprzed. |   jajko | znosi | odchow | lvl |
+  +==================+==========+==========+=========+=======+========+=====+
+  | Leghorn          |    40 zl |    28 zl | 0,40 zl |   12s |   7m30 |   0 |
+  | Rhode Island     |    55 zl |    39 zl | 0,44 zl |   14s |   8m57 |   0 |
+  | Kura szabo       |    80 zl |    56 zl | 0,48 zl |   16s |  10m48 |   0 |
+  | Kura nagoszyja   |   110 zl |    77 zl | 0,52 zl |   17s |  12m45 |   1 |
+  | Marans           |   150 zl |   105 zl | 0,55 zl |   19s |  15m06 |   1 |
+  | Araukana         |   210 zl |   147 zl | 0,59 zl |   21s |  17m48 |   2 |
+  | Kura jedwabista  |   290 zl |   203 zl | 0,63 zl |   23s |  20m54 |   2 |
+  | Serama           |   400 zl |   280 zl | 0,66 zl |   25s |  24m21 |   3 |
+  | Brahma olbrzymia |   550 zl |   385 zl | 0,70 zl |   26s |  28m45 |   3 |
+  | Czubatka polska  |   750 zl |   525 zl | 0,74 zl |   28s |  33m36 |   4 |
+  | Kura pawłowska   | 1 050 zl |   735 zl | 0,78 zl |   30s |  39m27 |   4 |
+  | Feniks           | 1 450 zl | 1 015 zl | 0,81 zl |   32s |  45m54 |   5 |
+  | Totleger         | 2 000 zl | 1 400 zl | 0,85 zl |   34s |  53m15 |   5 |
+  | Sułtanka         | 2 800 zl | 1 960 zl | 0,89 zl |   35s |   1h02 |   6 |
+  | Onagadori        | 4 000 zl | 2 800 zl | 0,92 zl |   37s |   1h12 |   7 |
+  | Dong Tao         | 5 600 zl | 3 920 zl | 0,96 zl |   39s |   1h23 |   8 |
+  | Ayam Cemani      | 8 000 zl | 5 600 zl | 1,00 zl |   41s |   1h37 |   9 |
+  +------------------+----------+----------+---------+-------+--------+-----+
+
+  "lvl" to poziom kurnika, od ktorego rasa jest w ogole dostepna w sklepie.
+  "znosi" to odstep miedzy jajami jednej kury, "odchow" to pelny czas od
+  wlozenia jaj do inkubatora do doroslej sztuki. Oba przy zegarku.
+
+==============================================================================
+ 9. KURNIK
+==============================================================================
+
+  +===========+=================+================+
+  |    poziom | miejsc na ptaki | cena rozbudowy |
+  +===========+=================+================+
+  | 0 (start) |              20 |              - |
+  |         1 |              35 |         800 zl |
+  |         2 |              55 |       4 800 zl |
+  |         3 |              80 |      12 000 zl |
+  |         4 |             110 |      24 500 zl |
+  |         5 |             150 |      45 000 zl |
+  |         6 |             200 |      90 000 zl |
+  |         7 |             270 |     150 000 zl |
+  |         8 |             360 |     300 000 zl |
+  |         9 |             500 |     500 000 zl |
+  +-----------+-----------------+----------------+
+
+  Limit liczy WSZYSTKIE dorosle ptaki razem z kogutami. Ponad limit nie kupisz
+  ptaka, a podrosniete pisklę czeka przy inkubatorze, az zwolni sie miejsce.
+  Kurnik zmienia wyglad na poziomie 3 i 6.
+
+==============================================================================
+ 10. MAGAZYN
+==============================================================================
+
+  +===========+===========+==========+============+================+
+  |    poziom | limit jaj | worek kg | cena worka | cena rozbudowy |
+  +===========+===========+==========+============+================+
+  | 0 (start) |       200 |       25 |      25 zl |              - |
+  |         1 |       500 |       60 |      57 zl |         600 zl |
+  |         2 |     1 000 |      150 |     135 zl |       3 000 zl |
+  |         3 |     2 000 |      400 |     340 zl |      10 500 zl |
+  |         4 |    10 000 |    1 000 |     800 zl |      30 000 zl |
+  |         5 |    50 000 |    2 500 |   1 875 zl |      80 000 zl |
+  |         6 |   150 000 |    6 000 |   4 200 zl |     200 000 zl |
+  |         7 |   500 000 |   15 000 |   9 750 zl |     540 000 zl |
+  +-----------+-----------+----------+------------+----------------+
+
+  Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i daje wieksze,
+  tansze za kilogram worki paszy. Magazyn zmienia wyglad na poziomie 3 i 6.
+
+==============================================================================
+ 11. INKUBATOR
+==============================================================================
+
+  +===========+=======================+================+
+  |    poziom | miejsc (partii naraz) | cena rozbudowy |
+  +===========+=======================+================+
+  | 0 (start) |                     3 |              - |
+  |         1 |                     6 |         600 zl |
+  |         2 |                    10 |       4 000 zl |
+  |         3 |                    16 |      11 000 zl |
+  |         4 |                    24 |      24 000 zl |
+  |         5 |                    34 |      48 000 zl |
+  |         6 |                    48 |     108 000 zl |
+  |         7 |                    66 |     200 000 zl |
+  |         8 |                    90 |     450 000 zl |
+  +-----------+-----------------------+----------------+
+
+==============================================================================
+ 12. LIS
+==============================================================================
+
+  Lis to glowny powod, dla ktorego warto wydac pieniadze na obrone.
+
+  KIEDY PRZYCHODZI
+    gdy grasz          kostka co 60 min realnych, szansa 33%
+    gdy nie grasz      kostka co 24 h realnych, szansa 17%
+    nie przyjdzie      przez pierwsze 30 min nowej farmy
+                       ani gdy masz mniej niz 5 kur
+
+  CO ROBI NA WYBIEGU
+    zabija jedna kure co 3-10 sekund REALNYCH
+    (czas losowany od nowa po kazdej kurze)
+    odchodzi po 3-10 zabitych kurach
+    bezpiecznik: nie zostaje dluzej niz 10 minut
+
+  JAK GO PRZEGONIC RECZNIE
+    KLIKAJ W NIEGO. Trzeba 20 trafien. Licznik widac nad lisem.
+    Przegoniony reka wraca 10 razy szybciej niz normalnie -
+    chyba ze masz psa albo plot.
+
+==============================================================================
+ 13. PSY I PLOT
+==============================================================================
+
+  +==========+========+=========+========+===================+
+  | pies     |   cena | probuje | szansa | szansa na zabicie |
+  +==========+========+=========+========+===================+
+  | kundel   | 200 zl | co 10 s |    33% |                0% |
+  | owczarek | 500 zl |  co 5 s |    67% |               33% |
+  +----------+--------+---------+--------+-------------------+
+
+  Pies pracuje sam, bez twojego udzialu, takze gdy nie patrzysz. Gdy lis
+  wejdzie, pies rzuca kostka co tyle sekund. Przy udanej probie owczarek moze
+  lisa ZAGRYZC - wtedy lis zostaje rozszarpany na wybiegu, a nastepny
+  przychodzi 5 razy pozniej niz zwykle.
+
+  +==============+========================+==========+
+  | poziom plotu | szansa, ze lis zawroci |     cena |
+  +==============+========================+==========+
+  |            1 |                    50% |   200 zl |
+  |            2 |                    65% |   400 zl |
+  |            3 |                    80% |   800 zl |
+  |            4 |                    95% | 2 000 zl |
+  +--------------+------------------------+----------+
+
+  Plot dziala INACZEJ niz pies: nie wygania lisa z wybiegu, tylko z takim
+  prawdopodobienstwem w ogole go nie wpuszcza. Plot i pies licza sie osobno,
+  wiec najlepiej miec oba. Plot zmienia wyglad na kazdym poziomie.
+
+==============================================================================
+ 14. CHOROBA
+==============================================================================
+
+  KIEDY        gdy grasz: kostka co 30 min realnych, szansa 33%
+               gdy nie grasz: co 12 h realnych, szansa 17%
+               nie choruje nikt przez pierwsze 30 min
+               ani przy stadzie mniejszym niz 5 kur
+               drozsza rasa choruje CZESCIEJ
+
+  CO SIE DZIEJE  chora kura pada po 7 minutach GRY, jesli jej nie wyleczysz
+
+  LEK            20 zl za sztuke, leczy jedna chora kure
+
+  SZCZEPIENIE    5 zl za kure, chroni DO KONCA ZYCIA - ale tylko te kury,
+                 ktore zyja w chwili szczepienia. Nowe pisklęta trzeba
+                 zaszczepic osobno.
+
+  SKUP           chorej kury nie musisz leczyc - mozesz ja sprzedac
+                 do McDonalda za 5 zl. Tyle samo za kazda rase.
+
+==============================================================================
+ 15. CZAS W GRZE
+==============================================================================
+
+  Czas gry plynie 3 razy wolniej od zegarka: jedna minuta przy zegarku to
+  okolo 20 sekund w grze. Wszystkie czasy w tej instrukcji sa juz PRZELICZONE
+  na zegarek, chyba ze napisano inaczej.
+
+  Gra liczy czas TAK SAMO, gdy grasz i gdy nie grasz. Zostawiona na noc farma
+  znosi jaja, zjada pasze, choruje i goszczy lisa. Po powrocie gra nadrabia
+  zaleglosci - maksymalnie 72 godziny za jednym razem.
+
+  Stan zapisuje sie sam co kilka sekund i trafia na serwer. Zapis idzie takze
+  w chwili, gdy przelaczasz sie na inna karte albo zamykasz gre.
+
+==============================================================================
+ 16. CEL
+==============================================================================
+
+  Uzbieraj 2 500 000 zl. Droga najkrotsza: zbuduj stado jednej z drozszych
+  ras, trzymaj inkubator caly czas pelny i sprzedawaj odchowane sztuki. Jaja
+  sprzedawaj na biezaco, zeby bylo na pasze.
+
+==============================================================================
+ 17. SCIAGAWKA
+==============================================================================
+
+  Kury nie znosza jaj          -> brakuje KOGUTA tej rasy
+  Rasa wyszarzona w sklepie    -> za niski poziom kurnika (patrz tabela ras)
+  Jaja znikaja z magazynu      -> gnija po 4 h, albo magazyn jest pelny
+  Kury padaja bez ostrzezenia  -> skonczyla sie pasza
+  Pisklę nie wyrasta           -> brak paszy albo pelny kurnik
+  Lis na wybiegu               -> KLIKAJ W NIEGO (20 razy), kup psa i plot
+  Nie moge wrocic do farmy     -> potrzebny KOD, zapisz go sobie poza gra
+  Gra wyglada na cofnieta      -> odswiez z Ctrl+Shift+R
+
+==============================================================================
+  Milej hodowli. Lis i tak przyjdzie.
+==============================================================================
