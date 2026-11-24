@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 12.14
+  INSTRUKCJA OBSLUGI *** gra w wersji 12.15
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -133,12 +133,12 @@
  6. PASZA I GLOD
 ==============================================================================
 
-  Kazdy dorosly ptak zjada 0.34 kg paszy na minute gry, pisklę 0.5 tego. Worek
+  Kazdy dorosly ptak zjada 6.8 kg paszy na godzine, pisklę 0.5 tego. Worek
   kosztuje 25 zl za 25 kg; przy rozbudowanym magazynie worki sa wieksze i
   tansze za kilogram.
 
-  Gdy pasza sie skonczy: przez 3 minut nic sie nie dzieje, potem kury
-  zaczynaja padac - jedna co 50 sekund przy stadzie 10 sztuk, czesciej przy
+  Gdy pasza sie skonczy: przez 9 minut nic sie nie dzieje, potem kury
+  zaczynaja padac - jedna co 150 sekund przy stadzie 10 sztuk, czesciej przy
   wiekszym. Bez paszy STOI TEZ INKUBATOR I ODCHOW piskląt.
 
 ==============================================================================
@@ -274,12 +274,12 @@
  13. PSY I PLOT
 ==============================================================================
 
-  +==========+========+=========+========+===================+
-  | pies     |   cena | probuje | szansa | szansa na zabicie |
-  +==========+========+=========+========+===================+
-  | kundel   | 200 zl | co 10 s |    33% |                0% |
-  | owczarek | 500 zl |  co 5 s |    67% |               33% |
-  +----------+--------+---------+--------+-------------------+
+  +==========+==========+=========+========+===================+
+  | pies     |     cena | probuje | szansa | szansa na zabicie |
+  +==========+==========+=========+========+===================+
+  | kundel   |   400 zl | co 10 s |    33% |                0% |
+  | owczarek | 1 000 zl |  co 5 s |    67% |               33% |
+  +----------+----------+---------+--------+-------------------+
 
   Pies pracuje sam, bez twojego udzialu, takze gdy nie patrzysz. Gdy lis
   wejdzie, pies rzuca kostka co tyle sekund. Przy udanej probie owczarek moze
@@ -289,10 +289,10 @@
   +==============+========================+==========+
   | poziom plotu | szansa, ze lis zawroci |     cena |
   +==============+========================+==========+
-  |            1 |                    50% |   200 zl |
-  |            2 |                    65% |   400 zl |
-  |            3 |                    80% |   800 zl |
-  |            4 |                    95% | 2 000 zl |
+  |            1 |                    50% |   400 zl |
+  |            2 |                    65% |   800 zl |
+  |            3 |                    80% | 1 600 zl |
+  |            4 |                    95% | 4 000 zl |
   +--------------+------------------------+----------+
 
   Plot dziala INACZEJ niz pies: nie wygania lisa z wybiegu, tylko z takim
@@ -309,7 +309,7 @@
                ani przy stadzie mniejszym niz 5 kur
                drozsza rasa choruje CZESCIEJ
 
-  CO SIE DZIEJE  chora kura pada po 7 minutach GRY, jesli jej nie wyleczysz
+  CO SIE DZIEJE  chora kura pada po 21 minutach, jesli jej nie wyleczysz
 
   LEK            20 zl za sztuke, leczy jedna chora kure
 

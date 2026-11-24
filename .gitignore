@@ -5,3 +5,7 @@
 *.aab
 *.keystore
 *.tmp
+
+# Python
+__pycache__/
+*.pyc

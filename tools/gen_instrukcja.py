@@ -305,16 +305,17 @@ i znika z magazynu. Nie da sie zrobic zapasu na tydzien.
 
 title("6. PASZA I GLOD")
 para("""
-Kazdy dorosly ptak zjada %g kg paszy na minute gry, pisklę %g tego. Worek
+Kazdy dorosly ptak zjada %g kg paszy na godzine, pisklę %g tego. Worek
 kosztuje %s za %d kg; przy rozbudowanym magazynie worki sa wieksze i tansze
 za kilogram.
-""" % (ECO["feed_per_hen_minute"], ECO.get("chick_feed_multiplier", 0.5),
+""" % (round(ECO["feed_per_hen_minute"] * 60 * SCALE, 2), ECO.get("chick_feed_multiplier", 0.5),
        zl(ECO["feed_pack_price"]), ECO["feed_pack_size"]))
 para("""
 Gdy pasza sie skonczy: przez %g minut nic sie nie dzieje, potem kury zaczynaja
 padac - jedna co %g sekund przy stadzie %d sztuk, czesciej przy wiekszym.
 Bez paszy STOI TEZ INKUBATOR I ODCHOW piskląt.
-""" % (BAL["hunger"]["grace_minutes"], BAL["hunger"]["death_interval_seconds"],
+""" % (round(BAL["hunger"]["grace_minutes"] / SCALE, 1),
+       round(BAL["hunger"]["death_interval_seconds"] / SCALE),
        BAL["hunger"]["reference_hens"]))
 
 title("7. ROZMNAZANIE - TU SA PIENIADZE")
@@ -452,7 +453,7 @@ raw("""
                ani przy stadzie mniejszym niz %d kur
                drozsza rasa choruje CZESCIEJ
 
-  CO SIE DZIEJE  chora kura pada po %g minutach GRY, jesli jej nie wyleczysz
+  CO SIE DZIEJE  chora kura pada po %g minutach, jesli jej nie wyleczysz
 
   LEK            %s za sztuke, leczy jedna chora kure
 
@@ -465,7 +466,7 @@ raw("""
 """.rstrip() % (
     dis["active_roll_minutes"], dis["active_chance"] * 100,
     dis["offline_roll_hours"], dis["offline_chance"] * 100,
-    dis["grace_minutes"], dis["min_hens"], dis["death_minutes"],
+    dis["grace_minutes"], dis["min_hens"], round(dis["death_minutes"] / SCALE, 1),
     zl(dis["medicine_price"]), zl(dis["vaccine_price_per_hen"]),
     zl(dis["mcdonalds_price"])))
 

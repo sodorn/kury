@@ -40,6 +40,7 @@ func _ready() -> void:
 	_test_body_unpacking()
 	_test_dog()
 	_test_dog_in_action()
+	_test_dog_offline()
 	_test_breed_gating()
 	_test_guard_migration()
 	_test_fox_return_speed()
@@ -351,7 +352,7 @@ func _test_economy() -> void:
 	# w grze — i dlatego nie bylo czego wazyc przy zakupie.
 	var mnoznik: float = float(GameData.balance().get("economy", {})
 			.get("rooster_price_multiplier", 2.5))
-	_check(mnoznik >= 1.5 and mnoznik <= 5.0,
+	_check(mnoznik >= 1.0 and mnoznik <= 20.0,
 			"mnoznik ceny koguta trzyma sie rozsadku (%.2f)" % mnoznik)
 	for breed: Dictionary in GameData.breeds():
 		var id := String(breed.get("id", ""))
@@ -714,6 +715,12 @@ func _test_fox() -> void:
 	# Wejscie: lis od razu porywa pierwsza kure i zostaje na wybiegu.
 	var state := _fresh_state(hens, 100000.0)
 	_arm_fox(state)
+	# Zwloki zostaja z szansa carcass_share (0,5) na kazda zabita kure. Przy
+	# trzech ofiarach raz na osiem przebiegow nie zostawalo nic i test
+	# "migal". Tu chcemy pewnosci, wiec szansa 100%; wraca na koncu testu.
+	var fox_cfg: Dictionary = GameData.balance()["fox"]
+	var stary_udzial: float = float(fox_cfg.get("carcass_share", 0.5))
+	fox_cfg["carcass_share"] = 1.0
 	var arrival := Simulation.advance(state, 1.0)
 	_check(int(arrival["fox_arrived"]) == 1, "lis przychodzi, gdy kostka padnie")
 	_check(int(arrival["fox_took"]) >= 1, "pierwsza kura ginie zaraz po wejsciu")
@@ -747,6 +754,7 @@ func _test_fox() -> void:
 
 	# Po napasci zostaja slady na wybiegu.
 	_check(state.corpses.size() > 0, "po napasci zostaja zwloki na wybiegu")
+	fox_cfg["carcass_share"] = stary_udzial
 
 	# Trzy lisy naraz nie moga sie zdarzyc: dopoki jeden jest na wybiegu,
 	# zaden drugi nie wejdzie. To jest blad, z ktorym zyl wlasciciel.
@@ -884,8 +892,13 @@ func _test_vet_and_selling() -> void:
 	_check(Game.state.chickens.is_empty(), "oddana kura znika ze stada")
 	_check(is_equal_approx(Game.state.money, purse + Game.mcdonalds_price()),
 			"za chora kure jest kilka zlotych, a nie zero")
-	_check(is_equal_approx(Game.mcdonalds_price(), 5.0), "skup placi 5 zl za sztuke")
-	_check(is_equal_approx(Game.medicine_price(), 20.0), "lek kosztuje 20 zl")
+	var choroba_cfg: Dictionary = GameData.balance().get("disease", {})
+	_check(is_equal_approx(Game.mcdonalds_price(), float(choroba_cfg.get("mcdonalds_price", -1))),
+			"skup placi tyle, ile stoi w balance.json")
+	_check(Game.mcdonalds_price() > 0.0, "skup placi wiecej niz zero")
+	_check(is_equal_approx(Game.medicine_price(), float(choroba_cfg.get("medicine_price", -1))),
+			"lek kosztuje tyle, ile stoi w balance.json")
+	_check(Game.medicine_price() > 0.0, "lek kosztuje wiecej niz zero")
 	_check(not Game.cull_hen("rhode"), "nie ma juz czego ubijac")
 
 	# Zdrowa idzie normalnie, za pelna stawke.
@@ -1001,17 +1014,22 @@ func _test_money_format() -> void:
 				"jajko rasy %s ma widoczna wartosc (%s)" % [breed.get("id", ""), shown])
 
 	# Ceny jaj musza siedziec w widelkach, ktore ustalilismy dla balansu.
-	# W 12.9 zjechalem je dziesieciokrotnie "pod zamysl ekonomii" — Tomek
-	# tego nie zamawial i cofnalem to w 12.12. Widelki sa z powrotem stare
-	# i maja pilnowac, zeby nikt (ja) znowu ich nie ruszyl bez polecenia.
+	# Od 12.15 wlasciciel sam stroi ceny w balance.json/breeds.json, a GitHub
+	# buduje gre po kazdym commicie. Test nie trzyma juz konkretnych cen,
+	# tylko granice rozsadku: jajko kosztuje cokolwiek i nie wiecej niz kura.
+	# (Zasada dla Claude'a "nie ruszac cen bez polecenia" stoi w
+	# PROJECT_STATE.md, nie tutaj.)
 	for breed: Dictionary in GameData.breeds():
 		var value := float(breed.get("egg_value", 0))
-		_check(value >= 0.4 and value <= 1.0,
-				"cena jajka rasy '%s' w widelkach 0,40-1,00 zl" % breed.get("id", ""))
+		_check(value > 0.0 and value < float(breed.get("price", 0)),
+				"jajko rasy '%s' kosztuje wiecej niz 0 i mniej niz kura" % breed.get("id", ""))
 
+	# Zwyczajowo sell_price to 70% price, ale to pole stroi sie recznie.
+	# Pilnujemy tylko, zeby kupno-sprzedaz nie dawalo darmowych pieniedzy.
 	for breed: Dictionary in GameData.breeds():
-		_check(absf(float(breed.get("sell_price", 0)) - round(float(breed.get("price", 0)) * 0.7)) < 0.51,
-				"sprzedaz kury rasy '%s' to 70%% ceny zakupu" % breed.get("id", ""))
+		var sell := float(breed.get("sell_price", 0))
+		_check(sell > 0.0 and sell < float(breed.get("price", 0)),
+				"sprzedaz kury rasy '%s' wiecej niz 0 i mniej niz kupno" % breed.get("id", ""))
 
 
 ## Pod nieobecnosc gracza jaja omijaja wybieg i ida prosto do magazynu.
@@ -1146,20 +1164,25 @@ func _test_dog() -> void:
 	_check(float(dogs[0].get("price", 0)) <= float(fences[0].get("price", 0)),
 			"kundel nie drozszy niz najtanszy plot (%s wobec %s)"
 			% [dogs[0].get("price"), fences[0].get("price")])
-	# Kundel: co 10 sekund proba z szansa 1/3. Owczarek: co 5 sekund z 2/3,
-	# a udana proba to jeszcze 1/3 szansy na zagryzienie lisa.
-	_check(absf(float(dogs[0].get("chance", 0.0)) - 1.0 / 3.0) < 0.01,
-			"kundel ma jedna trzecia szansy na probe")
-	_check(absf(float(dogs[1].get("chance", 0.0)) - 2.0 / 3.0) < 0.01,
-			"owczarek ma dwie trzecie")
-	_check(is_equal_approx(float(dogs[0].get("interval", 0.0)), 10.0),
-			"kundel probuje co dziesiec sekund")
-	_check(is_equal_approx(float(dogs[1].get("interval", 0.0)), 5.0),
-			"owczarek co piec")
-	_check(is_zero_approx(float(dogs[0].get("kill_chance", 1.0))),
-			"kundel nie zagryza lisa")
-	_check(absf(float(dogs[1].get("kill_chance", 0.0)) - 1.0 / 3.0) < 0.01,
-			"owczarek zagryza lisa w jednym przypadku na trzy")
+	# Liczby psow mozna stroic w balance.json. Test pilnuje tylko rozsadku:
+	# szanse to prawdopodobienstwa, odstepy sa dodatnie, a owczarek - drozszy
+	# pies - nie moze byc gorszy od kundla w zadnym parametrze.
+	for d: Dictionary in dogs:
+		var nazwa := String(d.get("name", "?"))
+		_check(float(d.get("interval", 0.0)) > 0.0, "pies %s probuje co dodatnia liczbe sekund" % nazwa)
+		_check(float(d.get("chance", -1.0)) > 0.0 and float(d.get("chance", 2.0)) <= 1.0,
+				"szansa psa %s miedzy 0 a 1" % nazwa)
+		_check(float(d.get("kill_chance", -1.0)) >= 0.0 and float(d.get("kill_chance", 2.0)) <= 1.0,
+				"szansa zagryzienia psa %s miedzy 0 a 1" % nazwa)
+		_check(float(d.get("price", 0)) > 0.0, "pies %s cos kosztuje" % nazwa)
+	_check(float(dogs[1].get("interval", 99.0)) <= float(dogs[0].get("interval", 0.0)),
+			"owczarek probuje nie rzadziej niz kundel")
+	_check(float(dogs[1].get("chance", 0.0)) >= float(dogs[0].get("chance", 1.0)),
+			"owczarek ma nie mniejsza szanse niz kundel")
+	_check(float(dogs[1].get("kill_chance", 0.0)) >= float(dogs[0].get("kill_chance", 1.0)),
+			"owczarek zagryza nie rzadziej niz kundel")
+	_check(float(dogs[1].get("price", 0)) > float(dogs[0].get("price", 0)),
+			"owczarek drozszy od kundla")
 
 	# Pies kupowalny od poczatku, bez plotu jako warunku.
 	Game.new_game()
@@ -1298,7 +1321,7 @@ func _test_upgrade_ladders() -> void:
 ## nocy magazyn pekal w szwach i cala ekonomia stawala na glowie.
 func _test_egg_spoilage() -> void:
 	var hours := float(GameData.balance().get("economy", {}).get("egg_spoil_hours", 0.0))
-	_check(is_equal_approx(hours, 4.0), "termin przydatnosci to cztery godziny realne")
+	_check(hours > 0.0, "jaja maja termin przydatnosci (%.1f h realnych)" % hours)
 	var spoil_game := hours * 3600.0 * GameData.time_scale()
 
 	var state := FarmState.new()
@@ -1342,10 +1365,12 @@ func _test_vaccine_price() -> void:
 	_check(is_zero_approx(Game.vaccine_price()), "bez kur nie ma za co placic")
 	for i in 7:
 		Game.state.chickens.append(Chicken.create("leghorn"))
-	_check(is_equal_approx(Game.vaccine_price(), 35.0),
-			"siedem kur to 35 zl (jest %.0f)" % Game.vaccine_price())
+	var za_sztuke := float(GameData.balance().get("disease", {}).get("vaccine_price_per_hen", 0.0))
+	_check(za_sztuke > 0.0, "szczepionka kosztuje cos za sztuke")
+	_check(is_equal_approx(Game.vaccine_price(), 7.0 * za_sztuke),
+			"siedem kur to siedem stawek (jest %.0f)" % Game.vaccine_price())
 	Game.state.chickens[0].vaccinated = true
-	_check(is_equal_approx(Game.vaccine_price(), 30.0),
+	_check(is_equal_approx(Game.vaccine_price(), 6.0 * za_sztuke),
 			"za juz zaszczepiona kure nie placimy drugi raz")
 
 
@@ -1470,12 +1495,14 @@ func _test_push_guards() -> void:
 func _test_egg_capacity() -> void:
 	var storage: Dictionary = GameData.balance().get("buildings", {}).get("storage", {})
 	var state := FarmState.new()
-	_check(state.egg_capacity() == 200, "mala szopa miesci 200 jaj (jest %d)" % state.egg_capacity())
+	var cap := int(storage.get("egg_capacity", 0))
+	_check(cap > 50, "mala szopa ma sensowny limit (%d)" % cap)
+	_check(state.egg_capacity() == cap, "limit z balance.json (jest %d)" % state.egg_capacity())
 
-	_check(state.add_egg("leghorn", 150) == 150, "pierwsze 150 jaj sie miesci")
+	_check(state.add_egg("leghorn", cap - 50) == cap - 50, "jaja do limitu bez 50 sie mieszcza")
 	_check(state.egg_room() == 50, "zostalo miejsca na 50")
 	_check(state.add_egg("leghorn", 90) == 50, "z 90 jaj miesci sie tylko 50")
-	_check(state.egg_count() == 200, "magazyn pelny, ani jednego wiecej")
+	_check(state.egg_count() == cap, "magazyn pelny, ani jednego wiecej")
 	_check(state.add_egg("rhode", 10) == 0, "do pelnego nic juz nie wejdzie")
 
 	# Kazdy poziom magazynu podnosi limit.
@@ -1502,6 +1529,45 @@ func _test_egg_capacity() -> void:
 
 
 ## Pies w akcji: probuje do skutku, a owczarek czasem zagryza lisa.
+## Pies ma pilnowac TAKZE wtedy, gdy gracza nie ma przy grze. Do 12.15
+## przy grze w tle lis zabieral caly lup naraz, a pies nie dostawal nawet
+## jednego rzutu kostka — czyli w nocy, gdy jest najbardziej potrzebny,
+## nie robil nic. Sredni lup z wielu wizyt: bez psa, z kundlem, z owczarkiem.
+func _test_dog_offline() -> void:
+	var proby := 300
+	var sredni := func(dog: int) -> Array:
+		var zabite := 0
+		var zagryzione := 0
+		for i in proby:
+			var hens: Array[String] = []
+			for j in 30:
+				hens.append("leghorn")
+			var state := _fresh_state(hens, 100000.0)
+			state.dog_level = dog
+			var out := {"fox_took": 0, "died_hunger": 0, "died_disease": 0, "fox_arrived": 0}
+			Simulation._fox_arrives(state, out, 1 << 30, true)
+			zabite += int(out["fox_took"])
+			zagryzione += int(out.get("fox_killed", 0))
+			if i == 0:
+				_check(state.fox_visit_left <= 0.0 and state.fox_kill_left == 0,
+						"po wizycie w tle stan lisa jest wyczyszczony (pies %d)" % dog)
+		return [float(zabite) / proby, zagryzione]
+	var bez: Array = sredni.call(0)
+	var kundel: Array = sredni.call(1)
+	var owczarek: Array = sredni.call(2)
+	var fox_cfg: Dictionary = GameData.balance()["fox"]
+	var oczekiwany := (float(fox_cfg.get("kills_min", 3)) + float(fox_cfg.get("kills_max", 10))) / 2.0
+	_check(bez[0] > oczekiwany * 0.85,
+			"bez psa lis w tle bierze pelny lup (srednio %.1f, oczekiwane %.1f)" % [bez[0], oczekiwany])
+	_check(kundel[0] < bez[0] * 0.85,
+			"kundel ratuje kury takze w tle (%.1f vs %.1f)" % [kundel[0], bez[0]])
+	_check(owczarek[0] < kundel[0],
+			"owczarek ratuje wiecej niz kundel (%.1f vs %.1f)" % [owczarek[0], kundel[0]])
+	_check(owczarek[0] >= 1.0, "pierwsza kura i tak ginie przy wejsciu lisa")
+	_check(int(owczarek[1]) > 0, "owczarek zagryza lisa takze w tle (%d razy)" % int(owczarek[1]))
+	_check(int(kundel[1]) == 0, "kundel nigdy nie zabija lisa")
+
+
 func _test_dog_in_action() -> void:
 	var hens: Array[String] = []
 	for i in 40:
@@ -1557,8 +1623,9 @@ func _test_dog_in_action() -> void:
 		Simulation.advance(d, 1.0)
 		bezpiecznik += 1
 	if d.fox_next_multiplier > 1.0:
-		_check(is_equal_approx(d.fox_next_multiplier, 5.0),
-				"po zagryzieniu odstep rosnie piec razy")
+		_check(is_equal_approx(d.fox_next_multiplier,
+				float(GameData.balance()["fox"].get("killed_return_multiplier", 0.0))),
+				"po zagryzieniu odstep rosnie o killed_return_multiplier")
 	_disarm_fox()
 
 
@@ -1622,36 +1689,24 @@ func _test_event_rules() -> void:
 	#            nieaktywna: co cztery godziny.
 	# Mierzymy to na samych ustawieniach, bo pelny pomiar statystyczny
 	# trwalby minuty, a liczby maja byc dokladnie takie, jak powiedzial.
-	_check(is_equal_approx(float(fox.get("active_roll_minutes", 0.0)), 60.0),
-			"lis: kostka raz na godzine grania")
-	_check(absf(float(fox.get("active_chance", 0.0)) - 1.0 / 3.0) < 0.01,
-			"lis: szansa jedna trzecia")
-	_check(is_equal_approx(float(fox.get("offline_roll_hours", 0.0)), 24.0),
-			"lis: przy nieaktywnej grze kostka raz na dobe")
-	_check(absf(float(fox.get("offline_chance", 0.0)) - 1.0 / 6.0) < 0.01,
-			"lis: przy nieaktywnej grze szansa jeden do szesciu")
-	# Wizyta konczy sie na liczbie zabitych kur, nie na zegarze.
-	_check(int(fox.get("kills_min", 0)) == 3 and int(fox.get("kills_max", 0)) == 10,
-			"lis zabija od trzech do dziesieciu kur i odchodzi")
-	_check(is_equal_approx(float(fox.get("kill_interval_min", 0.0)), 3.0)
-			and is_equal_approx(float(fox.get("kill_interval_max", 0.0)), 10.0),
-			"kolejna kura ginie co 3-10 sekund")
-	_check(is_equal_approx(float(fox.get("killed_return_multiplier", 0.0)), 5.0),
-			"po zagryzieniu lisa nastepny przychodzi piec razy pozniej")
-	# Choroba dziala tak samo jak lis, tylko dwa razy czesciej: ten sam
-	# ksztalt kostki, polowa odstepu.
-	_check(is_equal_approx(float(disease.get("active_roll_minutes", 0.0)),
-			float(fox.get("active_roll_minutes", 0.0)) / 2.0),
-			"choroba: kostka dwa razy czesciej niz u lisa w aktywnej grze")
-	_check(is_equal_approx(float(disease.get("offline_roll_hours", 0.0)),
-			float(fox.get("offline_roll_hours", 0.0)) / 2.0),
-			"choroba: dwa razy czesciej takze przy nieaktywnej grze")
-	_check(is_equal_approx(float(disease.get("active_chance", 0.0)),
-			float(fox.get("active_chance", 0.0))),
-			"choroba: ta sama szansa co u lisa")
-	_check(is_equal_approx(float(disease.get("offline_chance", 0.0)),
-			float(fox.get("offline_chance", 0.0))),
-			"choroba: ta sama szansa offline co u lisa")
+	# Wartosci mozna stroic w balance.json - test pilnuje tylko, zeby mialy
+	# sens: odstepy dodatnie, szanse to prawdopodobienstwa, minimum nie
+	# wieksze od maksimum.
+	for cfg: Dictionary in [fox, disease]:
+		var nazwa := "lis" if cfg == fox else "choroba"
+		_check(float(cfg.get("active_roll_minutes", 0.0)) > 0.0, "%s: odstep kostki w grze > 0" % nazwa)
+		_check(float(cfg.get("offline_roll_hours", 0.0)) > 0.0, "%s: odstep kostki w tle > 0" % nazwa)
+		for klucz: String in ["active_chance", "offline_chance"]:
+			var p := float(cfg.get(klucz, -1.0))
+			_check(p >= 0.0 and p <= 1.0, "%s: %s miedzy 0 a 1 (%.3f)" % [nazwa, klucz, p])
+	_check(int(fox.get("kills_min", 0)) >= 1
+			and int(fox.get("kills_max", 0)) >= int(fox.get("kills_min", 0)),
+			"lis: lup min >= 1 i max >= min")
+	_check(float(fox.get("kill_interval_min", 0.0)) > 0.0
+			and float(fox.get("kill_interval_max", 0.0)) >= float(fox.get("kill_interval_min", 0.0)),
+			"lis: odstep miedzy zabojstwami dodatni, max >= min")
+	_check(float(fox.get("killed_return_multiplier", 0.0)) >= 1.0,
+			"zagryziony lis nie wraca szybciej niz zwykly")
 
 	# I pomiar na zywo, zeby liczby z balansu faktycznie cos robily.
 	var chore: Array[String] = []
@@ -2057,18 +2112,23 @@ func _test_buildings() -> void:
 	# Obrona przed lisem.
 	_check(is_equal_approx(Game.state.fox_block_chance(), 0.0), "na starcie brak obrony")
 	_check(Game.upgrade_building("guard"), "plot da sie postawic")
-	# Drabinka plotow wedlug wlasciciela: 200/50%, 400/65%, 800/80%, 2000/95%.
-	_check(is_equal_approx(Game.state.fox_block_chance(), 0.5),
-			"lichy plot zawraca lisa w polowie podejsc")
-	var plot_ceny := [200, 400, 800, 2000]
-	var plot_szanse := [0.5, 0.65, 0.8, 0.95]
 	var plot_upgrades: Array = GameData.balance().get("buildings", {}).get("guard", {}).get("upgrades", [])
-	_check(plot_upgrades.size() == 4, "sa cztery poziomy plotu")
-	for i in mini(4, plot_upgrades.size()):
-		_check(int(plot_upgrades[i].get("price", 0)) == plot_ceny[i],
-				"plot %d kosztuje %d zl" % [i + 1, plot_ceny[i]])
-		_check(is_equal_approx(float(plot_upgrades[i].get("block_chance", 0.0)), plot_szanse[i]),
-				"plot %d zawraca w %d%% podejsc" % [i + 1, int(plot_szanse[i] * 100)])
+	_check(is_equal_approx(Game.state.fox_block_chance(),
+			float(plot_upgrades[0].get("block_chance", -1.0))),
+			"pierwszy plot zawraca lisa z szansa z balance.json")
+	# Ceny i szanse mozna stroic w balance.json. Pilnujemy tylko, zeby
+	# kazdy kolejny plot byl drozszy i lepszy od poprzedniego.
+	_check(plot_upgrades.size() == 4, "sa cztery poziomy plotu (jest tyle grafik)")
+	for i in plot_upgrades.size():
+		var cena := float(plot_upgrades[i].get("price", 0))
+		var szansa := float(plot_upgrades[i].get("block_chance", -1.0))
+		_check(cena > 0.0, "plot %d cos kosztuje" % (i + 1))
+		_check(szansa > 0.0 and szansa <= 1.0, "plot %d: szansa miedzy 0 a 1" % (i + 1))
+		if i > 0:
+			_check(cena > float(plot_upgrades[i - 1].get("price", 0)),
+					"plot %d drozszy od poprzedniego" % (i + 1))
+			_check(szansa >= float(plot_upgrades[i - 1].get("block_chance", 0.0)),
+					"plot %d nie gorszy od poprzedniego" % (i + 1))
 
 	# Bez pieniedzy nie ma rozbudowy.
 	Game.state.money = 0.0

@@ -109,14 +109,26 @@ i katalog `D:\GIT\kury`.
      minute sprawdza version.json na serwerze i sama sie przeladowuje,
      gdy numer sie rozni - w gore i w dol.
 
-  C) WDROZYC NOWA WERSJE  (od 12.14)
-     -------------------------------
+  C) WDROZYC NOWA WERSJE  (od 12.15 - SAMO)
+     ---------------------------------------
+     Push na main = GitHub sam testuje, buduje i wdraza
+     (zakladka Actions -> "Buduj i wdroz gre", 5-8 minut).
+     Otwarte karty przejda na nowa wersje same, w ciagu minuty.
+
+     Recznie, tylko gdy automat nie dziala:
       tools/build_web.sh /tmp/web_build
       tools/deploy_pages.sh /tmp/web_build
 
-     Skrypt zostawia na serwerze trzy ostatnie pakiety gry
-     (pack-<wersja>.txt). Otwarte karty przejda na nowa wersje same,
-     w ciagu minuty, bez pytania o kod.
+  D) SAMEMU ZMIENIC CENE / CZAS / SZANSE
+     ----------------------------------
+      1. https://github.com/sodorn/kury/blob/main/data/balance.json
+         (rasy: data/breeds.json)
+      2. olowek "Edit this file"
+      3. zmien liczbe - bez ruszania cudzyslowow i przecinkow
+      4. "Commit changes..." -> "Commit changes"
+      5. zakladka Actions: zielony = w grze, czerwony = nic nie
+         wdrozono, a linie "BLAD: ..." mowia, co poprawic.
+     Co oznacza kazda liczba: DOKUMENTACJA_TECHNICZNA.txt, rozdzial 7.
 
      Co to psuje: nic poza galezia gh-pages (sama zbudowana gra).
      Zrodla zostaja. Farmy graczy zostaja - sa w Supabase.

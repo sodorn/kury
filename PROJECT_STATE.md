@@ -4,7 +4,18 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.14): nowe wersje docieraja do
+- Aktualny etap: **ETAP 10** (wersja 12.15): GitHub Actions buduje i wdraza
+  gre po kazdym pushu na main (.github/workflows/buduj-i-wdroz.yml) -
+  wlasciciel moze sam zmieniac data/balance.json i breeds.json. Testy nie
+  trzymaja juz konkretnych cen, tylko reguly rozsadku. Psy i plot x2.
+  Pies dziala tez przy grze w tle (wczesniej lis w tle bral caly lup bez
+  rzutu psa). DOKUMENTACJA_TECHNICZNA.txt z gen_dokumentacja.py.
+- ZASADA DLA CLAUDE'A: nie zmieniac cen ani liczb balansu bez wyraznego
+  polecenia wlasciciela (wpadka z 12.9: jajka x0,1). Wczesniej pilnowaly
+  tego testy z cenami na sztywno; od 12.15 blokowalyby wlasciciela.
+- WDRAZANIE: push na main = automat. Recznie (build_web.sh +
+  deploy_pages.sh) tylko gdy automat nie dziala.
+- Wersja 12.14: nowe wersje docieraja do
   otwartych kart same. Pliki maja numer wersji w nazwie (pack-12.14.txt,
   engine-4.7.2.txt), a autoload Updater co minute czyta version.json
   i przeladowuje gre po zapisie. Test w prawdziwym Chrome: karta z 12.13.9,

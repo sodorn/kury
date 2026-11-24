@@ -647,10 +647,9 @@ func medicine_price() -> float:
 	return float(GameData.balance().get("disease", {}).get("medicine_price", 140))
 
 
-## Cena zaszczepienia calego stada. Jedna kwota za cale stado, niezaleznie od
-## jego wielkosci: stawka od kury rosla razem ze stadem i w praktyce nikt tego
-## nie kupowal. Stawka `vaccine_price_per_hen` zostaje w pliku balansu na wypadek
-## powrotu do rozliczania od sztuki — teraz wynosi zero.
+## Cena zaszczepienia calego stada: stala `vaccine_price` (teraz 0) plus
+## `vaccine_price_per_hen` za kazdego niezaszczepionego ptaka (wlasciciel:
+## "5 zl za sztuke"). Zaszczepionych nie liczymy drugi raz.
 func vaccine_price() -> float:
 	var disease: Dictionary = GameData.balance().get("disease", {})
 	var base := float(disease.get("vaccine_price", 100))

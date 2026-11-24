@@ -248,19 +248,19 @@
       "upgrades": [
         {
           "block_chance": 0.5,
-          "price": 200
-        },
-        {
-          "block_chance": 0.65,
           "price": 400
         },
         {
-          "block_chance": 0.8,
+          "block_chance": 0.65,
           "price": 800
         },
         {
+          "block_chance": 0.8,
+          "price": 1600
+        },
+        {
           "block_chance": 0.95,
-          "price": 2000
+          "price": 4000
         }
       ]
     },
@@ -272,14 +272,14 @@
           "interval": 10.0,
           "chance": 0.3333333333,
           "kill_chance": 0.0,
-          "price": 200
+          "price": 400
         },
         {
           "name": "owczarek",
           "interval": 5.0,
           "chance": 0.6666666667,
           "kill_chance": 0.3333333333,
-          "price": 500
+          "price": 1000
         }
       ]
     }

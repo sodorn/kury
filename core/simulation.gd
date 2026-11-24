@@ -277,64 +277,6 @@ static func _advance_disease(state: FarmState, step: float, out: Dictionary, bud
 	out["got_sick"] = int(out["got_sick"]) + 1
 
 
-## Wspolna zasada dla lisa i choroby: przez pierwsze `grace_minutes` gry nic
-## zlego sie nie dzieje i male stado jest nietykalne. Potem co minute leci
-## kostka, ale **szansa rosnie z kazda minuta bez zdarzenia**.
-##
-## Stala szansa nie dziala przy graniu z doskoku. Wlasciciel gra po minucie,
-## odklada telefon i wraca — przy stalym losowaniu z taka sama szansa za
-## kazdym razem potrafil nie zobaczyc lisa przez caly wieczor. Teraz licznik
-## suchych minut (`event_dry`) przechodzi przez zapis, wiec pressja narasta
-## miedzy sesjami.
-##
-## Krzywa: p na minute = (t / G)^4, gdzie t to minuty bez zdarzenia,
-## a G = `mean_minutes` * `RAMP_SPAN`. Wykladnik 4 trzyma poczatek spokojny,
-## a koniec stromy. Przy `mean_minutes` 45 daje to srednia 45 minut i
-## **pewnosc najpozniej po 84 minutach**; przy 15 — srednia 19 minut
-## i pewnosc po 30. Liczby wyliczone, nie zgadniete.
-const RAMP_SPAN := 1.95
-const RAMP_POWER := 4.0
-
-static func _event_fires(state: FarmState, step: float, key: String,
-		config: Dictionary) -> bool:
-	# Dopoki furtka jest zamknieta, licznik stoi: inaczej gracz dostalby lisa
-	# w tej samej sekundzie, w ktorej stado urosło do piatej sztuki.
-	if state.chickens.size() < int(config.get("min_hens", 5)):
-		return false
-	if state.played_seconds() < float(config.get("grace_minutes", 30.0)) * 60.0:
-		return false
-	var dry := float(state.event_dry.get(key, 0.0)) + step
-	state.event_dry[key] = dry
-	# Progi w balansie podane sa w minutach RZECZYWISTYCH, bo tak mysli o nich
-	# gracz ("pol godziny grania"). Licznik `dry` chodzi w sekundach gry, wiec
-	# przeliczamy progi przez te sama skale, ktora spowalnia cala symulacje.
-	var scale := GameData.time_scale()
-	var dry_real_minutes := dry / 60.0 / scale
-	# Twardy sufit: po tylu minutach grania bez zdarzenia wypada ono na pewno,
-	# bez zadnego losowania. Wlasciciel poprosil o to wprost po tym, jak przez
-	# dwa dni nie zobaczyl lisa ani razu.
-	var hard := float(config.get("hard_minutes", 0.0))
-	if hard > 0.0 and dry_real_minutes >= hard:
-		state.event_dry[key] = 0.0
-		return true
-	var span := maxf(1.0, float(config.get("mean_minutes", 45.0)) * RAMP_SPAN)
-	var chance_per_minute := pow(minf(dry_real_minutes / span, 1.0), RAMP_POWER)
-	# Przeliczenie szansy "na minute" na szanse w kroku o dlugosci `step`.
-	# Mnozenie przez step/60 byloby przyblizeniem, ktore przy szansie rownej
-	# jedynce dawaloby 1/60 zamiast pewnosci.
-	var step_real_minutes := step / 60.0 / scale
-	if randf() >= 1.0 - pow(1.0 - chance_per_minute, step_real_minutes):
-		return false
-	state.event_dry[key] = 0.0
-	return true
-
-
-## Lis: przychodzi raz na kilka godzin i porywa czesc stada.
-##
-## Wizyta ma dwa etapy. Najpierw lis przez `visit_seconds` biega po wybiegu
-## i nikogo jeszcze nie zabiera — wtedy gracz moze go przegonic. Dopiero gdy
-## czas minie, zabiera to, co sobie upatrzyl. Pod nieobecnosc gracza nie ma
-## kogo czekac, wiec strata liczy sie od razu.
 static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget: int,
 		offline: bool) -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})
@@ -413,8 +355,9 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 	_fox_arrives(state, out, budget, offline)
 
 
-## Lis wchodzi na wybieg. Limit lupu to 30-60% stada; rozklada go sobie na
-## cala wizyte. Pierwsza kura ginie od razu — lis ZAWSZE cos zabiera.
+## Lis wchodzi na wybieg. Lup to stala liczba kur z przedzialu
+## kills_min..kills_max, zabierana po jednej co kill_interval_min..max
+## sekund. Pierwsza kura ginie od razu — lis ZAWSZE cos zabiera.
 static func _fox_arrives(state: FarmState, out: Dictionary, budget: int,
 		offline: bool) -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})
@@ -432,13 +375,11 @@ static func _fox_arrives(state: FarmState, out: Dictionary, budget: int,
 	state.dog_timer = state.dog_interval()
 
 	# Gdy gracza nie ma przy grze, nie ma kogo straszyc ani komu pokazywac
-	# wizyty: lis robi swoje od razu i odchodzi. Gracz dostaje po powrocie
-	# jedna informacje, ile kur zginelo.
+	# wizyty: cala wizyte rozgrywamy od razu, na tej samej osi czasu co
+	# w grze aktywnej. Wczesniej lis zabieral wtedy CALY lup naraz, a pies
+	# w ogole nie dostawal szansy — czyli pilnowal tylko, gdy gracz patrzyl.
 	if offline:
-		while state.fox_kill_left > 0:
-			if not _fox_grabs_one(state, out, budget):
-				break
-		_fox_leaves(state)
+		_fox_visit_offline(state, out, budget, full)
 		return
 
 	# Pies rusza za lisem. Jesli da rade, skraca wizyte do swojego czasu —
@@ -474,6 +415,39 @@ static func _fox_grabs_one(state: FarmState, out: Dictionary, budget: int) -> bo
 ## wczesniej bylo ich kilka i jedna sciezka potrafila zostawic lisa na zawsze.
 ## Publiczna furtka dla Game.poke_fox — ta sama sciezka sprzatania.
 static func fox_leaves(state: FarmState) -> void:
+	_fox_leaves(state)
+
+
+## Wizyta lisa przy grze w tle, rozegrana od razu w calosci. Te same zasady
+## co w grze aktywnej: pierwsza kura ginie przy wejsciu, kolejne co
+## kill_interval_min..max sekund, a pies co dog_interval() sekund rzuca
+## kostka. Wygrywa to, co zdarzy sie wczesniej. Klikania palcem tu nie ma,
+## bo gracza nie ma przy grze.
+static func _fox_visit_offline(state: FarmState, out: Dictionary, budget: int,
+		visit_seconds: float) -> void:
+	var fox: Dictionary = GameData.balance().get("fox", {})
+	var next_kill := 0.0
+	var next_dog := state.dog_interval() if state.dog_level > 0 else INF
+	while state.fox_kill_left > 0:
+		if next_dog < next_kill:
+			if next_dog > visit_seconds:
+				break
+			next_dog += state.dog_interval()
+			if randf() >= state.dog_chance():
+				continue
+			if randf() < state.dog_kill_chance():
+				state.fox_next_multiplier = maxf(1.0,
+						float(fox.get("killed_return_multiplier", 5.0)))
+				out["fox_killed"] = int(out.get("fox_killed", 0)) + 1
+			else:
+				out["fox_chased"] = int(out.get("fox_chased", 0)) + 1
+			break
+		if next_kill > visit_seconds:
+			break
+		if not _fox_grabs_one(state, out, budget):
+			break
+		next_kill += randf_range(float(fox.get("kill_interval_min", 3.0)),
+				float(fox.get("kill_interval_max", 10.0)))
 	_fox_leaves(state)
 
 

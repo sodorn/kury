@@ -14,9 +14,10 @@ create table if not exists public.saves (
 
 alter table public.saves enable row level security;
 
--- Klucz anon jest widoczny w plikach gry, wiec kazdy moze wolac to API.
--- Dlatego pozwalamy tylko na odczyt i zapis wiersza o podanym kodzie farmy,
--- bez mozliwosci wylistowania cudzych farm i bez kasowania.
+-- UWAGA: ten plik jest starsza kopia. Aktualna definicja: docs/supabase.sql.
+-- Klucz z gry jest publiczny. Polityki ponizej (using (true)) pozwalaja
+-- KAZDEMU z tym kluczem czytac wszystkie farmy i nadpisac kazda z nich.
+-- Blokuja tylko kasowanie. Opis: DOKUMENTACJA_TECHNICZNA.txt, rozdzial 10.
 drop policy if exists "odczyt po kodzie farmy" on public.saves;
 create policy "odczyt po kodzie farmy"
     on public.saves for select

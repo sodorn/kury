@@ -16,7 +16,9 @@ set -euo pipefail
 
 BUILD_DIR="${1:?podaj katalog z buildem, np. /tmp/web_build}"
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-REMOTE="$(git -C "$PROJECT_DIR" remote get-url origin)"
+# W GitHub Actions adres z tokenem podaje workflow (DEPLOY_REMOTE).
+REMOTE="${DEPLOY_REMOTE:-$(git -C "$PROJECT_DIR" remote get-url origin)}"
+AUTHOR="${DEPLOY_AUTHOR:-Claude}"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
@@ -39,7 +41,7 @@ if git diff --cached --quiet; then
 	echo "Nic do wdrozenia - na serwerze juz jest ta wersja."
 	exit 0
 fi
-git -c user.email=noreply@anthropic.com -c user.name="Claude" \
+git -c user.email=noreply@anthropic.com -c user.name="$AUTHOR" \
 	commit -q -m "Wersja $VERSION na GitHub Pages"
 git push -q origin gh-pages
 echo "Wdrozone: wersja $VERSION"

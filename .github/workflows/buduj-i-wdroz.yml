@@ -1,0 +1,137 @@
+# Buduje gre i wrzuca ja graczom po kazdym pushu na main.
+#
+# Po co: zeby zmiana ceny w data/balance.json zrobiona przez przegladarke
+# (olowek na GitHubie -> Commit) sama trafila do gry. Wczesniej budowanie
+# i wdrazanie robil wylacznie Claude u siebie.
+#
+# Kolejnosc jest bezpiecznikiem: testy logiki, test dymny z prawdziwa grafika,
+# dopiero potem build i wdrozenie. Ktorykolwiek krok sie wysypie - NIC nie
+# trafia do graczy, a w zakladce Actions widac linie "BLAD: ...".
+#
+# Opis calego procesu: DOKUMENTACJA_TECHNICZNA.txt, rozdzialy 12-13.
+name: Buduj i wdroz gre
+
+on:
+  push:
+    branches: [main]
+    # Codzienna kopia farm i same dokumenty nie wdrazaja gry.
+    paths-ignore:
+      - "kopie/**"
+      - "**.md"
+      - "**.TXT"
+      - "INSTRUKCJA.txt"
+      - "DOKUMENTACJA_TECHNICZNA.txt"
+  workflow_dispatch:
+
+# Dwa wdrozenia naraz pokloci by sie o galaz gh-pages. Drugie czeka.
+concurrency:
+  group: wdrozenie-gry
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  GODOT_VERSION: "4.7.2"
+  GODOT_BIN: /home/runner/godot/Godot_v4.7.2-stable_linux.x86_64
+
+jobs:
+  buduj:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Godot z pamieci podrecznej
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /home/runner/godot
+            /home/runner/.local/share/godot/export_templates
+          key: godot-${{ env.GODOT_VERSION }}-web-v1
+
+      - name: Pobierz Godota i szablon eksportu (tylko bez cache)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          base="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable"
+          mkdir -p /home/runner/godot
+          curl -fsSL -o /tmp/godot.zip "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d /home/runner/godot
+          # Paczka szablonow ma ~1,3 GB; wyciagamy tylko to, czego uzywa
+          # eksport Web bez watkow (export_presets.cfg: thread_support=false).
+          curl -fsSL -o /tmp/templates.tpz "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          dest="/home/runner/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p "$dest"
+          unzip -q -j /tmp/templates.tpz \
+            templates/web_nothreads_release.zip \
+            templates/web_nothreads_debug.zip \
+            templates/version.txt -d "$dest"
+          rm -f /tmp/godot.zip /tmp/templates.tpz
+          ls -la "$dest"
+
+      - name: Biblioteki do testu dymnego
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libgl1-mesa-dri libglx-mesa0 > /dev/null
+
+      - name: Import projektu (tlumaczenia, grafiki)
+        run: |
+          "$GODOT_BIN" --version
+          xvfb-run -a "$GODOT_BIN" --headless --path . --import > /tmp/import.log 2>&1 || {
+            tail -40 /tmp/import.log; exit 1; }
+
+      - name: Instrukcja i dokumentacja z aktualnych danych
+        run: |
+          python3 -I tools/gen_instrukcja.py
+          python3 -I tools/gen_dokumentacja.py
+
+      - name: Testy logiki
+        run: |
+          set -o pipefail
+          "$GODOT_BIN" --headless --path . --quit-after 5000 tests/tests.tscn 2>&1 | tee /tmp/testy.log | grep -E "BLAD|TESTY"
+          grep -qE "^TESTY: [0-9]+ OK, 0 BLEDOW" /tmp/testy.log
+
+      - name: Test dymny (cala gra z grafika)
+        run: |
+          set -o pipefail
+          xvfb-run -a -s "-screen 0 1280x1024x24" "$GODOT_BIN" --path . --rendering-driver opengl3 \
+            --quit-after 60000 tests/smoke_ui.tscn 2>&1 | tee /tmp/dymny.log | grep -E "BLAD|DYMNY"
+          grep -q "TEST DYMNY: OK" /tmp/dymny.log
+
+      - name: Zapisz przegenerowane dokumenty na main
+        run: |
+          git config user.name "kury-automat"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add INSTRUKCJA.txt DOKUMENTACJA_TECHNICZNA.txt
+          if git diff --cached --quiet; then
+            echo "Dokumenty aktualne."
+            exit 0
+          fi
+          git commit -q -m "Dokumenty przegenerowane z danych gry [automat]"
+          for i in 1 2 3; do
+            git pull -q --rebase origin main && git push -q origin HEAD:main && exit 0
+            sleep 5
+          done
+          echo "BLAD: nie udalo sie zapisac dokumentow na main" >&2
+          exit 1
+
+      - name: Numer wersji z numerem przebiegu
+        run: |
+          base=$(sed -n 's/^config\/version="\(.*\)"$/\1/p' project.godot)
+          ver="${base}.${GITHUB_RUN_NUMBER}"
+          sed -i "s/^config\/version=\"${base}\"/config\/version=\"${ver}\"/" project.godot
+          sed -i "s/^const VERSION := \"${base}\"/const VERSION := \"${ver}\"/" core/util/game_data.gd
+          grep -q "config/version=\"${ver}\"" project.godot
+          grep -q "const VERSION := \"${ver}\"" core/util/game_data.gd
+          echo "Wersja do wdrozenia: $ver"
+
+      - name: Build
+        run: GODOT="$GODOT_BIN" bash tools/build_web.sh /tmp/web_build
+
+      - name: Wdrozenie na GitHub Pages
+        env:
+          DEPLOY_REMOTE: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          DEPLOY_AUTHOR: kury-automat
+        run: bash tools/deploy_pages.sh /tmp/web_build
