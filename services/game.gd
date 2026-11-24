@@ -504,15 +504,34 @@ func ground_eggs_by_breed() -> Dictionary:
 
 
 ## Sprzedaje wszystkie zebrane jaja. Zwraca zarobek w zlotowkach.
-func sell_eggs() -> float:
-	var earned := state.eggs_value()
+## Sprzedaje jaja. `count` > 0 = tylko tyle sztuk, najstarsze najpierw
+## (przycisk w sklepie sprzedaje partiami - economy.egg_sale_lot). Bez
+## argumentu - wszystkie. Zwraca zarobek.
+func sell_eggs(count: int = 0) -> float:
+	if count <= 0:
+		var earned_all := state.eggs_value()
+		if earned_all <= 0.0:
+			return 0.0
+		state.money += earned_all
+		state.eggs.clear()
+		state.egg_ages.clear()
+		Events.resources_changed.emit()
+		return earned_all
+	var lot := state.oldest_eggs(count)
+	var earned := 0.0
+	for breed_id: String in lot:
+		var taken := state.take_eggs(breed_id, int(lot[breed_id]))
+		earned += taken * FarmState.egg_value(breed_id)
 	if earned <= 0.0:
 		return 0.0
 	state.money += earned
-	state.eggs.clear()
-	state.egg_ages.clear()
 	Events.resources_changed.emit()
 	return earned
+
+
+## Ile jaj idzie w jednej partii sprzedazy.
+func egg_sale_lot() -> int:
+	return maxi(1, int(GameData.balance().get("economy", {}).get("egg_sale_lot", 100)))
 
 
 # --- pasza --------------------------------------------------------------

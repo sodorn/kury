@@ -41,6 +41,7 @@ func _ready() -> void:
 	_test_dog()
 	_test_dog_in_action()
 	_test_dog_offline()
+	_test_egg_lots()
 	_test_breed_gating()
 	_test_guard_migration()
 	_test_fox_return_speed()
@@ -1297,14 +1298,26 @@ func _test_upgrade_ladders() -> void:
 			poprzednia_wartosc = wartosc
 			poprzedni_koszt_jednostki = koszt_jednostki
 
-	# Magazyn ma sens tylko wtedy, gdy kilogram paszy z kazdym poziomem tanieje.
-	var economy: Dictionary = GameData.balance().get("economy", {})
-	var za_kg := float(economy.get("feed_pack_price", 25)) / maxf(1.0, float(economy.get("feed_pack_size", 25)))
-	for poziom: Dictionary in (GameData.balance().get("buildings", {}).get("storage", {}).get("upgrades", []) as Array):
-		var nowy := float(poziom.get("pack_price", 0)) / maxf(1.0, float(poziom.get("pack_size", 1)))
-		_check(nowy < za_kg, "%s: kilogram paszy tanieje (%.2f -> %.2f)"
-				% [String(poziom.get("name", "")), za_kg, nowy])
-		za_kg = nowy
+	# Hurt: kazdy poziom magazynu to wiekszy worek i wiekszy rabat, wiec
+	# kilogram paszy tanieje (wlasciciel: rabat 10-40% rosnie ze skala).
+	var stan := FarmState.new()
+	var poprzedni := stan.feed_pack()
+	_check(is_zero_approx(float(poprzedni["discount"])), "bez rozbudowy magazynu nie ma rabatu")
+	var poziomy: Array = GameData.balance().get("buildings", {}).get("storage", {}).get("upgrades", [])
+	for i in poziomy.size():
+		stan.storage_level = i + 1
+		var worek := stan.feed_pack()
+		var nazwa := String(poziomy[i].get("name", ""))
+		_check(float(worek["discount"]) > float(poprzedni["discount"]),
+				"%s: rabat rosnie (%.0f%% -> %.0f%%)" % [nazwa,
+				float(poprzedni["discount"]) * 100.0, float(worek["discount"]) * 100.0])
+		_check(float(worek["discount"]) < 0.95, "%s: rabat ponizej 95%%" % nazwa)
+		_check(float(worek["size"]) > float(poprzedni["size"]), "%s: worek wiekszy" % nazwa)
+		_check(float(worek["per_kg"]) < float(poprzedni["per_kg"]), "%s: kilogram tanieje" % nazwa)
+		_check(is_equal_approx(float(worek["price"]),
+				round(float(worek["size"]) * float(worek["per_kg"]) * 100.0) / 100.0),
+				"%s: cena worka = kg x cena za kg z rabatem" % nazwa)
+		poprzedni = worek
 
 	# Inkubator nie moze wyprzedzic kurnika: nie ma gdzie wstawic piskląt.
 	var coop_max := 0
@@ -1533,6 +1546,45 @@ func _test_egg_capacity() -> void:
 ## przy grze w tle lis zabieral caly lup naraz, a pies nie dostawal nawet
 ## jednego rzutu kostka — czyli w nocy, gdy jest najbardziej potrzebny,
 ## nie robil nic. Sredni lup z wielu wizyt: bez psa, z kundlem, z owczarkiem.
+## Sklep sprzedaje jaja partiami po economy.egg_sale_lot, najstarsze najpierw
+## - bez wzgledu na rase, bo to najstarsze gnija najszybciej.
+func _test_egg_lots() -> void:
+	Game.new_game()
+	var s := Game.state
+	s.eggs.clear()
+	s.egg_ages.clear()
+	s.add_egg("cemani", 30)
+	s.age_eggs(3600.0, 999999.0)  # cemani: godzina
+	s.add_egg("leghorn", 150)
+	s.age_eggs(600.0, 999999.0)   # cemani 70 min, leghorn 10 min
+	s.add_egg("marans", 20)     # swieze
+	var partia := s.oldest_eggs(100)
+	_check(int(partia.get("cemani", 0)) == 30, "partia zaczyna od najstarszych (cemani 30)")
+	_check(int(partia.get("leghorn", 0)) == 70, "potem kolejne wedlug wieku (leghorn 70)")
+	_check(not partia.has("marans"), "swieze jaja zostaja")
+	_check(s.egg_count() == 200, "podglad partii niczego nie zabiera")
+	var oczekiwane := FarmState.eggs_worth(partia)
+	var pieniadze := s.money
+	var zarobek := Game.sell_eggs(100)
+	_check(is_equal_approx(zarobek, oczekiwane), "sprzedaz daje tyle, ile pokazal przycisk")
+	_check(is_equal_approx(s.money, pieniadze + zarobek), "pieniadze doszly")
+	_check(s.egg_count() == 100, "zostalo 100 jaj")
+	_check(int(s.eggs.get("cemani", 0)) == 0 and int(s.eggs.get("leghorn", 0)) == 80
+			and int(s.eggs.get("marans", 0)) == 20, "zeszly dokladnie te z partii")
+	Game.sell_eggs(100)
+	Game.sell_eggs(100)
+	_check(s.egg_count() == 0, "resztka ponizej partii tez sie sprzedaje")
+	_check(Game.egg_sale_lot() == int(GameData.balance()["economy"].get("egg_sale_lot", -1)),
+			"wielkosc partii z balance.json")
+
+	for para: Array in [[1, "1 jajo"], [2, "2 jaja"], [4, "4 jaja"], [5, "5 jaj"], [12, "12 jaj"],
+			[14, "14 jaj"], [22, "22 jaja"], [100, "100 jaj"], [1003, NumberFormat.grouped(1003) + " jaja"]]:
+		_check(NumberFormat.eggs(int(para[0])) == String(para[1]),
+				"odmiana: %s (jest '%s')" % [para[1], NumberFormat.eggs(int(para[0]))])
+	# Cena za kilogram ponizej zlotowki nie moze wyjsc jako "0 zl".
+	_check(NumberFormat.small_money(0.9) == "90 gr", "90 groszy to '90 gr'")
+
+
 func _test_dog_offline() -> void:
 	var proby := 300
 	var sredni := func(dog: int) -> Array:

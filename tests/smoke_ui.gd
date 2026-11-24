@@ -59,6 +59,7 @@ func _run() -> void:
 	await _test_unlock_popup()
 	await _test_farm_code_restore()
 	await _test_sick_and_fox_look()
+	await _test_feed_panels()
 	await _test_upgrade_looks()
 	await _test_dog_breeds()
 	await _test_fox_death()
@@ -263,10 +264,27 @@ func _test_shop() -> void:
 	if rows.size() < 3:
 		return
 
+	# Jaja schodza partiami po 100, a resztka ponizej setki tez.
+	Game.state.eggs.clear()
+	Game.state.egg_ages.clear()
+	Game.state.add_egg("leghorn", 150)
+	await _frames(20)
+	var sprzedaz := rows[0] as Button
+	_check(sprzedaz.text.begins_with("Sprzedaj 100 jaj za"),
+			"przycisk sprzedaje setke (jest '%s')" % sprzedaz.text)
 	var money_before: float = Game.state.money
-	(rows[0] as Button).emit_signal("pressed")
+	sprzedaz.emit_signal("pressed")
+	await _frames(20)
+	_check(Game.state.egg_count() == 50 and Game.state.money > money_before,
+			"po sprzedazy setki zostaje 50 jaj (jest %d)" % Game.state.egg_count())
+	_check(sprzedaz.text.begins_with("Sprzedaj 50 jaj za"), "potem przycisk sprzedaje resztke")
+	sprzedaz.emit_signal("pressed")
 	await _frames(10)
-	_check(Game.state.egg_count() == 0 and Game.state.money > money_before, "sprzedaz jaj dziala")
+	_check(Game.state.egg_count() == 0, "sprzedaz jaj dziala do konca")
+	_check(sprzedaz.disabled, "bez jaj przycisk jest wyszarzony")
+	var pasza_btn := rows[1] as Button
+	_check(pasza_btn.text.begins_with("Kup worek paszy"),
+			"przycisk paszy: 'Kup worek paszy ...' (jest '%s')" % pasza_btn.text)
 
 	var feed_before: float = Game.state.feed
 	(rows[1] as Button).emit_signal("pressed")
@@ -282,11 +300,33 @@ func _test_shop() -> void:
 	_check(last_card != null and last_card.disabled, "ale bez pieniedzy przycisk jest wyszarzony")
 
 	var hens_before: int = Game.state.hen_count()
+	_check(open_card != null and open_card.text.begins_with("Kup kurę za"),
+			"przycisk mowi 'Kup kurę za ...' (jest '%s')" % (open_card.text if open_card else ""))
 	if open_card != null:
 		open_card.emit_signal("pressed")
+	await _frames(20)
+	# Kupno idzie przez potwierdzenie (wlasciciel, 24.11).
+	_check(Game.state.hen_count() == hens_before, "samo klikniecie jeszcze nie kupuje")
+	var tak_kup := _button_labelled(tr("CONFIRM_YES_BUY"))
+	var nie_kup := _button_labelled(tr("CONFIRM_NO"))
+	_check(tak_kup != null and nie_kup != null, "pojawilo sie pytanie o kupno")
+	var ekran := Rect2(Vector2.ZERO, get_viewport().get_visible_rect().size)
+	if tak_kup != null:
+		_check(ekran.encloses(tak_kup.get_global_rect()), "'Tak, kup' miesci sie na ekranie")
+	_shot("pytanie_kupno.png")
+	if nie_kup != null:
+		nie_kup.emit_signal("pressed")
+	await _frames(20)
+	_check(Game.state.hen_count() == hens_before, "'Nie' niczego nie kupuje")
+	if open_card != null:
+		open_card.emit_signal("pressed")
+	await _frames(20)
+	tak_kup = _button_labelled(tr("CONFIRM_YES_BUY"))
+	if tak_kup != null:
+		tak_kup.emit_signal("pressed")
 	await _frames(30)
 	await _dismiss_unlock_popup()
-	_check(Game.state.hen_count() == hens_before + 1, "zakup kury dziala")
+	_check(Game.state.hen_count() == hens_before + 1, "zakup kury dziala po potwierdzeniu")
 	_check(_nodes_of_type("FarmChicken").size() == Game.state.hen_count(), "kupiona kura pojawila sie na wybiegu")
 	_shot("panel_po_zakupach.png")
 
@@ -1097,3 +1137,39 @@ func _test_fox_death() -> void:
 	_shot("lis_rozszarpany.png")
 	await _seconds(3.6)
 	_check(_nodes_of_type("FarmFox").is_empty(), "zwloki lisa w koncu znikaja")
+
+
+## Panele kurnika i magazynu na farmie jak u wlasciciela (22 kury, magazyn
+## na poziomie 1). Wlasciciel zglosil, ze "cena paszy wyglada blednie".
+func _test_feed_panels() -> void:
+	Game.state.chickens.clear()
+	for i in 22:
+		Game.state.chickens.append(Chicken.create("leghorn"))
+	Game.state.chickens.append(Chicken.create("leghorn", true))
+	Game.state.storage_level = 1
+	Game.state.feed = 1040.0
+	Game.state.money = 1431.0
+	for id: String in ["coop", "storage"]:
+		Events.building_tapped.emit(id, null)
+		await _frames(20)
+		var rows: Node = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Gutter/Scrollable/Rows")
+		var teksty: Array[String] = []
+		for label in rows.find_children("*", "Label", true, false):
+			if (label as Label).visible and not (label as Label).text.is_empty():
+				teksty.append((label as Label).text)
+		var calosc := " | ".join(teksty)
+		if id == "storage":
+			_check(not calosc.contains(" 0 zł/kg"), "cena paszy nie wychodzi jako 0 zl/kg (%s)" % calosc)
+			_check(calosc.contains("90 gr/kg") and calosc.contains("rabat 10%"),
+					"magazyn poziom 1: 90 gr/kg i rabat 10%% (%s)" % calosc)
+		var akcje: Node = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Gutter/Scrollable/Actions")
+		var przyciski: Array[String] = []
+		for b in akcje.find_children("*", "Button", true, false):
+			przyciski.append((b as Button).text)
+
+		_shot("panel_%s.png" % id)
+		Events.notice.emit("")
+		var panel: Node = _main.get_node("Hud/Root/BuildingPanel")
+		if panel.has_method("close"):
+			panel.close()
+		await _frames(20)

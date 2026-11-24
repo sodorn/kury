@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 12.15
+  INSTRUKCJA OBSLUGI *** gra w wersji 12.16
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -97,10 +97,11 @@
      Jaj powyzej 40 sztuk naraz gra nie kladzie na trawie - nadmiar
      ladzie prosto w magazynie.
 
-  2. SPRZEDAWAJ JAJA w sklepie. To biezacy przychod na pasze.
+  2. SPRZEDAWAJ JAJA w sklepie, po 100 sztuk na dotkniecie. Ida najstarsze,
+     bo te najszybciej gnija. To biezacy przychod na pasze.
 
   3. KUPUJ PASZE, zanim sie skonczy. Pusty magazyn = stado zaczyna padac
-     po 3 minutach.
+     po 9 minutach.
 
   4. WKLADAJ JAJA DO INKUBATORA. 3 jaja jednej rasy = jedno pisklę tej rasy.
      Pisklę rosnie i zmienia sie w dorosla kure.
@@ -213,21 +214,22 @@
  10. MAGAZYN
 ==============================================================================
 
-  +===========+===========+==========+============+================+
-  |    poziom | limit jaj | worek kg | cena worka | cena rozbudowy |
-  +===========+===========+==========+============+================+
-  | 0 (start) |       200 |       25 |      25 zl |              - |
-  |         1 |       500 |       60 |      57 zl |         600 zl |
-  |         2 |     1 000 |      150 |     135 zl |       3 000 zl |
-  |         3 |     2 000 |      400 |     340 zl |      10 500 zl |
-  |         4 |    10 000 |    1 000 |     800 zl |      30 000 zl |
-  |         5 |    50 000 |    2 500 |   1 875 zl |      80 000 zl |
-  |         6 |   150 000 |    6 000 |   4 200 zl |     200 000 zl |
-  |         7 |   500 000 |   15 000 |   9 750 zl |     540 000 zl |
-  +-----------+-----------+----------+------------+----------------+
+  +===========+===========+==========+============+=======+============+
+  |    poziom | limit jaj | worek kg | cena worka | rabat |  rozbudowa |
+  +===========+===========+==========+============+=======+============+
+  | 0 (start) |       200 |       25 |      25 zl |     - |          - |
+  |         1 |       500 |       60 |      54 zl |   10% |     600 zl |
+  |         2 |     1 000 |      160 |     136 zl |   15% |   3 000 zl |
+  |         3 |     2 000 |      400 |     320 zl |   20% |  10 500 zl |
+  |         4 |    10 000 |    1 000 |     750 zl |   25% |  30 000 zl |
+  |         5 |    50 000 |    2 500 |   1 750 zl |   30% |  80 000 zl |
+  |         6 |   150 000 |    6 000 |   3 900 zl |   35% | 200 000 zl |
+  |         7 |   500 000 |   15 000 |   9 000 zl |   40% | 540 000 zl |
+  +-----------+-----------+----------+------------+-------+------------+
 
-  Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i daje wieksze,
-  tansze za kilogram worki paszy. Magazyn zmienia wyglad na poziomie 3 i 6.
+  Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i daje HURT -
+  wiekszy worek paszy z rabatem od 10% do 40%. Im wiekszy magazyn, tym tanszy
+  kilogram. Magazyn zmienia wyglad na poziomie 3 i 6.
 
 ==============================================================================
  11. INKUBATOR

@@ -48,7 +48,9 @@ OPISY = {
                        "Game.new_game"),
     # -------------------------------------------------------------- economy
     "economy.feed_pack_size": ("kg", "Wielkosc worka paszy przy magazynie na poziomie 0. Wyzsze "
-                               "poziomy maja wlasne worki (buildings.storage.upgrades[].pack_size).",
+                               "poziomy maja wlasne worki (buildings.storage.upgrades[].pack_size). "
+                               "Razem z feed_pack_price wyznacza CENE BAZOWA kilograma, od ktorej "
+                               "liczy sie rabaty hurtowe.",
                                "FarmState.feed_pack(), panel sklepu"),
     "economy.feed_pack_price": ("zl", "Cena worka paszy przy magazynie na poziomie 0.",
                                 "FarmState.feed_pack(), panel sklepu"),
@@ -59,6 +61,9 @@ OPISY = {
                                     "FarmState.feed_per_minute, Simulation._step"),
     "economy.chick_feed_multiplier": ("mnoznik", "Pisklę zjada tyle razy wiecej niz dorosly ptak "
                                       "(0.5 = polowe).", "FarmState.feed_per_minute"),
+    "economy.egg_sale_lot": ("szt.", "Ile jaj sprzedaje jedno dotkniecie przycisku w sklepie. "
+                             "Najstarsze najpierw, bez wzgledu na rase. Mniej jaj niz partia = "
+                             "sprzedaje resztke.", "Game.sell_eggs, Game.egg_sale_lot"),
     "economy.egg_spoil_hours": ("h ZEGARA", "Po tylu godzinach niesprzedane jajo w magazynie gnije "
                                 "i znika. 0 wylacza gnicie. Wiek jaj trzyma FarmState.egg_ages.",
                                 "Simulation._advance_egg_spoilage, FarmState.age_eggs"),
@@ -174,7 +179,11 @@ OPISY = {
                                        "FarmState.egg_capacity"),
     "buildings.storage.upgrades[].name": ("klucz tekstu", "Nazwa poziomu magazynu.", "panel magazynu"),
     "buildings.storage.upgrades[].pack_size": ("kg", "Worek paszy na tym poziomie.", "FarmState.feed_pack"),
-    "buildings.storage.upgrades[].pack_price": ("zl", "Cena tego worka.", "FarmState.feed_pack"),
+    "buildings.storage.upgrades[].pack_discount": ("0-1", "Rabat hurtowy na pasze na tym poziomie "
+                                                   "(0.10 = 10%). Cena worka = pack_size * cena bazowa "
+                                                   "za kg (economy.feed_pack_price / feed_pack_size) * "
+                                                   "(1 - rabat), do pelnych groszy. Musi rosnac z "
+                                                   "poziomem (test).", "FarmState.feed_pack"),
     "buildings.storage.upgrades[].price": ("zl", "Cena przejscia NA ten poziom.", "Game.upgrade_building"),
     "buildings.storage.upgrades[].egg_capacity": ("szt.", "Limit jaj na tym poziomie.",
                                                   "FarmState.egg_capacity"),
@@ -614,7 +623,18 @@ def build():
          "(FarmState.egg_capacity): jajo, ktore sie nie miesci, przepada. FarmState.add_egg zwraca, "
          "ile faktycznie weszlo.")
     para("Gnicie: FarmState.egg_ages trzyma wiek jaj kazdej rasy (ZEGAR). Jajo starsze niz "
-         "economy.egg_spoil_hours (%s h) znika. Sprzedaz zabiera najstarsze jaja." % fmt(BAL["economy"]["egg_spoil_hours"]))
+         "economy.egg_spoil_hours (%s h) znika. Sklep sprzedaje partiami po economy.egg_sale_lot "
+         "(%s) - FarmState.oldest_eggs wybiera NAJSTARSZE jaja ze wszystkich ras, bo te zgnija "
+         "najpierw." % (fmt(BAL["economy"]["egg_spoil_hours"]), BAL["economy"]["egg_sale_lot"]))
+    head("6.1a Pasza w hurcie")
+    eco = BAL["economy"]
+    per_kg = eco["feed_pack_price"] / eco["feed_pack_size"]
+    rows = [["0", eco["feed_pack_size"], "0%", "%.2f" % (eco["feed_pack_size"] * per_kg), "%.2f" % per_kg]]
+    for i, u in enumerate(BAL["buildings"]["storage"]["upgrades"], start=1):
+        kg = per_kg * (1 - u["pack_discount"])
+        rows.append([str(i), u["pack_size"], "%.0f%%" % (u["pack_discount"] * 100),
+                     "%.2f" % round(u["pack_size"] * kg, 2), "%.2f" % kg])
+    table(["magazyn", "worek kg", "rabat", "cena zl", "zl/kg"], rows, "rrrrr")
 
     head("6.2 Pasza i glod")
     block("""
@@ -1075,6 +1095,8 @@ def build():
     kill_interval_min > 0, kill_interval_max >= kill_interval_min,
     killed_return_multiplier >= 1
   - egg_spoil_hours > 0, magazyn na poziomie 0 > 50 jaj
+  - magazyn: z kazdym poziomem wiekszy worek, wiekszy rabat
+    (pack_discount < 0.95) i tanszy kilogram paszy
   - lek, skup, szczepienie: cena > 0
   - KAZDY klucz balance.json i breeds.json ma opis w tym dokumencie""")
 

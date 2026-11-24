@@ -495,13 +495,82 @@ func coop_free() -> int:
 
 
 ## Worek paszy: rozmiar i cena przy obecnym poziomie magazynu.
+## Worek paszy przy obecnym magazynie. Cena liczona z ceny bazowej za kilogram
+## (economy.feed_pack_price / feed_pack_size) i rabatu hurtowego poziomu
+## magazynu (pack_discount, 0.10 = 10%). Wlasciciel: rabat 10-40%, rosnie ze
+## skala, a wiekszy magazyn to wiekszy worek.
 func feed_pack() -> Dictionary:
 	var economy: Dictionary = GameData.balance().get("economy", {})
+	var base_size := maxf(1.0, float(economy.get("feed_pack_size", 25)))
+	var base_kg := float(economy.get("feed_pack_price", 25)) / base_size
 	var upgrade := current_building_upgrade("storage")
+	var size := float(upgrade.get("pack_size", base_size))
+	var discount := clampf(float(upgrade.get("pack_discount", 0.0)), 0.0, 0.95)
+	var per_kg := base_kg * (1.0 - discount)
 	return {
-		"size": float(upgrade.get("pack_size", economy.get("feed_pack_size", 25))),
-		"price": float(upgrade.get("pack_price", economy.get("feed_pack_price", 60))),
+		"size": size,
+		# Do pelnych groszy, zeby cena na przycisku i pobrana kwota sie zgadzaly.
+		"price": round(size * per_kg * 100.0) / 100.0,
+		"per_kg": per_kg,
+		"discount": discount,
 	}
+
+
+## Ktore jaja pojda w nastepnej partii sprzedazy: NAJSTARSZE, niezaleznie od
+## rasy - wlasnie one najszybciej zgnija. Zwraca {rasa: sztuk}. Nic nie zmienia.
+func oldest_eggs(count: int) -> Dictionary:
+	var out := {}
+	# Kursor po wiaderkach kazdej rasy: [indeks wiaderka, zabrane z niego].
+	var cursor := {}
+	var spare := {}
+	for breed_id: String in eggs:
+		cursor[breed_id] = [0, 0]
+		# Jaja bez metryki wieku (stare zapisy) traktujemy jak najswiezsze.
+		var in_buckets := 0
+		for bucket: Array in egg_ages.get(breed_id, []):
+			in_buckets += int(bucket[0])
+		spare[breed_id] = maxi(0, int(eggs[breed_id]) - in_buckets)
+	var left := count
+	while left > 0:
+		var best := ""
+		var best_age := -1.0
+		for breed_id: String in cursor:
+			var buckets: Array = egg_ages.get(breed_id, [])
+			var at: Array = cursor[breed_id]
+			if int(at[0]) < buckets.size():
+				var age := float(buckets[int(at[0])][1])
+				if age > best_age:
+					best_age = age
+					best = breed_id
+			elif int(spare[breed_id]) > 0 and best_age < 0.0:
+				best = breed_id
+				best_age = 0.0
+		if best.is_empty():
+			break
+		var buckets: Array = egg_ages.get(best, [])
+		var at: Array = cursor[best]
+		var take := 0
+		if int(at[0]) < buckets.size():
+			var room := int(buckets[int(at[0])][0]) - int(at[1])
+			take = mini(room, left)
+			at[1] = int(at[1]) + take
+			if int(at[1]) >= int(buckets[int(at[0])][0]):
+				at[0] = int(at[0]) + 1
+				at[1] = 0
+		else:
+			take = mini(int(spare[best]), left)
+			spare[best] = int(spare[best]) - take
+		out[best] = int(out.get(best, 0)) + take
+		left -= take
+	return out
+
+
+## Wartosc zestawu jaj {rasa: sztuk}.
+static func eggs_worth(lot: Dictionary) -> float:
+	var total := 0.0
+	for breed_id: String in lot:
+		total += float(lot[breed_id]) * egg_value(breed_id)
+	return total
 
 
 ## Ile razy rzadziej przychodzi lis dzieki plotowi albo psu.

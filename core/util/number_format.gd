@@ -41,3 +41,15 @@ static func small_money(amount: float) -> String:
 	if grosze % 100 == 0:
 		return money(amount)
 	return "%d,%02d zł" % [grosze / 100, grosze % 100]
+
+
+## Liczba jaj z poprawna polska koncowka: 1 jajo, 2-4 jaja, 5 jaj, 22 jaja,
+## 12 jaj, 100 jaj.
+static func eggs(count: int) -> String:
+	var n := absi(count)
+	var word := "jaj"
+	if n == 1:
+		word = "jajo"
+	elif n % 10 >= 2 and n % 10 <= 4 and not (n % 100 >= 12 and n % 100 <= 14):
+		word = "jaja"
+	return "%s %s" % [grouped(count), word]

@@ -292,12 +292,15 @@ func _build_storage() -> void:
 					int(Game.state.eggs.get(breed_id, 0)),
 					NumberFormat.money(int(Game.state.eggs.get(breed_id, 0)) * FarmState.egg_value(breed_id))])
 
+	# Cena za kilogram jest ponizej zlotowki - zwykle money() obcina do pelnych
+	# zlotych w dol i pokazywalo "0 zl/kg" (zgloszenie wlasciciela).
 	_add_row("PANEL_FEED_PRICE",
 			func() -> String:
 				var pack := Game.state.feed_pack()
 				return tr("PANEL_FEED_PRICE_VALUE") % [
-					int(pack["size"]),
-					NumberFormat.money(float(pack["price"]) / maxf(1.0, float(pack["size"])))])
+					int(pack["size"]), NumberFormat.money(float(pack["price"])),
+					NumberFormat.small_money(float(pack["per_kg"])),
+					int(round(float(pack["discount"]) * 100.0))])
 	_add_action(true,
 			func() -> bool: return Game.state.money >= float(
 					Game.state.next_building_upgrade("storage").get("price", 0)),
@@ -308,6 +311,7 @@ func _build_storage() -> void:
 					tr(String(upgrade.get("name", ""))),
 					NumberFormat.money(float(upgrade.get("price", 0))),
 					int(size),
+					int(round(float(upgrade.get("pack_discount", 0.0)) * 100.0)),
 					NumberFormat.grouped(int(upgrade.get("egg_capacity", 0)))],
 			func() -> void: _on_upgrade("storage"),
 			func() -> bool: return not Game.state.next_building_upgrade("storage").is_empty(),
@@ -446,16 +450,25 @@ func _build_incubator() -> void:
 
 ## Sklep: jaja, pasza, weterynaria i karty ras ze zdjeciem.
 func _build_shop() -> void:
+	# Jaja idą partiami (economy.egg_sale_lot), najstarsze najpierw. Gdy
+	# zostalo mniej niz partia, przycisk sprzedaje resztke - inaczej zgnilaby.
 	_add_action(true,
 			func() -> bool: return Game.state.egg_count() > 0,
-			func() -> String: return tr("PANEL_SELL_EGGS") % [
-				Game.state.egg_count(), NumberFormat.money(Game.state.eggs_value())],
+			func() -> String:
+				var n := mini(Game.egg_sale_lot(), Game.state.egg_count())
+				var lot := Game.state.oldest_eggs(n)
+				return tr("PANEL_SELL_EGGS") % [
+					NumberFormat.eggs(n), NumberFormat.money(FarmState.eggs_worth(lot))],
 			_on_sell_eggs)
 
 	_add_action(false,
 			func() -> bool: return Game.state.money >= float(Game.state.feed_pack()["price"]),
 			func() -> String:
 				var pack := Game.state.feed_pack()
+				if float(pack["discount"]) > 0.0:
+					return tr("PANEL_BUY_FEED_DISCOUNT") % [
+						int(pack["size"]), NumberFormat.money(float(pack["price"])),
+						int(round(float(pack["discount"]) * 100.0))]
 				return tr("PANEL_BUY_FEED") % [
 					int(pack["size"]), NumberFormat.money(float(pack["price"]))],
 			_on_buy_feed)
@@ -601,10 +614,10 @@ func _flash(message: String) -> void:
 
 
 func _on_sell_eggs() -> void:
-	var sold := Game.state.egg_count()
-	var earned := Game.sell_eggs()
+	var sold := mini(Game.egg_sale_lot(), Game.state.egg_count())
+	var earned := Game.sell_eggs(sold)
 	if earned > 0.0:
-		_flash(tr("PANEL_SOLD") % [sold, NumberFormat.money(earned)])
+		_flash(tr("PANEL_SOLD") % [NumberFormat.eggs(sold), NumberFormat.money(earned)])
 
 
 func _on_buy_feed() -> void:
@@ -612,7 +625,17 @@ func _on_buy_feed() -> void:
 		_flash(tr("PANEL_FEED_BOUGHT"))
 
 
+## Kupno tez idzie przez potwierdzenie (wlasciciel, 24.11) - droga rasa to
+## tysiace zlotych, a przycisk stoi tuz obok sprzedazy.
 func _on_buy_hen(breed_id: String, breed_name: String, rooster: bool = false) -> void:
+	var price := FarmState.hen_buy_price(breed_id, rooster)
+	var key := "CONFIRM_BUY_ROOSTER" if rooster else "CONFIRM_BUY_HEN"
+	_ask(tr(key) % [breed_name, NumberFormat.money(price)],
+			func() -> void: _do_buy_hen(breed_id, breed_name, rooster),
+			tr("CONFIRM_YES_BUY"))
+
+
+func _do_buy_hen(breed_id: String, breed_name: String, rooster: bool) -> void:
 	if Game.buy_hen(breed_id, rooster):
 		var key := "PANEL_ROOSTER_BOUGHT" if rooster else "PANEL_HEN_BOUGHT"
 		_flash(tr(key) % breed_name)
@@ -646,7 +669,7 @@ func _do_sell_hen(breed_id: String, breed_name: String, rooster: bool) -> void:
 ## Pytanie "na pewno?" w srodku panelu. Celowo nie jest to okno systemowe:
 ## gra chodzi w przegladarce na telefonie, gdzie wlasne okienko wyglada
 ## obco i potrafi sie nie zmiescic.
-func _ask(question: String, on_yes: Callable) -> void:
+func _ask(question: String, on_yes: Callable, yes_text: String = "") -> void:
 	if _confirm != null and is_instance_valid(_confirm):
 		_confirm.queue_free()
 	# Zaslona na caly panel: przyciemnia tlo, lapie dotkniecia, zeby nie
@@ -675,7 +698,7 @@ func _ask(question: String, on_yes: Callable) -> void:
 	var buttons := HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", 18)
 	var yes := Button.new()
-	yes.text = tr("CONFIRM_YES")
+	yes.text = yes_text if not yes_text.is_empty() else tr("CONFIRM_YES")
 	yes.theme_type_variation = &"PrimaryButton"
 	yes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var no := Button.new()

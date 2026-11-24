@@ -21,6 +21,7 @@
     "_opis_kogut": "Kogut kosztuje 250% ceny kury tej samej rasy (Tomek, 2026-11-24). Jeden kogut obsluguje cala rase, wiec przy cenie kury byl najtanszym obowiazkowym zakupem w grze.",
     "feed_per_hen_minute": 0.34,
     "chick_feed_multiplier": 0.5,
+    "egg_sale_lot": 100,
     "egg_spoil_hours": 4.0
   },
   "run": {
@@ -194,49 +195,49 @@
         {
           "name": "STORE_T1",
           "pack_size": 60,
-          "pack_price": 57,
+          "pack_discount": 0.10,
           "price": 600,
           "egg_capacity": 500
         },
         {
           "name": "STORE_T2",
-          "pack_size": 150,
-          "pack_price": 135,
+          "pack_size": 160,
+          "pack_discount": 0.15,
           "price": 3000,
           "egg_capacity": 1000
         },
         {
           "name": "STORE_T3",
           "pack_size": 400,
-          "pack_price": 340,
+          "pack_discount": 0.20,
           "price": 10500,
           "egg_capacity": 2000
         },
         {
           "name": "STORE_T4",
           "pack_size": 1000,
-          "pack_price": 800,
+          "pack_discount": 0.25,
           "price": 30000,
           "egg_capacity": 10000
         },
         {
           "name": "STORE_T5",
           "pack_size": 2500,
-          "pack_price": 1875,
+          "pack_discount": 0.30,
           "price": 80000,
           "egg_capacity": 50000
         },
         {
           "name": "STORE_T6",
           "pack_size": 6000,
-          "pack_price": 4200,
+          "pack_discount": 0.35,
           "price": 200000,
           "egg_capacity": 150000
         },
         {
           "name": "STORE_T7",
           "pack_size": 15000,
-          "pack_price": 9750,
+          "pack_discount": 0.40,
           "price": 540000,
           "egg_capacity": 500000
         }

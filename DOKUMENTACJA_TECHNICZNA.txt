@@ -1,6 +1,6 @@
 ==============================================================================
   SYMULATOR HODOWLI KURCZAKOW - DOKUMENTACJA TECHNICZNA
-  gra w wersji 12.15   *   format zapisu w wersji 6   *   Godot 4.7.2
+  gra w wersji 12.16   *   format zapisu w wersji 6   *   Godot 4.7.2
 ==============================================================================
 
   Dokument dla programisty: jak gra jest zbudowana, jak dzialaja mechaniki, co
@@ -245,7 +245,25 @@
   miesci, przepada. FarmState.add_egg zwraca, ile faktycznie weszlo.
 
   Gnicie: FarmState.egg_ages trzyma wiek jaj kazdej rasy (ZEGAR). Jajo starsze
-  niz economy.egg_spoil_hours (4.0 h) znika. Sprzedaz zabiera najstarsze jaja.
+  niz economy.egg_spoil_hours (4.0 h) znika. Sklep sprzedaje partiami po
+  economy.egg_sale_lot (100) - FarmState.oldest_eggs wybiera NAJSTARSZE jaja
+  ze wszystkich ras, bo te zgnija najpierw.
+
+  6.1a Pasza w hurcie
+  -------------------
+
+  +=========+==========+=======+=========+=======+
+  | magazyn | worek kg | rabat | cena zl | zl/kg |
+  +=========+==========+=======+=========+=======+
+  |       0 |       25 |    0% |   25.00 |  1.00 |
+  |       1 |       60 |   10% |   54.00 |  0.90 |
+  |       2 |      160 |   15% |  136.00 |  0.85 |
+  |       3 |      400 |   20% |  320.00 |  0.80 |
+  |       4 |     1000 |   25% |  750.00 |  0.75 |
+  |       5 |     2500 |   30% | 1750.00 |  0.70 |
+  |       6 |     6000 |   35% | 3900.00 |  0.65 |
+  |       7 |    15000 |   40% | 9000.00 |  0.60 |
+  +---------+----------+-------+---------+-------+
 
   6.2 Pasza i glod
   ----------------
@@ -396,7 +414,9 @@
   economy.feed_pack_size
       = 25 [kg]
       Wielkosc worka paszy przy magazynie na poziomie 0. Wyzsze poziomy maja
-      wlasne worki (buildings.storage.upgrades[].pack_size).
+      wlasne worki (buildings.storage.upgrades[].pack_size). Razem z
+      feed_pack_price wyznacza CENE BAZOWA kilograma, od ktorej liczy sie
+      rabaty hurtowe.
       uzycie: FarmState.feed_pack(), panel sklepu
 
   economy.feed_pack_price
@@ -419,6 +439,12 @@
       = 0.5 [mnoznik]
       Pisklę zjada tyle razy wiecej niz dorosly ptak (0.5 = polowe).
       uzycie: FarmState.feed_per_minute
+
+  economy.egg_sale_lot
+      = 100 [szt.]
+      Ile jaj sprzedaje jedno dotkniecie przycisku w sklepie. Najstarsze
+      najpierw, bez wzgledu na rase. Mniej jaj niz partia = sprzedaje resztke.
+      uzycie: Game.sell_eggs, Game.egg_sale_lot
 
   economy.egg_spoil_hours
       = 4.0 [h ZEGARA]
@@ -731,13 +757,15 @@
       uzycie: panel magazynu
 
   buildings.storage.upgrades[].pack_size
-      = [60, 150, 400, 1000, 2500, 6000, 15000] [kg]
+      = [60, 160, 400, 1000, 2500, 6000, 15000] [kg]
       Worek paszy na tym poziomie.
       uzycie: FarmState.feed_pack
 
-  buildings.storage.upgrades[].pack_price
-      = [57, 135, 340, 800, 1875, 4200, 9750] [zl]
-      Cena tego worka.
+  buildings.storage.upgrades[].pack_discount
+      = [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4] [0-1]
+      Rabat hurtowy na pasze na tym poziomie (0.10 = 10%). Cena worka =
+      pack_size * cena bazowa za kg (economy.feed_pack_price / feed_pack_size)
+      * (1 - rabat), do pelnych groszy. Musi rosnac z poziomem (test).
       uzycie: FarmState.feed_pack
 
   buildings.storage.upgrades[].price
@@ -1326,6 +1354,8 @@
     kill_interval_min > 0, kill_interval_max >= kill_interval_min,
     killed_return_multiplier >= 1
   - egg_spoil_hours > 0, magazyn na poziomie 0 > 50 jaj
+  - magazyn: z kazdym poziomem wiekszy worek, wiekszy rabat
+    (pack_discount < 0.95) i tanszy kilogram paszy
   - lek, skup, szczepienie: cena > 0
   - KAZDY klucz balance.json i breeds.json ma opis w tym dokumencie
 
@@ -1442,5 +1472,5 @@
     limity miejsca i ruchu planu darmowego.
 
 ==============================================================================
-  koniec dokumentu  *  wygenerowano z wersji 12.15
+  koniec dokumentu  *  wygenerowano z wersji 12.16
 ==============================================================================

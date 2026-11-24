@@ -265,7 +265,8 @@ raw("""
      Jaj powyzej %d sztuk naraz gra nie kladzie na trawie - nadmiar
      ladzie prosto w magazynie.
 
-  2. SPRZEDAWAJ JAJA w sklepie. To biezacy przychod na pasze.
+  2. SPRZEDAWAJ JAJA w sklepie, po %d sztuk na dotkniecie. Ida najstarsze,
+     bo te najszybciej gnija. To biezacy przychod na pasze.
 
   3. KUPUJ PASZE, zanim sie skonczy. Pusty magazyn = stado zaczyna padac
      po %g minutach.
@@ -278,7 +279,8 @@ raw("""
 
   6. ROZBUDOWUJ. Wiekszy kurnik to wiecej kur, wiekszy inkubator to wiecej
      piskląt naraz, wiekszy magazyn to wiecej jaj i tanszy worek paszy.
-""" % (BAL["run"]["max_eggs_on_ground"], BAL["hunger"]["grace_minutes"],
+""" % (BAL["run"]["max_eggs_on_ground"], ECO["egg_sale_lot"],
+       round(BAL["hunger"]["grace_minutes"] / SCALE, 1),
        BAL["incubator"]["eggs_per_chick"]))
 raw("")
 para("""
@@ -371,15 +373,19 @@ title("10. MAGAZYN")
 st = BAL["buildings"]["storage"]
 rows = [["0 (start)", num(st["egg_capacity"]), num(ECO["feed_pack_size"]),
          zl(ECO["feed_pack_price"]), "-"]]
+BASE_KG = float(ECO["feed_pack_price"]) / float(ECO["feed_pack_size"])
+rows[0].insert(4, "-")
 for i, u in enumerate(st["upgrades"], start=1):
+    worek = round(u["pack_size"] * BASE_KG * (1 - u["pack_discount"]), 2)
     rows.append([str(i), num(u["egg_capacity"]), num(u["pack_size"]),
-                 zl(u["pack_price"]), zl(u["price"])])
-table(["poziom", "limit jaj", "worek kg", "cena worka", "cena rozbudowy"],
-      rows, align="rrrrr")
+                 zl(worek), "%d%%" % round(u["pack_discount"] * 100), zl(u["price"])])
+table(["poziom", "limit jaj", "worek kg", "cena worka", "rabat", "rozbudowa"],
+      rows, align="rrrrrr")
 para("""
-Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i daje wieksze,
-tansze za kilogram worki paszy. Magazyn zmienia wyglad na poziomie 3 i 6.
-""")
+Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i daje HURT -
+wiekszy worek paszy z rabatem od %d%% do %d%%. Im wiekszy magazyn, tym tanszy
+kilogram. Magazyn zmienia wyglad na poziomie 3 i 6.
+""" % (round(st["upgrades"][0]["pack_discount"] * 100), round(st["upgrades"][-1]["pack_discount"] * 100)))
 
 title("11. INKUBATOR")
 inc = BAL["incubator"]

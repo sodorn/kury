@@ -4,7 +4,12 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.15): GitHub Actions buduje i wdraza
+- Aktualny etap: **ETAP 10** (wersja 12.16): hurt paszy (rabat 10-40% z
+  poziomem magazynu, pole pack_discount zamiast pack_price), jaja sprzedawane
+  partiami po 100 (economy.egg_sale_lot, najstarsze najpierw), potwierdzenie
+  przy kupnie kury i koguta, ujednolicone napisy Kup/Sprzedaj kure/koguta,
+  naprawiona cena za kg w magazynie (pokazywala "0 zl/kg").
+- Wersja 12.15: GitHub Actions buduje i wdraza
   gre po kazdym pushu na main (.github/workflows/buduj-i-wdroz.yml) -
   wlasciciel moze sam zmieniac data/balance.json i breeds.json. Testy nie
   trzymaja juz konkretnych cen, tylko reguly rozsadku. Psy i plot x2.
