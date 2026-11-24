@@ -43,14 +43,38 @@ var last_result := -1
 var last_rows := -1
 
 
+## Martwy adres dla testow: port 9 (discard) na wlasnej maszynie - polaczenie
+## odbija sie natychmiast, a gra dalej "ma serwer", wiec testy sprawdzaja te
+## same sciezki kodu co u gracza.
+const TEST_SERVER := "http://127.0.0.1:9"
+
+
 func _ready() -> void:
 	_config = _load_config()
+	# Testy nie moga dotykac prawdziwej bazy. 24.11 wyszlo, ze testy na
+	# GitHubie zakladaly smieciowe farmy (399975, 439267) i nadpisywaly
+	# farme 327733, ktorej kod jest wpisany w test. Workflow ustawia te
+	# zmienna; testy dodatkowo wolaja use_test_server() na samym starcie.
+	if not OS.get_environment("KURY_BEZ_SERWERA").is_empty():
+		use_test_server()
 	player_id = _load_or_create_player_id()
 	_push_http = HTTPRequest.new()
 	_push_http.timeout = float(_config.get("timeout_seconds", 8))
 	_push_http.accept_gzip = false
 	add_child(_push_http)
 	_push_http.request_completed.connect(_on_push_done)
+
+
+## Przestawia gre na martwy adres. Nic, co zrobia testy, nie wyjdzie poza
+## ten komputer. `url` pozwala wskazac lokalny udawany serwer
+## (tools/mock_backend.py).
+func use_test_server(url: String = TEST_SERVER) -> void:
+	_config["url"] = url
+
+
+func is_test_server() -> bool:
+	return String(_config.get("url", "")).begins_with("http://127.0.0.1") \
+			or String(_config.get("url", "")).begins_with("http://localhost")
 
 
 ## Czy zapis na serwerze jest w ogole skonfigurowany.

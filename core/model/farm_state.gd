@@ -239,10 +239,21 @@ func has_full_collection() -> bool:
 ## Chorej kury skup nie przyjmuje w ogole — trzeba ja wyleczyc albo ubic.
 ## Parametr `sick` zostaje, zeby stare wywolania nadal sie kompilowaly, ale
 ## zwraca teraz zero zamiast ulamka ceny.
-static func hen_sell_price(breed_id: String, sick: bool = false) -> float:
+## Ile dostaje sie za zdrowa dorosla sztuke. Kogut idzie za sell_price razy
+## ten sam mnoznik co w kupnie (economy.rooster_price_multiplier) - wlasciciel,
+## 24.11: "tak jak w kupnie, dla kazdej rasy adekwatnie". Dzieki temu kogut,
+## tak samo jak kura, schodzi za 70% swojej ceny kupna.
+static func hen_sell_price(breed_id: String, sick: bool = false, rooster: bool = false) -> float:
 	if sick:
 		return 0.0
-	return float(GameData.breed(breed_id).get("sell_price", 0))
+	var price := float(GameData.breed(breed_id).get("sell_price", 0))
+	if not rooster:
+		return price
+	return price * rooster_multiplier()
+
+
+static func rooster_multiplier() -> float:
+	return float(GameData.balance().get("economy", {}).get("rooster_price_multiplier", 2.5))
 
 
 ## Ile kosztuje zakup jednej sztuki. Kogut jest DROZSZY od kury tej samej
@@ -253,8 +264,7 @@ static func hen_buy_price(breed_id: String, rooster: bool = false) -> float:
 	var price := float(GameData.breed(breed_id).get("price", 0))
 	if not rooster:
 		return price
-	var economy: Dictionary = GameData.balance().get("economy", {})
-	return price * float(economy.get("rooster_price_multiplier", 2.0))
+	return price * rooster_multiplier()
 
 
 static func egg_value(breed_id: String) -> float:

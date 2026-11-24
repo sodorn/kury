@@ -4,7 +4,18 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.16): hurt paszy (rabat 10-40% z
+- Aktualny etap: **ETAP 10** (wersja 12.17): kogut SPRZEDAWANY tez za 250%
+  ceny kury swojej rasy (FarmState.hen_sell_price(..., rooster) i
+  rooster_multiplier()). Testy NIE dotykaja juz bazy produkcyjnej: przed 12.17
+  testy w CI pisaly do Supabase (powstaly smieciowe farmy 399975 i 439267,
+  farma 327733 zmieniona przez test z kodem na sztywno). Teraz
+  Cloud.use_test_server() (http://127.0.0.1:9), zmienna KURY_BEZ_SERWERA=1
+  w workflow, oba zestawy testow sprawdzaja Cloud.is_test_server(), test
+  ponownej proby uzywa kodu 100001. Smieciowe wiersze zostaly w bazie
+  (brak polityki delete). Nowe laboratorium lisa tests/fox_lab.tscn (tylko
+  pomiar, nie jest w CI). Raport balansu ulepszen i lisa oddany 24.11,
+  BEZ zmian liczb - zmiany w kolejnej wersji.
+- Wersja 12.16: hurt paszy (rabat 10-40% z
   poziomem magazynu, pole pack_discount zamiast pack_price), jaja sprzedawane
   partiami po 100 (economy.egg_sale_lot, najstarsze najpierw), potwierdzenie
   przy kupnie kury i koguta, ujednolicone napisy Kup/Sprzedaj kure/koguta,
@@ -849,6 +860,11 @@ niezauwazony).
   obszar na realnym urzadzeniu.
 
 ## Nastepne zadania
+
+- (12.18, po decyzji Tomka) lis: patrz raport z 24.11 - wspolny zegar losowan
+  omija losowanie offline, plot 4 + owczarek prawie wylacza lisa, ofiary 3-10
+  sztuk niezaleznie od wielkosci stada. Balans ulepszen: magazyn T5-T7 i
+  plot/pies za tanie/za drogie wzgledem korzysci - patrz raport.
 
 - Krotki samouczek na start (3-4 kroki) i przycisk "?" z zasadami.
 - Zdjecia ras: podmiana plikow w assets/photos/, bez zmian w kodzie.

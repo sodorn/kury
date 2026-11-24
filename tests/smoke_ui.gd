@@ -11,6 +11,11 @@ var _main: Node
 
 
 func _ready() -> void:
+	# Testy NIGDY na prawdziwy serwer (patrz Cloud.use_test_server). Wyjatek:
+	# backend.json wskazuje lokalny udawany serwer - wtedy zostawiamy go.
+	if not Cloud.is_test_server():
+		Cloud.use_test_server()
+	_check(Cloud.is_test_server(), "test dymny nie rozmawia z baza graczy")
 	# Odroczone, bo w trakcie _ready() drzewo sceny jest zajete i add_child()
 	# na korzeniu zostalby odrzucony.
 	_run.call_deferred()

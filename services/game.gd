@@ -609,7 +609,7 @@ func sell_hen(breed_id: String, rooster: bool = false) -> float:
 	var index := _find_hen(breed_id, false, rooster)
 	if index < 0:
 		return 0.0
-	var price := FarmState.hen_sell_price(breed_id, false)
+	var price := FarmState.hen_sell_price(breed_id, false, rooster)
 	state.chickens.remove_at(index)
 	state.money += price
 	Events.hen_removed.emit(breed_id)

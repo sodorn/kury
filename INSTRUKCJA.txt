@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 12.16
+  INSTRUKCJA OBSLUGI *** gra w wersji 12.17
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -115,7 +115,9 @@
 
   WAZNE: kura znosi jaja tylko wtedy, gdy na farmie stoi KOGUT JEJ RASY.
   Kupienie samych kur nic nie da. Kogut kosztuje 250% ceny kury tej samej rasy
-  (kura za 40 zl to kogut za 100 zl), ale wystarczy jeden na cala rase.
+  (kura za 40 zl to kogut za 100 zl), ale wystarczy jeden na cala rase. Przy
+  sprzedazy dziala ten sam mnoznik: kogut idzie za 250% ceny skupu kury (kura
+  28 zl, kogut 70 zl).
 
 ==============================================================================
  5. JAJA: ZNOSZENIE, MAGAZYN, GNICIE

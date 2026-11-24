@@ -1,6 +1,6 @@
 ==============================================================================
   SYMULATOR HODOWLI KURCZAKOW - DOKUMENTACJA TECHNICZNA
-  gra w wersji 12.16   *   format zapisu w wersji 6   *   Godot 4.7.2
+  gra w wersji 12.17   *   format zapisu w wersji 6   *   Godot 4.7.2
 ==============================================================================
 
   Dokument dla programisty: jak gra jest zbudowana, jak dzialaja mechaniki, co
@@ -95,6 +95,8 @@
   tests/
     run_tests.gd         testy logiki (bez okna), tests.tscn
     smoke_ui.gd          test dymny: prawdziwa gra z grafika, smoke_ui.tscn
+    fox_lab.gd           laboratorium lisa (tylko pomiar, poza CI):
+                         godot --headless --path . tests/fox_lab.tscn
   tools/                 skrypty pomocnicze (rozdzial 15)
   docs/supabase.sql      definicja tabeli i polityk w bazie
   kopie/                 codzienne kopie wszystkich farm z serwera (JSON)
@@ -1336,6 +1338,22 @@
   synchronizacji, updater. Test dymny uruchamia cala gre z grafika, klika
   przyciski, wywoluje lisa i robi zrzuty ekranu.
 
+  Testy nie dotykaja bazy produkcyjnej (od 12.17)
+  -----------------------------------------------
+
+  Oba zestawy testow na starcie wolaja Cloud.use_test_server(), ktore
+  podmienia adres Supabase na http://127.0.0.1:9 (nic tam nie slucha, kazde
+  zapytanie od razu sie nie udaje), i sprawdzaja Cloud.is_test_server().
+  Workflow ustawia dodatkowo zmienna KURY_BEZ_SERWERA=1, ktora robi to samo
+  juz w _ready() autoloadu Cloud. Przed 12.17 testy w CI pisaly do prawdziwej
+  bazy - zostaly po tym farmy 399975 i 439267 (smieci) i zmieniona farma
+  327733.
+
+  tests/fox_lab.tscn to nie test, tylko pomiar: 60 prob po 24 h na kilku
+  farmach (bez obrony, plot, owczarek, oba), dwa style gry. Wypisuje
+  pierwszego lisa, lisy na dobe, kury na lisa i na dobe. Trwa okolo 12 minut,
+  nie jest uruchamiany w CI.
+
   Reguly konfiguracji, ktore zatrzymaja wdrozenie
   -----------------------------------------------
 
@@ -1472,5 +1490,5 @@
     limity miejsca i ruchu planu darmowego.
 
 ==============================================================================
-  koniec dokumentu  *  wygenerowano z wersji 12.16
+  koniec dokumentu  *  wygenerowano z wersji 12.17
 ==============================================================================

@@ -653,7 +653,7 @@ func _on_cull_hen(breed_id: String, breed_name: String) -> void:
 ## stoja obok siebie, a sprzedana kura nie wraca — jedno nieuwazne
 ## dotkniecie kosztuje caly wyhodowany egzemplarz.
 func _on_sell_hen(breed_id: String, breed_name: String, rooster: bool = false) -> void:
-	var price := FarmState.hen_sell_price(breed_id)
+	var price := FarmState.hen_sell_price(breed_id, false, rooster)
 	var key := "CONFIRM_SELL_ROOSTER" if rooster else "CONFIRM_SELL_HEN"
 	_ask(tr(key) % [breed_name, NumberFormat.money(price)],
 			func() -> void: _do_sell_hen(breed_id, breed_name, rooster))
@@ -1063,7 +1063,7 @@ func _add_breed_card(breed: Dictionary) -> void:
 			NumberFormat.money(FarmState.hen_sell_price(breed_id)), healthy]
 		sell_rooster.visible = healthy_cocks > 0
 		sell_rooster.text = tr("PANEL_SELL_ROOSTER") % [
-			NumberFormat.money(FarmState.hen_sell_price(breed_id)), healthy_cocks]
+			NumberFormat.money(FarmState.hen_sell_price(breed_id, false, true)), healthy_cocks]
 		var sick := owned - healthy + cocks - healthy_cocks
 		cull.visible = sick > 0
 		cull.text = tr("PANEL_CULL_HEN") % [NumberFormat.money(Game.mcdonalds_price()), sick]

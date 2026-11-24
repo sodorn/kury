@@ -12,6 +12,9 @@ var _passed := 0
 
 
 func _ready() -> void:
+	# Testy NIGDY na prawdziwy serwer (patrz Cloud.use_test_server).
+	Cloud.use_test_server()
+	_check(Cloud.is_test_server(), "testy rozmawiaja tylko z martwym adresem, nie z baza graczy")
 	# Gra przy starcie wczytuje zapis; testy maja ruszac od stanu poczatkowego.
 	SaveGame.clear()
 	Game.new_game()
@@ -365,6 +368,20 @@ func _test_economy() -> void:
 		_check(is_equal_approx(kura, float(breed.get("price", 0))),
 				"cena kury rasy '%s' bez zmian" % id)
 
+	# Sprzedaz koguta: ten sam mnoznik co w kupnie, wiec tak jak kura
+	# schodzi za ~70% swojej ceny kupna (wlasciciel, 24.11).
+	for breed: Dictionary in GameData.breeds():
+		var id2 := String(breed.get("id", ""))
+		var kura_s := FarmState.hen_sell_price(id2)
+		var kogut_s := FarmState.hen_sell_price(id2, false, true)
+		_check(is_equal_approx(kogut_s, kura_s * mnoznik),
+				"kogut rasy '%s' sprzedaje sie za %.0f%% ceny kury (%.0f vs %.0f)"
+						% [id2, mnoznik * 100.0, kogut_s, kura_s])
+		_check(kogut_s < FarmState.hen_buy_price(id2, true),
+				"kogut rasy '%s': sprzedaz tansza niz kupno" % id2)
+	_check(is_zero_approx(FarmState.hen_sell_price("leghorn", true, true)),
+			"chory kogut nie idzie po cenie zdrowego")
+
 	# I to samo przy kasie, nie tylko w tabelce.
 	Game.new_game()
 	_open_all_breeds()
@@ -377,6 +394,9 @@ func _test_economy() -> void:
 	_check(Game.buy_hen("leghorn", true), "kogut do kupienia za podwojna cene")
 	_check(Game.state.rooster_count() == kogutow_przed + 1, "kogut dolaczyl do stada")
 	_check(is_zero_approx(Game.state.money), "za koguta pobrano pelna cene koguta")
+	var za_koguta := Game.sell_hen("leghorn", true)
+	_check(is_equal_approx(za_koguta, FarmState.hen_sell_price("leghorn", false, true)),
+			"sprzedaz koguta przy kasie daje cene koguta (%.0f zl)" % za_koguta)
 
 	# Wartosc jaj zalezy od stada.
 	Game.new_game()
@@ -1121,7 +1141,9 @@ func _test_incubate_without_flock() -> void:
 ## inaczej jedna chwila bez sieci zamyka graczowi droge do wlasnej farmy.
 func _test_retry_same_code() -> void:
 	Game.new_game()
-	var kod := "327733"
+	# Kod spoza puli prawdziwych farm. Wczesniej stalo tu 327733 - kod
+	# istniejacej farmy, ktora testy na GitHubie wczytywaly i nadpisywaly.
+	var kod := "100001"
 	Cloud.set_player_id(kod)
 	_check(Cloud.player_id == kod, "urzadzenie ma juz ten kod")
 	_check(Game.restore_from_code(kod), "ponowna proba tym samym kodem rusza")
@@ -1134,7 +1156,7 @@ func _test_retry_same_code() -> void:
 ## po stronie Godota, ale gdyby gzip mimo wszystko do nas trafil, musimy sobie
 ## z nim poradzic sami, a nie udawac, ze serwera nie ma.
 func _test_body_unpacking() -> void:
-	var tekst := '[{"player_id":"327733","updated_at":1795000000}]'
+	var tekst := '[{"player_id":"100001","updated_at":1795000000}]'
 	var czysty := tekst.to_utf8_buffer()
 	_check(Cloud._body_text(czysty) == tekst, "zwykly JSON przechodzi bez zmian")
 

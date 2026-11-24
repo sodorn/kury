@@ -509,6 +509,8 @@ def build():
   tests/
     run_tests.gd         testy logiki (bez okna), tests.tscn
     smoke_ui.gd          test dymny: prawdziwa gra z grafika, smoke_ui.tscn
+    fox_lab.gd           laboratorium lisa (tylko pomiar, poza CI):
+                         godot --headless --path . tests/fox_lab.tscn
   tools/                 skrypty pomocnicze (rozdzial 15)
   docs/supabase.sql      definicja tabeli i polityk w bazie
   kopie/                 codzienne kopie wszystkich farm z serwera (JSON)
@@ -1079,6 +1081,15 @@ def build():
     para("Testy logiki (~1300 sprawdzen) uruchamiaja core/ bez grafiki: zakupy, symulacje, lis, "
          "psy, choroby, glod, zapis i migracje, bezpieczniki synchronizacji, updater. Test dymny "
          "uruchamia cala gre z grafika, klika przyciski, wywoluje lisa i robi zrzuty ekranu.")
+    head("Testy nie dotykaja bazy produkcyjnej (od 12.17)")
+    para("Oba zestawy testow na starcie wolaja Cloud.use_test_server(), ktore podmienia adres "
+         "Supabase na http://127.0.0.1:9 (nic tam nie slucha, kazde zapytanie od razu sie nie udaje), "
+         "i sprawdzaja Cloud.is_test_server(). Workflow ustawia dodatkowo zmienna KURY_BEZ_SERWERA=1, "
+         "ktora robi to samo juz w _ready() autoloadu Cloud. Przed 12.17 testy w CI pisaly do "
+         "prawdziwej bazy - zostaly po tym farmy 399975 i 439267 (smieci) i zmieniona farma 327733.")
+    para("tests/fox_lab.tscn to nie test, tylko pomiar: 60 prob po 24 h na kilku farmach (bez "
+         "obrony, plot, owczarek, oba), dwa style gry. Wypisuje pierwszego lisa, lisy na dobe, "
+         "kury na lisa i na dobe. Trwa okolo 12 minut, nie jest uruchamiany w CI.")
     head("Reguly konfiguracji, ktore zatrzymaja wdrozenie")
     para("Od wersji 12.15 testy NIE trzymaja konkretnych cen ani czasow - mozna je zmieniac. "
          "Pilnuja tylko, zeby konfiguracja miala sens:")
