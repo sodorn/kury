@@ -348,13 +348,17 @@ func _test_economy() -> void:
 	# Kogut jest dwa razy drozszy od kury swojej rasy. Jeden kogut obsluguje
 	# cale stado, wiec przy cenie kury byl najtanszym obowiazkowym zakupem
 	# w grze — i dlatego nie bylo czego wazyc przy zakupie.
+	var mnoznik: float = float(GameData.balance().get("economy", {})
+			.get("rooster_price_multiplier", 2.5))
+	_check(mnoznik >= 1.5 and mnoznik <= 5.0,
+			"mnoznik ceny koguta trzyma sie rozsadku (%.2f)" % mnoznik)
 	for breed: Dictionary in GameData.breeds():
 		var id := String(breed.get("id", ""))
 		var kura := FarmState.hen_buy_price(id, false)
 		var kogut := FarmState.hen_buy_price(id, true)
-		_check(is_equal_approx(kogut, kura * 2.0),
-				"kogut rasy '%s' kosztuje dwa razy tyle, co kura (%.0f vs %.0f)"
-						% [id, kogut, kura])
+		_check(is_equal_approx(kogut, kura * mnoznik),
+				"kogut rasy '%s' kosztuje %.0f%% ceny kury (%.0f vs %.0f)"
+						% [id, mnoznik * 100.0, kogut, kura])
 		_check(is_equal_approx(kura, float(breed.get("price", 0))),
 				"cena kury rasy '%s' bez zmian" % id)
 
@@ -362,14 +366,14 @@ func _test_economy() -> void:
 	Game.new_game()
 	_open_all_breeds()
 	var cena_kury := FarmState.hen_buy_price("leghorn", false)
-	Game.state.money = cena_kury * 2.0 - 1.0
+	Game.state.money = cena_kury * mnoznik - 1.0
 	_check(not Game.buy_hen("leghorn", true),
-			"na koguta nie wystarcza kwota, ktora starczyla na kure")
-	Game.state.money = cena_kury * 2.0
+			"na koguta nie wystarcza kwota o zlotowke za mala")
+	Game.state.money = cena_kury * mnoznik
 	var kogutow_przed := Game.state.rooster_count()
 	_check(Game.buy_hen("leghorn", true), "kogut do kupienia za podwojna cene")
 	_check(Game.state.rooster_count() == kogutow_przed + 1, "kogut dolaczyl do stada")
-	_check(is_zero_approx(Game.state.money), "za koguta pobrano podwojna cene")
+	_check(is_zero_approx(Game.state.money), "za koguta pobrano pelna cene koguta")
 
 	# Wartosc jaj zalezy od stada.
 	Game.new_game()

@@ -283,9 +283,11 @@ raw("""
 raw("")
 para("""
 WAZNE: kura znosi jaja tylko wtedy, gdy na farmie stoi KOGUT JEJ RASY. Kupienie
-samych kur nic nie da. Kogut kosztuje %g raza tyle, co kura tej samej rasy, ale
-wystarczy jeden na cala rase.
-""" % ECO.get("rooster_price_multiplier", 2.0))
+samych kur nic nie da. Kogut kosztuje %d%% ceny kury tej samej rasy (kura za
+%s to kogut za %s), ale wystarczy jeden na cala rase.
+""" % (round(ECO.get("rooster_price_multiplier", 2.5) * 100),
+       zl(BREEDS[0]["price"]),
+       zl(float(BREEDS[0]["price"]) * ECO.get("rooster_price_multiplier", 2.5))))
 
 title("5. JAJA: ZNOSZENIE, MAGAZYN, GNICIE")
 para("""

@@ -4,7 +4,9 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.12): ceny jaj cofniete do stanu
+- Aktualny etap: **ETAP 10** (wersja 12.13): kogut kosztuje 250% ceny kury
+  tej samej rasy (`balance.economy.rooster_price_multiplier`).
+- Wersja 12.12: ceny jaj cofniete do stanu
   z 12.8 (leghorn 0,40 zl ... cemani 1,00 zl). Obnizka z 12.9 byla moja
   wlasna inicjatywa, nie polecenie wlasciciela. Doszedl user manual.
 - Wersja 12.11: naprawa gubienia czasu przy
