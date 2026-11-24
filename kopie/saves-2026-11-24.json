@@ -1582,6 +1582,176 @@
     {
      "breed": "leghorn",
      "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "leghorn",
+     "egg": 3.42833327237102,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "szabo",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "leghorn",
+     "egg": 0.52900002848799,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "leghorn",
+     "egg": 0.195333422015053,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.0643333829667113,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "szabo",
+     "egg": 5.06433338296676,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    }
+   ],
+   "chicks": [],
+   "coop_level": 1,
+   "corpses": [],
+   "day_fraction": 0.536752221793027,
+   "days": 4,
+   "disease_timer": 96.699000120163,
+   "dog_level": 0,
+   "egg_ages": {
+    "leghorn": [
+     [
+      24,
+      46.279000043869
+     ]
+    ],
+    "rhode": [
+     [
+      9,
+      41.5800001621246
+     ]
+    ],
+    "szabo": [
+     [
+      3,
+      46.3800001144409
+     ]
+    ]
+   },
+   "eggs": {
+    "leghorn": 24,
+    "rhode": 9,
+    "szabo": 3
+   },
+   "eggs_on_ground": [
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "rhode"
+   ],
+   "event_dry": {
+    "disease": 0.0,
+    "fox": 0.0
+   },
+   "feed": 531.288881292499,
+   "fox_hand_scared": false,
+   "fox_pending": 0,
+   "fox_roll_timer": 2276.82300043104,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 0.0,
+   "incubating": [
+    {
+     "breed": "szabo",
+     "count": 1,
+     "elapsed": 6.3880000108053
+    },
+    {
+     "breed": "szabo",
+     "count": 1,
+     "elapsed": 6.22133334415529
+    },
+    {
+     "breed": "szabo",
+     "count": 1,
+     "elapsed": 6.08800005851901
+    },
+    {
+     "breed": "szabo",
+     "count": 1,
+     "elapsed": 5.96600000003918
+    },
+    {
+     "breed": "szabo",
+     "count": 1,
+     "elapsed": 5.85500001848798
+    },
+    {
+     "breed": "rhode",
+     "count": 1,
+     "elapsed": 5.39933339700746
+    }
+   ],
+   "incubator_level": 1,
+   "intro_seen": true,
+   "money": 113.02,
+   "rooster_hints": {
+    "rhode": 1.0,
+    "szabo": 1.0
+   },
+   "saved_at": 1795540122.131,
+   "storage_level": 0,
+   "unlocked": [
+    "rhode",
+    "szabo"
+   ],
+   "version": 6,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "272180",
+  "updated_at": 1795540122
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "leghorn",
+     "egg": 0.0,
      "rooster": false,
      "sick": false,
      "sick_s": 0.0,
@@ -1641,8 +1811,8 @@
    "chicks": [],
    "coop_level": 0,
    "corpses": [],
-   "day_fraction": 0.403467129633949,
-   "days": 141,
+   "day_fraction": 0.826572138058661,
+   "days": 145,
    "disease_timer": 0.0,
    "dog_level": 0,
    "egg_ages": {},
@@ -1658,13 +1828,13 @@
    "fox_roll_timer": 0.0,
    "fox_visit_left": 0.0,
    "guard_level": 0,
-   "hunger_seconds": 20739.5419502714,
+   "hunger_seconds": 23393.4049553255,
    "incubating": [],
    "incubator_level": 1,
    "intro_seen": true,
    "money": 201.0,
    "rooster_hints": {},
-   "saved_at": 1795524741.43746,
+   "saved_at": 1795532703.0322,
    "storage_level": 0,
    "unlocked": [
     "nagoszyja",
@@ -1676,7 +1846,7 @@
    "won": false
   },
   "player_id": "327733",
-  "updated_at": 1795524741
+  "updated_at": 1795532703
  },
  {
   "payload": {
@@ -1878,6 +2048,144 @@
   },
   "player_id": "399975",
   "updated_at": 1795524766
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "leghorn",
+     "egg": 3.10056066512056,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 3.10056066512056,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 3.0,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 3.0,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    }
+   ],
+   "chicks": [],
+   "coop_level": 0,
+   "corpses": [],
+   "day_fraction": 0.288219916157264,
+   "days": 0,
+   "disease_timer": 0.0,
+   "dog_level": 0,
+   "egg_ages": {
+    "leghorn": [
+     [
+      128,
+      386.494167126363
+     ]
+    ]
+   },
+   "eggs": {
+    "leghorn": 131
+   },
+   "eggs_on_ground": [
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn"
+   ],
+   "event_dry": {},
+   "feed": 0.0,
+   "fox_hand_scared": false,
+   "fox_pending": 0,
+   "fox_roll_timer": 0.0,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 5.83138902923762,
+   "incubating": [],
+   "incubator_level": 1,
+   "intro_seen": true,
+   "money": 99890.5,
+   "rooster_hints": {},
+   "saved_at": 1795532725.25367,
+   "storage_level": 0,
+   "unlocked": [
+    "leghorn",
+    "rhode"
+   ],
+   "version": 6,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "439267",
+  "updated_at": 1795532725
  },
  {
   "payload": {
@@ -3884,14 +4192,6 @@
     },
     {
      "breed": "serama",
-     "egg": 7.27399953980418,
-     "rooster": false,
-     "sick": false,
-     "sick_s": 0.0,
-     "vax": true
-    },
-    {
-     "breed": "serama",
      "egg": 0.0,
      "rooster": true,
      "sick": false,
@@ -3931,30 +4231,6 @@
      "vax": true
     },
     {
-     "breed": "serama",
-     "egg": 4.06933314878593,
-     "rooster": false,
-     "sick": false,
-     "sick_s": 0.0,
-     "vax": true
-    },
-    {
-     "breed": "serama",
-     "egg": 4.06933314878593,
-     "rooster": false,
-     "sick": false,
-     "sick_s": 0.0,
-     "vax": true
-    },
-    {
-     "breed": "serama",
-     "egg": 4.06933314878593,
-     "rooster": false,
-     "sick": false,
-     "sick_s": 0.0,
-     "vax": true
-    },
-    {
      "breed": "araukana",
      "egg": 0.0,
      "rooster": false,
@@ -3963,32 +4239,8 @@
      "vax": true
     },
     {
-     "breed": "leghorn",
-     "egg": 1.36233322756134,
-     "rooster": false,
-     "sick": false,
-     "sick_s": 0.0,
-     "vax": true
-    },
-    {
-     "breed": "leghorn",
-     "egg": 1.36233322756134,
-     "rooster": false,
-     "sick": false,
-     "sick_s": 0.0,
-     "vax": true
-    },
-    {
-     "breed": "leghorn",
-     "egg": 1.36233322756134,
-     "rooster": false,
-     "sick": false,
-     "sick_s": 0.0,
-     "vax": true
-    },
-    {
-     "breed": "leghorn",
-     "egg": 1.36233322756134,
+     "breed": "nagoszyja",
+     "egg": 4.55099941579168,
      "rooster": false,
      "sick": false,
      "sick_s": 0.0,
@@ -3996,15 +4248,7 @@
     },
     {
      "breed": "nagoszyja",
-     "egg": 1.76233322756225,
-     "rooster": false,
-     "sick": false,
-     "sick_s": 0.0,
-     "vax": true
-    },
-    {
-     "breed": "nagoszyja",
-     "egg": 1.76233322756225,
+     "egg": 4.55099941579168,
      "rooster": false,
      "sick": false,
      "sick_s": 0.0,
@@ -4012,7 +4256,7 @@
     },
     {
      "breed": "leghorn",
-     "egg": 3.91176375296989,
+     "egg": 1.50042994119796,
      "rooster": false,
      "sick": false,
      "sick_s": 0.0,
@@ -4020,7 +4264,7 @@
     },
     {
      "breed": "leghorn",
-     "egg": 3.91176375296989,
+     "egg": 1.50042994119796,
      "rooster": false,
      "sick": false,
      "sick_s": 0.0,
@@ -4028,7 +4272,7 @@
     },
     {
      "breed": "leghorn",
-     "egg": 3.91176375296989,
+     "egg": 3.1238396503987,
      "rooster": false,
      "sick": false,
      "sick_s": 0.0,
@@ -4036,7 +4280,7 @@
     },
     {
      "breed": "leghorn",
-     "egg": 3.91176375296989,
+     "egg": 3.1238396503987,
      "rooster": false,
      "sick": false,
      "sick_s": 0.0,
@@ -4044,7 +4288,7 @@
     },
     {
      "breed": "leghorn",
-     "egg": 3.91176375296989,
+     "egg": 3.1238396503987,
      "rooster": false,
      "sick": false,
      "sick_s": 0.0,
@@ -4052,39 +4296,7 @@
     },
     {
      "breed": "leghorn",
-     "egg": 3.91176375296989,
-     "rooster": false,
-     "sick": false,
-     "sick_s": 0.0,
-     "vax": true
-    },
-    {
-     "breed": "leghorn",
-     "egg": 3.91176375296989,
-     "rooster": false,
-     "sick": false,
-     "sick_s": 0.0,
-     "vax": true
-    },
-    {
-     "breed": "leghorn",
-     "egg": 3.91176375296989,
-     "rooster": false,
-     "sick": false,
-     "sick_s": 0.0,
-     "vax": true
-    },
-    {
-     "breed": "leghorn",
-     "egg": 3.91176375296989,
-     "rooster": false,
-     "sick": false,
-     "sick_s": 0.0,
-     "vax": true
-    },
-    {
-     "breed": "leghorn",
-     "egg": 3.91176375296989,
+     "egg": 3.1238396503987,
      "rooster": false,
      "sick": false,
      "sick_s": 0.0,
@@ -4092,7 +4304,7 @@
     },
     {
      "breed": "marans",
-     "egg": 4.22405543385097,
+     "egg": 1.04613966231299,
      "rooster": false,
      "sick": false,
      "sick_s": 0.0,
@@ -4100,92 +4312,151 @@
     },
     {
      "breed": "marans",
-     "egg": 1.41119154704677,
+     "egg": 3.80354966270996,
      "rooster": false,
      "sick": false,
      "sick_s": 0.0,
      "vax": true
+    },
+    {
+     "breed": "marans",
+     "egg": 4.96599991277555,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "serama",
+     "egg": 4.695333266956,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "serama",
+     "egg": 3.69533326695601,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "serama",
+     "egg": 3.69533326695601,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
     }
    ],
-   "chicks": [],
+   "chicks": [
+    {
+     "breed": "serama",
+     "grown": 63.4953332669583
+    },
+    {
+     "breed": "serama",
+     "grown": 63.4953332669583
+    },
+    {
+     "breed": "serama",
+     "grown": 63.4953332669583
+    }
+   ],
    "coop_level": 1,
    "corpses": [],
-   "day_fraction": 0.367908883921395,
-   "days": 47,
-   "disease_timer": 159.611999988556,
-   "dog_level": 1,
+   "day_fraction": 0.197223327568508,
+   "days": 54,
+   "disease_timer": 40.0169999599457,
+   "dog_level": 2,
    "egg_ages": {
     "leghorn": [
      [
-      44,
-      16.0840001106262
+      198,
+      237.366999864578
      ]
     ],
     "marans": [
      [
-      4,
-      12.6670000553131
+      38,
+      233.533999919891
      ]
     ],
     "nagoszyja": [
      [
-      8,
-      22.683000087738
+      28,
+      231.851999998093
      ]
     ],
     "serama": [
      [
-      7,
-      21.816999912262
+      58,
+      235.983999967575
      ]
     ]
    },
    "eggs": {
-    "leghorn": 44,
-    "marans": 4,
-    "nagoszyja": 8,
-    "serama": 7
+    "leghorn": 198,
+    "marans": 38,
+    "nagoszyja": 28,
+    "serama": 58
    },
    "eggs_on_ground": [
-    "marans",
+    "serama",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
     "marans",
     "leghorn",
     "leghorn",
-    "leghorn"
+    "leghorn",
+    "leghorn",
+    "serama",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "marans",
+    "serama",
+    "nagoszyja",
+    "nagoszyja",
+    "marans",
+    "serama",
+    "serama",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "marans"
    ],
    "event_dry": {
     "disease": 0.0,
     "fox": 0.0
    },
-   "feed": 2211.9382462101,
+   "feed": 2146.14194331786,
    "fox_hand_scared": true,
    "fox_pending": 0,
-   "fox_roll_timer": 159.611999988556,
+   "fox_roll_timer": 1946.82799983023,
    "fox_visit_left": 0.0,
    "guard_level": 2,
    "hunger_seconds": 0.0,
-   "incubating": [
-    {
-     "breed": "marans",
-     "count": 1,
-     "elapsed": 35.193333423592
-    },
-    {
-     "breed": "marans",
-     "count": 1,
-     "elapsed": 34.6108333235144
-    },
-    {
-     "breed": "marans",
-     "count": 1,
-     "elapsed": 34.2216666505288
-    }
-   ],
+   "incubating": [],
    "incubator_level": 2,
    "intro_seen": true,
-   "money": 1100.37,
+   "money": 3370.98,
    "rooster_hints": {},
-   "saved_at": 1795528103.833,
+   "saved_at": 1795540396.628,
    "storage_level": 1,
    "unlocked": [
     "rhode",
@@ -4201,7 +4472,7 @@
    "won": false
   },
   "player_id": "666478",
-  "updated_at": 1795528103
+  "updated_at": 1795540396
  },
  {
   "payload": {
