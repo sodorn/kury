@@ -321,13 +321,14 @@ func _keep_feed(minutes_real: float) -> void:
 	var need := _feed_need(minutes_real) - _state.feed
 	if need <= 0.0:
 		return
-	var pack := _state.feed_pack()
+	var opt := FarmState.feed_option_count() - 1
+	var pack := _state.feed_pack(opt)
 	var packs := int(ceil(need / float(pack["size"])))
 	var spent := 0.0
 	while packs > 0:
 		var n := mini(packs, 10)
-		if not Game.buy_feed(n):
-			if not Game.buy_feed(1):
+		if not Game.buy_feed(opt, n):
+			if not Game.buy_feed(opt, 1):
 				break
 			n = 1
 		packs -= n

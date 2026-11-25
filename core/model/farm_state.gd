@@ -594,28 +594,36 @@ func coop_free() -> int:
 	return coop_capacity() - coop_occupied() - coop_reserved()
 
 
-## Pasza do kupienia przy obecnym magazynie: JEDNA jednostka (worek, big-bag,
-## dostawa luzem...), jej waga i cena. Wszystko z data/rozbudowy.json (lista
-## "magazyn"): wiekszy magazyn = wieksza jednostka i nizsza cena za kilogram.
-## Wlasciciel 25.11: jeden suwak, zadnego "rabatu" ani "hurtu" w tekstach.
-func feed_pack() -> Dictionary:
+## Pasza do kupienia: `option` to numer przycisku z data/rozbudowy.json
+## ("pasza_do_kupienia": worek 20 kg, big-bag 200 kg). Cena za kilogram zalezy
+## od poziomu magazynu (magazyn[].pasza_zl_kg) i spada z kazdym poziomem.
+## Wlasciciel 25.11: dwa zwykle przyciski obok siebie, bez "rabatu".
+func feed_pack(option: int = 0) -> Dictionary:
 	var economy: Dictionary = GameData.balance().get("economy", {})
 	var storage: Dictionary = GameData.balance().get("buildings", {}).get("storage", {})
-	var size := maxf(1.0, float(economy.get("feed_pack_size", 25)))
-	var price := float(economy.get("feed_pack_price", 50))
-	var unit := String(storage.get("feed_unit", "worek"))
+	var options: Array = economy.get("feed_options", [])
+	var size := maxf(1.0, float(economy.get("feed_pack_size", 20)))
+	var unit := "worek"
+	if not options.is_empty():
+		var opt: Dictionary = options[clampi(option, 0, options.size() - 1)]
+		size = maxf(1.0, float(opt.get("size", size)))
+		unit = String(opt.get("unit", unit))
+	var per_kg := float(storage.get("feed_price_kg", 2.0))
 	var upgrade := current_building_upgrade("storage")
 	if not upgrade.is_empty():
-		size = maxf(1.0, float(upgrade.get("pack_size", size)))
-		price = float(upgrade.get("pack_price", price))
-		unit = String(upgrade.get("feed_unit", unit))
+		per_kg = float(upgrade.get("feed_price_kg", per_kg))
 	return {
 		"size": size,
 		# Do pelnych groszy, zeby cena na przycisku i pobrana kwota sie zgadzaly.
-		"price": round(price * 100.0) / 100.0,
-		"per_kg": price / size,
+		"price": round(size * per_kg * 100.0) / 100.0,
+		"per_kg": per_kg,
 		"unit": unit,
 	}
+
+
+## Ile jest przyciskow paszy (rodzajow opakowan).
+static func feed_option_count() -> int:
+	return maxi(1, (GameData.balance().get("economy", {}).get("feed_options", []) as Array).size())
 
 
 ## Ktore jaja pojda w nastepnej partii sprzedazy: NAJSTARSZE, niezaleznie od

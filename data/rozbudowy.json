@@ -7,7 +7,7 @@
 		"Ceny w zlotych. budowa_min to minuty prawdziwego czasu (zegar w telefonie).",
 		"kurnik.miejsc = ile doroslych ptakow (kury i koguty) zmiesci kurnik.",
 		"magazyn.jaj = ile jaj moze lezec w magazynie (nadmiar przepada).",
-		"magazyn.pasza / pasza_kg / pasza_cena = to, co kupuje JEDEN suwak 'Kup pasze' przy tym magazynie. Cena za kilogram ma spadac z kazdym poziomem.",
+		"pasza_do_kupienia = przyciski paszy w sklepie (nazwa i ile kg). magazyn.pasza_zl_kg = cena kilograma paszy przy tym magazynie - ma spadac z kazdym poziomem.",
 		"inkubator.jaj = ile jaj grzeje sie naraz. Z 3 jaj wykluwa sie jedno piskle, wiec 48 jaj = 16 pisklat naraz.",
 		"plot.lis_zawraca_proc = w ilu procentach podejsc lis odchodzi od plotu z niczym.",
 		"pies: probuje_co_s = co ile sekund pies rzuca sie na lisa, przegania_proc = szansa, ze przegoni, zagryza_proc = szansa, ze przy okazji zagryzie lisa.",
@@ -25,17 +25,21 @@
 		{"poziom": 8, "nazwa": "kurnik 12×12 m z wolierą i wentylacją",      "cena": 300000, "budowa_min": 48, "miejsc": 360},
 		{"poziom": 9, "nazwa": "ekologiczna ferma: kurnik 12×20 m i 1 ha pastwiska", "cena": 500000, "budowa_min": 60, "miejsc": 500}
 	],
+	"pasza_do_kupienia": [
+		{"nazwa": "worek",   "kg": 20},
+		{"nazwa": "big-bag", "kg": 200}
+	],
 	"magazyn": [
-		{"poziom": 0, "nazwa": "lodówka w piwnicy",                          "cena": 0,       "budowa_min": 0,  "jaj": 200,    "pasza": "worek",         "pasza_kg": 25,    "pasza_cena": 50},
-		{"poziom": 1, "nazwa": "mała szopka",                                "cena": 600,     "budowa_min": 5,  "jaj": 500,    "pasza": "worek",         "pasza_kg": 25,    "pasza_cena": 45},
-		{"poziom": 2, "nazwa": "garaż blaszany 3×5 m",                       "cena": 3000,    "budowa_min": 8,  "jaj": 1000,   "pasza": "big-bag",       "pasza_kg": 500,   "pasza_cena": 860},
-		{"poziom": 3, "nazwa": "ocieplony kontener 20 stóp z regałami",      "cena": 10500,   "budowa_min": 12, "jaj": 2000,   "pasza": "big-bag",       "pasza_kg": 1000,  "pasza_cena": 1640},
-		{"poziom": 4, "nazwa": "kontener-chłodnia i silos na paszę",         "cena": 30000,   "budowa_min": 17, "jaj": 4000,   "pasza": "dostawa luzem", "pasza_kg": 2000,  "pasza_cena": 3120},
-		{"poziom": 5, "nazwa": "magazyn z płyty warstwowej 8×10 m i silos 10 t", "cena": 80000, "budowa_min": 23, "jaj": 8000, "pasza": "dostawa luzem", "pasza_kg": 5000,  "pasza_cena": 7400},
-		{"poziom": 6, "nazwa": "hala stalowa 12×15 m z chłodnią",            "cena": 200000,  "budowa_min": 30, "jaj": 15000,  "pasza": "dostawa luzem", "pasza_kg": 10000, "pasza_cena": 14000},
-		{"poziom": 7, "nazwa": "hala 20×20 m z chłodnią i silosami 2×30 t",  "cena": 540000,  "budowa_min": 38, "jaj": 30000,  "pasza": "paszowóz",      "pasza_kg": 24000, "pasza_cena": 31680},
-		{"poziom": 8, "nazwa": "centrum magazynowe 800 m² z sortownią jaj",  "cena": 1000000, "budowa_min": 48, "jaj": 60000,  "pasza": "paszowóz",      "pasza_kg": 24000, "pasza_cena": 30240},
-		{"poziom": 9, "nazwa": "baza paszowa: hala 1500 m², silosy 2×150 t i waga", "cena": 1800000, "budowa_min": 60, "jaj": 100000, "pasza": "dwa paszowozy", "pasza_kg": 48000, "pasza_cena": 57600}
+		{"poziom": 0, "nazwa": "lodówka w piwnicy",                          "cena": 0,       "budowa_min": 0,  "jaj": 200, "pasza_zl_kg": 2.00},
+		{"poziom": 1, "nazwa": "mała szopka",                                "cena": 600,     "budowa_min": 5,  "jaj": 500, "pasza_zl_kg": 1.80},
+		{"poziom": 2, "nazwa": "garaż blaszany 3×5 m",                       "cena": 3000,    "budowa_min": 8,  "jaj": 1000, "pasza_zl_kg": 1.72},
+		{"poziom": 3, "nazwa": "ocieplony kontener 20 stóp z regałami",      "cena": 10500,   "budowa_min": 12, "jaj": 2000, "pasza_zl_kg": 1.64},
+		{"poziom": 4, "nazwa": "kontener-chłodnia i silos na paszę",         "cena": 30000,   "budowa_min": 17, "jaj": 4000, "pasza_zl_kg": 1.56},
+		{"poziom": 5, "nazwa": "magazyn z płyty warstwowej 8×10 m i silos 10 t", "cena": 80000, "budowa_min": 23, "jaj": 8000, "pasza_zl_kg": 1.48},
+		{"poziom": 6, "nazwa": "hala stalowa 12×15 m z chłodnią",            "cena": 200000,  "budowa_min": 30, "jaj": 15000, "pasza_zl_kg": 1.40},
+		{"poziom": 7, "nazwa": "hala 20×20 m z chłodnią i silosami 2×30 t",  "cena": 540000,  "budowa_min": 38, "jaj": 30000, "pasza_zl_kg": 1.32},
+		{"poziom": 8, "nazwa": "centrum magazynowe 800 m² z sortownią jaj",  "cena": 1000000, "budowa_min": 48, "jaj": 60000, "pasza_zl_kg": 1.26},
+		{"poziom": 9, "nazwa": "baza paszowa: hala 1500 m², silosy 2×150 t i waga", "cena": 1800000, "budowa_min": 60, "jaj": 100000, "pasza_zl_kg": 1.20}
 	],
 	"inkubator": [
 		{"poziom": 0, "nazwa": "domowy inkubator ze styropianu i żarówki",   "cena": 0,     "budowa_min": 0,  "jaj": 9},

@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 12.24
+  INSTRUKCJA OBSLUGI *** gra w wersji 12.25
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -145,10 +145,9 @@
 ==============================================================================
 
   Kazdy dorosly ptak zjada 13 kg paszy na godzine, pisklę 0.5 tego. Na starcie
-  pasze kupujesz w workach: 50 zl za 25 kg (cena jak w sklepie rolniczym). Im
-  wiekszy magazyn, tym wieksza jednostka (big-bag, dostawa luzem, paszowoz) i
-  nizsza cena za kilogram - tabela w rozdziale MAGAZYN. Pasze kupuje sie
-  JEDNYM SUWAKIEM, jedna jednostka na raz.
+  kilogram paszy kosztuje 2.00 zl (cena jak w sklepie rolniczym). W sklepie sa
+  dwa przyciski: worek 20 kg i big-bag 200 kg. Im wiekszy magazyn, tym tanszy
+  kilogram - tabela w rozdziale MAGAZYN.
 
   ZANIM WYJDZIESZ Z GRY: kup paszy na cala przerwe. Kury jedza tez wtedy, gdy
   nie grasz, a magazyn trzyma tylko tyle jaj, ile sie w nim miesci - reszta
@@ -264,24 +263,23 @@
   10. baza paszowa: hala 1500 m², silosy 2×150 t i waga
       limit 100 000 jaj - 1 800 000 zl, budowa 1 h
 
-  +======+=====================+===========+=========+
-  | poz. | pasza (jeden suwak) |      cena |   za kg |
-  +======+=====================+===========+=========+
-  |    1 | worek 25 kg         |     50 zl | 2.00 zl |
-  |    2 | worek 25 kg         |     45 zl | 1.80 zl |
-  |    3 | big-bag 500 kg      |    860 zl | 1.72 zl |
-  |    4 | big-bag 1 t         |  1 640 zl | 1.64 zl |
-  |    5 | dostawa luzem 2 t   |  3 120 zl | 1.56 zl |
-  |    6 | dostawa luzem 5 t   |  7 400 zl | 1.48 zl |
-  |    7 | dostawa luzem 10 t  | 14 000 zl | 1.40 zl |
-  |    8 | paszowóz 24 t       | 31 680 zl | 1.32 zl |
-  |    9 | paszowóz 24 t       | 30 240 zl | 1.26 zl |
-  |   10 | dwa paszowozy 48 t  | 57 600 zl | 1.20 zl |
-  +------+---------------------+-----------+---------+
+  +======+=========+=============+================+
+  | poz. |   za kg | worek 20 kg | big-bag 200 kg |
+  +======+=========+=============+================+
+  |    1 | 2.00 zl |       40 zl |         400 zl |
+  |    2 | 1.80 zl |       36 zl |         360 zl |
+  |    3 | 1.72 zl |    34,40 zl |         344 zl |
+  |    4 | 1.64 zl |    32,80 zl |         328 zl |
+  |    5 | 1.56 zl |    31,20 zl |         312 zl |
+  |    6 | 1.48 zl |    29,60 zl |         296 zl |
+  |    7 | 1.40 zl |       28 zl |         280 zl |
+  |    8 | 1.32 zl |    26,40 zl |         264 zl |
+  |    9 | 1.26 zl |    25,20 zl |         252 zl |
+  |   10 | 1.20 zl |       24 zl |         240 zl |
+  +------+---------+-------------+----------------+
 
-  Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i pozwala
-  kupowac pasze w wiekszych jednostkach, a im wieksza jednostka, tym tanszy
-  kilogram (od 2.00 zl na starcie do 1.20 zl na ostatnim poziomie). Magazyn
+  Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i obniza cene
+  paszy (od 2.00 zl za kg na starcie do 1.20 zl na ostatnim poziomie). Magazyn
   zmienia wyglad na poziomie 4 i 7.
 
 ==============================================================================

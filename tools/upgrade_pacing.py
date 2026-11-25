@@ -42,15 +42,13 @@ def egg_income_per_hen_hour(breed: dict) -> float:
 
 def feed_cost_per_hen_hour(storage_level: int) -> float:
     """Koszt paszy jednej kury na godzine realna przy danym magazynie."""
-    size = float(ECO["feed_pack_size"])
-    price = float(ECO["feed_pack_price"])
+    per_kg = float(BAL["buildings"]["storage"]["feed_price_kg"])
     ups = BAL["buildings"]["storage"]["upgrades"]
     if storage_level > 0:
-        u = ups[min(storage_level, len(ups)) - 1]
-        size, price = float(u["pack_size"]), float(u["pack_price"])
+        per_kg = float(ups[min(storage_level, len(ups)) - 1]["feed_price_kg"])
     kg_per_game_minute = float(ECO["feed_per_hen_minute"])
     kg_per_real_hour = kg_per_game_minute * (60.0 * SCALE)
-    return kg_per_real_hour * (price / size)
+    return kg_per_real_hour * per_kg
 
 
 def coop_capacity(level: int) -> int:

@@ -11,7 +11,7 @@ const DATA_DIR := "res://data/"
 ## Numer wersji gry. Jedno miejsce do podbicia przy wydaniu — pokazuje sie
 ## na ekranie powitalnym, zeby bylo widac, czy przegladarka wczytala nowa
 ## wersje, czy podsunela stara z pamieci.
-const VERSION := "12.24"
+const VERSION := "12.25"
 
 static var _balance: Dictionary = {}
 static var _buildings: Array = []
@@ -103,15 +103,22 @@ static func apply_upgrades(bal: Dictionary, file: Dictionary) -> Array[String]:
 		var cfg: Dictionary = buildings.get_or_add("storage", {})
 		cfg["name"] = String(store[0].get("nazwa", ""))
 		cfg["egg_capacity"] = int(store[0].get("jaj", 200))
-		cfg["feed_unit"] = String(store[0].get("pasza", "worek"))
-		economy["feed_pack_size"] = float(store[0].get("pasza_kg", 25))
-		economy["feed_pack_price"] = float(store[0].get("pasza_cena", 50))
+		cfg["feed_price_kg"] = float(store[0].get("pasza_zl_kg", 2.0))
+		var options: Array = []
+		for opt: Variant in file.get("pasza_do_kupienia", []):
+			if opt is Dictionary and float((opt as Dictionary).get("kg", 0)) > 0.0:
+				options.append({"unit": String(opt.get("nazwa", "worek")), "size": float(opt.get("kg", 0))})
+		if options.is_empty():
+			problems.append("brak listy 'pasza_do_kupienia' (nazwa i kg)")
+			options = [{"unit": "worek", "size": 20.0}]
+		economy["feed_options"] = options
+		# Stare pola dla zgodnosci: pierwszy przycisk na starcie.
+		economy["feed_pack_size"] = float(options[0]["size"])
+		economy["feed_pack_price"] = float(options[0]["size"]) * float(cfg["feed_price_kg"])
 		cfg["upgrades"] = store.slice(1).map(func(lv: Dictionary) -> Dictionary:
 			return _common(lv).merged({
 				"egg_capacity": int(lv.get("jaj", 0)),
-				"feed_unit": String(lv.get("pasza", "worek")),
-				"pack_size": float(lv.get("pasza_kg", 25)),
-				"pack_price": float(lv.get("pasza_cena", 50)),
+				"feed_price_kg": float(lv.get("pasza_zl_kg", 2.0)),
 			}))
 
 	var incu: Array = _levels(file, "inkubator", 0, problems)

@@ -77,6 +77,9 @@ func open(building_id: String, picture: Texture2D = null) -> void:
 	# Zerujemy wysokosc listy z poprzedniego budynku, inaczej jej rozmiar
 	# trzymalby panel rozciagniety przy nastepnym otwarciu.
 	_scroll.custom_minimum_size.y = 0
+	# Szerokosc tez wracamy do ekranu: panel raz rozepchniety zostawal szeroki.
+	_sheet.offset_left = 0.0
+	_sheet.offset_right = 0.0
 	_build_content(building_id)
 	_refresh()
 	_bottom_spacer.custom_minimum_size.y = SafeArea.bottom_inset(get_viewport())
@@ -248,12 +251,9 @@ func _build_coop() -> void:
 
 func _build_storage() -> void:
 	_add_upgrade("storage", func(upgrade: Dictionary) -> String:
-			var size := float(upgrade.get("pack_size", 25))
-			var price := float(upgrade.get("pack_price", 0))
 			return tr("UPG_STORAGE_EFFECT") % [
 				NumberFormat.eggs(int(upgrade.get("egg_capacity", 0))),
-				NumberFormat.feed_unit({"unit": upgrade.get("feed_unit", ""), "size": size}),
-				NumberFormat.money(price), NumberFormat.small_money(price / maxf(size, 1.0))])
+				NumberFormat.small_money(float(upgrade.get("feed_price_kg", 0.0)))])
 	_add_level_row(func() -> int: return Game.state.storage_level, _building_levels("storage"),
 			func() -> String: return _level_name("storage"))
 	_add_row("PANEL_EGGS_STORED", func() -> String: return "%s / %s" % [
@@ -277,10 +277,8 @@ func _build_storage() -> void:
 	# kg potrafi byc ponizej zlotowki - stad small_money).
 	_add_row("PANEL_FEED_PRICE",
 			func() -> String:
-				var pack := Game.state.feed_pack()
-				return tr("PANEL_FEED_PRICE_VALUE") % [
-					NumberFormat.feed_unit(pack), NumberFormat.money(float(pack["price"])),
-					NumberFormat.small_money(float(pack["per_kg"]))])
+				return tr("PANEL_FEED_PRICE_VALUE") % NumberFormat.small_money(
+						float(Game.state.feed_pack()["per_kg"])))
 
 
 ## Inkubator: postep wykluwania i wzrostu, wkladanie jaj, rozbudowa.
@@ -413,28 +411,38 @@ func _build_shop() -> void:
 					NumberFormat.eggs(n), NumberFormat.money(FarmState.eggs_worth(lot))],
 			_on_sell_eggs)
 
-	# Pasza: JEDEN worek, suwakiem (wlasciciel 25.11 - przy cenach w tysiacach
-	# zwykly przycisk to proszenie sie o pomylke). Cena za kilogram spada
-	# z poziomem magazynu, bez napisu o rabacie.
-	var feed_slide := _add_action(false,
-			func() -> bool: return Game.state.money >= float(Game.state.feed_pack()["price"]),
-			func() -> String:
-				var pack := Game.state.feed_pack()
-				return tr("PANEL_BUY_FEED") % [
-					NumberFormat.feed_unit(pack), NumberFormat.money(float(pack["price"]))],
-			_on_buy_feed, Callable(), func() -> float: return float(Game.state.feed_pack()["price"]),
-			_actions, true)
-	_make_compact(feed_slide as SlideButton)
+	# Pasza (wlasciciel 25.11): dwa zwykle przyciski obok siebie - worek
+	# i big-bag z data/rozbudowy.json. Cena za kg spada z poziomem magazynu.
+	var feed_row := HBoxContainer.new()
+	feed_row.name = "FeedRow"
+	feed_row.add_theme_constant_override("separation", 12)
+	_actions.add_child(feed_row)
+	for option in FarmState.feed_option_count():
+		var feed_button := _grid_button(&"")
+		feed_button.name = "Feed%d" % option
+		feed_button.pressed.connect(func() -> void: _on_buy_feed(option))
+		feed_row.add_child(feed_button)
+		_refreshers.append(func() -> void:
+			var pack := Game.state.feed_pack(option)
+			# small_money: przy tanszym magazynie worek kosztuje np. 34,40 zl,
+			# a money() pokazaloby 34 zl i klamalo o pobrana kwote.
+			var text := tr("PANEL_BUY_FEED") % [
+				NumberFormat.feed_unit(pack), NumberFormat.small_money(float(pack["price"]))]
+			text = text.left(1).to_upper() + text.substr(1)
+			feed_button.disabled = Game.state.money < float(pack["price"])
+			feed_button.text = text)
 
 	# Weterynaria: leku nie ma (12.20) — szczepienie chroni zdrowe stado.
-	_add_action(false,
-			func() -> bool: return Game.state.money >= Game.vaccine_price(),
-			func() -> String: return tr("PANEL_BUY_VACCINE") % [
-				NumberFormat.money(Game.vaccine_price()), Game.state.unvaccinated_count()],
-			_on_buy_vaccine,
-			func() -> bool: return Game.state.unvaccinated_count() > 0,
-			func() -> float: return Game.vaccine_price(), _actions, true)
-	_make_compact(_actions.get_child(_actions.get_child_count() - 1) as SlideButton)
+	# Od 12.25 zwykly przycisk, bez suwaka (wlasciciel 25.11).
+	var vaccine := _grid_button(&"")
+	vaccine.name = "Vaccine"
+	vaccine.pressed.connect(_on_buy_vaccine)
+	_actions.add_child(vaccine)
+	_refreshers.append(func() -> void:
+		vaccine.visible = Game.state.unvaccinated_count() > 0
+		vaccine.disabled = Game.state.money < Game.vaccine_price()
+		vaccine.text = tr("PANEL_BUY_VACCINE") % [
+			NumberFormat.money(Game.vaccine_price()), Game.state.unvaccinated_count()])
 
 	var vaccine_note := Label.new()
 	vaccine_note.theme_type_variation = &"NoteLabel"
@@ -486,10 +494,23 @@ func _add_row(label_key: String, value_provider: Callable) -> void:
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var value := Label.new()
 	value.theme_type_variation = &"CounterLabel"
+	_row_value(value)
 	row.add_child(label)
 	row.add_child(value)
 	_rows.add_child(row)
 	_refreshers.append(func() -> void: value.text = value_provider.call())
+
+
+## Wartosc w wierszu panelu: zawija sie i przylega do prawej. Bez tego dluga
+## nazwa poziomu ("ekologiczna ferma: kurnik 12x20 m...") rozpychala panel
+## szerzej niz ekran, a ten zostawal szeroki tez w innych budynkach -
+## wlasciciel widzial tekst uciety na krawedziach (zgloszenie 25.11).
+func _row_value(value: Label) -> void:
+	value.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	value.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	value.size_flags_stretch_ratio = 1.6
+	value.custom_minimum_size.x = 10.0
 
 
 ## Wiersz, ktory chowa sie, gdy `label_provider` zwroci pusty napis.
@@ -500,6 +521,7 @@ func _add_dynamic_row(label_provider: Callable, value_provider: Callable) -> voi
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var value := Label.new()
 	value.theme_type_variation = &"NoteLabel"
+	_row_value(value)
 	row.add_child(label)
 	row.add_child(value)
 	_rows.add_child(row)
@@ -748,8 +770,8 @@ func _on_sell_eggs() -> void:
 		_flash(tr("PANEL_SOLD") % [NumberFormat.eggs(sold), NumberFormat.money(earned)])
 
 
-func _on_buy_feed() -> void:
-	if Game.buy_feed():
+func _on_buy_feed(option: int = 0) -> void:
+	if Game.buy_feed(option):
 		_flash(tr("PANEL_FEED_BOUGHT"))
 
 
@@ -925,6 +947,7 @@ func _add_level_row(level_provider: Callable, levels: int,
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var value := Label.new()
 	value.theme_type_variation = &"CounterLabel"
+	_row_value(value)
 	row.add_child(label)
 	row.add_child(value)
 	_rows.add_child(row)
@@ -980,13 +1003,13 @@ func _add_breed_card(breed: Dictionary) -> void:
 	texts.add_theme_constant_override("separation", 4)
 	var title := Label.new()
 	title.text = breed_name
-	# 12.24 (wlasciciel 25.11): ile masz - cyferka w bordowym kolku obok
-	# nazwy rasy (kury), a obok kogucik z druga cyferka (koguty).
+	# 12.24/12.25 (wlasciciel 25.11): ile masz - cyferka w ciemnozielonym kolku
+	# obok nazwy rasy (kury), a obok kogucik i ciemnoczerwone kolko (koguty).
 	var name_row := HBoxContainer.new()
 	name_row.name = "NameRow"
 	name_row.add_theme_constant_override("separation", 10)
 	name_row.add_child(title)
-	var hen_badge := _count_badge(Color("#7A1F2B"))
+	var hen_badge := _count_badge(Color("#2F5A1E"))
 	hen_badge.name = "HenBadge"
 	name_row.add_child(hen_badge)
 	var cock_icon := TextureRect.new()
@@ -998,7 +1021,7 @@ func _add_breed_card(breed: Dictionary) -> void:
 	if cock_path != "" and ResourceLoader.exists(cock_path):
 		cock_icon.texture = load(cock_path) as Texture2D
 	name_row.add_child(cock_icon)
-	var cock_badge := _count_badge(Color("#4A2A18"))
+	var cock_badge := _count_badge(Color("#8E1B1B"))
 	cock_badge.name = "RoosterBadge"
 	name_row.add_child(cock_badge)
 	var subtitle := Label.new()

@@ -325,12 +325,12 @@ i znika z magazynu. Nie da sie zrobic zapasu na tydzien.
 title("6. PASZA I GLOD")
 para("""
 Kazdy dorosly ptak zjada %g kg paszy na godzine, pisklę %g tego. Na starcie
-pasze kupujesz w workach: %s za %d kg (cena jak w sklepie rolniczym). Im
-wiekszy magazyn, tym wieksza jednostka (big-bag, dostawa luzem, paszowoz)
-i nizsza cena za kilogram - tabela w rozdziale MAGAZYN. Pasze kupuje sie
-JEDNYM SUWAKIEM, jedna jednostka na raz.
+kilogram paszy kosztuje %s (cena jak w sklepie rolniczym). W sklepie sa dwa
+przyciski: %s. Im wiekszy magazyn, tym tanszy kilogram - tabela w rozdziale
+MAGAZYN.
 """ % (round(ECO["feed_per_hen_minute"] * 60 * SCALE, 2), ECO.get("chick_feed_multiplier", 0.5),
-       zl(ECO["feed_pack_price"]), ECO["feed_pack_size"]))
+       "%.2f zl" % BAL["buildings"]["storage"]["feed_price_kg"],
+       " i ".join("%s %s" % (o["unit"], dane.weight(o["size"])) for o in ECO["feed_options"])))
 para("""
 ZANIM WYJDZIESZ Z GRY: kup paszy na cala przerwe. Kury jedza tez wtedy, gdy nie
 grasz, a magazyn trzyma tylko tyle jaj, ile sie w nim miesci - reszta przepada.
@@ -422,19 +422,17 @@ z czasem. Plot i pies sa od razu.
 title("10. MAGAZYN")
 st = BAL["buildings"]["storage"]
 poziomy(st, lambda c, u: "limit %s jaj" % num((u or c)["egg_capacity"]), "limit jaj")
-rows = [["1", "%s %s" % (st.get("feed_unit", "worek"), dane.weight(ECO["feed_pack_size"])),
-         zl(ECO["feed_pack_price"]), "%.2f zl" % (ECO["feed_pack_price"] / ECO["feed_pack_size"])]]
-for i, u in enumerate(st["upgrades"], start=2):
-    rows.append([str(i), "%s %s" % (u["feed_unit"], dane.weight(u["pack_size"])), zl(u["pack_price"]),
-                 "%.2f zl" % (u["pack_price"] / u["pack_size"])])
-table(["poz.", "pasza (jeden suwak)", "cena", "za kg"], rows, align="rlrr")
+opts = ECO["feed_options"]
+rows = []
+for i, kg in enumerate([st["feed_price_kg"]] + [u["feed_price_kg"] for u in st["upgrades"]], start=1):
+    rows.append([str(i), "%.2f zl" % kg] + [zl(round(o["size"] * kg, 2)) for o in opts])
+table(["poz.", "za kg"] + ["%s %s" % (o["unit"], dane.weight(o["size"])) for o in opts], rows,
+      align="r" * (2 + len(opts)))
 para("""
-Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i pozwala kupowac
-pasze w wiekszych jednostkach, a im wieksza jednostka, tym tanszy kilogram
-(od %.2f zl na starcie do %.2f zl na ostatnim poziomie). Magazyn zmienia
-wyglad na poziomie 4 i 7.
-""" % (ECO["feed_pack_price"] / ECO["feed_pack_size"],
-       st["upgrades"][-1]["pack_price"] / st["upgrades"][-1]["pack_size"]))
+Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i obniza cene
+paszy (od %.2f zl za kg na starcie do %.2f zl na ostatnim poziomie). Magazyn
+zmienia wyglad na poziomie 4 i 7.
+""" % (st["feed_price_kg"], st["upgrades"][-1]["feed_price_kg"]))
 
 title("11. INKUBATOR")
 inc = BAL["incubator"]

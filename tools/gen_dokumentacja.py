@@ -246,12 +246,12 @@ OPISY_ROZ = {
     "magazyn[].budowa_min": ("min ZEGARA", "Czas budowy jak w kurniku.", "Simulation._advance_construction"),
     "magazyn[].jaj": ("szt.", "Limit jaj w magazynie; nadmiar przepada przy znoszeniu.",
                       "FarmState.egg_capacity"),
-    "magazyn[].pasza": ("tekst", "Nazwa jednostki paszy kupowanej JEDNYM suwakiem przy tym "
-                        "magazynie (worek, big-bag, dostawa luzem...). Waga dopisuje sie sama.",
-                        "FarmState.feed_pack, NumberFormat.feed_unit"),
-    "magazyn[].pasza_kg": ("kg", "Ile paszy przybywa po jednym zakupie.", "FarmState.feed_pack"),
-    "magazyn[].pasza_cena": ("zl", "Cena jednej jednostki. Cena za kg (pasza_cena / pasza_kg) musi "
-                             "spadac z kazdym poziomem (test).", "FarmState.feed_pack"),
+    "magazyn[].pasza_zl_kg": ("zl", "Cena kilograma paszy przy tym magazynie. Musi spadac z kazdym "
+                              "poziomem (test).", "FarmState.feed_pack"),
+    "pasza_do_kupienia[].nazwa": ("tekst", "Nazwa opakowania na przycisku paszy w sklepie (worek, "
+                                  "big-bag).", "FarmState.feed_pack, panel sklepu"),
+    "pasza_do_kupienia[].kg": ("kg", "Ile paszy kupuje ten przycisk. Cena = kg * pasza_zl_kg "
+                               "obecnego magazynu.", "FarmState.feed_pack, Game.buy_feed"),
     "inkubator[].poziom": ("nr", "Numer poziomu, 0 = start.", "GameData.apply_upgrades"),
     "inkubator[].nazwa": ("tekst", "Nazwa poziomu inkubatora.", "panel inkubatora"),
     "inkubator[].cena": ("zl", "Cena przejscia NA ten poziom.", "Game.upgrade_building"),
@@ -689,15 +689,17 @@ def build():
          "economy.egg_spoil_hours (%s h) znika. Sklep sprzedaje partiami po economy.egg_sale_lot "
          "(%s) - FarmState.oldest_eggs wybiera NAJSTARSZE jaja ze wszystkich ras, bo te zgnija "
          "najpierw." % (fmt(BAL["economy"]["egg_spoil_hours"]), BAL["economy"]["egg_sale_lot"]))
-    head("6.1a Pasza: jedna jednostka na poziom magazynu")
-    para("Jeden suwak \"Kup pasze\" kupuje JEDNA jednostke paszy z data/rozbudowy.json "
-         "(magazyn[].pasza, pasza_kg, pasza_cena) dla obecnego poziomu magazynu. Cena za kilogram "
-         "spada z poziomem. W tekstach gry nie ma slow \"rabat\" ani \"hurt\" (wlasciciel 25.11).")
+    head("6.1a Pasza: dwa przyciski, cena za kg z magazynu")
+    para("W sklepie sa przyciski z data/rozbudowy.json -> pasza_do_kupienia (od 12.25: worek "
+         "20 kg i big-bag 200 kg, zwykle przyciski bez suwaka). Cena = kg * magazyn[].pasza_zl_kg "
+         "dla obecnego poziomu magazynu; kilogram tanieje z poziomem. W tekstach gry nie ma slow "
+         "\"rabat\" ani \"hurt\" (wlasciciel 25.11).")
     rows = []
     for lv in ROZ["magazyn"]:
-        rows.append([str(lv["poziom"]), "%s %s" % (lv["pasza"], dane.weight(lv["pasza_kg"])),
-                     "%.2f" % lv["pasza_cena"], "%.2f" % (lv["pasza_cena"] / lv["pasza_kg"])])
-    table(["magazyn", "jednostka", "cena zl", "zl/kg"], rows, "rlrr")
+        rows.append([str(lv["poziom"]), "%.2f" % lv["pasza_zl_kg"]] +
+                    ["%.2f" % (o["kg"] * lv["pasza_zl_kg"]) for o in ROZ["pasza_do_kupienia"]])
+    table(["magazyn", "zl/kg"] + ["%s %s" % (o["nazwa"], dane.weight(o["kg"]))
+                                  for o in ROZ["pasza_do_kupienia"]], rows, "rrrr")
 
     head("6.2 Pasza i glod")
     block("""
@@ -838,7 +840,7 @@ def build():
          "data/rozbudowy.json: polskie klucze, nazwy zwyklym tekstem (bez strings.csv). Na gorze "
          "pliku jest instrukcja \"_jak_edytowac\". GameData.apply_upgrades przepisuje go przy "
          "starcie gry na balance.buildings.coop/storage/guard/dog, balance.incubator i "
-         "economy.feed_pack_size/price - reszta kodu czyta stare pola. Zly numer poziomu albo "
+         "economy.feed_options/feed_pack_size/price - reszta kodu czyta stare pola. Zly numer poziomu albo "
          "pusta nazwa = blad w tescie i nic sie nie wdraza.")
     for key, (unit, desc, where) in OPISY_ROZ.items():
         L.append("")

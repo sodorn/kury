@@ -40,11 +40,11 @@ def apply_upgrades(bal: dict, plik: dict) -> dict:
 
     m = plik["magazyn"]
     st = b.setdefault("storage", {})
-    st.update(name=m[0]["nazwa"], egg_capacity=int(m[0]["jaj"]), feed_unit=m[0]["pasza"])
-    eco["feed_pack_size"] = float(m[0]["pasza_kg"])
-    eco["feed_pack_price"] = float(m[0]["pasza_cena"])
-    st["upgrades"] = [dict(_common(lv), egg_capacity=int(lv["jaj"]), feed_unit=lv["pasza"],
-                           pack_size=float(lv["pasza_kg"]), pack_price=float(lv["pasza_cena"]))
+    st.update(name=m[0]["nazwa"], egg_capacity=int(m[0]["jaj"]), feed_price_kg=float(m[0]["pasza_zl_kg"]))
+    eco["feed_options"] = [{"unit": o["nazwa"], "size": float(o["kg"])} for o in plik["pasza_do_kupienia"]]
+    eco["feed_pack_size"] = eco["feed_options"][0]["size"]
+    eco["feed_pack_price"] = eco["feed_pack_size"] * st["feed_price_kg"]
+    st["upgrades"] = [dict(_common(lv), egg_capacity=int(lv["jaj"]), feed_price_kg=float(lv["pasza_zl_kg"]))
                       for lv in m[1:]]
 
     i = plik["inkubator"]

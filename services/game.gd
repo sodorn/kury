@@ -682,8 +682,9 @@ func egg_sale_lot() -> int:
 ## przy braku pieniedzy. Od 12.18 kura je tyle, co prawdziwa nioska na
 ## jajo, wiec przy wiekszym stadzie jeden worek znika w dwie minuty -
 ## stad przycisk "kup 10 workow".
-func buy_feed(packs: int = 1) -> bool:
-	var pack := state.feed_pack()
+## `option` = ktory przycisk paszy (0 worek, 1 big-bag), `packs` = ile sztuk.
+func buy_feed(option: int = 0, packs: int = 1) -> bool:
+	var pack := state.feed_pack(option)
 	packs = maxi(1, packs)
 	var price := float(pack["price"]) * packs
 	if state.money < price:

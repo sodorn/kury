@@ -1,6 +1,6 @@
 ==============================================================================
   SYMULATOR HODOWLI KURCZAKOW - DOKUMENTACJA TECHNICZNA
-  gra w wersji 12.24   *   format zapisu w wersji 6   *   Godot 4.7.2
+  gra w wersji 12.25   *   format zapisu w wersji 6   *   Godot 4.7.2
 ==============================================================================
 
   Dokument dla programisty: jak gra jest zbudowana, jak dzialaja mechaniki, co
@@ -271,28 +271,28 @@
   economy.egg_sale_lot (100) - FarmState.oldest_eggs wybiera NAJSTARSZE jaja
   ze wszystkich ras, bo te zgnija najpierw.
 
-  6.1a Pasza: jedna jednostka na poziom magazynu
-  ----------------------------------------------
+  6.1a Pasza: dwa przyciski, cena za kg z magazynu
+  ------------------------------------------------
 
-  Jeden suwak "Kup pasze" kupuje JEDNA jednostke paszy z data/rozbudowy.json
-  (magazyn[].pasza, pasza_kg, pasza_cena) dla obecnego poziomu magazynu. Cena
-  za kilogram spada z poziomem. W tekstach gry nie ma slow "rabat" ani "hurt"
-  (wlasciciel 25.11).
+  W sklepie sa przyciski z data/rozbudowy.json -> pasza_do_kupienia (od 12.25:
+  worek 20 kg i big-bag 200 kg, zwykle przyciski bez suwaka). Cena = kg *
+  magazyn[].pasza_zl_kg dla obecnego poziomu magazynu; kilogram tanieje z
+  poziomem. W tekstach gry nie ma slow "rabat" ani "hurt" (wlasciciel 25.11).
 
-  +=========+====================+==========+=======+
-  | magazyn | jednostka          |  cena zl | zl/kg |
-  +=========+====================+==========+=======+
-  |       0 | worek 25 kg        |    50.00 |  2.00 |
-  |       1 | worek 25 kg        |    45.00 |  1.80 |
-  |       2 | big-bag 500 kg     |   860.00 |  1.72 |
-  |       3 | big-bag 1 t        |  1640.00 |  1.64 |
-  |       4 | dostawa luzem 2 t  |  3120.00 |  1.56 |
-  |       5 | dostawa luzem 5 t  |  7400.00 |  1.48 |
-  |       6 | dostawa luzem 10 t | 14000.00 |  1.40 |
-  |       7 | paszowóz 24 t      | 31680.00 |  1.32 |
-  |       8 | paszowóz 24 t      | 30240.00 |  1.26 |
-  |       9 | dwa paszowozy 48 t | 57600.00 |  1.20 |
-  +---------+--------------------+----------+-------+
+  +=========+=======+=============+================+
+  | magazyn | zl/kg | worek 20 kg | big-bag 200 kg |
+  +=========+=======+=============+================+
+  |       0 |  2.00 |       40.00 |         400.00 |
+  |       1 |  1.80 |       36.00 |         360.00 |
+  |       2 |  1.72 |       34.40 |         344.00 |
+  |       3 |  1.64 |       32.80 |         328.00 |
+  |       4 |  1.56 |       31.20 |         312.00 |
+  |       5 |  1.48 |       29.60 |         296.00 |
+  |       6 |  1.40 |       28.00 |         280.00 |
+  |       7 |  1.32 |       26.40 |         264.00 |
+  |       8 |  1.26 |       25.20 |         252.00 |
+  |       9 |  1.20 |       24.00 |         240.00 |
+  +---------+-------+-------------+----------------+
 
   6.2 Pasza i glod
   ----------------
@@ -809,8 +809,8 @@
   strings.csv). Na gorze pliku jest instrukcja "_jak_edytowac".
   GameData.apply_upgrades przepisuje go przy starcie gry na
   balance.buildings.coop/storage/guard/dog, balance.incubator i
-  economy.feed_pack_size/price - reszta kodu czyta stare pola. Zly numer
-  poziomu albo pusta nazwa = blad w tescie i nic sie nie wdraza.
+  economy.feed_options/feed_pack_size/price - reszta kodu czyta stare pola.
+  Zly numer poziomu albo pusta nazwa = blad w tescie i nic sie nie wdraza.
 
   kurnik[].poziom   [nr]
       Numer poziomu, 0 = start. Kolejne liczby od 0 - inaczej gra zglasza blad
@@ -854,19 +854,19 @@
       Limit jaj w magazynie; nadmiar przepada przy znoszeniu.
       uzycie: FarmState.egg_capacity
 
-  magazyn[].pasza   [tekst]
-      Nazwa jednostki paszy kupowanej JEDNYM suwakiem przy tym magazynie
-      (worek, big-bag, dostawa luzem...). Waga dopisuje sie sama.
-      uzycie: FarmState.feed_pack, NumberFormat.feed_unit
-
-  magazyn[].pasza_kg   [kg]
-      Ile paszy przybywa po jednym zakupie.
+  magazyn[].pasza_zl_kg   [zl]
+      Cena kilograma paszy przy tym magazynie. Musi spadac z kazdym poziomem
+      (test).
       uzycie: FarmState.feed_pack
 
-  magazyn[].pasza_cena   [zl]
-      Cena jednej jednostki. Cena za kg (pasza_cena / pasza_kg) musi spadac z
-      kazdym poziomem (test).
-      uzycie: FarmState.feed_pack
+  pasza_do_kupienia[].nazwa   [tekst]
+      Nazwa opakowania na przycisku paszy w sklepie (worek, big-bag).
+      uzycie: FarmState.feed_pack, panel sklepu
+
+  pasza_do_kupienia[].kg   [kg]
+      Ile paszy kupuje ten przycisk. Cena = kg * pasza_zl_kg obecnego
+      magazynu.
+      uzycie: FarmState.feed_pack, Game.buy_feed
 
   inkubator[].poziom   [nr]
       Numer poziomu, 0 = start.
@@ -1677,5 +1677,5 @@
     limity miejsca i ruchu planu darmowego.
 
 ==============================================================================
-  koniec dokumentu  *  wygenerowano z wersji 12.24
+  koniec dokumentu  *  wygenerowano z wersji 12.25
 ==============================================================================

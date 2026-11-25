@@ -4,7 +4,16 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.24): SKLEP - liczba kur i kogutow
+- Aktualny etap: **ETAP 10** (wersja 12.25): PASZA dwoma zwyklymi przyciskami
+  obok siebie (rozbudowy.json -> pasza_do_kupienia: worek 20 kg, big-bag
+  200 kg; magazyn[].pasza_zl_kg 2,00 -> 1,20; FarmState.feed_pack(option),
+  Game.buy_feed(option, packs), economy.feed_options). Szczepienie zwyklym
+  przyciskiem. Kolka w sklepie: kury ciemnozielone, koguty ciemnoczerwone.
+  NAPRAWA: dlugie nazwy poziomow w wierszach panelu rozpychaly Sheet szerzej
+  niz ekran (i zostawal szeroki w kolejnych budynkach) - wartosci wierszy
+  zawijaja sie (_row_value), open() zeruje offset_left/right; test dymny
+  sprawdza szerokosc wszystkich paneli na poziomach 0/3/6/9.
+- Wersja 12.24: SKLEP - liczba kur i kogutow
   jako cyferki w kolkach obok nazwy rasy (bordowe = kury, ciemnobrazowe
   z kogucikiem = koguty; _count_badge, HenBadge/RoosterBadge); z przyciskow
   kupna zniknelo "(masz N)" (wlasciciel 25.11).

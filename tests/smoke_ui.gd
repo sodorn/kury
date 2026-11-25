@@ -70,6 +70,7 @@ func _run() -> void:
 	await _test_fox_lurk_and_fence()
 	await _test_feed_panels()
 	await _test_upgrade_looks()
+	await _test_panel_width()
 	await _test_dog_breeds()
 	await _test_fox_death()
 	await _test_achievements()
@@ -354,22 +355,29 @@ func _test_shop() -> void:
 	await _frames(10)
 	_check(Game.state.egg_count() == 0, "sprzedaz jaj dziala do konca")
 	_check(sprzedaz.disabled, "bez jaj przycisk jest wyszarzony")
-	var pasza_btn := rows[1] as Button
-	_check(pasza_btn.text.begins_with("Kup paszę: worek 25 kg za 50 zł"),
-			"przycisk paszy: 'Kup paszę: worek 25 kg za 50 zł' (jest '%s')" % pasza_btn.text)
-	# Dokladnie JEDEN suwak paszy (wlasciciel 25.11: zadnego "kup 10 workow").
-	var paszowe := 0
-	for b in actions.find_children("*", "Button", true, false):
-		if (b as Button).text.contains("pasz") and (b as Button).text.begins_with("Kup"):
-			paszowe += 1
-	_check(paszowe == 1, "w sklepie jest jeden suwak paszy (jest %d)" % paszowe)
-	_check(pasza_btn is SlideButton and (pasza_btn as SlideButton).compact,
-			"pasza kupowana niskim suwakiem")
-
+	# 12.25 (wlasciciel 25.11): dwa zwykle przyciski paszy obok siebie,
+	# worek 20 kg i big-bag 200 kg, bez suwaka; szczepienie tez bez suwaka.
+	var feed_row := actions.get_node_or_null("FeedRow") as HBoxContainer
+	_check(feed_row != null and feed_row.get_child_count() == 2, "dwa przyciski paszy w jednym wierszu")
+	if feed_row == null:
+		return
+	var worek := feed_row.get_child(0) as Button
+	var bigbag := feed_row.get_child(1) as Button
+	_check(not (worek is SlideButton) and not (bigbag is SlideButton), "pasza bez suwaka")
+	_check(worek.text == "Worek 20 kg za 40 zł" and bigbag.text == "Big-bag 200 kg za 400 zł",
+			"napisy paszy: '%s' | '%s'" % [worek.text, bigbag.text])
+	_check(absf(worek.size.y - bigbag.size.y) < 1.0 and worek.size.y <= 80.0, "przyciski paszy niskie, rowne")
+	var szczepionka := actions.get_node_or_null("Vaccine") as Button
+	_check(szczepionka != null and not (szczepionka is SlideButton), "szczepienie zwyklym przyciskiem")
 	var feed_before: float = Game.state.feed
-	(rows[1] as Button).emit_signal("pressed")
+	worek.emit_signal("pressed")
 	await _frames(10)
-	_check(Game.state.feed > feed_before, "zakup paszy dziala")
+	_check(is_equal_approx(Game.state.feed, feed_before + 20.0), "worek dosypuje 20 kg")
+	Game.state.money += 400.0
+	await _frames(10)
+	bigbag.emit_signal("pressed")
+	await _frames(10)
+	_check(is_equal_approx(Game.state.feed, feed_before + 220.0), "big-bag dosypuje 200 kg")
 
 	# Kazda rasa ma teraz widoczny przycisk zakupu — sklep nie ma blokad.
 	var first_card := rows.size() - GameData.breeds().size()
@@ -1403,9 +1411,7 @@ func _test_feed_panels() -> void:
 			# Cena za kilogram liczona z konfiguracji, nie wpisana na sztywno -
 			# wlasciciel sam zmienia ceny w balance.json.
 			var za_kg := NumberFormat.small_money(float(Game.state.feed_pack()["per_kg"])) + "/kg"
-			var jednostka := NumberFormat.feed_unit(Game.state.feed_pack())
-			_check(calosc.contains(za_kg) and calosc.contains(jednostka),
-					"magazyn poziom 1: %s, %s (%s)" % [jednostka, za_kg, calosc])
+			_check(calosc.contains(za_kg), "magazyn poziom 1: %s (%s)" % [za_kg, calosc])
 		# Wlasciciel 25.11: zadnego "rabatu" ani "hurtu" nigdzie w panelu.
 		var panel_node: Node = _main.get_node("Hud/Root/BuildingPanel/Sheet")
 		var wszystko: Array[String] = []
@@ -1426,6 +1432,33 @@ func _test_feed_panels() -> void:
 		if panel.has_method("close"):
 			panel.close()
 		await _frames(20)
+
+
+## 12.25: dlugie nazwy poziomow rozpychaly panel szerzej niz ekran, a raz
+## rozepchniety panel zostawal szeroki tez w sklepie (zrzut wlasciciela:
+## tekst uciety na krawedziach). Kazdy budynek na kazdym poziomie miesci sie.
+func _test_panel_width() -> void:
+	var panel: Control = _main.get_node("Hud/Root/BuildingPanel")
+	var sheet: Control = panel.get_node("Sheet")
+	var ekran := get_viewport().get_visible_rect().size.x
+	var zle: Array[String] = []
+	var stary := [Game.state.coop_level, Game.state.storage_level, Game.state.incubator_level]
+	for lv in [0, 3, 6, 9]:
+		Game.state.coop_level = lv
+		Game.state.storage_level = lv
+		Game.state.incubator_level = lv
+		for id: String in ["coop", "storage", "incubator", "shop"]:
+			Events.building_tapped.emit(id, null)
+			await _frames(12)
+			var r := sheet.get_global_rect()
+			if r.position.x < -0.5 or r.end.x > ekran + 0.5:
+				zle.append("%s poz.%d: %.0f..%.0f" % [id, lv, r.position.x, r.end.x])
+			panel.close()
+			await _frames(8)
+	_check(zle.is_empty(), "panele mieszcza sie w szerokosci ekranu (%s)" % ", ".join(zle))
+	Game.state.coop_level = stary[0]
+	Game.state.storage_level = stary[1]
+	Game.state.incubator_level = stary[2]
 
 
 ## GAME OVER: pelny ekran, duzy napis, tekst wlasciciela i restart pod tym

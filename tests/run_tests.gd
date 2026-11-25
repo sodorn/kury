@@ -1543,6 +1543,9 @@ func _test_upgrades_file() -> void:
 		_check((plik.get(lista, []) as Array).size() == int(ile[lista]),
 				"rozbudowy.json: %s ma %d poziomow" % [lista, ile[lista]])
 	_check(plik.has("_jak_edytowac"), "rozbudowy.json ma instrukcje edycji")
+	var zakupy: Array = plik.get("pasza_do_kupienia", [])
+	_check(zakupy.size() == 2 and int(zakupy[0]["kg"]) == 20 and int(zakupy[1]["kg"]) == 200,
+			"pasza: worek 20 kg i big-bag 200 kg (wlasciciel 25.11)")
 	# Ten sam plik po popsuciu numeru poziomu i nazwy - bledy maja byc nazwane.
 	var zepsuty: Dictionary = (plik as Dictionary).duplicate(true)
 	(zepsuty["kurnik"][2] as Dictionary)["poziom"] = 7
@@ -1565,11 +1568,15 @@ func _test_upgrades_file() -> void:
 	for i in magazyn.size():
 		stan.storage_level = i
 		_check(stan.egg_capacity() == int(magazyn[i]["jaj"]), "magazyn %d: %d jaj z pliku" % [i, magazyn[i]["jaj"]])
-		var pasza := stan.feed_pack()
-		_check(is_equal_approx(float(pasza["price"]), float(magazyn[i]["pasza_cena"]))
-				and is_equal_approx(float(pasza["size"]), float(magazyn[i]["pasza_kg"]))
-				and String(pasza["unit"]) == String(magazyn[i]["pasza"]),
-				"magazyn %d: pasza %s z pliku" % [i, NumberFormat.feed_unit(pasza)])
+		var opcje: Array = plik["pasza_do_kupienia"]
+		for o in opcje.size():
+			var pasza := stan.feed_pack(o)
+			var kg := float(opcje[o]["kg"])
+			_check(is_equal_approx(float(pasza["per_kg"]), float(magazyn[i]["pasza_zl_kg"]))
+					and is_equal_approx(float(pasza["size"]), kg)
+					and String(pasza["unit"]) == String(opcje[o]["nazwa"])
+					and is_equal_approx(float(pasza["price"]), round(kg * float(magazyn[i]["pasza_zl_kg"]) * 100.0) / 100.0),
+					"magazyn %d: %s za %.2f zl z pliku" % [i, NumberFormat.feed_unit(pasza), float(pasza["price"])])
 	var inkubator: Array = plik["inkubator"]
 	for i in inkubator.size():
 		stan.incubator_level = i
@@ -1634,9 +1641,8 @@ func _test_upgrade_ladders() -> void:
 			poprzednia_cena = cena
 			poprzednia_wartosc = wartosc
 
-	# Pasza: przy kazdym poziomie magazynu JEDNA jednostka (worek, big-bag,
-	# dostawa luzem...), nie mniejsza niz poprzednio, a kilogram tanieje.
-	# Zadnych slow "rabat" ani "hurt" (wlasciciel 25.11).
+	# Pasza: dwa przyciski (worek, big-bag), kilogram tanieje z kazdym
+	# poziomem magazynu. Zadnych slow "rabat" ani "hurt" (wlasciciel 25.11).
 	var stan := FarmState.new()
 	var poprzedni := stan.feed_pack()
 	_check(not String(poprzedni.get("unit", "")).is_empty(), "pasza na starcie ma nazwe jednostki")
@@ -1647,10 +1653,9 @@ func _test_upgrade_ladders() -> void:
 		var worek := stan.feed_pack()
 		var nazwa := String(poziomy[i].get("name", ""))
 		_check(not String(worek.get("unit", "")).is_empty(), "%s: jednostka paszy ma nazwe" % nazwa)
-		_check(float(worek["size"]) >= float(poprzedni["size"]), "%s: jednostka nie mniejsza" % nazwa)
 		_check(float(worek["per_kg"]) < float(poprzedni["per_kg"]), "%s: kilogram tanieje" % nazwa)
-		_check(is_equal_approx(float(worek["price"]), float(poziomy[i].get("pack_price", -1))),
-				"%s: cena jednostki prosto z pliku rozbudow" % nazwa)
+		_check(is_equal_approx(float(worek["per_kg"]), float(poziomy[i].get("feed_price_kg", -1))),
+				"%s: cena kilograma prosto z pliku rozbudow" % nazwa)
 		poprzedni = worek
 	for key: String in ["PANEL_BUY_FEED", "PANEL_FEED_PRICE_VALUE", "HINT_BUILDING_UPGRADED_STORAGE",
 			"UPG_STORAGE_EFFECT", "PANEL_UPGRADE_NEXT", "PANEL_UPGRADE_SLIDE"]:
@@ -2487,7 +2492,7 @@ func _test_buildings() -> void:
 	_check(Game.upgrade_building("storage"), "rozbudowa magazynu udaje sie")
 	_finish_build(Game.state, "storage")
 	var better := Game.state.feed_pack()
-	_check(float(better["size"]) >= float(pack["size"]), "jednostka paszy nie mniejsza")
+	_check(float(better["size"]) == float(pack["size"]), "ten sam worek")
 	_check(float(better["price"]) / float(better["size"]) < per_kg, "kilogram paszy tanieje")
 	var feed_before := Game.state.feed
 	_check(Game.buy_feed(), "zakup paszy dziala po rozbudowie")
