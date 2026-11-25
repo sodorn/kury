@@ -251,9 +251,7 @@ func _build_coop() -> void:
 
 func _build_storage() -> void:
 	_add_upgrade("storage", func(upgrade: Dictionary) -> String:
-			return tr("UPG_STORAGE_EFFECT") % [
-				NumberFormat.eggs(int(upgrade.get("egg_capacity", 0))),
-				NumberFormat.small_money(float(upgrade.get("feed_price_kg", 0.0)))])
+			return tr("UPG_STORAGE_EFFECT") % NumberFormat.eggs(int(upgrade.get("egg_capacity", 0))))
 	_add_level_row(func() -> int: return Game.state.storage_level, _building_levels("storage"),
 			func() -> String: return _level_name("storage"))
 	_add_row("PANEL_EGGS_STORED", func() -> String: return "%s / %s" % [
@@ -272,13 +270,6 @@ func _build_storage() -> void:
 				func() -> String: return tr("PANEL_EGG_LINE") % [
 					int(Game.state.eggs.get(breed_id, 0)),
 					NumberFormat.money(int(Game.state.eggs.get(breed_id, 0)) * FarmState.egg_value(breed_id))])
-
-	# Jedna jednostka paszy przy tym magazynie i jej cena za kilogram (cena za
-	# kg potrafi byc ponizej zlotowki - stad small_money).
-	_add_row("PANEL_FEED_PRICE",
-			func() -> String:
-				return tr("PANEL_FEED_PRICE_VALUE") % NumberFormat.small_money(
-						float(Game.state.feed_pack()["per_kg"])))
 
 
 ## Inkubator: postep wykluwania i wzrostu, wkladanie jaj, rozbudowa.

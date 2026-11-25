@@ -595,28 +595,27 @@ func coop_free() -> int:
 
 
 ## Pasza do kupienia: `option` to numer przycisku z data/rozbudowy.json
-## ("pasza_do_kupienia": worek 20 kg, big-bag 200 kg). Cena za kilogram zalezy
-## od poziomu magazynu (magazyn[].pasza_zl_kg) i spada z kazdym poziomem.
-## Wlasciciel 25.11: dwa zwykle przyciski obok siebie, bez "rabatu".
+## ("pasza_do_kupienia": worek 20 kg, big-bag 500 kg). Cena za kilogram zalezy
+## od WIELKOSCI opakowania (znizka_proc), nie od magazynu (wlasciciel 25.11).
 func feed_pack(option: int = 0) -> Dictionary:
 	var economy: Dictionary = GameData.balance().get("economy", {})
-	var storage: Dictionary = GameData.balance().get("buildings", {}).get("storage", {})
 	var options: Array = economy.get("feed_options", [])
 	var size := maxf(1.0, float(economy.get("feed_pack_size", 20)))
+	var per_kg := float(economy.get("feed_price_kg", 2.0))
 	var unit := "worek"
+	var discount := 0.0
 	if not options.is_empty():
 		var opt: Dictionary = options[clampi(option, 0, options.size() - 1)]
 		size = maxf(1.0, float(opt.get("size", size)))
 		unit = String(opt.get("unit", unit))
-	var per_kg := float(storage.get("feed_price_kg", 2.0))
-	var upgrade := current_building_upgrade("storage")
-	if not upgrade.is_empty():
-		per_kg = float(upgrade.get("feed_price_kg", per_kg))
+		per_kg = float(opt.get("per_kg", per_kg))
+		discount = float(opt.get("discount", 0.0))
 	return {
 		"size": size,
 		# Do pelnych groszy, zeby cena na przycisku i pobrana kwota sie zgadzaly.
 		"price": round(size * per_kg * 100.0) / 100.0,
 		"per_kg": per_kg,
+		"discount": discount,
 		"unit": unit,
 	}
 

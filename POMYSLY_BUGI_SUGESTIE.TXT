@@ -411,3 +411,41 @@ Punkt 3.2 opisuje stara mechanike lisa (10 sekund wizyty, 3 dotkniecia,
   - kundel probuje co 10 sekund z szansa 1/3, owczarek co 5 sekund
     z szansa 2/3, a udana proba owczarka ma 1/3 szans na zabicie lisa,
   - po zabitym lisie nastepny przychodzi piec razy pozniej.
+
+
+================================================================================
+ PRZEGLAD NA 2026-11-25 (wersja 12.26) - sama ocena, nic nie wdrozone
+================================================================================
+
+ZROBIONE (sprawdzone w kodzie): 2.1-2.6, 4.1 (licznik nad lisem), 4.3
+(codzienna kopia farm do kopie/), 5.1 (McDonald), 5.2 (kundel i owczarek
+na wybiegu), 5.3 (wyglad budynkow i plotu), POMYSLY.md 1 i 2, UWAGI.md 1-3,
+UWAGI.md 4 (czas liczony z zegara systemowego, karta w tle nic nie traci).
+
+PRZETERMINOWANE OPISY: pkt 1 (tabela ras: cemani kosztuje dzis 4000 zl,
+sprzedaz 70%), pkt 3.2 i "co sie zdezaktualizowalo" (lis: kostka co godzine
+tez w tle, czai sie w krzakach, 20 dotkniec, czasem rzez).
+
+NIE ZROBIONE - OCENA
+  5.7  klikalne krzaki           TAK, najpierw. Lis i tak czai sie dzis
+       w krzakach 10-30 s - dotkniecie krzaka moze go wyploszyc, zanim
+       dojdzie do plotu. Mala robota, daje cos do roboty na wybiegu.
+  5.5  gluszec-obronca           NIE w tej formie: gluszec jest w Polsce
+       gatunkiem scisle chronionym i nie broni kur. Realny obronca to
+       ALPAKA albo GESI (naprawde trzyma sie je przeciw lisom). Ta sama
+       robota co pisalem: trzeci "pies", jedna grafika, trzy liczby.
+  5.6  jednorazowa pomoc         TAK, jako nagroda (np. "sasiad mysliwy"
+       za przegonienie lisa palcem), nie za gotowke.
+  3    zamowienia                TAK, najlepszy z duzych: daje cel na
+       krotka mete i powod trzymac rozne rasy (pasuje do choroby jednej
+       rasy z 12.23). Srednia robota.
+  5    wahania cen               MOZE, maly koszt; tylko ceny kur, nie
+       paszy.
+  7    pory roku                 MOZE, ale gra ma dni po 24 h realnych -
+       pora roku trwalaby tygodnie. Lepiej "pogoda dnia".
+  4    genetyka, 6 wystawy       duze; dopiero po zamowieniach.
+  4.4  dwie mapy, 5.4 minigra    NIE teraz - po kilka etapow roboty.
+  4.2  ETAPY.md                  papierowe, 10 minut, kiedy chcesz.
+  UWAGI "nadal otwarte": samouczek / "?" - NIE MA, a gra ma juz sporo
+       zasad (lis, choroba jednej rasy, rozbudowy). Zdjecia ras - brak
+       plikow, sklep pokazuje rysunki. APK - dalej brak Android SDK.

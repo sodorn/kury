@@ -1,6 +1,6 @@
 ==============================================================================
   SYMULATOR HODOWLI KURCZAKOW - DOKUMENTACJA TECHNICZNA
-  gra w wersji 12.25   *   format zapisu w wersji 6   *   Godot 4.7.2
+  gra w wersji 12.26   *   format zapisu w wersji 6   *   Godot 4.7.2
 ==============================================================================
 
   Dokument dla programisty: jak gra jest zbudowana, jak dzialaja mechaniki, co
@@ -271,28 +271,20 @@
   economy.egg_sale_lot (100) - FarmState.oldest_eggs wybiera NAJSTARSZE jaja
   ze wszystkich ras, bo te zgnija najpierw.
 
-  6.1a Pasza: dwa przyciski, cena za kg z magazynu
-  ------------------------------------------------
+  6.1a Pasza: dwa przyciski, znizka za wielkosc opakowania
+  --------------------------------------------------------
 
-  W sklepie sa przyciski z data/rozbudowy.json -> pasza_do_kupienia (od 12.25:
-  worek 20 kg i big-bag 200 kg, zwykle przyciski bez suwaka). Cena = kg *
-  magazyn[].pasza_zl_kg dla obecnego poziomu magazynu; kilogram tanieje z
-  poziomem. W tekstach gry nie ma slow "rabat" ani "hurt" (wlasciciel 25.11).
+  W sklepie sa przyciski z data/rozbudowy.json -> pasza_do_kupienia (zwykle
+  przyciski, bez suwaka). Cena = kg * pasza_zl_kg * (1 - znizka_proc/100).
+  Magazyn ceny NIE zmienia (od 12.26). W tekstach gry nie ma slow "rabat" ani
+  "hurt" (wlasciciel 25.11).
 
-  +=========+=======+=============+================+
-  | magazyn | zl/kg | worek 20 kg | big-bag 200 kg |
-  +=========+=======+=============+================+
-  |       0 |  2.00 |       40.00 |         400.00 |
-  |       1 |  1.80 |       36.00 |         360.00 |
-  |       2 |  1.72 |       34.40 |         344.00 |
-  |       3 |  1.64 |       32.80 |         328.00 |
-  |       4 |  1.56 |       31.20 |         312.00 |
-  |       5 |  1.48 |       29.60 |         296.00 |
-  |       6 |  1.40 |       28.00 |         280.00 |
-  |       7 |  1.32 |       26.40 |         264.00 |
-  |       8 |  1.26 |       25.20 |         252.00 |
-  |       9 |  1.20 |       24.00 |         240.00 |
-  +---------+-------+-------------+----------------+
+  +============+=====+========+=======+========+
+  | opakowanie |  kg | znizka | zl/kg |   cena |
+  +============+=====+========+=======+========+
+  | worek      |  20 |     0% |  2.00 |  40.00 |
+  | big-bag    | 500 |    20% |  1.60 | 800.00 |
+  +------------+-----+--------+-------+--------+
 
   6.2 Pasza i glod
   ----------------
@@ -854,9 +846,8 @@
       Limit jaj w magazynie; nadmiar przepada przy znoszeniu.
       uzycie: FarmState.egg_capacity
 
-  magazyn[].pasza_zl_kg   [zl]
-      Cena kilograma paszy przy tym magazynie. Musi spadac z kazdym poziomem
-      (test).
+  pasza_zl_kg   [zl]
+      Cena kilograma paszy bez znizki.
       uzycie: FarmState.feed_pack
 
   pasza_do_kupienia[].nazwa   [tekst]
@@ -864,9 +855,13 @@
       uzycie: FarmState.feed_pack, panel sklepu
 
   pasza_do_kupienia[].kg   [kg]
-      Ile paszy kupuje ten przycisk. Cena = kg * pasza_zl_kg obecnego
-      magazynu.
+      Ile paszy kupuje ten przycisk.
       uzycie: FarmState.feed_pack, Game.buy_feed
+
+  pasza_do_kupienia[].znizka_proc   [%]
+      O ile taniej za kg niz pasza_zl_kg. Zalezy od wielkosci opakowania, NIE
+      od magazynu (wlasciciel 25.11).
+      uzycie: GameData.apply_upgrades, FarmState.feed_pack
 
   inkubator[].poziom   [nr]
       Numer poziomu, 0 = start.
@@ -1677,5 +1672,5 @@
     limity miejsca i ruchu planu darmowego.
 
 ==============================================================================
-  koniec dokumentu  *  wygenerowano z wersji 12.25
+  koniec dokumentu  *  wygenerowano z wersji 12.26
 ==============================================================================

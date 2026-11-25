@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 12.25
+  INSTRUKCJA OBSLUGI *** gra w wersji 12.26
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -146,8 +146,8 @@
 
   Kazdy dorosly ptak zjada 13 kg paszy na godzine, pisklę 0.5 tego. Na starcie
   kilogram paszy kosztuje 2.00 zl (cena jak w sklepie rolniczym). W sklepie sa
-  dwa przyciski: worek 20 kg i big-bag 200 kg. Im wiekszy magazyn, tym tanszy
-  kilogram - tabela w rozdziale MAGAZYN.
+  dwa przyciski: worek 20 kg za 40 zl i big-bag 500 kg za 800 zl. Wieksze
+  opakowanie jest tansze za kilogram.
 
   ZANIM WYJDZIESZ Z GRY: kup paszy na cala przerwe. Kury jedza tez wtedy, gdy
   nie grasz, a magazyn trzyma tylko tyle jaj, ile sie w nim miesci - reszta
@@ -263,24 +263,8 @@
   10. baza paszowa: hala 1500 m², silosy 2×150 t i waga
       limit 100 000 jaj - 1 800 000 zl, budowa 1 h
 
-  +======+=========+=============+================+
-  | poz. |   za kg | worek 20 kg | big-bag 200 kg |
-  +======+=========+=============+================+
-  |    1 | 2.00 zl |       40 zl |         400 zl |
-  |    2 | 1.80 zl |       36 zl |         360 zl |
-  |    3 | 1.72 zl |    34,40 zl |         344 zl |
-  |    4 | 1.64 zl |    32,80 zl |         328 zl |
-  |    5 | 1.56 zl |    31,20 zl |         312 zl |
-  |    6 | 1.48 zl |    29,60 zl |         296 zl |
-  |    7 | 1.40 zl |       28 zl |         280 zl |
-  |    8 | 1.32 zl |    26,40 zl |         264 zl |
-  |    9 | 1.26 zl |    25,20 zl |         252 zl |
-  |   10 | 1.20 zl |       24 zl |         240 zl |
-  +------+---------+-------------+----------------+
-
-  Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i obniza cene
-  paszy (od 2.00 zl za kg na starcie do 1.20 zl na ostatnim poziomie). Magazyn
-  zmienia wyglad na poziomie 4 i 7.
+  Rozbudowa magazynu podnosi limit jaj. Ceny paszy nie zmienia - tansza jest
+  tylko wieksza paczka (big-bag). Magazyn zmienia wyglad na poziomie 4 i 7.
 
 ==============================================================================
  11. INKUBATOR

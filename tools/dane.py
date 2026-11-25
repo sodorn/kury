@@ -40,12 +40,16 @@ def apply_upgrades(bal: dict, plik: dict) -> dict:
 
     m = plik["magazyn"]
     st = b.setdefault("storage", {})
-    st.update(name=m[0]["nazwa"], egg_capacity=int(m[0]["jaj"]), feed_price_kg=float(m[0]["pasza_zl_kg"]))
-    eco["feed_options"] = [{"unit": o["nazwa"], "size": float(o["kg"])} for o in plik["pasza_do_kupienia"]]
+    st.update(name=m[0]["nazwa"], egg_capacity=int(m[0]["jaj"]))
+    base = float(plik["pasza_zl_kg"])
+    eco["feed_price_kg"] = base
+    eco["feed_options"] = [{"unit": o["nazwa"], "size": float(o["kg"]),
+                            "discount": float(o.get("znizka_proc", 0)) / 100.0,
+                            "per_kg": base * (1 - float(o.get("znizka_proc", 0)) / 100.0)}
+                           for o in plik["pasza_do_kupienia"]]
     eco["feed_pack_size"] = eco["feed_options"][0]["size"]
-    eco["feed_pack_price"] = eco["feed_pack_size"] * st["feed_price_kg"]
-    st["upgrades"] = [dict(_common(lv), egg_capacity=int(lv["jaj"]), feed_price_kg=float(lv["pasza_zl_kg"]))
-                      for lv in m[1:]]
+    eco["feed_pack_price"] = eco["feed_pack_size"] * eco["feed_options"][0]["per_kg"]
+    st["upgrades"] = [dict(_common(lv), egg_capacity=int(lv["jaj"])) for lv in m[1:]]
 
     i = plik["inkubator"]
     inc.update(name=i[0]["nazwa"], slots=max(1, int(i[0]["jaj"]) // per_chick), eggs=int(i[0]["jaj"]))

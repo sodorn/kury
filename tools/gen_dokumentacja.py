@@ -246,12 +246,13 @@ OPISY_ROZ = {
     "magazyn[].budowa_min": ("min ZEGARA", "Czas budowy jak w kurniku.", "Simulation._advance_construction"),
     "magazyn[].jaj": ("szt.", "Limit jaj w magazynie; nadmiar przepada przy znoszeniu.",
                       "FarmState.egg_capacity"),
-    "magazyn[].pasza_zl_kg": ("zl", "Cena kilograma paszy przy tym magazynie. Musi spadac z kazdym "
-                              "poziomem (test).", "FarmState.feed_pack"),
+    "pasza_zl_kg": ("zl", "Cena kilograma paszy bez znizki.", "FarmState.feed_pack"),
     "pasza_do_kupienia[].nazwa": ("tekst", "Nazwa opakowania na przycisku paszy w sklepie (worek, "
                                   "big-bag).", "FarmState.feed_pack, panel sklepu"),
-    "pasza_do_kupienia[].kg": ("kg", "Ile paszy kupuje ten przycisk. Cena = kg * pasza_zl_kg "
-                               "obecnego magazynu.", "FarmState.feed_pack, Game.buy_feed"),
+    "pasza_do_kupienia[].kg": ("kg", "Ile paszy kupuje ten przycisk.", "FarmState.feed_pack, Game.buy_feed"),
+    "pasza_do_kupienia[].znizka_proc": ("%", "O ile taniej za kg niz pasza_zl_kg. Zalezy od wielkosci "
+                                        "opakowania, NIE od magazynu (wlasciciel 25.11).",
+                                        "GameData.apply_upgrades, FarmState.feed_pack"),
     "inkubator[].poziom": ("nr", "Numer poziomu, 0 = start.", "GameData.apply_upgrades"),
     "inkubator[].nazwa": ("tekst", "Nazwa poziomu inkubatora.", "panel inkubatora"),
     "inkubator[].cena": ("zl", "Cena przejscia NA ten poziom.", "Game.upgrade_building"),
@@ -689,17 +690,16 @@ def build():
          "economy.egg_spoil_hours (%s h) znika. Sklep sprzedaje partiami po economy.egg_sale_lot "
          "(%s) - FarmState.oldest_eggs wybiera NAJSTARSZE jaja ze wszystkich ras, bo te zgnija "
          "najpierw." % (fmt(BAL["economy"]["egg_spoil_hours"]), BAL["economy"]["egg_sale_lot"]))
-    head("6.1a Pasza: dwa przyciski, cena za kg z magazynu")
-    para("W sklepie sa przyciski z data/rozbudowy.json -> pasza_do_kupienia (od 12.25: worek "
-         "20 kg i big-bag 200 kg, zwykle przyciski bez suwaka). Cena = kg * magazyn[].pasza_zl_kg "
-         "dla obecnego poziomu magazynu; kilogram tanieje z poziomem. W tekstach gry nie ma slow "
-         "\"rabat\" ani \"hurt\" (wlasciciel 25.11).")
-    rows = []
-    for lv in ROZ["magazyn"]:
-        rows.append([str(lv["poziom"]), "%.2f" % lv["pasza_zl_kg"]] +
-                    ["%.2f" % (o["kg"] * lv["pasza_zl_kg"]) for o in ROZ["pasza_do_kupienia"]])
-    table(["magazyn", "zl/kg"] + ["%s %s" % (o["nazwa"], dane.weight(o["kg"]))
-                                  for o in ROZ["pasza_do_kupienia"]], rows, "rrrr")
+    head("6.1a Pasza: dwa przyciski, znizka za wielkosc opakowania")
+    para("W sklepie sa przyciski z data/rozbudowy.json -> pasza_do_kupienia (zwykle przyciski, bez "
+         "suwaka). Cena = kg * pasza_zl_kg * (1 - znizka_proc/100). Magazyn ceny NIE zmienia "
+         "(od 12.26). W tekstach gry nie ma slow \"rabat\" ani \"hurt\" (wlasciciel 25.11).")
+    base = ROZ["pasza_zl_kg"]
+    table(["opakowanie", "kg", "znizka", "zl/kg", "cena"],
+          [[o["nazwa"], fmt(o["kg"]), "%s%%" % fmt(o["znizka_proc"]),
+            "%.2f" % (base * (1 - o["znizka_proc"] / 100.0)),
+            "%.2f" % (o["kg"] * base * (1 - o["znizka_proc"] / 100.0))]
+           for o in ROZ["pasza_do_kupienia"]], "lrrrr")
 
     head("6.2 Pasza i glod")
     block("""

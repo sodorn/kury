@@ -1544,8 +1544,9 @@ func _test_upgrades_file() -> void:
 				"rozbudowy.json: %s ma %d poziomow" % [lista, ile[lista]])
 	_check(plik.has("_jak_edytowac"), "rozbudowy.json ma instrukcje edycji")
 	var zakupy: Array = plik.get("pasza_do_kupienia", [])
-	_check(zakupy.size() == 2 and int(zakupy[0]["kg"]) == 20 and int(zakupy[1]["kg"]) == 200,
-			"pasza: worek 20 kg i big-bag 200 kg (wlasciciel 25.11)")
+	_check(zakupy.size() == 2 and int(zakupy[0]["kg"]) == 20 and int(zakupy[1]["kg"]) == 500
+			and int(zakupy[0]["znizka_proc"]) == 0 and int(zakupy[1]["znizka_proc"]) == 20,
+			"pasza: worek 20 kg bez znizki, big-bag 500 kg -20% (wlasciciel 25.11)")
 	# Ten sam plik po popsuciu numeru poziomu i nazwy - bledy maja byc nazwane.
 	var zepsuty: Dictionary = (plik as Dictionary).duplicate(true)
 	(zepsuty["kurnik"][2] as Dictionary)["poziom"] = 7
@@ -1572,10 +1573,10 @@ func _test_upgrades_file() -> void:
 		for o in opcje.size():
 			var pasza := stan.feed_pack(o)
 			var kg := float(opcje[o]["kg"])
-			_check(is_equal_approx(float(pasza["per_kg"]), float(magazyn[i]["pasza_zl_kg"]))
-					and is_equal_approx(float(pasza["size"]), kg)
+			var za_kg := float(plik["pasza_zl_kg"]) * (1.0 - float(opcje[o]["znizka_proc"]) / 100.0)
+			_check(is_equal_approx(float(pasza["per_kg"]), za_kg) and is_equal_approx(float(pasza["size"]), kg)
 					and String(pasza["unit"]) == String(opcje[o]["nazwa"])
-					and is_equal_approx(float(pasza["price"]), round(kg * float(magazyn[i]["pasza_zl_kg"]) * 100.0) / 100.0),
+					and is_equal_approx(float(pasza["price"]), round(kg * za_kg * 100.0) / 100.0),
 					"magazyn %d: %s za %.2f zl z pliku" % [i, NumberFormat.feed_unit(pasza), float(pasza["price"])])
 	var inkubator: Array = plik["inkubator"]
 	for i in inkubator.size():
@@ -1641,23 +1642,22 @@ func _test_upgrade_ladders() -> void:
 			poprzednia_cena = cena
 			poprzednia_wartosc = wartosc
 
-	# Pasza: dwa przyciski (worek, big-bag), kilogram tanieje z kazdym
-	# poziomem magazynu. Zadnych slow "rabat" ani "hurt" (wlasciciel 25.11).
+	# Pasza (wlasciciel 25.11): worek 20 kg bez znizki, big-bag 500 kg o 20%
+	# taniej; magazyn ceny paszy NIE zmienia. Zadnego "rabatu"/"hurtu" w tekstach.
 	var stan := FarmState.new()
-	var poprzedni := stan.feed_pack()
-	_check(not String(poprzedni.get("unit", "")).is_empty(), "pasza na starcie ma nazwe jednostki")
-	_check(is_equal_approx(float(poprzedni["per_kg"]), 2.0), "na starcie kilogram paszy po 2 zl")
+	var worek0 := stan.feed_pack(0)
+	var big0 := stan.feed_pack(1)
+	_check(is_equal_approx(float(worek0["size"]), 20.0) and is_equal_approx(float(worek0["price"]), 40.0),
+			"worek 20 kg za 40 zl (2 zl/kg, bez znizki)")
+	_check(is_equal_approx(float(big0["size"]), 500.0) and is_equal_approx(float(big0["price"]), 800.0),
+			"big-bag 500 kg za 800 zl (20%% taniej)")
 	var poziomy: Array = GameData.balance().get("buildings", {}).get("storage", {}).get("upgrades", [])
 	for i in poziomy.size():
 		stan.storage_level = i + 1
-		var worek := stan.feed_pack()
-		var nazwa := String(poziomy[i].get("name", ""))
-		_check(not String(worek.get("unit", "")).is_empty(), "%s: jednostka paszy ma nazwe" % nazwa)
-		_check(float(worek["per_kg"]) < float(poprzedni["per_kg"]), "%s: kilogram tanieje" % nazwa)
-		_check(is_equal_approx(float(worek["per_kg"]), float(poziomy[i].get("feed_price_kg", -1))),
-				"%s: cena kilograma prosto z pliku rozbudow" % nazwa)
-		poprzedni = worek
-	for key: String in ["PANEL_BUY_FEED", "PANEL_FEED_PRICE_VALUE", "HINT_BUILDING_UPGRADED_STORAGE",
+		_check(is_equal_approx(float(stan.feed_pack(0)["price"]), 40.0)
+				and is_equal_approx(float(stan.feed_pack(1)["price"]), 800.0),
+				"magazyn %d nie zmienia ceny paszy" % (i + 1))
+	for key: String in ["PANEL_BUY_FEED", "HINT_BUILDING_UPGRADED_STORAGE",
 			"UPG_STORAGE_EFFECT", "PANEL_UPGRADE_NEXT", "PANEL_UPGRADE_SLIDE"]:
 		var tekst := tr(key).to_lower()
 		_check(not tekst.contains("rabat") and not tekst.contains("hurt"),
@@ -2486,14 +2486,14 @@ func _test_buildings() -> void:
 	_finish_build(Game.state, "coop")
 	_check(Game.state.coop_capacity() > before, "po rozbudowie miejsc jest wiecej")
 
-	# Magazyn: nizsza cena za kilogram (jednostka moze zostac ta sama).
+	# Magazyn: cena paszy zostaje ta sama (znizka zalezy od opakowania).
 	var pack := Game.state.feed_pack()
 	var per_kg := float(pack["price"]) / float(pack["size"])
 	_check(Game.upgrade_building("storage"), "rozbudowa magazynu udaje sie")
 	_finish_build(Game.state, "storage")
 	var better := Game.state.feed_pack()
 	_check(float(better["size"]) == float(pack["size"]), "ten sam worek")
-	_check(float(better["price"]) / float(better["size"]) < per_kg, "kilogram paszy tanieje")
+	_check(is_equal_approx(float(better["price"]) / float(better["size"]), per_kg), "kilogram paszy bez zmian")
 	var feed_before := Game.state.feed
 	_check(Game.buy_feed(), "zakup paszy dziala po rozbudowie")
 	_check(is_equal_approx(Game.state.feed, feed_before + float(better["size"])),

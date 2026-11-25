@@ -356,7 +356,7 @@ func _test_shop() -> void:
 	_check(Game.state.egg_count() == 0, "sprzedaz jaj dziala do konca")
 	_check(sprzedaz.disabled, "bez jaj przycisk jest wyszarzony")
 	# 12.25 (wlasciciel 25.11): dwa zwykle przyciski paszy obok siebie,
-	# worek 20 kg i big-bag 200 kg, bez suwaka; szczepienie tez bez suwaka.
+	# worek 20 kg i big-bag 500 kg (-20%), bez suwaka; szczepienie bez suwaka.
 	var feed_row := actions.get_node_or_null("FeedRow") as HBoxContainer
 	_check(feed_row != null and feed_row.get_child_count() == 2, "dwa przyciski paszy w jednym wierszu")
 	if feed_row == null:
@@ -364,7 +364,7 @@ func _test_shop() -> void:
 	var worek := feed_row.get_child(0) as Button
 	var bigbag := feed_row.get_child(1) as Button
 	_check(not (worek is SlideButton) and not (bigbag is SlideButton), "pasza bez suwaka")
-	_check(worek.text == "Worek 20 kg za 40 zł" and bigbag.text == "Big-bag 200 kg za 400 zł",
+	_check(worek.text == "Worek 20 kg za 40 zł" and bigbag.text == "Big-bag 500 kg za 800 zł",
 			"napisy paszy: '%s' | '%s'" % [worek.text, bigbag.text])
 	_check(absf(worek.size.y - bigbag.size.y) < 1.0 and worek.size.y <= 80.0, "przyciski paszy niskie, rowne")
 	var szczepionka := actions.get_node_or_null("Vaccine") as Button
@@ -373,11 +373,11 @@ func _test_shop() -> void:
 	worek.emit_signal("pressed")
 	await _frames(10)
 	_check(is_equal_approx(Game.state.feed, feed_before + 20.0), "worek dosypuje 20 kg")
-	Game.state.money += 400.0
+	Game.state.money += 800.0
 	await _frames(10)
 	bigbag.emit_signal("pressed")
 	await _frames(10)
-	_check(is_equal_approx(Game.state.feed, feed_before + 220.0), "big-bag dosypuje 200 kg")
+	_check(is_equal_approx(Game.state.feed, feed_before + 520.0), "big-bag dosypuje 500 kg")
 
 	# Kazda rasa ma teraz widoczny przycisk zakupu — sklep nie ma blokad.
 	var first_card := rows.size() - GameData.breeds().size()
@@ -1408,10 +1408,8 @@ func _test_feed_panels() -> void:
 		var calosc := " | ".join(teksty)
 		if id == "storage":
 			_check(not calosc.contains(" 0 zł/kg"), "cena paszy nie wychodzi jako 0 zl/kg (%s)" % calosc)
-			# Cena za kilogram liczona z konfiguracji, nie wpisana na sztywno -
-			# wlasciciel sam zmienia ceny w balance.json.
-			var za_kg := NumberFormat.small_money(float(Game.state.feed_pack()["per_kg"])) + "/kg"
-			_check(calosc.contains(za_kg), "magazyn poziom 1: %s (%s)" % [za_kg, calosc])
+			# 12.26: magazyn nie zmienia ceny paszy, wiec nie pisze o niej.
+			_check(not calosc.contains("zł/kg"), "magazyn nie pokazuje ceny paszy (%s)" % calosc)
 		# Wlasciciel 25.11: zadnego "rabatu" ani "hurtu" nigdzie w panelu.
 		var panel_node: Node = _main.get_node("Hud/Root/BuildingPanel/Sheet")
 		var wszystko: Array[String] = []

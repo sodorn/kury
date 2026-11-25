@@ -4,7 +4,13 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.25): PASZA dwoma zwyklymi przyciskami
+- Aktualny etap: **ETAP 10** (wersja 12.26): ZNIZKA NA PASZE ZA WIELKOSC
+  OPAKOWANIA, nie za magazyn (wlasciciel 25.11): rozbudowy.json ->
+  pasza_zl_kg 2,00 i pasza_do_kupienia [worek 20 kg 0%, big-bag 500 kg 20%];
+  magazyn[].pasza_zl_kg usuniete, magazyn podnosi tylko limit jaj.
+  economy.feed_price_kg, feed_options[].per_kg/discount. Ocena pomyslow
+  kolegow dopisana na koncu POMYSLY_BUGI_SUGESTIE.TXT (nic nie wdrozone).
+- Wersja 12.25: PASZA dwoma zwyklymi przyciskami
   obok siebie (rozbudowy.json -> pasza_do_kupienia: worek 20 kg, big-bag
   200 kg; magazyn[].pasza_zl_kg 2,00 -> 1,20; FarmState.feed_pack(option),
   Game.buy_feed(option, packs), economy.feed_options). Szczepienie zwyklym
