@@ -16,7 +16,6 @@ var _closing := false
 var _building_id := ""
 var _flash_left := 0.0
 ## Otwarte pytanie "na pewno?", zeby nie dalo sie otworzyc dwoch naraz.
-var _confirm: Control = null
 var _refresh_left := 0.0
 ## Odswiezacze pol, ktore zaleza od stanu gry; wolane po kazdej zmianie zasobow.
 var _refreshers: Array[Callable] = []
@@ -32,6 +31,8 @@ var _refreshers: Array[Callable] = []
 @onready var _scrollable: VBoxContainer = $Sheet/Content/Scroll/Gutter/Scrollable
 @onready var _rows: VBoxContainer = $Sheet/Content/Scroll/Gutter/Scrollable/Rows
 @onready var _actions: VBoxContainer = $Sheet/Content/Scroll/Gutter/Scrollable/Actions
+## Rozbudowa stoi NA GORZE listy, nad informacjami (wlasciciel, 25.11).
+@onready var _upgrades: VBoxContainer = $Sheet/Content/Scroll/Gutter/Scrollable/Upgrades
 ## Paski postepu stoja POD przyciskami: wlasciciel chcial miec przyciski
 ## pod palcem u gory, a odliczanie na dole.
 @onready var _bars: VBoxContainer = $Sheet/Content/Scroll/Gutter/Scrollable/Bars
@@ -146,7 +147,7 @@ func _on_dim_input(event: InputEvent) -> void:
 
 func _build_content(building_id: String) -> void:
 	_refreshers.clear()
-	for container in [_rows, _actions, _bars]:
+	for container in [_upgrades, _rows, _actions, _bars]:
 		for child in container.get_children():
 			child.queue_free()
 			container.remove_child(child)
@@ -163,9 +164,40 @@ func _build_content(building_id: String) -> void:
 
 
 func _build_coop() -> void:
+	_add_upgrade("coop", func(upgrade: Dictionary) -> String:
+			return tr("PANEL_UPGRADE_COOP") % [
+				tr(String(upgrade.get("name", ""))),
+				int(upgrade.get("capacity", 0)),
+				NumberFormat.money(float(upgrade.get("price", 0))),
+				_build_time_text("coop")])
+	_add_action(false,
+			func() -> bool: return Game.state.money >= float(
+					Game.state.next_building_upgrade("dog").get("price", 0)),
+			func() -> String:
+				var upgrade := Game.state.next_building_upgrade("dog")
+				return tr("PANEL_BUY_DOG") % [
+					tr(_dog_buy_name(Game.state.dog_level + 1)),
+					NumberFormat.money(float(upgrade.get("price", 0)))],
+			func() -> void: _on_upgrade("dog"),
+			func() -> bool: return not Game.state.next_building_upgrade("dog").is_empty(),
+			func() -> float: return float(Game.state.next_building_upgrade("dog").get("price", 0)),
+			_upgrades, true)
+	_add_action(false,
+			func() -> bool: return Game.state.money >= float(
+					Game.state.next_building_upgrade("guard").get("price", 0)),
+			func() -> String:
+				var upgrade := Game.state.next_building_upgrade("guard")
+				return tr("PANEL_UPGRADE_GUARD") % [
+					tr(_guard_buy_name(Game.state.guard_level + 1)),
+					NumberFormat.money(float(upgrade.get("price", 0))),
+					int(round(float(upgrade.get("block_chance", 0.0)) * 100.0))],
+			func() -> void: _on_upgrade("guard"),
+			func() -> bool: return not Game.state.next_building_upgrade("guard").is_empty(),
+			func() -> float: return float(Game.state.next_building_upgrade("guard").get("price", 0)),
+			_upgrades, true)
+
 	_add_level_row(func() -> int: return Game.state.coop_level, _building_levels("coop"),
-			func() -> String: return tr(String(
-					Game.state.current_building_upgrade("coop").get("name", ""))))
+			func() -> String: return _level_name("coop"))
 	_add_row("PANEL_HENS", func() -> String: return str(Game.state.laying_hen_count()))
 	_add_row("PANEL_ROOSTERS", func() -> String: return str(Game.state.rooster_count()))
 	# Jaja w inkubatorze i pisklęta rezerwuja miejsca w kurniku, wiec musza byc
@@ -194,14 +226,10 @@ func _build_coop() -> void:
 			func() -> String: return "%d / %d" % [
 				Game.state.hen_count() - Game.state.unvaccinated_count(), Game.state.hen_count()])
 	_add_row("PANEL_FEED_LEFT", func() -> String: return _feed_text())
-	# Zuzycie podajemy na dzien gospodarstwa, a nie na godzine zegarowa:
-	# dzien w grze trwa kilka minut, wiec "kg/godz." brzmialoby absurdalnie.
-	_add_row("PANEL_FEED_BURN",
-			func() -> String:
-				var day := float(GameData.balance().get("day", {}).get("seconds", 600.0))
-				return tr("PANEL_FEED_BURN_VALUE") % NumberFormat.amount_only(
-					Game.state.feed_per_minute() * day / 60.0))
-	_add_row("PANEL_DAYS", func() -> String: return str(Game.state.days))
+	_add_feed_time_rows()
+	# Wiek farmy w czasie ZIEMSKIM. Do 12.18 byl tu "dzien gospodarstwa"
+	# (pol godziny zegara) - wlasciciel nie wiedzial, czy to jego doby.
+	_add_row("PANEL_FARM_AGE", func() -> String: return NumberFormat.duration(_farm_age()))
 	_add_progress("PANEL_NEXT_EGG", func() -> float: return _best_progress())
 
 	# Stado wedlug ras, zeby gracz widzial, co wlasciwie ma na wybiegu.
@@ -217,44 +245,6 @@ func _build_coop() -> void:
 						return tr("PANEL_FLOCK_LINE_NO_ROOSTER") % _owned(breed_id)
 					return tr("PANEL_FLOCK_LINE") % [
 						_owned(breed_id), NumberFormat.small_money(FarmState.egg_value(breed_id))])
-
-	_add_action(true,
-			func() -> bool: return Game.state.money >= float(
-					Game.state.next_building_upgrade("coop").get("price", 0)),
-			func() -> String:
-				var upgrade := Game.state.next_building_upgrade("coop")
-				return tr("PANEL_UPGRADE_COOP") % [
-					tr(String(upgrade.get("name", ""))),
-					int(upgrade.get("capacity", 0)),
-					NumberFormat.money(float(upgrade.get("price", 0)))],
-			func() -> void: _on_upgrade("coop"),
-			func() -> bool: return not Game.state.next_building_upgrade("coop").is_empty(),
-			func() -> float: return float(Game.state.next_building_upgrade("coop").get("price", 0)))
-
-	_add_action(false,
-			func() -> bool: return Game.state.money >= float(
-					Game.state.next_building_upgrade("dog").get("price", 0)),
-			func() -> String:
-				var upgrade := Game.state.next_building_upgrade("dog")
-				return tr("PANEL_BUY_DOG") % [
-					tr(_dog_buy_name(Game.state.dog_level + 1)),
-					NumberFormat.money(float(upgrade.get("price", 0)))],
-			func() -> void: _on_upgrade("dog"),
-			func() -> bool: return not Game.state.next_building_upgrade("dog").is_empty(),
-			func() -> float: return float(Game.state.next_building_upgrade("dog").get("price", 0)))
-
-	_add_action(false,
-			func() -> bool: return Game.state.money >= float(
-					Game.state.next_building_upgrade("guard").get("price", 0)),
-			func() -> String:
-				var upgrade := Game.state.next_building_upgrade("guard")
-				return tr("PANEL_UPGRADE_GUARD") % [
-					tr(_guard_buy_name(Game.state.guard_level + 1)),
-					NumberFormat.money(float(upgrade.get("price", 0))),
-					int(round(float(upgrade.get("block_chance", 0.0)) * 100.0))],
-			func() -> void: _on_upgrade("guard"),
-			func() -> bool: return not Game.state.next_building_upgrade("guard").is_empty(),
-			func() -> float: return float(Game.state.next_building_upgrade("guard").get("price", 0)))
 
 	var hint := Label.new()
 	hint.theme_type_variation = &"NoteLabel"
@@ -273,14 +263,22 @@ func _build_coop() -> void:
 
 
 func _build_storage() -> void:
+	_add_upgrade("storage", func(upgrade: Dictionary) -> String:
+			return tr("PANEL_UPGRADE_STORAGE") % [
+				tr(String(upgrade.get("name", ""))),
+				NumberFormat.money(float(upgrade.get("price", 0))),
+				int(float(upgrade.get("pack_size", 1))),
+				int(round(float(upgrade.get("pack_discount", 0.0)) * 100.0)),
+				NumberFormat.grouped(int(upgrade.get("egg_capacity", 0))),
+				_build_time_text("storage")])
 	_add_level_row(func() -> int: return Game.state.storage_level, _building_levels("storage"),
-			func() -> String: return tr(String(
-					Game.state.current_building_upgrade("storage").get("name", ""))))
+			func() -> String: return _level_name("storage"))
 	_add_row("PANEL_EGGS_STORED", func() -> String: return "%s / %s" % [
 			NumberFormat.grouped(Game.state.egg_count()),
 			NumberFormat.grouped(Game.state.egg_capacity())])
 	_add_row("PANEL_EGGS_WORTH", func() -> String: return NumberFormat.money(Game.state.eggs_value()))
 	_add_row("PANEL_FEED_LEFT", func() -> String: return _feed_text())
+	_add_feed_time_rows()
 
 	# Jaja z podzialem na rasy — od rasy zalezy cena, wiec warto to widziec.
 	for breed: Dictionary in GameData.breeds():
@@ -301,36 +299,20 @@ func _build_storage() -> void:
 					int(pack["size"]), NumberFormat.money(float(pack["price"])),
 					NumberFormat.small_money(float(pack["per_kg"])),
 					int(round(float(pack["discount"]) * 100.0))])
-	_add_action(true,
-			func() -> bool: return Game.state.money >= float(
-					Game.state.next_building_upgrade("storage").get("price", 0)),
-			func() -> String:
-				var upgrade := Game.state.next_building_upgrade("storage")
-				var size := float(upgrade.get("pack_size", 1))
-				return tr("PANEL_UPGRADE_STORAGE") % [
-					tr(String(upgrade.get("name", ""))),
-					NumberFormat.money(float(upgrade.get("price", 0))),
-					int(size),
-					int(round(float(upgrade.get("pack_discount", 0.0)) * 100.0)),
-					NumberFormat.grouped(int(upgrade.get("egg_capacity", 0)))],
-			func() -> void: _on_upgrade("storage"),
-			func() -> bool: return not Game.state.next_building_upgrade("storage").is_empty(),
-			func() -> float: return float(Game.state.next_building_upgrade("storage").get("price", 0)))
-
-
 
 
 ## Inkubator: postep wykluwania i wzrostu, wkladanie jaj, rozbudowa.
 func _build_incubator() -> void:
 	var incubator: Dictionary = GameData.balance().get("incubator", {})
 	var levels: int = (incubator.get("upgrades", []) as Array).size() + 1
+	_add_upgrade("incubator", func(upgrade: Dictionary) -> String:
+			return tr("PANEL_UPGRADE_INCUBATOR") % [
+				tr(String(upgrade.get("name", ""))),
+				int(upgrade.get("slots", 0)),
+				NumberFormat.money(float(upgrade.get("price", 0))),
+				_build_time_text("incubator")])
 	_add_level_row(func() -> int: return Game.state.incubator_level, levels,
-			func() -> String:
-				if Game.state.incubator_level <= 0:
-					return ""
-				var biezacy: Array = incubator.get("upgrades", [])
-				var i := clampi(Game.state.incubator_level - 1, 0, biezacy.size() - 1)
-				return tr(String(biezacy[i].get("name", ""))) if i >= 0 else "")
+			func() -> String: return _level_name("incubator"))
 	_add_row("PANEL_INCUBATOR_SLOTS",
 			func() -> String: return "%d / %d" % [Game.state.incubating.size(), Game.incubator_slots()])
 	_add_row("PANEL_EGGS_STORED", func() -> String: return "%s / %s" % [
@@ -420,17 +402,6 @@ func _build_incubator() -> void:
 				func() -> bool: return _owned(breed_id) > 0 \
 						or int(Game.state.eggs.get(breed_id, 0)) > 0)
 
-	_add_action(true,
-			func() -> bool: return Game.state.money >= float(Game.state.next_incubator_upgrade().get("price", 0)),
-			func() -> String:
-				var upgrade := Game.state.next_incubator_upgrade()
-				return tr("PANEL_UPGRADE_INCUBATOR") % [
-					tr(String(upgrade.get("name", ""))),
-					int(upgrade.get("slots", 0)),
-					NumberFormat.money(float(upgrade.get("price", 0)))],
-			_on_upgrade_incubator,
-			func() -> bool: return not Game.state.next_incubator_upgrade().is_empty(),
-			func() -> float: return float(Game.state.next_incubator_upgrade().get("price", 0)))
 
 	# Padlo pytanie, czy rozbudowa przyspiesza wykluwanie. Nie — i teraz
 	# panel mowi to wprost, zanim ktos wyda 20 000 zl na zly domysl.
@@ -491,14 +462,14 @@ func _build_shop() -> void:
 				NumberFormat.money(Game.medicine_price()), Game.state.sick_count()],
 			_on_buy_medicine,
 			func() -> bool: return Game.state.sick_count() > 0,
-			func() -> float: return Game.medicine_price())
+			func() -> float: return Game.medicine_price(), _actions, true)
 	_add_action(false,
 			func() -> bool: return Game.state.money >= Game.vaccine_price(),
 			func() -> String: return tr("PANEL_BUY_VACCINE") % [
 				NumberFormat.money(Game.vaccine_price()), Game.state.unvaccinated_count()],
 			_on_buy_vaccine,
 			func() -> bool: return Game.state.unvaccinated_count() > 0,
-			func() -> float: return Game.vaccine_price())
+			func() -> float: return Game.vaccine_price(), _actions, true)
 
 	var vaccine_note := Label.new()
 	vaccine_note.theme_type_variation = &"NoteLabel"
@@ -571,15 +542,19 @@ func _add_progress(label_key: String, value_provider: Callable) -> void:
 
 ## `visible_provider` pozwala ukryc przycisk zupelnie (np. sprzedaz rasy,
 ## ktorej gracz nie ma) zamiast pokazywac go wyszarzonego.
+## `slide` = przycisk-suwak: akcja rusza dopiero po przeciagnieciu palcem
+## od lewej do prawej. Tak sa zrobione wszystkie transakcje, ktore kiedys
+## pytaly "na pewno?", i cala rozbudowa (wlasciciel, 25.11).
 func _add_action(primary: bool, enabled_provider: Callable, text_provider: Callable,
 		on_pressed: Callable, visible_provider: Callable = Callable(),
-		price_provider: Callable = Callable()) -> void:
-	var button := Button.new()
+		price_provider: Callable = Callable(), container: VBoxContainer = null,
+		slide: bool = false) -> Button:
+	var button: Button = _new_slide() if slide else Button.new()
 	if primary:
 		button.theme_type_variation = &"PrimaryButton"
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	button.pressed.connect(on_pressed)
-	_actions.add_child(button)
+	(container if container != null else _actions).add_child(button)
 	_refreshers.append(func() -> void:
 		if visible_provider.is_valid():
 			button.visible = visible_provider.call()
@@ -598,6 +573,103 @@ func _add_action(primary: bool, enabled_provider: Callable, text_provider: Calla
 			if brak > 0.0:
 				base += "\n" + tr("PANEL_MISSING_MONEY") % NumberFormat.money(brak)
 		button.text = base)
+	return button
+
+
+func _new_slide() -> SlideButton:
+	var slide := SlideButton.new()
+	slide.tapped_only.connect(func() -> void: _flash(tr("PANEL_SLIDE_HINT")))
+	return slide
+
+
+## Rozbudowa budynku na samej gorze panelu: suwak, a w trakcie budowy
+## pasek postepu z czasem do konca (czas ziemski).
+func _add_upgrade(building_id: String, text_provider: Callable) -> void:
+	_add_action(true,
+			func() -> bool: return not Game.state.is_building(building_id) and Game.state.money \
+					>= float(Game.state.upgrade_entry(building_id).get("price", 0)),
+			func() -> String:
+				var upgrade := Game.state.upgrade_entry(building_id)
+				if Game.state.is_building(building_id):
+					return tr("PANEL_BUILDING_BUSY") % [tr(String(upgrade.get("name", ""))),
+						NumberFormat.duration(Game.state.construction_left(building_id))]
+				return text_provider.call(upgrade),
+			func() -> void: _on_upgrade(building_id),
+			func() -> bool: return not Game.state.upgrade_entry(building_id).is_empty(),
+			func() -> float:
+				if Game.state.is_building(building_id):
+					return 0.0
+				return float(Game.state.upgrade_entry(building_id).get("price", 0)),
+			_upgrades, true)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	var head := HBoxContainer.new()
+	var label := Label.new()
+	label.theme_type_variation = &"NoteLabel"
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.clip_text = true
+	var detail := Label.new()
+	detail.theme_type_variation = &"CounterLabel"
+	head.add_child(label)
+	head.add_child(detail)
+	var bar := ProgressBar.new()
+	bar.max_value = 1.0
+	bar.step = 0.001
+	bar.show_percentage = false
+	bar.custom_minimum_size.y = 30
+	box.add_child(head)
+	box.add_child(bar)
+	_upgrades.add_child(box)
+	_refreshers.append(func() -> void:
+		box.visible = Game.state.is_building(building_id)
+		if not box.visible:
+			return
+		label.text = tr("PANEL_BUILDING") % tr(String(
+				Game.state.upgrade_entry(building_id).get("name", "")))
+		detail.text = NumberFormat.clock(Game.state.construction_left(building_id))
+		bar.value = Game.state.construction_progress(building_id))
+
+
+## Czas budowy nastepnego poziomu w zwyklym zdaniu ("budowa 12 min").
+func _build_time_text(building_id: String) -> String:
+	var seconds := Game.state.build_seconds(building_id)
+	return tr("PANEL_UPGRADE_TIME") % NumberFormat.duration(seconds) if seconds > 0.0 else ""
+
+
+## Nazwa obecnego poziomu: start ma nazwe w samym budynku ("name"),
+## kolejne poziomy - w swoich wpisach upgrades[].
+func _level_name(building_id: String) -> String:
+	var cfg: Dictionary = GameData.balance().get("incubator", {}) if building_id == "incubator" \
+			else GameData.balance().get("buildings", {}).get(building_id, {})
+	var level := Game.state.building_level(building_id)
+	if level <= 0:
+		return tr(String(cfg.get("name", "")))
+	var ups: Array = cfg.get("upgrades", [])
+	return tr(String((ups[mini(level, ups.size()) - 1] as Dictionary).get("name", "")))
+
+
+## Pasza: zuzycie na godzine ZEGARA i na jak dlugo starczy.
+func _add_feed_time_rows() -> void:
+	_add_row("PANEL_FEED_BURN",
+			func() -> String:
+				var per_hour := Game.state.feed_per_minute() * 60.0 * GameData.time_scale()
+				return tr("PANEL_FEED_BURN_VALUE") % NumberFormat.amount_only(per_hour))
+	_add_row("PANEL_FEED_LASTS",
+			func() -> String:
+				var per_min := Game.state.feed_per_minute()
+				if Game.state.feed <= 0.0:
+					return tr("PANEL_FEED_GONE")
+				if per_min <= 0.0:
+					return "—"
+				# feed_per_minute jest na minute GRY; zamieniamy na zegar.
+				var game_seconds := Game.state.feed / per_min * 60.0
+				return NumberFormat.duration(game_seconds / GameData.time_scale()))
+
+
+## Ile czasu ZIEMSKIEGO minelo na farmie (z licznika dni gry).
+func _farm_age() -> float:
+	var day := float(GameData.balance().get("day", {}).get("seconds", 600.0))
+	return (Game.state.days + Game.state.day_fraction) * day / maxf(0.0001, GameData.time_scale())
 
 
 func _refresh() -> void:
@@ -641,14 +713,10 @@ func _on_buy_feed_bulk() -> void:
 		_flash(tr("PANEL_FEED_BOUGHT"))
 
 
-## Kupno tez idzie przez potwierdzenie (wlasciciel, 24.11) - droga rasa to
-## tysiace zlotych, a przycisk stoi tuz obok sprzedazy.
+## Kupno idzie suwakiem (od 12.19) - droga rasa to tysiace zlotych, a
+## przycisk stoi tuz obok sprzedazy. Okienko "na pewno?" bylo za ciezkie.
 func _on_buy_hen(breed_id: String, breed_name: String, rooster: bool = false) -> void:
-	var price := FarmState.hen_buy_price(breed_id, rooster)
-	var key := "CONFIRM_BUY_ROOSTER" if rooster else "CONFIRM_BUY_HEN"
-	_ask(tr(key) % [breed_name, NumberFormat.money(price)],
-			func() -> void: _do_buy_hen(breed_id, breed_name, rooster),
-			tr("CONFIRM_YES_BUY"))
+	_do_buy_hen(breed_id, breed_name, rooster)
 
 
 func _do_buy_hen(breed_id: String, breed_name: String, rooster: bool) -> void:
@@ -665,14 +733,10 @@ func _on_cull_hen(breed_id: String, breed_name: String) -> void:
 		_flash(tr("PANEL_HEN_MCDONALDS") % [breed_name, NumberFormat.money(Game.mcdonalds_price())])
 
 
-## Sprzedaz ptaka idzie przez potwierdzenie. Przyciski kupna i sprzedazy
-## stoja obok siebie, a sprzedana kura nie wraca — jedno nieuwazne
-## dotkniecie kosztuje caly wyhodowany egzemplarz.
+## Sprzedaz ptaka tez suwakiem: sprzedana kura nie wraca, a jedno
+## nieuwazne dotkniecie kosztowaloby caly wyhodowany egzemplarz.
 func _on_sell_hen(breed_id: String, breed_name: String, rooster: bool = false) -> void:
-	var price := FarmState.hen_sell_price(breed_id, false, rooster)
-	var key := "CONFIRM_SELL_ROOSTER" if rooster else "CONFIRM_SELL_HEN"
-	_ask(tr(key) % [breed_name, NumberFormat.money(price)],
-			func() -> void: _do_sell_hen(breed_id, breed_name, rooster))
+	_do_sell_hen(breed_id, breed_name, rooster)
 
 
 func _do_sell_hen(breed_id: String, breed_name: String, rooster: bool) -> void:
@@ -680,61 +744,6 @@ func _do_sell_hen(breed_id: String, breed_name: String, rooster: bool) -> void:
 	if earned > 0.0:
 		var key := "PANEL_ROOSTER_SOLD" if rooster else "PANEL_HEN_SOLD"
 		_flash(tr(key) % [breed_name, NumberFormat.money(earned)])
-
-
-## Pytanie "na pewno?" w srodku panelu. Celowo nie jest to okno systemowe:
-## gra chodzi w przegladarce na telefonie, gdzie wlasne okienko wyglada
-## obco i potrafi sie nie zmiescic.
-func _ask(question: String, on_yes: Callable, yes_text: String = "") -> void:
-	if _confirm != null and is_instance_valid(_confirm):
-		_confirm.queue_free()
-	# Zaslona na caly panel: przyciemnia tlo, lapie dotkniecia, zeby nie
-	# trafialy w przyciski pod spodem, a dotkniecie obok okienka znaczy "Nie".
-	var veil := ColorRect.new()
-	veil.color = Color(0.18, 0.12, 0.08, 0.45)
-	veil.mouse_filter = Control.MOUSE_FILTER_STOP
-	veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	# CenterContainer liczy srodek z rozmiaru okienka. Wczesniej bylo
-	# PRESET_CENTER na samym okienku — Godot stawial wtedy w srodku panelu
-	# LEWY GORNY ROG okienka i reszta wyjezdzala za prawa krawedz ekranu.
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	veil.add_child(center)
-	var box := PanelContainer.new()
-	box.theme_type_variation = &"ConfirmBox"
-	var rows := VBoxContainer.new()
-	rows.add_theme_constant_override("separation", 18)
-	var label := Label.new()
-	label.text = question
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.custom_minimum_size.x = 620
-	rows.add_child(label)
-	var buttons := HBoxContainer.new()
-	buttons.add_theme_constant_override("separation", 18)
-	var yes := Button.new()
-	yes.text = yes_text if not yes_text.is_empty() else tr("CONFIRM_YES")
-	yes.theme_type_variation = &"PrimaryButton"
-	yes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var no := Button.new()
-	no.text = tr("CONFIRM_NO")
-	no.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	buttons.add_child(no)
-	buttons.add_child(yes)
-	rows.add_child(buttons)
-	box.add_child(rows)
-	center.add_child(box)
-	add_child(veil)
-	_confirm = veil
-	no.pressed.connect(func() -> void: veil.queue_free())
-	yes.pressed.connect(func() -> void:
-		veil.queue_free()
-		on_yes.call())
-	veil.gui_input.connect(func(event: InputEvent) -> void:
-		var tap := event as InputEventMouseButton
-		if tap != null and tap.pressed:
-			veil.queue_free())
 
 
 func _on_buy_medicine() -> void:
@@ -747,14 +756,11 @@ func _on_buy_vaccine() -> void:
 		_flash(tr("PANEL_NO_MONEY"))
 
 
-func _on_upgrade_incubator() -> void:
-	if not Game.upgrade_incubator():
-		_flash(tr("PANEL_NO_MONEY"))
-
-
 func _on_upgrade(building_id: String) -> void:
 	if not Game.upgrade_building(building_id):
 		_flash(tr("PANEL_NO_MONEY"))
+		return
+	_refresh()
 
 
 ## Pole do przepisania kodu farmy z innego urzadzenia. To jedyna droga
@@ -957,12 +963,7 @@ func _building_levels(building_id: String) -> int:
 ## po polsku. Czas w grze plynie wolniej niz zegarek, wiec bez tego dzielenia
 ## "jeszcze 2 min" klamaloby o trzykrotnosc.
 func _countdown(game_seconds: float) -> String:
-	var real := game_seconds / maxf(0.001, GameData.time_scale())
-	if real < 90.0:
-		return tr("TIME_SECONDS") % maxi(1, int(ceil(real)))
-	if real < 3600.0:
-		return tr("TIME_MINUTES") % int(ceil(real / 60.0))
-	return tr("TIME_HOURS") % [int(real / 3600.0), int(fmod(real, 3600.0) / 60.0)]
+	return NumberFormat.duration(game_seconds / maxf(0.001, GameData.time_scale()))
 
 
 ## Karta rasy w sklepie: zdjecie (albo rysunek), nazwa, rzadkosc i przycisk.
@@ -1013,25 +1014,25 @@ func _add_breed_card(breed: Dictionary) -> void:
 	no_rooster.text = tr("PANEL_NO_ROOSTER")
 	card.add_child(no_rooster)
 
-	var buy := Button.new()
+	var buy := _new_slide()
 	buy.theme_type_variation = &"BuyButton"
 	buy.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	buy.pressed.connect(func() -> void: _on_buy_hen(breed_id, breed_name))
 	card.add_child(buy)
 
-	var buy_rooster := Button.new()
+	var buy_rooster := _new_slide()
 	buy_rooster.theme_type_variation = &"BuyButton"
 	buy_rooster.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	buy_rooster.pressed.connect(func() -> void: _on_buy_hen(breed_id, breed_name, true))
 	card.add_child(buy_rooster)
 
-	var sell := Button.new()
+	var sell := _new_slide()
 	sell.theme_type_variation = &"SellButton"
 	sell.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	sell.pressed.connect(func() -> void: _on_sell_hen(breed_id, breed_name))
 	card.add_child(sell)
 
-	var sell_rooster := Button.new()
+	var sell_rooster := _new_slide()
 	sell_rooster.theme_type_variation = &"SellButton"
 	sell_rooster.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	sell_rooster.pressed.connect(func() -> void: _on_sell_hen(breed_id, breed_name, true))
@@ -1039,7 +1040,7 @@ func _add_breed_card(breed: Dictionary) -> void:
 
 	# Chora sztuke mozna oddac do skupu za drobne, zamiast placic za lek.
 	# To swiadomy zart wlasciciela, nie przeoczenie.
-	var cull := Button.new()
+	var cull := _new_slide()
 	cull.theme_type_variation = &"CullButton"
 	cull.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	cull.pressed.connect(func() -> void: _on_cull_hen(breed_id, breed_name))
@@ -1086,7 +1087,7 @@ func _add_breed_card(breed: Dictionary) -> void:
 		subtitle.text = "%s · %s" % [tr(breed.get("rarity", "")), tr(breed.get("desc", ""))]
 		numbers.text = tr("PANEL_BREED_NUMBERS") % [
 			NumberFormat.small_money(FarmState.egg_value(breed_id)),
-			int(float(breed.get("egg_seconds", 0))),
+			NumberFormat.duration(float(breed.get("egg_seconds", 0)) / GameData.time_scale()),
 			owned])
 
 

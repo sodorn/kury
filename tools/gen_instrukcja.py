@@ -260,6 +260,13 @@ wyglad przy kazdej rozbudowie.
 """)
 
 title("4. PETLA GRY - OD CZEGO ZACZAC")
+para("""
+SUWAKI. Kupno i sprzedaz kur, ubicie chorej, lek, szczepienie, plot, pies
+i kazda rozbudowa to SUWAK: przeciagnij palcem od lewej do prawej, az pole
+sie zapelni kolorem. Samo dotkniecie nic nie robi - nie kupisz nic
+przypadkiem. Sprzedaz jaj, pasza i wkladanie jaj do inkubatora to zwykle
+przyciski, bo klika sie je co chwile.
+""")
 raw("""
   1. ZBIERAJ JAJA z wybiegu. Dotknij jajka palcem, idzie do magazynu.
      Jaj powyzej %d sztuk naraz gra nie kladzie na trawie - nadmiar
@@ -372,42 +379,53 @@ para("""
 wlozenia jaj do inkubatora do doroslej sztuki. Oba przy zegarku.
 """)
 
+def budowa(u) -> str:
+    m = float(u.get("build_minutes", 0))
+    return "od razu" if m <= 0 else ("%d min" % m if m < 60 else "%g h" % (m / 60))
+
+
+def poziomy(cfg, wartosc, naglowek):
+    """Wiersze: nr | nazwa | wartosc | cena | budowa. Poziom startowy to 1."""
+    rows = [["1", S.get(cfg.get("name", ""), "start"), wartosc(cfg, None), "start", "-"]]
+    for i, u in enumerate(cfg["upgrades"], start=2):
+        rows.append([str(i), S.get(u["name"], u["name"]), wartosc(cfg, u), zl(u["price"]), budowa(u)])
+    table(["poz.", "nazwa", naglowek, "cena", "budowa"], rows, align="rlrrr")
+
+
 title("9. KURNIK")
 coop = BAL["buildings"]["coop"]
-rows = [["0 (start)", num(coop["capacity"]), "-"]]
-for i, u in enumerate(coop["upgrades"], start=1):
-    rows.append([str(i), num(u["capacity"]), zl(u["price"])])
-table(["poziom", "miejsc na ptaki", "cena rozbudowy"], rows, align="rrr")
+poziomy(coop, lambda c, u: num((u or c)["capacity"]), "miejsc")
 para("""
 Limit liczy WSZYSTKIE dorosle ptaki razem z kogutami. Ponad limit nie kupisz
 ptaka, a podrosniete pisklę czeka przy inkubatorze, az zwolni sie miejsce.
-Kurnik zmienia wyglad na poziomie 3 i 6.
+Kurnik zmienia wyglad na poziomie 4 i 7.
 """)
+para("""
+ROZBUDOWA TRWA. Kurnik, magazyn i inkubator buduja sie od %d minut do %d minut
+(czas przy zegarku, leci tez, gdy nie grasz). Placisz od razu, a do konca
+budowy budynek dziala na starym poziomie. Nad budynkiem wisi tabliczka
+z czasem. Plot i pies sa od razu.
+""" % (min(u.get("build_minutes", 0) for u in coop["upgrades"]),
+       max(u.get("build_minutes", 0) for u in coop["upgrades"])))
 
 title("10. MAGAZYN")
 st = BAL["buildings"]["storage"]
-rows = [["0 (start)", num(st["egg_capacity"]), num(ECO["feed_pack_size"]),
-         zl(ECO["feed_pack_price"]), "-"]]
+poziomy(st, lambda c, u: num((u or c)["egg_capacity"]), "limit jaj")
 BASE_KG = float(ECO["feed_pack_price"]) / float(ECO["feed_pack_size"])
-rows[0].insert(4, "-")
-for i, u in enumerate(st["upgrades"], start=1):
+rows = [["1", num(ECO["feed_pack_size"]), zl(ECO["feed_pack_price"]), "-"]]
+for i, u in enumerate(st["upgrades"], start=2):
     worek = round(u["pack_size"] * BASE_KG * (1 - u["pack_discount"]), 2)
-    rows.append([str(i), num(u["egg_capacity"]), num(u["pack_size"]),
-                 zl(worek), "%d%%" % round(u["pack_discount"] * 100), zl(u["price"])])
-table(["poziom", "limit jaj", "worek kg", "cena worka", "rabat", "rozbudowa"],
-      rows, align="rrrrrr")
+    rows.append([str(i), num(u["pack_size"]), zl(worek), "%d%%" % round(u["pack_discount"] * 100)])
+table(["poz.", "worek kg", "cena worka", "rabat"], rows, align="rrrr")
 para("""
 Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i daje HURT -
 wiekszy worek paszy z rabatem od %d%% do %d%%. Im wiekszy magazyn, tym tanszy
-kilogram. Magazyn zmienia wyglad na poziomie 3 i 6.
+kilogram. Magazyn zmienia wyglad na poziomie 4 i 7.
 """ % (round(st["upgrades"][0]["pack_discount"] * 100), round(st["upgrades"][-1]["pack_discount"] * 100)))
 
 title("11. INKUBATOR")
 inc = BAL["incubator"]
-rows = [["0 (start)", num(inc["slots"]), "-"]]
-for i, u in enumerate(inc["upgrades"], start=1):
-    rows.append([str(i), num(u["slots"]), zl(u["price"])])
-table(["poziom", "miejsc (partii naraz)", "cena rozbudowy"], rows, align="rrr")
+poziomy(inc, lambda c, u: num((u or c)["slots"]), "miejsc")
 
 title("12. LIS")
 fox = BAL["fox"]
@@ -501,8 +519,9 @@ raw("""
 title("15. CZAS W GRZE")
 para("""
 Czas gry plynie %g razy wolniej od zegarka: jedna minuta przy zegarku to okolo
-%d sekund w grze. Wszystkie czasy w tej instrukcji sa juz PRZELICZONE na zegarek,
-chyba ze napisano inaczej.
+%d sekund w grze. Wszystkie czasy w tej instrukcji i W GRZE (panele, budowy,
+"pasza starczy na", wiek gospodarstwa) sa podane przy zegarku - w czasie
+ziemskim. Gra nie pokazuje juz "dni gospodarstwa".
 """ % (round(1.0 / SCALE, 2), round(60 * SCALE)))
 para("""
 Gra liczy czas TAK SAMO, gdy grasz i gdy nie grasz. Zostawiona na noc farma

@@ -1,6 +1,6 @@
 ==============================================================================
   SYMULATOR HODOWLI KURCZAKOW - DOKUMENTACJA TECHNICZNA
-  gra w wersji 12.18   *   format zapisu w wersji 6   *   Godot 4.7.2
+  gra w wersji 12.19   *   format zapisu w wersji 6   *   Godot 4.7.2
 ==============================================================================
 
   Dokument dla programisty: jak gra jest zbudowana, jak dzialaja mechaniki, co
@@ -218,6 +218,8 @@
         _advance_incubator   partie w inkubatorze -> piskleta
         _advance_chicks      piskleta rosna -> dorosle ptaki
    3. _advance_corpses       zwloki znikaja po hunger.corpse_seconds
+      _advance_construction  budowy (czas ZEGARA) - koniec = poziom+1,
+                             id do wyniku "built" (od 12.19)
    4. _advance_egg_spoilage  jaja starsze niz egg_spoil_hours gnija
                              (PRZED wyjsciem dla pustej farmy - jaja
                              gnija takze bez stada)
@@ -229,6 +231,20 @@
    8. _advance_disease       choroba: przebieg u chorych + kostka
    9. brak paszy?            koniec kroku (glodne kury nie znosza)
   10. _lay_eggs              znoszenie jaj
+
+  Rozbudowa kurnika, magazynu i inkubatora trwa build_minutes minut zegara
+  (5-60). Game.upgrade_building placi od razu i wpisuje
+  FarmState.construction[id] = [zostalo, calosc]; budynek dziala na starym
+  poziomie. Budowa idzie takze w tle i przezywa zapis (klucz "construction").
+  Plot i pies nie maja build_minutes - sa od razu. Na farmie nad budynkiem
+  wisi tabliczka z zegarem (farm.gd _sync_construction).
+
+  Transakcje, ktore kiedys pytaly "na pewno?", i cala rozbudowa to SUWAK
+  (scenes/ui/panels/slide_button.gd, klasa SlideButton dziedziczy po Button).
+  Zwykle dotkniecie jest polykane w _gui_input, a sygnal pressed leci dopiero
+  po przeciagnieciu do konca - kod podlaczony do pressed nic nie wie o suwaku.
+  Zwykle przyciski zostaly przy sprzedazy jaj, paszy i wkladaniu jaj do
+  inkubatora (klika sie je co chwile).
 
   Wynik Simulation.advance to slownik licznikow (eggs_laid, hatched, grown_up,
   died_hunger, died_disease, got_sick, fox_took, fox_arrived, fox_blocked,
@@ -262,12 +278,14 @@
   +=========+==========+=======+==========+=======+
   |       0 |       25 |    0% |    50.00 |  2.00 |
   |       1 |      100 |   10% |   180.00 |  1.80 |
-  |       2 |      250 |   15% |   425.00 |  1.70 |
-  |       3 |      600 |   20% |   960.00 |  1.60 |
-  |       4 |     1500 |   25% |  2250.00 |  1.50 |
-  |       5 |     3500 |   30% |  4900.00 |  1.40 |
-  |       6 |     8000 |   35% | 10400.00 |  1.30 |
-  |       7 |    20000 |   40% | 24000.00 |  1.20 |
+  |       2 |      250 |   14% |   430.00 |  1.72 |
+  |       3 |      600 |   18% |   984.00 |  1.64 |
+  |       4 |     1500 |   22% |  2340.00 |  1.56 |
+  |       5 |     3500 |   26% |  5180.00 |  1.48 |
+  |       6 |     8000 |   30% | 11200.00 |  1.40 |
+  |       7 |    20000 |   34% | 26400.00 |  1.32 |
+  |       8 |    40000 |   37% | 50400.00 |  1.26 |
+  |       9 |    70000 |   40% | 84000.00 |  1.20 |
   +---------+----------+-------+----------+-------+
 
   6.2 Pasza i glod
@@ -539,19 +557,26 @@
 
   incubator.upgrades[].name
       = ["INCU_T1", "INCU_T2", "INCU_T3", "INCU_T4", "INCU_T5", "INCU_T6",
-      "INCU_T7", "INCU_T8"] [klucz tekstu]
+      "INCU_T7", "INCU_T8", "INCU_T9"] [klucz tekstu]
       Nazwa poziomu z data/strings.csv.
       uzycie: panel inkubatora
 
   incubator.upgrades[].slots
-      = [6, 10, 16, 24, 34, 48, 66, 90] [szt.]
+      = [6, 10, 16, 24, 34, 48, 66, 90, 120] [szt.]
       Miejsca w inkubatorze na tym poziomie.
       uzycie: FarmState.incubator_slots
 
   incubator.upgrades[].price
-      = [600, 4000, 11000, 24000, 48000, 108000, 200000, 450000] [zl]
+      = [600, 4000, 11000, 24000, 48000, 108000, 200000, 450000, 700000] [zl]
       Cena przejscia NA ten poziom.
       uzycie: Game.upgrade_incubator
+
+  incubator.upgrades[].build_minutes
+      = [5, 8, 12, 17, 23, 30, 38, 48, 60] [min ZEGARA]
+      Ile minut REALNYCH trwa budowa tego poziomu. Placi sie od razu, nowy
+      poziom wchodzi po skonczeniu; w trakcie budynek dziala na starym. 0 albo
+      brak = od razu.
+      uzycie: Game.upgrade_building, Simulation._advance_construction
 
   incubator.rooster_share
       = 0.5 [0..1]
@@ -559,6 +584,11 @@
       pol. Plec losowana przy wykluciu, zapisywana w pisklęciu ("rooster" w
       zapisie).
       uzycie: Chick.roll_rooster, Simulation._advance_incubator
+
+  incubator.name
+      = INCU_T0 [klucz tekstu]
+      Nazwa poziomu startowego inkubatora (poziom 1 w panelu).
+      uzycie: panel inkubatora
 
   balance.json -> hunger
   ----------------------
@@ -787,38 +817,64 @@
       Cena przejscia NA ten poziom.
       uzycie: Game.upgrade_building
 
+  buildings.coop.upgrades[].build_minutes
+      = [5, 8, 12, 17, 23, 30, 38, 48, 60] [min ZEGARA]
+      Ile minut REALNYCH trwa budowa tego poziomu. Placi sie od razu, nowy
+      poziom wchodzi po skonczeniu; w trakcie budynek dziala na starym. 0 albo
+      brak = od razu.
+      uzycie: Game.upgrade_building, Simulation._advance_construction
+
+  buildings.coop.name
+      = COOP_T0 [klucz tekstu]
+      Nazwa poziomu startowego kurnika.
+      uzycie: panel kurnika
+
   buildings.storage.upgrades[].name
       = ["STORE_T1", "STORE_T2", "STORE_T3", "STORE_T4", "STORE_T5",
-      "STORE_T6", "STORE_T7"] [klucz tekstu]
+      "STORE_T6", "STORE_T7", "STORE_T8", "STORE_T9"] [klucz tekstu]
       Nazwa poziomu magazynu.
       uzycie: panel magazynu
 
   buildings.storage.upgrades[].pack_size
-      = [100, 250, 600, 1500, 3500, 8000, 20000] [kg]
+      = [100, 250, 600, 1500, 3500, 8000, 20000, 40000, 70000] [kg]
       Worek paszy na tym poziomie.
       uzycie: FarmState.feed_pack
 
   buildings.storage.upgrades[].pack_discount
-      = [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4] [0-1]
+      = [0.1, 0.14, 0.18, 0.22, 0.26, 0.3, 0.34, 0.37, 0.4] [0-1]
       Rabat hurtowy na pasze na tym poziomie (0.10 = 10%). Cena worka =
       pack_size * cena bazowa za kg (economy.feed_pack_price / feed_pack_size)
       * (1 - rabat), do pelnych groszy. Musi rosnac z poziomem (test).
       uzycie: FarmState.feed_pack
 
   buildings.storage.upgrades[].price
-      = [600, 3000, 10500, 30000, 80000, 200000, 540000] [zl]
+      = [600, 3000, 10500, 30000, 80000, 200000, 540000, 1000000, 1800000]
+      [zl]
       Cena przejscia NA ten poziom.
       uzycie: Game.upgrade_building
 
   buildings.storage.upgrades[].egg_capacity
-      = [5000, 10000, 20000, 100000, 500000, 1500000, 5000000] [szt.]
+      = [5000, 10000, 20000, 100000, 500000, 1500000, 5000000, 10000000,
+      20000000] [szt.]
       Limit jaj na tym poziomie.
       uzycie: FarmState.egg_capacity
+
+  buildings.storage.upgrades[].build_minutes
+      = [5, 8, 12, 17, 23, 30, 38, 48, 60] [min ZEGARA]
+      Ile minut REALNYCH trwa budowa tego poziomu. Placi sie od razu, nowy
+      poziom wchodzi po skonczeniu; w trakcie budynek dziala na starym. 0 albo
+      brak = od razu.
+      uzycie: Game.upgrade_building, Simulation._advance_construction
 
   buildings.storage.egg_capacity
       = 2000 [szt.]
       Limit jaj w magazynie na poziomie 0.
       uzycie: FarmState.egg_capacity
+
+  buildings.storage.name
+      = STORE_T0 [klucz tekstu]
+      Nazwa poziomu startowego magazynu.
+      uzycie: panel magazynu
 
   buildings.guard.upgrades[].block_chance
       = [0.5, 0.65, 0.8, 0.95] [0-1]
@@ -1539,5 +1595,5 @@
     limity miejsca i ruchu planu darmowego.
 
 ==============================================================================
-  koniec dokumentu  *  wygenerowano z wersji 12.18
+  koniec dokumentu  *  wygenerowano z wersji 12.19
 ==============================================================================

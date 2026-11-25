@@ -53,3 +53,30 @@ static func eggs(count: int) -> String:
 	elif n % 10 >= 2 and n % 10 <= 4 and not (n % 100 >= 12 and n % 100 <= 14):
 		word = "jaja"
 	return "%s %s" % [grouped(count), word]
+
+
+## Czas ZIEMSKI (sekundy zegara) po polsku: "45 s", "12 min", "3 godz. 5 min",
+## "2 dni 4 godz.". Wlasciciel (25.11): czas w grze podajemy wszedzie
+## w czasie zegarowym, nigdy w "dniach gospodarstwa".
+static func duration(real_seconds: float) -> String:
+	var s := maxf(0.0, real_seconds)
+	if s < 90.0:
+		return "%d s" % maxi(1, int(ceil(s)))
+	if s < 3600.0:
+		return "%d min" % int(ceil(s / 60.0))
+	if s < 86400.0:
+		var h := int(s / 3600.0)
+		var m := int(fmod(s, 3600.0) / 60.0)
+		return "%d godz." % h if m == 0 else "%d godz. %d min" % [h, m]
+	var d := int(s / 86400.0)
+	var hours := int(fmod(s, 86400.0) / 3600.0)
+	var word := "dzień" if d == 1 else "dni"
+	return "%d %s" % [d, word] if hours == 0 else "%d %s %d godz." % [d, word, hours]
+
+
+## Odliczanie jak na zegarku: "4:07", "1:02:30".
+static func clock(real_seconds: float) -> String:
+	var s := int(ceil(maxf(0.0, real_seconds)))
+	if s >= 3600:
+		return "%d:%02d:%02d" % [s / 3600, (s % 3600) / 60, s % 60]
+	return "%d:%02d" % [s / 60, s % 60]

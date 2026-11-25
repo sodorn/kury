@@ -4,7 +4,19 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.18): REALNE CENY (listopad 2026):
+- Aktualny etap: **ETAP 10** (wersja 12.19): ROZBUDOWA TRWA - kurnik,
+  magazyn i inkubator buduja sie 5/8/12/17/23/30/38/48/60 min zegara
+  (upgrades[].build_minutes; FarmState.construction, Simulation._advance_construction,
+  idzie tez w tle, przezywa zapis); tabliczka "Budowa m:ss" nad budynkiem.
+  Kazdy z tych budynkow ma 10 poziomow (magazyn +2: T8 1 mln, T9 1,8 mln;
+  inkubator +1: T9 120 miejsc za 700 tys.; rabat magazynu rozlozony 10-40% na
+  9 poziomow), smieszne nazwy wszystkich poziomow (COOP/INCU/STORE_T0..T9,
+  poziom startowy = "name" budynku). SUWAK zamiast okienka "na pewno?"
+  (SlideButton): kupno/sprzedaz/ubicie kur, lek, szczepienie, plot, pies,
+  rozbudowa. Rozbudowa na samej gorze panelu (kontener Upgrades). Czas
+  wszedzie ZIEMSKI: zuzycie paszy kg/godz., "pasza starczy na", wiek
+  gospodarstwa, "znosi co 13 s" (NumberFormat.duration / clock).
+- Wersja 12.18: REALNE CENY (listopad 2026):
   kury 35 zl (leghorn) ... 4000 zl (cemani), jaja 0,45-2,00 zl, pasza 50 zl/25 kg,
   plot 400/1000/2500/6000, owczarek 2500. Pasza 0,65 kg/min gry (bylo 0,34;
   pelny realizm ~2,0 kg zabijal gracza sesyjnego - bot), limity jaj w magazynie

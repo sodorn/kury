@@ -37,6 +37,7 @@ static func advance(state: FarmState, delta: float, offline: bool = false) -> Di
 		"fox_lurking": 0,
 		"fox_left": 0,
 		"fox_victims": [],
+		"built": [],
 		"rotted": 0,
 	}
 	var remaining := maxf(delta, 0.0)
@@ -70,6 +71,7 @@ static func _step(state: FarmState, step: float, out: Dictionary, loss_budget: i
 		out["hatched"] = int(out["hatched"]) + _advance_incubator(state, step)
 		out["grown_up"] = int(out["grown_up"]) + _advance_chicks(state, step)
 	out["rotted"] = int(out["rotted"]) + _advance_corpses(state, step)
+	_advance_construction(state, step, out)
 	# Jaja starzeja sie niezaleznie od tego, czy stado jeszcze zyje — stad
 	# miejsce PRZED wyjsciem dla pustej farmy nizej.
 	_advance_egg_spoilage(state, step, out)
@@ -111,6 +113,24 @@ static func _advance_days(state: FarmState, step: float) -> int:
 	state.day_fraction -= passed
 	state.days += passed
 	return passed
+
+
+## Budowy ida czasem REALNYM, takze przy grze w tle. Po skonczeniu budynek
+## wskakuje na nastepny poziom, a id trafia do out["built"].
+static func _advance_construction(state: FarmState, step: float, out: Dictionary) -> void:
+	if state.construction.is_empty():
+		return
+	var real := step / maxf(0.0001, GameData.time_scale())
+	for id: String in state.construction.keys():
+		var job: Array = state.construction[id]
+		job[0] = float(job[0]) - real
+		if float(job[0]) > 0.0:
+			continue
+		state.construction.erase(id)
+		state.set_building_level(id, state.building_level(id) + 1)
+		var built: Array = out.get("built", [])
+		built.append(id)
+		out["built"] = built
 
 
 ## Inkubator: partie jaj dochodza do wyklucia i zamieniaja sie w pisklęta.

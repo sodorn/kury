@@ -112,7 +112,10 @@ func _check_dog_offer(panel: Control) -> void:
 	var rows: VBoxContainer = panel.get_node(
 			"Sheet/Content/Scroll/Gutter/Scrollable/Rows")
 	var actions: VBoxContainer = panel.get_node(
-			"Sheet/Content/Scroll/Gutter/Scrollable/Actions")
+			"Sheet/Content/Scroll/Gutter/Scrollable/Upgrades")
+	var scrollable: VBoxContainer = panel.get_node("Sheet/Content/Scroll/Gutter/Scrollable")
+	_check(actions.get_index() < rows.get_index(),
+			"rozbudowa stoi NAD informacjami o budynku (wlasciciel, 25.11)")
 	var stany := "\n".join(_labels_in(rows))
 	_check(stany.contains(tr("PANEL_FOX_FENCE")), "kurnik pokazuje stan plotu")
 	_check(stany.contains(tr("PANEL_FOX_DOG")), "kurnik pokazuje stan psa")
@@ -147,7 +150,7 @@ func _check_dog_offer(panel: Control) -> void:
 ## a po dosypaniu pieniedzy — klikalny.
 func _check_incubator_upgrade(panel: Control) -> void:
 	var actions: VBoxContainer = panel.get_node(
-			"Sheet/Content/Scroll/Gutter/Scrollable/Actions")
+			"Sheet/Content/Scroll/Gutter/Scrollable/Upgrades")
 	var cena := float(Game.state.next_incubator_upgrade().get("price", 0))
 	_check(cena > 0.0, "jest co kupowac w inkubatorze (%.0f zl)" % cena)
 
@@ -177,12 +180,45 @@ func _check_incubator_upgrade(panel: Control) -> void:
 	_check(not przycisk.disabled,
 			"z pieniedzmi przycisk da sie kliknac (tekst: %s)" % przycisk.text)
 
+	_check(przycisk is SlideButton, "rozbudowa to suwak, nie zwykly przycisk")
 	var poziom := Game.state.incubator_level
-	przycisk.emit_signal("pressed")
+	await _tap(przycisk.get_global_rect().get_center())
+	await _frames(10)
+	_check(not Game.state.is_building("incubator"), "samo dotkniecie suwaka nic nie buduje")
+	await _slide(przycisk as SlideButton)
 	await _frames(20)
+	_check(Game.state.is_building("incubator"), "przesuniety suwak zaczyna budowe")
+	_check(Game.state.incubator_level == poziom, "w trakcie budowy poziom jeszcze stary")
+	_check(przycisk.disabled and przycisk.text.contains(tr("PANEL_BUILDING_BUSY").split(":")[0]),
+			"w trakcie budowy suwak mowi, ze trwa budowa (%s)" % przycisk.text)
+	var paski := 0
+	for node in _controls_of_type(actions, "ProgressBar"):
+		if (node as Control).is_visible_in_tree():
+			paski += 1
+	_check(paski == 1, "pod suwakiem widac pasek budowy")
+	_shot("panel_inkubator_budowa.png")
+	# Tabliczka na budynku na farmie.
+	var farm: Node2D = _main.get_node("Farm")
+	farm._sync_buildings()
+	await _frames(4)
+	var tabliczka := farm.get_node_or_null("Objects/Incubator/BuildSign")
+	_check(tabliczka != null, "nad inkubatorem wisi tabliczka budowy")
+	if tabliczka != null:
+		var napis := (tabliczka.get_node("Box/Rows/Label") as Label).text
+		_check(napis.contains(":"), "tabliczka odlicza czas (%s)" % napis)
+	panel.close()
+	await _frames(30)
+	_shot("budowa_na_farmie.png")
+	(Game.state.construction["incubator"] as Array)[0] = 0.001
+	Simulation.advance(Game.state, 1.0)
+	farm._sync_buildings()
+	await _frames(10)
 	_check(Game.state.incubator_level == poziom + 1,
-			"klikniecie faktycznie rozbudowuje inkubator (%d -> %d)"
-			% [poziom, Game.state.incubator_level])
+			"po budowie inkubator ma kolejny poziom (%d -> %d)" % [poziom, Game.state.incubator_level])
+	_check(farm.get_node_or_null("Objects/Incubator/BuildSign") == null,
+			"po budowie tabliczka znika")
+	Events.building_tapped.emit("incubator", null)
+	await _frames(30)
 	Game.state.money = kasa
 
 
@@ -309,31 +345,29 @@ func _test_shop() -> void:
 	var hens_before: int = Game.state.hen_count()
 	_check(open_card != null and open_card.text.begins_with("Kup kurę za"),
 			"przycisk mowi 'Kup kurę za ...' (jest '%s')" % (open_card.text if open_card else ""))
-	if open_card != null:
-		open_card.emit_signal("pressed")
-	await _frames(20)
-	# Kupno idzie przez potwierdzenie (wlasciciel, 24.11).
-	_check(Game.state.hen_count() == hens_before, "samo klikniecie jeszcze nie kupuje")
-	var tak_kup := _button_labelled(tr("CONFIRM_YES_BUY"))
-	var nie_kup := _button_labelled(tr("CONFIRM_NO"))
-	_check(tak_kup != null and nie_kup != null, "pojawilo sie pytanie o kupno")
-	var ekran := Rect2(Vector2.ZERO, get_viewport().get_visible_rect().size)
-	if tak_kup != null:
-		_check(ekran.encloses(tak_kup.get_global_rect()), "'Tak, kup' miesci sie na ekranie")
-	_shot("pytanie_kupno.png")
-	if nie_kup != null:
-		nie_kup.emit_signal("pressed")
-	await _frames(20)
-	_check(Game.state.hen_count() == hens_before, "'Nie' niczego nie kupuje")
-	if open_card != null:
-		open_card.emit_signal("pressed")
-	await _frames(20)
-	tak_kup = _button_labelled(tr("CONFIRM_YES_BUY"))
-	if tak_kup != null:
-		tak_kup.emit_signal("pressed")
-	await _frames(30)
+	# Kupno suwakiem (od 12.19): dotkniecie nic nie robi, przesuniecie do
+	# polowy tez nie, dopiero do konca. Zamiast okienka "na pewno?".
+	_check(open_card is SlideButton, "kupno kury to suwak")
+	if open_card is SlideButton:
+		_scroll_into_view(open_card)
+		await _frames(10)
+		await _tap(open_card.get_global_rect().get_center())
+		await _frames(10)
+		_check(Game.state.hen_count() == hens_before, "samo dotkniecie nie kupuje")
+		var status: Label = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Body/Text/Status")
+		_check(status.text == tr("PANEL_SLIDE_HINT"), "dotkniecie podpowiada, zeby przesunac")
+		await _slide(open_card as SlideButton, 0.5)
+		await _frames(10)
+		_check(Game.state.hen_count() == hens_before, "przesuniecie do polowy nie kupuje")
+		await _slide(open_card as SlideButton, 0.6, true)
+		_shot("suwak_w_trakcie.png")
+		await _slide_release(open_card as SlideButton, 0.6)
+		await _frames(20)
+		_check(Game.state.hen_count() == hens_before, "puszczony w polowie suwak wraca, nic nie kupuje")
+		await _slide(open_card as SlideButton)
+		await _frames(30)
 	await _dismiss_unlock_popup()
-	_check(Game.state.hen_count() == hens_before + 1, "zakup kury dziala po potwierdzeniu")
+	_check(Game.state.hen_count() == hens_before + 1, "zakup kury dziala po przesunieciu suwaka")
 	_check(_nodes_of_type("FarmChicken").size() == Game.state.hen_count(), "kupiona kura pojawila sie na wybiegu")
 	_shot("panel_po_zakupach.png")
 
@@ -488,55 +522,17 @@ func _test_sell_hen() -> void:
 		return
 	var hens_before: int = Game.state.hen_count()
 	var money_before: float = Game.state.money
-	sell_button.emit_signal("pressed")
-	await _frames(30)
-	# Sprzedaz ptaka idzie teraz przez potwierdzenie: jedno nieuwazne
-	# dotkniecie nie moze kosztowac wyhodowanej kury.
-	_check(Game.state.hen_count() == hens_before,
-			"samo klikniecie jeszcze nic nie sprzedaje")
-	var tak := _button_labelled(tr("CONFIRM_YES"))
-	var nie := _button_labelled(tr("CONFIRM_NO"))
-	_check(tak != null and nie != null, "pojawilo sie pytanie z dwoma odpowiedziami")
-	if tak == null:
-		return
-
-	# Okienko ma byc CALE na ekranie. Wczesniej test sprawdzal tylko, czy
-	# przyciski istnieja — a one istnialy, tylko polowa wystawala za prawa
-	# krawedz telefonu. Wlasciciel zobaczyl to na zrzucie, test nie.
-	var ekran := Rect2(Vector2.ZERO, get_viewport().get_visible_rect().size)
-	for przycisk: Button in [tak, nie]:
-		var r := przycisk.get_global_rect()
-		_check(ekran.encloses(r),
-				"przycisk '%s' miesci sie na ekranie (%s w %s)" % [przycisk.text, r, ekran])
-	var pytanie: Label = null
-	var w_gore: Node = tak.get_parent()
-	while w_gore != null and pytanie == null:
-		for dziecko in w_gore.get_children():
-			if dziecko is Label:
-				pytanie = dziecko
-		w_gore = w_gore.get_parent()
-	_check(pytanie != null and ekran.encloses(pytanie.get_global_rect()),
-			"tekst pytania miesci sie na ekranie")
-	var srodek_okna := (tak.get_global_rect().merge(nie.get_global_rect())).get_center().x
-	_check(absf(srodek_okna - ekran.size.x * 0.5) < ekran.size.x * 0.1,
-			"okienko stoi na srodku ekranu (%.0f vs %.0f)" % [srodek_okna, ekran.size.x * 0.5])
-	_shot("pytanie_sprzedaz.png")
-
-	# Najpierw sprawdzamy, ze "Nie" naprawde nic nie robi.
-	nie.emit_signal("pressed")
+	_check(sell_button is SlideButton, "sprzedaz kury to suwak")
+	_scroll_into_view(sell_button)
+	await _frames(10)
+	await _tap(sell_button.get_global_rect().get_center())
 	await _frames(20)
-	_check(Game.state.hen_count() == hens_before, "'Nie' zostawia kure w spokoju")
-	_check(_button_labelled(tr("CONFIRM_YES")) == null, "pytanie znika po odpowiedzi")
-
-	sell_button.emit_signal("pressed")
-	await _frames(30)
-	tak = _button_labelled(tr("CONFIRM_YES"))
-	_check(tak != null, "pytanie wraca przy kolejnej probie")
-	if tak == null:
-		return
-	tak.emit_signal("pressed")
-	# Wybieg dogania stan stada dopiero przy nastepnym przegladzie, a doszlo
-	# jedno dodatkowe klikniecie (potwierdzenie) — dajemy mu wiecej czasu.
+	_check(Game.state.hen_count() == hens_before, "samo dotkniecie nic nie sprzedaje")
+	_check(_button_labelled(tr("CONFIRM_YES")) == null, "zadnego okienka 'na pewno?'")
+	var ekran := Rect2(Vector2.ZERO, get_viewport().get_visible_rect().size)
+	_check(ekran.encloses(sell_button.get_global_rect()), "suwak sprzedazy miesci sie na ekranie")
+	if sell_button is SlideButton:
+		await _slide(sell_button as SlideButton)
 	await _seconds(2.0)
 	_check(Game.state.hen_count() == hens_before - 1, "sprzedaz zmniejsza stado")
 	_check(Game.state.money > money_before, "sprzedaz kury daje pieniadze")
@@ -643,6 +639,51 @@ func _tap(viewport_point: Vector2) -> void:
 		event.pressed = pressed
 		Input.parse_input_event(event)
 		await _frames(4)
+
+
+## Przesuwa suwak prawdziwymi zdarzeniami myszy (na telefonie dotyk jest
+## zamieniany na mysz). `fraction` - jak daleko, `hold` - nie puszczaj.
+func _slide(slide: SlideButton, fraction: float = 1.0, hold: bool = false) -> void:
+	var rect := slide.get_global_rect()
+	var start := Vector2(rect.position.x + 50.0, rect.get_center().y)
+	var screen := get_viewport().get_screen_transform()
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.position = screen * start
+	press.global_position = press.position
+	Input.parse_input_event(press)
+	await _frames(2)
+	var end_x := start.x + (rect.size.x - 60.0) * fraction
+	for i in 12:
+		var motion := InputEventMouseMotion.new()
+		motion.button_mask = MOUSE_BUTTON_MASK_LEFT
+		var x := lerpf(start.x, end_x, float(i + 1) / 12.0)
+		motion.position = screen * Vector2(x, start.y)
+		motion.global_position = motion.position
+		Input.parse_input_event(motion)
+		await _frames(1)
+	if not hold:
+		await _slide_release(slide, fraction)
+
+
+func _slide_release(slide: SlideButton, fraction: float) -> void:
+	var rect := slide.get_global_rect()
+	var screen := get_viewport().get_screen_transform()
+	var release := InputEventMouseButton.new()
+	release.button_index = MOUSE_BUTTON_LEFT
+	release.pressed = false
+	release.position = screen * Vector2(rect.position.x + 50.0 + (rect.size.x - 60.0) * fraction,
+			rect.get_center().y)
+	release.global_position = release.position
+	Input.parse_input_event(release)
+	await _frames(3)
+
+
+## Przewija panel tak, zeby kontrolka byla widoczna (suwak trzeba zlapac).
+func _scroll_into_view(control: Control) -> void:
+	var scroll: ScrollContainer = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll")
+	scroll.ensure_control_visible(control)
 
 
 func _frames(count: int) -> void:

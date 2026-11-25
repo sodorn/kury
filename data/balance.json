@@ -52,46 +52,61 @@
       {
         "name": "INCU_T1",
         "slots": 6,
-        "price": 600
+        "price": 600,
+        "build_minutes": 5
       },
       {
         "name": "INCU_T2",
         "slots": 10,
-        "price": 4000
+        "price": 4000,
+        "build_minutes": 8
       },
       {
         "name": "INCU_T3",
         "slots": 16,
-        "price": 11000
+        "price": 11000,
+        "build_minutes": 12
       },
       {
         "name": "INCU_T4",
         "slots": 24,
-        "price": 24000
+        "price": 24000,
+        "build_minutes": 17
       },
       {
         "name": "INCU_T5",
         "slots": 34,
-        "price": 48000
+        "price": 48000,
+        "build_minutes": 23
       },
       {
         "name": "INCU_T6",
         "slots": 48,
-        "price": 108000
+        "price": 108000,
+        "build_minutes": 30
       },
       {
         "name": "INCU_T7",
         "slots": 66,
-        "price": 200000
+        "price": 200000,
+        "build_minutes": 38
       },
       {
         "name": "INCU_T8",
         "slots": 90,
-        "price": 450000
+        "price": 450000,
+        "build_minutes": 48
+      },
+      {
+        "name": "INCU_T9",
+        "slots": 120,
+        "price": 700000,
+        "build_minutes": 60
       }
     ],
     "_opis": "slots to liczba partii grzanych naraz; kazda partia to jedno pisklę. eggs_per_chick jaj danej rasy robi jedno pisklę tej rasy.",
-    "rooster_share": 0.5
+    "rooster_share": 0.5,
+    "name": "INCU_T0"
   },
   "hunger": {
     "_opis": "Po grace_minutes bez paszy stado zaczyna padac. Odstep miedzy zgonami to death_interval_seconds przy stadzie wielkosci reference_hens i skraca sie proporcjonalnie przy wiekszym - przy stalym odstepie stado liczace dwiescie sztuk gloddzilo godzinami i pasza przestawala byc problemem. Bez paszy stoi tez inkubator i odchow piskląt.",
@@ -142,7 +157,7 @@
     "collection": false
   },
   "buildings": {
-    "_opis": "Ulepszenia budynkow. Poziom 0 to stan poczatkowy, kazdy kolejny to wpis z upgrades.",
+    "_opis": "Ulepszenia budynkow. Poziom 0 to stan poczatkowy, kazdy kolejny to wpis z upgrades. Od 12.19 kazdy z trzech budynkow (kurnik, magazyn, inkubator) ma 10 poziomow (start + 9 rozbudow), a rozbudowa sie BUDUJE: build_minutes minut realnego czasu (5 do 60), w trakcie budynek dziala na starym poziomie. name na poziomie budynku to nazwa poziomu startowego.",
     "coop": {
       "_opis": "Pojemnosc kurnika liczona we wszystkich doroslych ptakach, razem z kogutami. Ponad limit nie kupisz ptaka, a podrosniete pisklę czeka przy inkubatorze. Drabinka siega 260, zeby przy siedemnastu rasach zmiescilo sie po kilka sztuk kazdej.",
       "capacity": 20,
@@ -150,49 +165,59 @@
         {
           "name": "COOP_T1",
           "capacity": 35,
-          "price": 800
+          "price": 800,
+          "build_minutes": 5
         },
         {
           "name": "COOP_T2",
           "capacity": 55,
-          "price": 4800
+          "price": 4800,
+          "build_minutes": 8
         },
         {
           "name": "COOP_T3",
           "capacity": 80,
-          "price": 12000
+          "price": 12000,
+          "build_minutes": 12
         },
         {
           "name": "COOP_T4",
           "capacity": 110,
-          "price": 24500
+          "price": 24500,
+          "build_minutes": 17
         },
         {
           "name": "COOP_T5",
           "capacity": 150,
-          "price": 45000
+          "price": 45000,
+          "build_minutes": 23
         },
         {
           "name": "COOP_T6",
           "capacity": 200,
-          "price": 90000
+          "price": 90000,
+          "build_minutes": 30
         },
         {
           "name": "COOP_T7",
           "capacity": 270,
-          "price": 150000
+          "price": 150000,
+          "build_minutes": 38
         },
         {
           "name": "COOP_T8",
           "capacity": 360,
-          "price": 300000
+          "price": 300000,
+          "build_minutes": 48
         },
         {
           "name": "COOP_T9",
           "capacity": 500,
-          "price": 500000
+          "price": 500000,
+          "build_minutes": 60
         }
-      ]
+      ],
+      "name": "COOP_T0"
     },
     "storage": {
       "_opis": "MAGAZYN. pack_size/pack_price to worek paszy, egg_capacity to LIMIT JAJ, ktore moga lezec w magazynie. Limit jest po to, zeby gra nie przechodzila sie sama: bez niego mozna bylo wrocic po dobie i zastac gore jaj. Nadmiar nad limit przepada przy znoszeniu — gracz musi zajrzec i sprzedac. Od 12.18 limity jaj sa 10 razy wieksze: przy realnej cenie paszy kura je w przerwie wiecej niz zarabia, jesli magazyn miesci tylko kilka minut niesienia - bot 24 h pokazal, ze bez tego gracz sesyjny bankrutuje w nocy.",
@@ -202,52 +227,76 @@
           "pack_size": 100,
           "pack_discount": 0.1,
           "price": 600,
-          "egg_capacity": 5000
+          "egg_capacity": 5000,
+          "build_minutes": 5
         },
         {
           "name": "STORE_T2",
           "pack_size": 250,
-          "pack_discount": 0.15,
+          "pack_discount": 0.14,
           "price": 3000,
-          "egg_capacity": 10000
+          "egg_capacity": 10000,
+          "build_minutes": 8
         },
         {
           "name": "STORE_T3",
           "pack_size": 600,
-          "pack_discount": 0.2,
+          "pack_discount": 0.18,
           "price": 10500,
-          "egg_capacity": 20000
+          "egg_capacity": 20000,
+          "build_minutes": 12
         },
         {
           "name": "STORE_T4",
           "pack_size": 1500,
-          "pack_discount": 0.25,
+          "pack_discount": 0.22,
           "price": 30000,
-          "egg_capacity": 100000
+          "egg_capacity": 100000,
+          "build_minutes": 17
         },
         {
           "name": "STORE_T5",
           "pack_size": 3500,
-          "pack_discount": 0.3,
+          "pack_discount": 0.26,
           "price": 80000,
-          "egg_capacity": 500000
+          "egg_capacity": 500000,
+          "build_minutes": 23
         },
         {
           "name": "STORE_T6",
           "pack_size": 8000,
-          "pack_discount": 0.35,
+          "pack_discount": 0.3,
           "price": 200000,
-          "egg_capacity": 1500000
+          "egg_capacity": 1500000,
+          "build_minutes": 30
         },
         {
           "name": "STORE_T7",
           "pack_size": 20000,
-          "pack_discount": 0.4,
+          "pack_discount": 0.34,
           "price": 540000,
-          "egg_capacity": 5000000
+          "egg_capacity": 5000000,
+          "build_minutes": 38
+        },
+        {
+          "name": "STORE_T8",
+          "pack_size": 40000,
+          "pack_discount": 0.37,
+          "price": 1000000,
+          "egg_capacity": 10000000,
+          "build_minutes": 48
+        },
+        {
+          "name": "STORE_T9",
+          "pack_size": 70000,
+          "pack_discount": 0.4,
+          "price": 1800000,
+          "egg_capacity": 20000000,
+          "build_minutes": 60
         }
       ],
-      "egg_capacity": 2000
+      "egg_capacity": 2000,
+      "name": "STORE_T0"
     },
     "guard": {
       "_opis": "PLOT. block_chance to szansa, ze lis w ogole nie wejdzie na wybieg — losowana przy kazdym podejsciu. Plot nie ma nic wspolnego z psem: pies dziala dopiero wtedy, gdy lis juz wszedl.",

@@ -81,6 +81,11 @@ var fox_pending: int = 0
 var coop_level: int = 0
 var storage_level: int = 0
 var guard_level: int = 0
+## Budowy w toku (wlasciciel, 25.11: rozbudowa trwa jak wylęganie, 5 min do
+## godziny). Klucz: id budynku ("coop", "storage", "incubator"), wartosc:
+## [sekundy REALNE do konca, sekundy realne calej budowy]. W trakcie budowy
+## budynek dziala na starym poziomie; nowy wchodzi po skonczeniu.
+var construction: Dictionary = {}
 ## Pies podworzowy. Osobna sciezka od plotu: plot decyduje, czy lis wejdzie,
 ## pies — jak szybko wyleci i ile zdazy zabrac. Kupiony raz, zostaje.
 var dog_level: int = 0
@@ -421,6 +426,36 @@ func next_incubator_upgrade() -> Dictionary:
 
 
 # --- budynki ------------------------------------------------------------
+
+
+## Nastepny poziom budynku albo inkubatora - jeden odczyt dla wszystkich.
+func upgrade_entry(building_id: String) -> Dictionary:
+	if building_id == "incubator":
+		return next_incubator_upgrade()
+	return next_building_upgrade(building_id)
+
+
+## Ile sekund REALNYCH trwa budowa nastepnego poziomu (0 = od razu).
+func build_seconds(building_id: String) -> float:
+	return maxf(0.0, float(upgrade_entry(building_id).get("build_minutes", 0.0)) * 60.0)
+
+
+func is_building(building_id: String) -> bool:
+	return construction.has(building_id)
+
+
+## Sekundy realne do konca budowy (0, gdy nic sie nie buduje).
+func construction_left(building_id: String) -> float:
+	var job: Array = construction.get(building_id, [])
+	return float(job[0]) if job.size() >= 2 else 0.0
+
+
+## Postep budowy 0..1.
+func construction_progress(building_id: String) -> float:
+	var job: Array = construction.get(building_id, [])
+	if job.size() < 2 or float(job[1]) <= 0.0:
+		return 0.0
+	return clampf(1.0 - float(job[0]) / float(job[1]), 0.0, 1.0)
 
 
 ## Wspolny odczyt poziomu budynku: 0 to stan poczatkowy.

@@ -147,6 +147,9 @@ func _report(result: Dictionary) -> void:
 	if died_hunger > 0:
 		Events.notice.emit(tr("HINT_DIED_HUNGER") % died_hunger)
 		Events.resources_changed.emit()
+	for id in result.get("built", []):
+		_announce_built(String(id))
+		Events.resources_changed.emit()
 	if int(result.get("fox_lurking", 0)) > 0:
 		Events.notice.emit(tr("HINT_FOX_LURKING"))
 		Events.fox_lurking.emit(state.fox_lurk_left)
@@ -452,6 +455,9 @@ func _apply_elapsed(elapsed: float) -> void:
 	var laid := int(result["eggs_laid"])
 	if laid > 0:
 		Events.notice.emit(tr("HINT_WELCOME_BACK") % laid)
+	# Budowa skonczona pod nieobecnosc gracza.
+	for id in result.get("built", []):
+		_announce_built(String(id))
 	var lost := int(result["died_hunger"]) + int(result["died_disease"]) + int(result["fox_took"])
 	if lost > 0:
 		Events.notice.emit(tr("HINT_LOST_WHILE_AWAY") % lost)
@@ -766,19 +772,41 @@ func fox_taps_left() -> int:
 # --- budynki ------------------------------------------------------------
 
 
-## Kupuje kolejny poziom budynku ("coop", "storage", "guard").
+## Kupuje kolejny poziom budynku ("coop", "storage", "incubator", "guard",
+## "dog"). Kurnik, magazyn i inkubator sie BUDUJA (build_minutes w
+## balance.json, czas realny) - placisz od razu, nowy poziom wchodzi po
+## skonczeniu budowy. Plot i pies sa od razu. W trakcie budowy nie da sie
+## zamowic kolejnego poziomu tego samego budynku.
 func upgrade_building(building_id: String) -> bool:
-	var upgrade := state.next_building_upgrade(building_id)
+	if state.is_building(building_id):
+		return false
+	var upgrade := state.upgrade_entry(building_id)
 	if upgrade.is_empty():
 		return false
 	var price := float(upgrade.get("price", 0))
 	if state.money < price:
 		return false
 	state.money -= price
+	var seconds := state.build_seconds(building_id)
+	if seconds > 0.0:
+		state.construction[building_id] = [seconds, seconds]
+		Events.resources_changed.emit()
+		Events.notice.emit(tr("HINT_BUILD_STARTED") % [tr(String(upgrade.get("name", ""))),
+				NumberFormat.duration(seconds)])
+		save()
+		return true
 	state.set_building_level(building_id, state.building_level(building_id) + 1)
 	Events.resources_changed.emit()
-	Events.notice.emit(tr("HINT_BUILDING_UPGRADED_%s" % building_id.to_upper()))
+	_announce_built(building_id)
 	return true
+
+
+## Komunikat po skonczonej rozbudowie.
+func _announce_built(building_id: String) -> void:
+	if building_id == "incubator":
+		Events.notice.emit(tr("HINT_INCUBATOR_UPGRADED") % state.incubator_slots())
+	else:
+		Events.notice.emit(tr("HINT_BUILDING_UPGRADED_%s" % building_id.to_upper()))
 
 
 # --- inkubator ----------------------------------------------------------
@@ -828,16 +856,6 @@ func incubate(breed_id: String) -> bool:
 	return true
 
 
-## Rozbudowuje inkubator o kolejny poziom z balance.json.
+## Rozbudowuje inkubator o kolejny poziom z balance.json (z czasem budowy).
 func upgrade_incubator() -> bool:
-	var upgrade := state.next_incubator_upgrade()
-	if upgrade.is_empty():
-		return false
-	var price := float(upgrade.get("price", 0))
-	if state.money < price:
-		return false
-	state.money -= price
-	state.incubator_level += 1
-	Events.resources_changed.emit()
-	Events.notice.emit(tr("HINT_INCUBATOR_UPGRADED") % state.incubator_slots())
-	return true
+	return upgrade_building("incubator")

@@ -104,6 +104,11 @@ OPISY = {
     "incubator.upgrades[].slots": ("szt.", "Miejsca w inkubatorze na tym poziomie.",
                                    "FarmState.incubator_slots"),
     "incubator.upgrades[].price": ("zl", "Cena przejscia NA ten poziom.", "Game.upgrade_incubator"),
+    "incubator.name": ("klucz tekstu", "Nazwa poziomu startowego inkubatora (poziom 1 w panelu).",
+                       "panel inkubatora"),
+    "incubator.upgrades[].build_minutes": ("min ZEGARA", "Ile minut REALNYCH trwa budowa tego poziomu. Placi sie od razu, "
+                 "nowy poziom wchodzi po skonczeniu; w trakcie budynek dziala na starym. "
+                 "0 albo brak = od razu.", "Game.upgrade_building, Simulation._advance_construction"),
     # --------------------------------------------------------------- hunger
     "hunger.grace_minutes": ("min GRY", "Po skonczeniu paszy przez tyle minut nic sie nie dzieje. "
                              "Potem zaczynaja padac kury.", "Simulation._advance_hunger"),
@@ -189,6 +194,10 @@ OPISY = {
     "buildings.coop.upgrades[].capacity": ("szt.", "Miejsca w kurniku na tym poziomie.",
                                            "FarmState.coop_capacity"),
     "buildings.coop.upgrades[].price": ("zl", "Cena przejscia NA ten poziom.", "Game.upgrade_building"),
+    "buildings.coop.name": ("klucz tekstu", "Nazwa poziomu startowego kurnika.", "panel kurnika"),
+    "buildings.coop.upgrades[].build_minutes": ("min ZEGARA", "Ile minut REALNYCH trwa budowa tego poziomu. Placi sie od razu, "
+                 "nowy poziom wchodzi po skonczeniu; w trakcie budynek dziala na starym. "
+                 "0 albo brak = od razu.", "Game.upgrade_building, Simulation._advance_construction"),
     "buildings.storage.egg_capacity": ("szt.", "Limit jaj w magazynie na poziomie 0.",
                                        "FarmState.egg_capacity"),
     "buildings.storage.upgrades[].name": ("klucz tekstu", "Nazwa poziomu magazynu.", "panel magazynu"),
@@ -199,6 +208,10 @@ OPISY = {
                                                    "(1 - rabat), do pelnych groszy. Musi rosnac z "
                                                    "poziomem (test).", "FarmState.feed_pack"),
     "buildings.storage.upgrades[].price": ("zl", "Cena przejscia NA ten poziom.", "Game.upgrade_building"),
+    "buildings.storage.name": ("klucz tekstu", "Nazwa poziomu startowego magazynu.", "panel magazynu"),
+    "buildings.storage.upgrades[].build_minutes": ("min ZEGARA", "Ile minut REALNYCH trwa budowa tego poziomu. Placi sie od razu, "
+                 "nowy poziom wchodzi po skonczeniu; w trakcie budynek dziala na starym. "
+                 "0 albo brak = od razu.", "Game.upgrade_building, Simulation._advance_construction"),
     "buildings.storage.upgrades[].egg_capacity": ("szt.", "Limit jaj na tym poziomie.",
                                                   "FarmState.egg_capacity"),
     "buildings.guard.upgrades[].block_chance": ("0-1", "Szansa, ze lis po udanej kostce ZAWROCI przy "
@@ -617,6 +630,8 @@ def build():
         _advance_incubator   partie w inkubatorze -> piskleta
         _advance_chicks      piskleta rosna -> dorosle ptaki
    3. _advance_corpses       zwloki znikaja po hunger.corpse_seconds
+      _advance_construction  budowy (czas ZEGARA) - koniec = poziom+1,
+                             id do wyniku "built" (od 12.19)
    4. _advance_egg_spoilage  jaja starsze niz egg_spoil_hours gnija
                              (PRZED wyjsciem dla pustej farmy - jaja
                              gnija takze bez stada)
@@ -628,6 +643,16 @@ def build():
    8. _advance_disease       choroba: przebieg u chorych + kostka
    9. brak paszy?            koniec kroku (glodne kury nie znosza)
   10. _lay_eggs              znoszenie jaj""")
+    para("Rozbudowa kurnika, magazynu i inkubatora trwa build_minutes minut zegara (5-60). "
+         "Game.upgrade_building placi od razu i wpisuje FarmState.construction[id] = [zostalo, "
+         "calosc]; budynek dziala na starym poziomie. Budowa idzie takze w tle i przezywa zapis "
+         "(klucz \"construction\"). Plot i pies nie maja build_minutes - sa od razu. Na farmie nad "
+         "budynkiem wisi tabliczka z zegarem (farm.gd _sync_construction).")
+    para("Transakcje, ktore kiedys pytaly \"na pewno?\", i cala rozbudowa to SUWAK "
+         "(scenes/ui/panels/slide_button.gd, klasa SlideButton dziedziczy po Button). Zwykle "
+         "dotkniecie jest polykane w _gui_input, a sygnal pressed leci dopiero po przeciagnieciu "
+         "do konca - kod podlaczony do pressed nic nie wie o suwaku. Zwykle przyciski zostaly "
+         "przy sprzedazy jaj, paszy i wkladaniu jaj do inkubatora (klika sie je co chwile).")
     para("Wynik Simulation.advance to slownik licznikow (eggs_laid, hatched, grown_up, died_hunger, "
          "died_disease, got_sick, fox_took, fox_arrived, fox_blocked, fox_chased, fox_killed, "
          "rotted, eggs_spoiled ...). Game zamienia go na komunikaty i sygnaly (Game._report).")

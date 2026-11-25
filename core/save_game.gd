@@ -57,6 +57,7 @@ static func to_dict(state: FarmState, unpaid_seconds: float = 0.0) -> Dictionary
 		"storage_level": state.storage_level,
 		"guard_level": state.guard_level,
 		"dog_level": state.dog_level,
+		"construction": state.construction,
 		"egg_ages": state.egg_ages,
 		"rooster_hints": state.rooster_hints,
 		"fox_roll_timer": state.fox_roll_timer,
@@ -114,6 +115,16 @@ static func from_dict(data: Dictionary) -> Dictionary:
 		state.event_dry[key] = maxf(0.0, float(
 				(data.get("event_dry", {}) as Dictionary).get(key, 0.0)))
 	state.hunger_seconds = maxf(0.0, float(data.get("hunger_seconds", 0.0)))
+	# Budowy w toku (od 12.19). Starsze zapisy ich nie znaja.
+	state.construction = {}
+	var jobs: Variant = data.get("construction", {})
+	if jobs is Dictionary:
+		for id: String in ["coop", "storage", "incubator"]:
+			var job: Variant = (jobs as Dictionary).get(id, [])
+			if job is Array and (job as Array).size() >= 2:
+				var left := maxf(0.0, float(job[0]))
+				var total := maxf(left, float(job[1]))
+				state.construction[id] = [left, total]
 	state.intro_seen = bool(data.get("intro_seen", false))
 	state.won = bool(data.get("won", false))
 	state.win_reason = String(data.get("win_reason", ""))

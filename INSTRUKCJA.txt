@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 12.18
+  INSTRUKCJA OBSLUGI *** gra w wersji 12.19
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -92,6 +92,12 @@
 ==============================================================================
  4. PETLA GRY - OD CZEGO ZACZAC
 ==============================================================================
+
+  SUWAKI. Kupno i sprzedaz kur, ubicie chorej, lek, szczepienie, plot, pies i
+  kazda rozbudowa to SUWAK: przeciagnij palcem od lewej do prawej, az pole sie
+  zapelni kolorem. Samo dotkniecie nic nie robi - nie kupisz nic przypadkiem.
+  Sprzedaz jaj, pasza i wkladanie jaj do inkubatora to zwykle przyciski, bo
+  klika sie je co chwile.
 
   1. ZBIERAJ JAJA z wybiegu. Dotknij jajka palcem, idzie do magazynu.
      Jaj powyzej 40 sztuk naraz gra nie kladzie na trawie - nadmiar
@@ -202,63 +208,86 @@
  9. KURNIK
 ==============================================================================
 
-  +===========+=================+================+
-  |    poziom | miejsc na ptaki | cena rozbudowy |
-  +===========+=================+================+
-  | 0 (start) |              20 |              - |
-  |         1 |              35 |         800 zl |
-  |         2 |              55 |       4 800 zl |
-  |         3 |              80 |      12 000 zl |
-  |         4 |             110 |      24 500 zl |
-  |         5 |             150 |      45 000 zl |
-  |         6 |             200 |      90 000 zl |
-  |         7 |             270 |     150 000 zl |
-  |         8 |             360 |     300 000 zl |
-  |         9 |             500 |     500 000 zl |
-  +-----------+-----------------+----------------+
+  +======+==========================+========+============+========+
+  | poz. | nazwa                    | miejsc |       cena | budowa |
+  +======+==========================+========+============+========+
+  |    1 | budka z palet po dziadku |     20 |      start |      - |
+  |    2 | kurnik na trytytkach     |     35 |     800 zl |  5 min |
+  |    3 | kurnik z przybudówką     |     55 |   4 800 zl |  8 min |
+  |    4 | kurza kamienica          |     80 |  12 000 zl | 12 min |
+  |    5 | kurnik z windą na grzędę |    110 |  24 500 zl | 17 min |
+  |    6 | kurzy apartamentowiec    |    150 |  45 000 zl | 23 min |
+  |    7 | galeria pierzasta        |    200 |  90 000 zl | 30 min |
+  |    8 | kurzy pałac kultury      |    270 | 150 000 zl | 38 min |
+  |    9 | ferma „Złoty Grzebień”   |    360 | 300 000 zl | 48 min |
+  |   10 | imperium gdakania        |    500 | 500 000 zl |    1 h |
+  +------+--------------------------+--------+------------+--------+
 
   Limit liczy WSZYSTKIE dorosle ptaki razem z kogutami. Ponad limit nie kupisz
   ptaka, a podrosniete pisklę czeka przy inkubatorze, az zwolni sie miejsce.
-  Kurnik zmienia wyglad na poziomie 3 i 6.
+  Kurnik zmienia wyglad na poziomie 4 i 7.
+
+  ROZBUDOWA TRWA. Kurnik, magazyn i inkubator buduja sie od 5 minut do 60
+  minut (czas przy zegarku, leci tez, gdy nie grasz). Placisz od razu, a do
+  konca budowy budynek dziala na starym poziomie. Nad budynkiem wisi tabliczka
+  z czasem. Plot i pies sa od razu.
 
 ==============================================================================
  10. MAGAZYN
 ==============================================================================
 
-  +===========+===========+==========+============+=======+============+
-  |    poziom | limit jaj | worek kg | cena worka | rabat |  rozbudowa |
-  +===========+===========+==========+============+=======+============+
-  | 0 (start) |     2 000 |       25 |      50 zl |     - |          - |
-  |         1 |     5 000 |      100 |     180 zl |   10% |     600 zl |
-  |         2 |    10 000 |      250 |     425 zl |   15% |   3 000 zl |
-  |         3 |    20 000 |      600 |     960 zl |   20% |  10 500 zl |
-  |         4 |   100 000 |    1 500 |   2 250 zl |   25% |  30 000 zl |
-  |         5 |   500 000 |    3 500 |   4 900 zl |   30% |  80 000 zl |
-  |         6 | 1 500 000 |    8 000 |  10 400 zl |   35% | 200 000 zl |
-  |         7 | 5 000 000 |   20 000 |  24 000 zl |   40% | 540 000 zl |
-  +-----------+-----------+----------+------------+-------+------------+
+  +======+=========================+============+==============+========+
+  | poz. | nazwa                   |  limit jaj |         cena | budowa |
+  +======+=========================+============+==============+========+
+  |    1 | komórka na łopaty       |      2 000 |        start |      - |
+  |    2 | szopa z kłódką          |      5 000 |       600 zl |  5 min |
+  |    3 | spiżarnia babci         |     10 000 |     3 000 zl |  8 min |
+  |    4 | spichlerz               |     20 000 |    10 500 zl | 12 min |
+  |    5 | stodoła z rampą         |    100 000 |    30 000 zl | 17 min |
+  |    6 | silos                   |    500 000 |    80 000 zl | 23 min |
+  |    7 | bliźniacze silosy       |  1 500 000 |   200 000 zl | 30 min |
+  |    8 | elewator zbożowy        |  5 000 000 |   540 000 zl | 38 min |
+  |    9 | port przeładunkowy pasz | 10 000 000 | 1 000 000 zl | 48 min |
+  |   10 | skarbiec jajczarski     | 20 000 000 | 1 800 000 zl |    1 h |
+  +------+-------------------------+------------+--------------+--------+
+
+  +======+==========+============+=======+
+  | poz. | worek kg | cena worka | rabat |
+  +======+==========+============+=======+
+  |    1 |       25 |      50 zl |     - |
+  |    2 |      100 |     180 zl |   10% |
+  |    3 |      250 |     430 zl |   14% |
+  |    4 |      600 |     984 zl |   18% |
+  |    5 |    1 500 |   2 340 zl |   22% |
+  |    6 |    3 500 |   5 180 zl |   26% |
+  |    7 |    8 000 |  11 200 zl |   30% |
+  |    8 |   20 000 |  26 400 zl |   34% |
+  |    9 |   40 000 |  50 400 zl |   37% |
+  |   10 |   70 000 |  84 000 zl |   40% |
+  +------+----------+------------+-------+
 
   Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i daje HURT -
   wiekszy worek paszy z rabatem od 10% do 40%. Im wiekszy magazyn, tym tanszy
-  kilogram. Magazyn zmienia wyglad na poziomie 3 i 6.
+  kilogram. Magazyn zmienia wyglad na poziomie 4 i 7.
 
 ==============================================================================
  11. INKUBATOR
 ==============================================================================
 
-  +===========+=======================+================+
-  |    poziom | miejsc (partii naraz) | cena rozbudowy |
-  +===========+=======================+================+
-  | 0 (start) |                     3 |              - |
-  |         1 |                     6 |         600 zl |
-  |         2 |                    10 |       4 000 zl |
-  |         3 |                    16 |      11 000 zl |
-  |         4 |                    24 |      24 000 zl |
-  |         5 |                    34 |      48 000 zl |
-  |         6 |                    48 |     108 000 zl |
-  |         7 |                    66 |     200 000 zl |
-  |         8 |                    90 |     450 000 zl |
-  +-----------+-----------------------+----------------+
+  +======+===========================+========+============+========+
+  | poz. | nazwa                     | miejsc |       cena | budowa |
+  +======+===========================+========+============+========+
+  |    1 | lampka pod kocykiem       |      3 |      start |      - |
+  |    2 | pudło po butach z żarówką |      6 |     600 zl |  5 min |
+  |    3 | inkubator z odzysku       |     10 |   4 000 zl |  8 min |
+  |    4 | wylęgarka z termometrem   |     16 |  11 000 zl | 12 min |
+  |    5 | Ciepła Kołdra 3000        |     24 |  24 000 zl | 17 min |
+  |    6 | bliźniak dwukomorowy      |     34 |  48 000 zl | 23 min |
+  |    7 | kurza porodówka           |     48 | 108 000 zl | 30 min |
+  |    8 | wylęgarnia na trzy zmiany |     66 | 200 000 zl | 38 min |
+  |    9 | fabryka puchu             |     90 | 450 000 zl | 48 min |
+  |   10 | reaktor wylęgowy          |    120 | 700 000 zl |    1 h |
+  +------+---------------------------+--------+------------+--------+
 
 ==============================================================================
  12. LIS
@@ -344,8 +373,9 @@
 ==============================================================================
 
   Czas gry plynie 3 razy wolniej od zegarka: jedna minuta przy zegarku to
-  okolo 20 sekund w grze. Wszystkie czasy w tej instrukcji sa juz PRZELICZONE
-  na zegarek, chyba ze napisano inaczej.
+  okolo 20 sekund w grze. Wszystkie czasy w tej instrukcji i W GRZE (panele,
+  budowy, "pasza starczy na", wiek gospodarstwa) sa podane przy zegarku - w
+  czasie ziemskim. Gra nie pokazuje juz "dni gospodarstwa".
 
   Gra liczy czas TAK SAMO, gdy grasz i gdy nie grasz. Zostawiona na noc farma
   znosi jaja, zjada pasze, choruje i goszczy lisa. Po powrocie gra nadrabia

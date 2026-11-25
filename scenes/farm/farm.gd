@@ -443,3 +443,73 @@ func _sync_buildings() -> void:
 		var texture: Texture2D = looks[mini(tier, looks.size() - 1)]
 		if sprite.texture != texture:
 			sprite.texture = texture
+		_sync_construction(building, String(building.building_id))
+
+
+## Tabliczka "Budowa 12:34" z paskiem postepu na budynku, ktory sie
+## rozbudowuje (od 12.19 rozbudowa trwa od 5 minut do godziny zegara).
+func _sync_construction(building: Node2D, building_id: String) -> void:
+	var board := building.get_node_or_null("BuildSign") as Node2D
+	if not Game.state.is_building(building_id):
+		if board != null:
+			board.queue_free()
+		return
+	if board == null:
+		board = _make_build_sign()
+		building.add_child(board)
+	(board.get_node("Box/Rows/Label") as Label).text = tr("FARM_BUILD_SIGN") \
+			% NumberFormat.clock(Game.state.construction_left(building_id))
+	(board.get_node("Box/Rows/Bar") as ProgressBar).value = \
+			Game.state.construction_progress(building_id)
+
+
+func _make_build_sign() -> Node2D:
+	var board := Node2D.new()
+	board.name = "BuildSign"
+	board.z_index = 60
+	board.position = Vector2(-170, -250)
+	var box := PanelContainer.new()
+	box.name = "Box"
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("FFF6E2")
+	style.border_color = Color("8A6A55")
+	style.set_border_width_all(5)
+	style.set_corner_radius_all(22)
+	style.content_margin_left = 18
+	style.content_margin_right = 18
+	style.content_margin_top = 8
+	style.content_margin_bottom = 12
+	style.shadow_color = Color(0, 0, 0, 0.2)
+	style.shadow_size = 6
+	box.add_theme_stylebox_override("panel", style)
+	box.custom_minimum_size = Vector2(340, 0)
+	var rows := VBoxContainer.new()
+	rows.name = "Rows"
+	var label := Label.new()
+	label.name = "Label"
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 38)
+	label.add_theme_color_override("font_color", Color("5C4030"))
+	var bar := ProgressBar.new()
+	bar.name = "Bar"
+	bar.max_value = 1.0
+	bar.step = 0.001
+	bar.show_percentage = false
+	bar.custom_minimum_size = Vector2(0, 22)
+	var back := StyleBoxFlat.new()
+	back.bg_color = Color("EFE3CC")
+	back.set_corner_radius_all(11)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = Color("E8A94A")
+	fill.set_corner_radius_all(11)
+	bar.add_theme_stylebox_override("background", back)
+	bar.add_theme_stylebox_override("fill", fill)
+	rows.add_child(label)
+	rows.add_child(bar)
+	box.add_child(rows)
+	board.add_child(box)
+	# Lekkie bujanie - tabliczka "zyje", widac, ze cos sie dzieje.
+	var bob := board.create_tween().set_loops()
+	bob.tween_property(board, "rotation", 0.03, 0.9).set_trans(Tween.TRANS_SINE)
+	bob.tween_property(board, "rotation", -0.03, 0.9).set_trans(Tween.TRANS_SINE)
+	return board

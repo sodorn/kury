@@ -69,6 +69,8 @@ func _ready() -> void:
 	_test_fox_lurk()
 	_test_fox_left_and_victims()
 	_test_feed_bulk()
+	_test_construction()
+	_test_real_time_texts()
 	SaveGame.clear()
 	print("TESTY: %d OK, %d BLEDOW" % [_passed, _failed])
 	get_tree().quit(1 if _failed > 0 else 0)
@@ -222,7 +224,7 @@ func _test_data_files() -> void:
 		_check(not GameData.breed(breed_id).is_empty(), "rasa startowa '%s' istnieje" % breed_id)
 
 	# Teksty uzywane przez panel.
-	for key in ["PANEL_HENS", "PANEL_CHICKS", "PANEL_DAYS", "PANEL_INCUBATE",
+	for key in ["PANEL_HENS", "PANEL_CHICKS", "PANEL_FARM_AGE", "PANEL_INCUBATE",
 			"PANEL_HATCHING", "PANEL_GROWING", "PANEL_LOCKED", "PANEL_NEED",
 			"PANEL_NEED_MONEY", "PANEL_NEED_DAYS", "PANEL_NEED_HENS", "PANEL_NEED_FEED",
 			"PANEL_NEED_BREED", "PANEL_FARM_CODE", "HINT_BREED_UNLOCKED", "PANEL_FEED_LEFT", "PANEL_EGGS_STORED", "PANEL_EGGS_WORTH",
@@ -971,6 +973,8 @@ func _test_incubator_upgrade() -> void:
 	_check(not Game.upgrade_incubator(), "bez pieniedzy nie ma rozbudowy")
 	Game.state.money = float(upgrade.get("price", 0))
 	_check(Game.upgrade_incubator(), "rozbudowa udaje sie przy pelnej kwocie")
+	_check(Game.incubator_slots() == base, "w trakcie budowy inkubator ma stare miejsca")
+	_finish_build(Game.state, "incubator")
 	_check(Game.incubator_slots() > base, "po rozbudowie miejsc jest wiecej")
 	_check(Game.incubator_slots() == int(upgrade.get("slots", 0)), "liczba miejsc zgodna z balance.json")
 
@@ -2178,12 +2182,14 @@ func _test_buildings() -> void:
 
 	var before := Game.state.coop_capacity()
 	_check(Game.upgrade_building("coop"), "rozbudowa kurnika udaje sie przy pelnej kasie")
+	_finish_build(Game.state, "coop")
 	_check(Game.state.coop_capacity() > before, "po rozbudowie miejsc jest wiecej")
 
 	# Magazyn: wiekszy worek i nizsza cena za kilogram.
 	var pack := Game.state.feed_pack()
 	var per_kg := float(pack["price"]) / float(pack["size"])
 	_check(Game.upgrade_building("storage"), "rozbudowa magazynu udaje sie")
+	_finish_build(Game.state, "storage")
 	var better := Game.state.feed_pack()
 	_check(float(better["size"]) > float(pack["size"]), "worek jest wiekszy")
 	_check(float(better["price"]) / float(better["size"]) < per_kg, "kilogram paszy tanieje")
@@ -2533,3 +2539,97 @@ func _test_feed_bulk() -> void:
 	_check(absf(Game.state.feed - pasza - float(pack["size"]) * n) < 0.01, "przybylo 10 workow")
 	_check(Game.state.money < 0.01, "pieniadze zeszly co do grosza")
 	Game.new_game()
+
+
+## Konczy budowe prawdziwa sciezka symulacji (bez czekania pol godziny).
+func _finish_build(state: FarmState, building_id: String) -> void:
+	if not state.is_building(building_id):
+		return
+	(state.construction[building_id] as Array)[0] = 0.001
+	Simulation.advance(state, 1.0)
+
+
+## 12.19: kurnik, magazyn i inkubator maja po 10 poziomow, a rozbudowa
+## trwa od 5 minut do godziny ZEGARA (wlasciciel, 25.11).
+func _test_construction() -> void:
+	for id: String in ["coop", "storage", "incubator"]:
+		var cfg: Dictionary = GameData.balance()["incubator"] if id == "incubator" \
+				else GameData.balance()["buildings"][id]
+		var ups: Array = cfg.get("upgrades", [])
+		_check(ups.size() + 1 == 10, "%s ma 10 poziomow (ma %d)" % [id, ups.size() + 1])
+		var names := {}
+		var base := String(cfg.get("name", ""))
+		_check(not base.is_empty() and tr(base) != base, "%s: poziom startowy ma nazwe" % id)
+		names[tr(base)] = true
+		var last := 0.0
+		for i in ups.size():
+			var u: Dictionary = ups[i]
+			var nazwa := tr(String(u.get("name", "")))
+			_check(nazwa != String(u.get("name", "")), "%s poziom %d ma przetlumaczona nazwe" % [id, i + 2])
+			_check(not names.has(nazwa), "%s: nazwa '%s' sie nie powtarza" % [id, nazwa])
+			names[nazwa] = true
+			var m := float(u.get("build_minutes", 0))
+			_check(m >= 5.0 and m <= 60.0, "%s poziom %d buduje sie 5-60 min (%g)" % [id, i + 2, m])
+			_check(m > last, "%s poziom %d buduje sie dluzej niz poprzedni" % [id, i + 2])
+			last = m
+		_check(float(ups[0].get("build_minutes", 0)) == 5.0, "%s: pierwsza rozbudowa 5 min" % id)
+		_check(float(ups[-1].get("build_minutes", 0)) == 60.0, "%s: ostatnia rozbudowa godzina" % id)
+
+	Game.new_game()
+	var state := Game.state
+	var scale := GameData.time_scale()
+	state.money = 1000000.0
+	state.feed = 100000.0
+	var cap := state.coop_capacity()
+	var minuty := float(state.upgrade_entry("coop").get("build_minutes", 0))
+	var cena := float(state.upgrade_entry("coop").get("price", 0))
+	_check(Game.upgrade_building("coop"), "budowa kurnika rusza")
+	_check(is_equal_approx(state.money, 1000000.0 - cena), "placi sie od razu")
+	_check(state.coop_level == 0 and state.coop_capacity() == cap,
+			"w trakcie budowy kurnik ma stary poziom")
+	_check(state.is_building("coop"), "kurnik jest w budowie")
+	_check(absf(state.construction_left("coop") - minuty * 60.0) < 0.01,
+			"budowa trwa %g min zegara" % minuty)
+	_check(not Game.upgrade_building("coop"), "drugiej budowy tego samego budynku nie da sie zamowic")
+	_check(is_equal_approx(state.money, 1000000.0 - cena), "odmowa niczego nie pobiera")
+	_check(Game.upgrade_building("storage"), "inny budynek mozna budowac rownolegle")
+	_check(Game.upgrade_building("guard"), "plot nie ma czasu budowy")
+	_check(state.guard_level == 1 and not state.is_building("guard"), "plot stoi od razu")
+	var przed := Simulation.advance(state, (minuty * 60.0 - 30.0) * scale)
+	_check((przed.get("built", []) as Array).is_empty() and state.coop_level == 0,
+			"pol minuty przed koncem kurnik sie jeszcze buduje")
+	_check(state.construction_progress("coop") > 0.85, "postep budowy rosnie")
+	var po := Simulation.advance(state, 40.0 * scale)
+	_check((po.get("built", []) as Array).has("coop"), "symulacja zglasza skonczona budowe")
+	_check(state.coop_level == 1 and not state.is_building("coop"), "po budowie kurnik ma poziom 2")
+	# Zapis w trakcie budowy i dokonczenie jej w tle. Magazyn rownolegly
+	# skonczyl sie razem z kurnikiem (tyle samo minut), wiec zamawiamy nastepny.
+	_check(state.storage_level == 1, "rownolegly magazyn tez skonczony")
+	_check(Game.upgrade_building("storage"), "kolejna budowa magazynu rusza")
+	_check(state.is_building("storage"), "magazyn sie buduje")
+	var zostalo := state.construction_left("storage")
+	var wczytany: FarmState = SaveGame.from_dict(SaveGame.to_dict(state))["state"]
+	_check(wczytany.is_building("storage") and absf(wczytany.construction_left("storage") - zostalo) < 0.01,
+			"budowa przezywa zapis")
+	var tlo := Simulation.advance(wczytany, (zostalo + 5.0) * scale, true)
+	_check((tlo.get("built", []) as Array).has("storage") and wczytany.storage_level == 2,
+			"budowa konczy sie takze w tle")
+	var stary := SaveGame.to_dict(state)
+	stary.erase("construction")
+	var ze_starego: FarmState = SaveGame.from_dict(stary)["state"]
+	_check(ze_starego.construction.is_empty(), "stary zapis bez budow wczytuje sie czysto")
+	Game.new_game()
+
+
+## 12.19: wszystkie czasy w czasie ziemskim.
+func _test_real_time_texts() -> void:
+	_check(NumberFormat.duration(30.0) == "30 s", "30 s")
+	_check(NumberFormat.duration(600.0) == "10 min", "10 min")
+	_check(NumberFormat.duration(3600.0 * 3 + 300.0) == "3 godz. 5 min", "3 godz. 5 min")
+	_check(NumberFormat.duration(86400.0 + 3600.0 * 4) == "1 dzień 4 godz.", "1 dzien")
+	_check(NumberFormat.duration(86400.0 * 2) == "2 dni", "2 dni")
+	_check(NumberFormat.clock(247.0) == "4:07", "zegar 4:07")
+	_check(NumberFormat.clock(3750.0) == "1:02:30", "zegar 1:02:30")
+	var csv := FileAccess.get_file_as_string("res://data/strings.csv")
+	_check(not csv.contains("na dzień\""), "zadnego 'na dzien' gospodarstwa w napisach")
+	_check(not csv.contains("PANEL_DAYS"), "licznik dni gospodarstwa usuniety")
