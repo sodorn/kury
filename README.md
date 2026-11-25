@@ -13,10 +13,10 @@ Stan prac, architektura i decyzje: [PROJECT_STATE.md](PROJECT_STATE.md).
 To, co widac w oknie edytora, nie jest gra — gre widac dopiero po F5.
 Mysz dziala w grze tak jak palec na telefonie.
 
-## Jak otworzyc mape farmy w edytorze
+## Jak otworzyc mape fermy w edytorze
 
 W panelu po lewej: `scenes` > `farm` > `farm.tscn` (dwuklik).
-Zakladka **2D** u gory pokazuje cala farme: budynki, wybieg, drzewa.
+Zakladka **2D** u gory pokazuje cala ferme: budynki, wybieg, drzewa.
 Klawisz `F` wysrodkowuje widok na zaznaczonym obiekcie.
 
 ## Testy

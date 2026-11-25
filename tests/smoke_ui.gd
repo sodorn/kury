@@ -51,6 +51,9 @@ func _run() -> void:
 	# testu znosić jaja, co psuje liczenia. Na czas testu ja zatrzymujemy
 	# i zmieniamy stan recznie.
 	Game.set_process(false)
+	# GAME OVER tylko we wlasnym tescie - inne testy zostawiaja stado bez
+	# koguta albo bez grosza i plansza zaslonilaby reszte.
+	Game.game_over_enabled = false
 	_shot("farma.png")
 
 	await _test_start_screen()
@@ -69,6 +72,7 @@ func _run() -> void:
 	await _test_upgrade_looks()
 	await _test_dog_breeds()
 	await _test_fox_death()
+	await _test_game_over_screen()
 
 	SaveGame.clear()
 	print("TEST DYMNY: %s" % ("OK" if _failed == 0 else "%d BLEDOW" % _failed))
@@ -301,8 +305,8 @@ func _test_shop() -> void:
 	await _frames(30)
 	var actions: VBoxContainer = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Gutter/Scrollable/Actions")
 	var rows := actions.get_children()
-	# 12.18: doszedl przycisk "kup 10 workow paszy".
-	_check(rows.size() == 6 + GameData.breeds().size(),
+	# 12.18: doszedl przycisk "kup 10 workow paszy". 12.20: zniknal lek.
+	_check(rows.size() == 5 + GameData.breeds().size(),
 			"sklep ma przyciski, notke i karte kazdej rasy (jest %d)" % rows.size())
 	if rows.size() < 3:
 		return
@@ -343,10 +347,24 @@ func _test_shop() -> void:
 	_check(last_card != null and last_card.disabled, "ale bez pieniedzy przycisk jest wyszarzony")
 
 	var hens_before: int = Game.state.hen_count()
-	_check(open_card != null and open_card.text.begins_with("Kup kurę za"),
-			"przycisk mowi 'Kup kurę za ...' (jest '%s')" % (open_card.text if open_card else ""))
+	_check(open_card != null and open_card.text.begins_with("Kup kurę\n"),
+			"przycisk mowi 'Kup kurę' (jest '%s')" % (open_card.text if open_card else ""))
+	# Dwie kolumny (12.20): obok kupna kury jej sprzedaz, pod spodem kogut.
+	var trade_row := open_card.get_parent() if open_card else null
+	_check(trade_row is HBoxContainer and trade_row.get_child_count() == 2,
+			"kup i sprzedaj stoja obok siebie")
+	if trade_row is HBoxContainer and trade_row.get_child_count() == 2:
+		var right := trade_row.get_child(1) as Button
+		_check(right != null and right.text.begins_with("Sprzedaj kurę"), "po prawej sprzedaz kury")
+		_check(absf(open_card.size.x - right.size.x) < 4.0, "obie kolumny rownej szerokosci")
+		_check(open_card.size.x < get_viewport().get_visible_rect().size.x * 0.5,
+				"suwak zajmuje pol karty (%.0f px)" % open_card.size.x)
+		var next_row := trade_row.get_parent().get_child(trade_row.get_index() + 1)
+		_check(next_row is HBoxContainer and (next_row.get_child(0) as Button).text.begins_with("Kup koguta")
+				and (next_row.get_child(1) as Button).text.begins_with("Sprzedaj koguta"),
+				"drugi wiersz: kup koguta | sprzedaj koguta")
 	# Kupno suwakiem (od 12.19): dotkniecie nic nie robi, przesuniecie do
-	# polowy tez nie, dopiero do konca. Zamiast okienka "na pewno?".
+	# polowy tez nie. Od 12.20 wystarczy 2/3 drogi.
 	_check(open_card is SlideButton, "kupno kury to suwak")
 	if open_card is SlideButton:
 		_scroll_into_view(open_card)
@@ -363,11 +381,15 @@ func _test_shop() -> void:
 		_shot("suwak_w_trakcie.png")
 		await _slide_release(open_card as SlideButton, 0.6)
 		await _frames(20)
-		_check(Game.state.hen_count() == hens_before, "puszczony w polowie suwak wraca, nic nie kupuje")
-		await _slide(open_card as SlideButton)
+		_check(Game.state.hen_count() == hens_before, "puszczony przed 2/3 suwak wraca, nic nie kupuje")
+		await _slide(open_card as SlideButton, 0.72, true)
+		_check((open_card as SlideButton).ready_to_fire(), "za 2/3 suwak sygnalizuje gotowosc")
+		await _frames(3)
+		_shot("suwak_gotowy.png")
+		await _slide_release(open_card as SlideButton, 0.72)
 		await _frames(30)
 	await _dismiss_unlock_popup()
-	_check(Game.state.hen_count() == hens_before + 1, "zakup kury dziala po przesunieciu suwaka")
+	_check(Game.state.hen_count() == hens_before + 1, "zakup kury dziala po przesunieciu suwaka do 2/3")
 	_check(_nodes_of_type("FarmChicken").size() == Game.state.hen_count(), "kupiona kura pojawila sie na wybiegu")
 	_shot("panel_po_zakupach.png")
 
@@ -509,10 +531,11 @@ func _test_sell_hen() -> void:
 		var card := child as VBoxContainer
 		if card == null:
 			continue
-		for inner in card.get_children():
+		# Od 12.20 przyciski siedza w wierszach po dwa (kup | sprzedaj).
+		for inner in card.find_children("*", "Button", true, false):
 			var button := inner as Button
 			if button != null and button.visible and not button.disabled \
-					and button.text.begins_with(tr("PANEL_SELL_HEN").left(8)):
+					and button.text.begins_with(tr("PANEL_SELL_HEN").left(13)):
 				sell_button = button
 				break
 		if sell_button != null:
@@ -643,6 +666,8 @@ func _tap(viewport_point: Vector2) -> void:
 
 ## Przesuwa suwak prawdziwymi zdarzeniami myszy (na telefonie dotyk jest
 ## zamieniany na mysz). `fraction` - jak daleko, `hold` - nie puszczaj.
+## Od 12.20 `fraction` to czesc DROGI GALKI (SlideButton.travel()), a nie
+## szerokosci pola - droga jest przycieta do MAX_TRAVEL px.
 func _slide(slide: SlideButton, fraction: float = 1.0, hold: bool = false) -> void:
 	var rect := slide.get_global_rect()
 	var start := Vector2(rect.position.x + 50.0, rect.get_center().y)
@@ -654,7 +679,7 @@ func _slide(slide: SlideButton, fraction: float = 1.0, hold: bool = false) -> vo
 	press.global_position = press.position
 	Input.parse_input_event(press)
 	await _frames(2)
-	var end_x := start.x + (rect.size.x - 60.0) * fraction
+	var end_x := start.x + _slide_px(slide, fraction)
 	for i in 12:
 		var motion := InputEventMouseMotion.new()
 		motion.button_mask = MOUSE_BUTTON_MASK_LEFT
@@ -673,11 +698,17 @@ func _slide_release(slide: SlideButton, fraction: float) -> void:
 	var release := InputEventMouseButton.new()
 	release.button_index = MOUSE_BUTTON_LEFT
 	release.pressed = false
-	release.position = screen * Vector2(rect.position.x + 50.0 + (rect.size.x - 60.0) * fraction,
+	release.position = screen * Vector2(rect.position.x + 50.0 + _slide_px(slide, fraction),
 			rect.get_center().y)
 	release.global_position = release.position
 	Input.parse_input_event(release)
 	await _frames(3)
+
+
+## Ile pikseli przesunac palcem, zeby galka przejechala `fraction` drogi.
+## Suwak odejmuje polowe progu zamiaru (INTENT_PX), wiec go dodajemy.
+func _slide_px(slide: SlideButton, fraction: float) -> float:
+	return SlideButton.INTENT_PX * 0.5 + slide.travel() * fraction
 
 
 ## Przewija panel tak, zeby kontrolka byla widoczna (suwak trzeba zlapac).
@@ -720,13 +751,27 @@ func _test_unlock_popup() -> void:
 	Events.breed_unlocked.emit("cemani")
 	await _frames(45)
 	_check(popup.visible, "okienko pokazuje sie po odblokowaniu rasy")
-	var lore: Label = popup.get_node("Sheet/Content/Lore")
+	var lore: Label = popup.get_node("Sheet/Content/Scroll/Text/Lore")
+	var facts: Label = popup.get_node("Sheet/Content/Scroll/Text/Facts")
 	var breed_name: Label = popup.get_node("Sheet/Content/Name")
 	_check(breed_name.text == tr(GameData.breed("cemani").get("name", "")), "nazwa rasy w naglowku")
 	_check(lore.text.length() > 80, "historia rasy jest wypelniona")
 	_check(not lore.text.begins_with("BREED_"), "historia ma tlumaczenie, a nie goly klucz")
-	_check((popup.get_node("Sheet/Content/Frame/Portrait") as TextureRect).texture != null,
-			"portret rasy jest ustawiony")
+	_check(facts.visible and facts.text.count("•") == 3 and not facts.text.contains("BREED_"),
+			"trzy ciekawostki z tlumaczeniem")
+	_check((popup.get_node("Sheet/Content/Congrats") as Label).text == tr("UNLOCK_CONGRATS")
+			and (popup.get_node("Sheet/Content/Title") as Label).text.contains("fermie"),
+			"gratulacje: masz nowa rase na fermie")
+	var portrait := popup.get_node("Sheet/Content/Frame/Portrait") as TextureRect
+	_check(portrait.texture != null and portrait.texture.resource_path.ends_with("cemani.webp"),
+			"w okienku malowany portret rasy (jest %s)" % (portrait.texture.resource_path if portrait.texture else "brak"))
+	var sheet := popup.get_node("Sheet") as Control
+	var ekran := get_viewport().get_visible_rect().size
+	_check(sheet.size.y >= ekran.y * 0.64 and sheet.size.y <= ekran.y * 0.8,
+			"okienko zajmuje okolo 2/3 ekranu (%.0f z %.0f px)" % [sheet.size.y, ekran.y])
+	_check(portrait.size.x >= 480.0, "portret jest duzy (%.0f px)" % portrait.size.x)
+	_check(ekran.x >= sheet.get_global_rect().end.x and sheet.get_global_rect().position.x >= 0.0,
+			"okienko miesci sie w szerokosci ekranu")
 	_shot("okienko_rasy.png")
 
 	# Druga rasa czeka w kolejce i pokazuje sie po zamknieciu pierwszej.
@@ -1326,3 +1371,38 @@ func _test_feed_panels() -> void:
 		if panel.has_method("close"):
 			panel.close()
 		await _frames(20)
+
+
+## GAME OVER: pelny ekran, duzy napis, tekst wlasciciela i restart pod tym
+## samym kodem.
+func _test_game_over_screen() -> void:
+	var over: Control = _main.get_node("Hud/Root/GameOverPanel")
+	_check(over != null and not over.visible, "plansza GAME OVER czeka ukryta")
+	var code := Cloud.player_id
+	Game.game_over_enabled = true
+	Game.state.chickens.clear()
+	Game.state.chicks.clear()
+	Game.state.incubating.clear()
+	Game.state.eggs = {}
+	Game.state.money = 3.0
+	Game._check_game_over()
+	await _seconds(1.2)
+	_check(over.visible, "bankrut widzi plansze GAME OVER")
+	var ekran := get_viewport().get_visible_rect()
+	_check(over.get_global_rect().encloses(ekran) or over.get_global_rect().size == ekran.size,
+			"plansza zakrywa caly ekran")
+	_check(over.get_index() == over.get_parent().get_child_count() - 1, "plansza lezy na wierzchu")
+	var title := over.get_node("Margin/Content/Title") as Label
+	var body := over.get_node("Margin/Content/Body") as Label
+	_check(title.text == "GAME OVER", "napis GAME OVER")
+	_check(body.text.contains("marnym hodowcą") and body.text.contains("bankructwo"),
+			"tekst o marnym hodowcy i bankructwie")
+	_shot("game_over.png")
+	var button := over.get_node("Margin/Content/Restart") as Button
+	await _tap(button.get_global_rect().get_center())
+	await _seconds(0.8)
+	_check(not over.visible, "po restarcie plansza znika")
+	_check(Game.state.hen_count() > 0 and Game.state.money > 3.0, "restart daje swieza ferme")
+	_check(Cloud.player_id == code, "kod fermy zostaje ten sam")
+	Game.game_over_enabled = false
+

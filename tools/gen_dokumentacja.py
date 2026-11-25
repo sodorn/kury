@@ -39,12 +39,12 @@ W = 78
 # ===========================================================================
 OPISY = {
     # ---------------------------------------------------------------- start
-    "start.money": ("zl", "Pieniadze nowej farmy.", "Game.new_game"),
-    "start.eggs": ("szt.", "Jaja w magazynie nowej farmy.", "Game.new_game"),
-    "start.feed": ("kg", "Pasza w magazynie nowej farmy.", "Game.new_game"),
-    "start.hens": ("lista id ras", "Kury nowej farmy - po jednym wpisie na sztuke. Id z breeds.json.",
+    "start.money": ("zl", "Pieniadze nowej fermy.", "Game.new_game"),
+    "start.eggs": ("szt.", "Jaja w magazynie nowej fermy.", "Game.new_game"),
+    "start.feed": ("kg", "Pasza w magazynie nowej fermy.", "Game.new_game"),
+    "start.hens": ("lista id ras", "Kury nowej fermy - po jednym wpisie na sztuke. Id z breeds.json.",
                    "Game.new_game"),
-    "start.roosters": ("lista id ras", "Koguty nowej farmy. Bez koguta danej rasy jej kury nie znosza.",
+    "start.roosters": ("lista id ras", "Koguty nowej fermy. Bez koguta danej rasy jej kury nie znosza.",
                        "Game.new_game"),
     # -------------------------------------------------------------- economy
     "economy.feed_pack_size": ("kg", "Wielkosc worka paszy przy magazynie na poziomie 0. Wyzsze "
@@ -124,30 +124,39 @@ OPISY = {
     "hunger.reference_hens": ("szt.", "Wielkosc stada, dla ktorej obowiazuje goly death_interval_seconds.",
                               "Simulation._advance_hunger"),
     # -------------------------------------------------------------- disease
-    "disease.death_minutes": ("min GRY", "Nieleczona chora kura pada po tylu minutach gry.",
-                              "Simulation._advance_disease"),
-    "disease.medicine_price": ("zl", "Cena jednego leku. Lek leczy jedna chora kure - najdrozsza.",
-                               "Game.buy_medicine"),
+    "disease.death_minutes": ("min ZEGARA", "Chora kura pada po tylu minutach REALNYCH. Leku nie ma "
+                              "(od 12.20).", "Simulation._advance_disease"),
     "disease.vaccine_price": ("zl", "Stala czesc ceny szczepienia calego stada (niezalezna od liczby "
-                              "kur). Cena = ta liczba + vaccine_price_per_hen * niezaszczepione.",
+                              "kur). Cena = ta liczba + vaccine_price_per_hen * zdrowe niezaszczepione.",
                               "Game.vaccine_price"),
     "disease.vaccine_price_per_hen": ("zl / szt.", "Zmienna czesc ceny szczepienia, za kazdego "
-                                      "niezaszczepionego ptaka.", "Game.vaccine_price"),
-    "disease.grace_minutes": ("min ZEGARA", "Przez tyle minut od zalozenia farmy nikt nie choruje.",
+                                      "ZDROWEGO niezaszczepionego ptaka. Szczepionka nie leczy.",
+                                      "Game.vaccine_price, Game.buy_vaccine"),
+    "disease.grace_minutes": ("min ZEGARA", "Przez tyle minut od zalozenia fermy nikt nie choruje.",
                               "Simulation._advance_disease"),
-    "disease.min_hens": ("szt.", "Przy mniejszym stadzie choroba nie wybucha.",
-                         "Simulation._advance_disease"),
-    "disease.mcdonalds_price": ("zl", "Ile skup placi za chora kure (kazda rasa tyle samo).",
-                                "Game.cull_hen, Game.mcdonalds_price"),
-    "disease.active_roll_minutes": ("min ZEGARA", "W GRZE AKTYWNEJ co tyle minut leci kostka na nowe "
-                                    "zachorowanie.", "Simulation._advance_disease"),
-    "disease.active_chance": ("0-1", "Szansa, ze kostka w grze aktywnej wywola zachorowanie.",
-                              "Simulation._advance_disease"),
-    "disease.offline_roll_hours": ("h ZEGARA", "Przy grze w tle kostka co tyle godzin.",
-                                   "Simulation._advance_disease"),
-    "disease.offline_chance": ("0-1", "Szansa kostki przy grze w tle.", "Simulation._advance_disease"),
+    "disease.mcdonalds_price": ("zl", "Ile skup placi za chora kure (kazda rasa tyle samo). Jedyne "
+                                "wyjscie z chora sztuka.", "Game.cull_hen, Game.mcdonalds_price"),
+    "disease.roll_seconds": ("s ZEGARA", "Co tyle sekund leci kostka na wybuch choroby (gra aktywna "
+                             "i w tle tak samo).", "Simulation._advance_disease"),
+    "disease.rate_per_hour": ("lista [ptaki, szansa/h]", "Krzywa szansy na wybuch na GODZINE od "
+                              "wielkosci stada (dorosle ptaki). Miedzy punktami liniowo, ponizej "
+                              "pierwszego i powyzej ostatniego plasko. Szansa jednej kostki = "
+                              "szansa/h * roll_seconds / 3600.",
+                              "FarmState.disease_rate_per_hour"),
+    "disease.spread_seconds": ("s ZEGARA", "W trakcie ogniska co tyle sekund zaraza przechodzi na "
+                               "kolejna zdrowa, niezaszczepiona kure.", "Simulation._spread_outbreak"),
+    "disease.kill_share_min": ("0-1", "Najmniejsza czesc stada, jaka zarazi jedno ognisko.",
+                               "Simulation._start_outbreak"),
+    "disease.kill_share_max": ("0-1", "Najwieksza czesc stada w jednym ognisku.",
+                               "Simulation._start_outbreak"),
+    "disease.kill_share_step": ("0-1", "Krok losowania udzialu (0.1 = 30%, 40% ... 100%). Liczba kur "
+                                "zaokraglana w gore.", "Simulation._start_outbreak"),
+    "disease.calm_hours_min": ("h ZEGARA", "Najkrotszy spokoj po wygasnieciu ogniska (kostka nie "
+                               "rzuca).", "Simulation._end_outbreak"),
+    "disease.calm_hours_max": ("h ZEGARA", "Najdluzszy spokoj po ognisku. Losowany z przedzialu "
+                               "min..max.", "Simulation._end_outbreak"),
     # ------------------------------------------------------------------ fox
-    "fox.grace_minutes": ("min ZEGARA", "Przez tyle minut od zalozenia farmy lis nie przychodzi.",
+    "fox.grace_minutes": ("min ZEGARA", "Przez tyle minut od zalozenia fermy lis nie przychodzi.",
                           "Simulation._advance_fox"),
     "fox.min_hens": ("szt.", "Przy mniejszym stadzie lis nie przychodzi.", "Simulation._advance_fox"),
     "fox.active_roll_minutes": ("min ZEGARA", "W GRZE AKTYWNEJ co tyle minut leci kostka na przyjscie "
@@ -160,7 +169,7 @@ OPISY = {
     "fox.scare_taps": ("szt.", "Ile dotkniec trzeba, zeby przegonic lisa palcem.",
                        "Game.poke_fox, scenes/farm/fox.gd (licznik)"),
     "fox.hand_return_factor": ("mnoznik 0.01-1", "Lis przegoniony PALCEM wraca tyle razy szybciej "
-                               "(odstep kostki mnozony przez te liczbe). Nie dziala, gdy farma ma psa "
+                               "(odstep kostki mnozony przez te liczbe). Nie dziala, gdy ferma ma psa "
                                "albo plot.", "Simulation._advance_fox"),
     "fox.carcass_share": ("0-1", "Szansa, ze zabita przez lisa kura zostanie na wybiegu jako zwloki. "
                           "Reszte lis wynosi.", "Simulation._fox_grabs_one"),
@@ -183,6 +192,10 @@ OPISY = {
                              "wylaczaja faze - lis wchodzi od razu.", "Simulation._fox_at_fence"),
     "fox.killed_return_multiplier": ("mnoznik", "Po ZAGRYZIENIU lisa przez psa odstep do nastepnej "
                                      "kostki jest tyle razy dluzszy.", "Simulation._advance_fox"),
+    "fox.massacre_chance": ("0-1", "Szansa, ze lis, ktory wszedl na wybieg fermy BEZ psa, wybije cale "
+                            "stado (rzez). Z psem nigdy.", "Simulation._fox_arrives"),
+    "fox.massacre_pace_factor": ("mnoznik 0.05-1", "W rzezi odstep miedzy ofiarami jest mnozony przez "
+                                 "te liczbe (lis zabija szybciej).", "Simulation._fox_kill_gap"),
     # ------------------------------------------------------------------ win
     "win.money": ("zl", "Wygrana po uzbieraniu tylu pieniedzy.", "Simulation.check_win"),
     "win.collection": ("tak/nie", "true = wygrana takze za zebranie wszystkich ras.",
@@ -229,7 +242,7 @@ OPISY = {
                                              "(zamiast tylko przegonic).", "FarmState.dog_kill_chance"),
     "buildings.dog.upgrades[].price": ("zl", "Cena psa.", "Game.upgrade_building"),
     # --------------------------------------------------------------- session
-    "session.require_code": ("tak/nie", "true = przy wejsciu do gry trzeba wpisac kod farmy, a stan "
+    "session.require_code": ("tak/nie", "true = przy wejsciu do gry trzeba wpisac kod fermy, a stan "
                              "przychodzi z serwera. Dziala tylko przy wlaczonym backendzie.",
                              "Game.must_enter_code"),
     "session.require_code_after_minutes": ("min ZEGARA", "0 = kod przy KAZDYM wejsciu. Liczba > 0 = "
@@ -244,7 +257,11 @@ OPISY_RAS = {
     "rarity": ("klucz tekstu", "Rzadkosc (RARITY_COMMON itp.) - tylko napis."),
     "sprite": ("sciezka res://", "Grafika kury na wybiegu."),
     "rooster_sprite": ("sciezka res://", "Grafika koguta."),
-    "photo": ("sciezka res://", "Zdjecie rasy w sklepie i oknie nowej rasy."),
+    "photo": ("sciezka res://", "Zdjecie rasy (zapasowe - plikow na razie nie ma)."),
+    "portrait": ("sciezka res://", "Malowany portret rasy (tools/gen_portraits.py) w sklepie i w oknie "
+                 "nowej rasy. Pierwszy wybor przed zdjeciem i rysunkiem z wybiegu."),
+    "facts": ("lista kluczy tekstu", "Trzy ciekawostki o rasie w oknie nowej rasy (sprawdzone "
+              "w zrodlach)."),
     "egg_seconds": ("s GRY", "Co tyle sekund gry kura znosi jajo."),
     "egg_value": ("zl", "Cena sprzedazy jednego jaja."),
     "price": ("zl", "Cena kupna kury. Kogut = price * economy.rooster_price_multiplier."),
@@ -256,7 +273,7 @@ OPISY_RAS = {
                  "jajo biale."),
     "feather_colors": ("lista kolorow #RRGGBB", "Kolory piór, ktore sypia sie fontanna, gdy lis "
                        "dopadnie kure tej rasy. Brak pola = biale."),
-    "incubation_bonus": ("liczba, opcjonalne", "Kazda DOROSLA kura tej rasy na farmie przyspiesza "
+    "incubation_bonus": ("liczba, opcjonalne", "Kazda DOROSLA kura tej rasy na fermie przyspiesza "
                          "inkubator: predkosc = 1 + suma bonusow, najwyzej 2,5 raza "
                          "(FarmState.incubation_speed). Ma je jedwabista - kwoka."),
 }
@@ -514,13 +531,13 @@ def build():
   data/
     balance.json         CALA liczbowa konfiguracja mechanik (rozdzial 7)
     breeds.json          17 ras: ceny, czasy, grafiki
-    buildings.json       budynki na farmie: id + klucze tekstow
+    buildings.json       budynki na fermie: id + klucze tekstow
     backend.json         adres i klucz Supabase, wlacznik backendu
     strings.csv          wszystkie teksty (klucz -> tekst po polsku)
   core/                  LOGIKA BEZ GRAFIKI - da sie testowac bez okna
     simulation.gd        Simulation.advance(): jeden krok swiata gry
     save_game.gd         zapis/odczyt JSON, migracje starych zapisow
-    model/farm_state.gd  caly stan farmy (pieniadze, stado, poziomy...)
+    model/farm_state.gd  caly stan fermy (pieniadze, stado, poziomy...)
     model/chicken.gd     jeden ptak
     model/corpse.gd      zwloki na wybiegu
     util/game_data.gd    wczytuje data/*.json, GameData.VERSION
@@ -531,7 +548,7 @@ def build():
     updater.gd           dowozenie nowej wersji do otwartych kart
   scenes/
     main/                scena glowna
-    farm/                farma: kury, lis, pies, budynki, jaja, zwloki
+    farm/                ferma: kury, lis, pies, budynki, jaja, zwloki
     ui/hud/              pasek zasobow na gorze
     ui/panels/           panele: budynki, sklep, start, nowa rasa, wygrana
   assets/                grafiki SVG, zdjecia ras, czcionki, motyw
@@ -559,19 +576,19 @@ def build():
          "i Events w swoim _ready, wiec musza istniec wczesniej.")
     head("Sekwencja")
     block("""
-  1. Cloud._ready      czyta data/backend.json i kod farmy
+  1. Cloud._ready      czyta data/backend.json i kod fermy
                       z user://player_id.txt
   2. Game._ready      Game.load_or_start():
                         - jest lokalny zapis -> wczytaj, rozlicz czas od
                           zapisu (rozdzial 4), potem Cloud.pull() w tle
-                        - brak zapisu -> nowa farma w pamieci,
+                        - brak zapisu -> nowa ferma w pamieci,
                           is_new_player = true (NIE pobiera z serwera,
                           bo nie wie, o jaki kod chodzi)
   3. Updater._ready   sprawdza znacznik "to bylo przeladowanie po
                       aktualizacji" (localStorage "kury_update")
   4. scena glowna     panel startowy pyta Game.should_show_intro() -
                       po aktualizacji NIE pokazuje sie wcale
-  5. panel startowy   "Nowa farma" -> Game.start_new_farm()
+  5. panel startowy   "Nowa ferma" -> Game.start_new_farm()
                       wpisany kod  -> Game.restore_from_code(kod)
                       Gdy session.require_code = true, przy kazdym
                       wejsciu trzeba wpisac kod (Game.must_enter_code)
@@ -612,8 +629,9 @@ def build():
   Game._apply_elapsed:     ogranicz do offline.max_hours = %s h
                            Simulation.advance(state, elapsed * scale,
                                               offline = true)""" % fmt(BAL["offline"]["max_hours"]))
-    para("Tryb offline zmienia trzy rzeczy: (1) kostki lisa i choroby losuja z offline_roll_hours "
-         "i offline_chance zamiast active_*, (2) jaja ida prosto do magazynu, nie na trawe, "
+    para("Tryb offline zmienia trzy rzeczy: (1) kostka lisa losuje z offline_roll_hours "
+         "i offline_chance zamiast active_* (choroba ma jedna kostke na oba tryby), (2) jaja ida "
+         "prosto do magazynu, nie na trawe, "
          "(3) straty z glodu, choroby i lisa RAZEM sa ograniczone do hunger.offline_max_share stada "
          "(loss_budget). Lis przy grze w tle rozgrywa cala wizyte od razu - z psem, ale bez "
          "klikania (Simulation._fox_visit_offline).")
@@ -633,20 +651,20 @@ def build():
       _advance_construction  budowy (czas ZEGARA) - koniec = poziom+1,
                              id do wyniku "built" (od 12.19)
    4. _advance_egg_spoilage  jaja starsze niz egg_spoil_hours gnija
-                             (PRZED wyjsciem dla pustej farmy - jaja
+                             (PRZED wyjsciem dla pustej fermy - jaja
                              gnija takze bez stada)
    5. _advance_fox           wizyta w toku / kostka na nowego lisa
    6. pasza                  jest -> zjedz feed_per_minute * krok,
                                      wyzeruj licznik glodu
                              brak -> _advance_hunger (glod zabija)
-   7. pusta farma?           koniec kroku
+   7. pusta ferma?           koniec kroku
    8. _advance_disease       choroba: przebieg u chorych + kostka
    9. brak paszy?            koniec kroku (glodne kury nie znosza)
   10. _lay_eggs              znoszenie jaj""")
     para("Rozbudowa kurnika, magazynu i inkubatora trwa build_minutes minut zegara (5-60). "
          "Game.upgrade_building placi od razu i wpisuje FarmState.construction[id] = [zostalo, "
          "calosc]; budynek dziala na starym poziomie. Budowa idzie takze w tle i przezywa zapis "
-         "(klucz \"construction\"). Plot i pies nie maja build_minutes - sa od razu. Na farmie nad "
+         "(klucz \"construction\"). Plot i pies nie maja build_minutes - sa od razu. Na fermie nad "
          "budynkiem wisi tabliczka z zegarem (farm.gd _sync_construction).")
     para("Transakcje, ktore kiedys pytaly \"na pewno?\", i cala rozbudowa to SUWAK "
          "(scenes/ui/panels/slide_button.gd, klasa SlideButton dziedziczy po Button). Zwykle "
@@ -663,7 +681,7 @@ def build():
 
     head("6.1 Znoszenie jaj")
     para("Kazda kura ma licznik since_last_egg (s GRY). Po przekroczeniu egg_seconds swojej rasy "
-         "znosi jajo. NIE znosza: koguty, chore kury, kury rasy bez koguta na farmie, cale stado "
+         "znosi jajo. NIE znosza: koguty, chore kury, kury rasy bez koguta na fermie, cale stado "
          "przy braku paszy. Jajo w grze aktywnej laduje na trawie (do run.max_eggs_on_ground), "
          "reszta i wszystko przy grze w tle - w magazynie. Magazyn ma limit "
          "(FarmState.egg_capacity): jajo, ktore sie nie miesci, przepada. FarmState.add_egg zwraca, "
@@ -695,25 +713,32 @@ def build():
     para("Bez paszy stoi tez inkubator i odchow - inaczej stado odnawialoby sie szybciej, niz "
          "gloduje.")
 
-    head("6.3 Choroba")
+    head("6.3 Choroba (od 12.20: ogniska)")
+    pts = ", ".join("%s->%s/h" % (p[0], fmt(p[1])) for p in dis["rate_per_hour"])
     block("""
-  karencja:   pierwsze %s min ZEGARA farmy - nic
-              stado mniejsze niz %s - nic
-  kostka:     gra aktywna:  co %s min ZEGARA, szansa %s
-              gra w tle:    co %s h ZEGARA,  szansa %s
-              JEDNA kostka na cala farme, nie na kure
-  kto:        losowanie wsrod zdrowych, niezaszczepionych; waga =
-              sqrt(cena rasy) - droga rasa choruje czesciej, ale nie
-              200x czesciej (sqrt splaszcza rozpietosc 40..8000 zl)
-  przebieg:   chora nie znosi; po death_minutes (%s min GRY) pada
-  leczenie:   lek %s zl - leczy NAJDROZSZA chora kure
-  szczepienie: vaccine_price + vaccine_price_per_hen * niezaszczepione
-              = %s + %s * n zl; chroni do konca zycia ptaka
-  skup:       chora kura do McDonalda za %s zl (Game.cull_hen)""" % (
-        fmt(dis["grace_minutes"]), fmt(dis["min_hens"]), fmt(dis["active_roll_minutes"]),
-        fmt(dis["active_chance"]), fmt(dis["offline_roll_hours"]), fmt(dis["offline_chance"]),
-        fmt(dis["death_minutes"]), fmt(dis["medicine_price"]), fmt(dis["vaccine_price"]),
-        fmt(dis["vaccine_price_per_hen"]), fmt(dis["mcdonalds_price"])))
+  karencja:   pierwsze %s min ZEGARA fermy - nic
+  kostka:     co %s s ZEGARA (gra aktywna i w tle tak samo)
+              szansa = rate_per_hour(stado) * %s / 3600
+              rate_per_hour: %s
+              (miedzy punktami liniowo, poza nimi plasko)
+  wybuch:     udzial = %s..%s co %s, liczba = ceil(stado * udzial)
+              pierwsza kura od razu, kolejne co %s s ZEGARA
+  kto:        tylko zdrowe i niezaszczepione; waga = sqrt(cena rasy)
+  przebieg:   chora nie znosi; po %s min ZEGARA pada
+  leczenie:   BRAK. Chora mozna tylko sprzedac do McDonalda za %s zl
+  koniec:     nikt nie choruje i nie ma kogo zarazic -> spokoj
+              %s..%s h ZEGARA (kostka nie rzuca)
+  szczepienie: vaccine_price + vaccine_price_per_hen * zdrowe bez
+              szczepienia = %s + %s * n zl; chroni zdrowe do konca
+              zycia, chorych NIE leczy""" % (
+        fmt(dis["grace_minutes"]), fmt(dis["roll_seconds"]), fmt(dis["roll_seconds"]), pts,
+        fmt(dis["kill_share_min"]), fmt(dis["kill_share_max"]), fmt(dis["kill_share_step"]),
+        fmt(dis["spread_seconds"]), fmt(dis["death_minutes"]), fmt(dis["mcdonalds_price"]),
+        fmt(dis["calm_hours_min"]), fmt(dis["calm_hours_max"]), fmt(dis["vaccine_price"]),
+        fmt(dis["vaccine_price_per_hen"])))
+    para("Stan ogniska (outbreak_on, outbreak_left, outbreak_timer, outbreak_dead) i spokoj "
+         "(disease_calm) ida do zapisu. Przy grze w tle zaraza staje, gdy straty plus chore "
+         "dobija do loss_budget - po powrocie gracza ognisko rusza dalej.")
 
     head("6.4 Lis - maszyna stanow")
     block("""
@@ -723,7 +748,7 @@ def build():
        |  odstep = active_roll_minutes (%s min)
        |           albo offline_roll_hours (%s h)
        |           * hand_return_factor (%s), gdy ostatni lis przegoniony
-       |             PALCEM i farma nie ma ani psa, ani plotu
+       |             PALCEM i ferma nie ma ani psa, ani plotu
        |           * fox_next_multiplier (%s po zagryzieniu, potem 1)
        v  minal odstep -> kostka: active_chance / offline_chance
    [KOSTKA UDANA]
@@ -742,12 +767,16 @@ def build():
        |     - lup zebrany                       -> fox_left
        |     - minelo visit_max_minutes (%s)     -> fox_left
        v
-   [BRAK LISA]   (Simulation._fox_leaves zeruje caly stan wizyty)""" % (
+   [BRAK LISA]   (Simulation._fox_leaves zeruje caly stan wizyty)
+
+   RZEZ: przy wejsciu na ferme BEZ psa z szansa massacre_chance (%s)
+   lup = cale stado, odstepy * massacre_pace_factor (%s), wizyta
+   wydluzona tak, zeby zdazyl. Przegonienie palcem ja przerywa.""" % (
         fmt(fox["grace_minutes"]), fmt(fox["min_hens"]), fmt(fox["active_roll_minutes"]),
         fmt(fox["offline_roll_hours"]), fmt(fox["hand_return_factor"]),
         fmt(fox["killed_return_multiplier"]), fox["kills_min"], fox["kills_max"], fox["scare_taps"],
         fmt(fox["kill_interval_min"]), fmt(fox["kill_interval_max"]), fmt(fox["carcass_share"]),
-        fmt(fox["visit_max_minutes"])))
+        fmt(fox["visit_max_minutes"]), fmt(fox["massacre_chance"]), fmt(fox["massacre_pace_factor"])))
     para("Przy grze w tle ta sama wizyta jest rozgrywana natychmiast na osi czasu "
          "(_fox_visit_offline): kolejne zabojstwa i rzuty psa sa ukladane w kolejnosci ich czasow, "
          "wygrywa wczesniejsze zdarzenie. Nie ma tylko klikania.")
@@ -816,7 +845,7 @@ def build():
     para("Czasy w tej tabeli sa w sekundach GRY. Na zegar: pomnoz przez %g." % round(1 / SCALE, 4))
 
     head("buildings.json")
-    para("Lista budynkow stojacych na farmie: id (coop, incubator, storage, shop) i klucze tekstow "
+    para("Lista budynkow stojacych na fermie: id (coop, incubator, storage, shop) i klucze tekstow "
          "nazwy i opisu. Liczby budynkow sa w balance.json -> buildings i incubator. Wyglad "
          "budynku zmienia sie na poziomach 3 i 6 (scenes/farm/farm.gd: LOOK_STEPS, grafiki "
          "z tools/gen_buildings.py).")
@@ -915,8 +944,8 @@ def build():
     block("""
   kolumna      typ      znaczenie
   -----------  -------  --------------------------------------------------
-  player_id    text     KOD FARMY, 6 cyfr. PRIMARY KEY = unikalny; jeden
-                        wiersz na farme. Po nim baza wie, ktory wiersz
+  player_id    text     KOD FERMY, 6 cyfr. PRIMARY KEY = unikalny; jeden
+                        wiersz na ferme. Po nim baza wie, ktory wiersz
                         nadpisac przy zapisie.
   payload      jsonb    caly zapis gry (rozdzial 9). jsonb = JSON
                         przechowywany binarnie; da sie po nim szukac SQL.
@@ -934,9 +963,9 @@ def build():
          "w bazie przy tabeli. Bez zadnej polityki tabela jest dla niego zamknieta: odczyt zwraca "
          "pusta liste, zapis konczy sie 401/403. Tabela saves ma trzy polityki dla roli anon: "
          "SELECT using (true), INSERT with check (true), UPDATE using (true). DELETE nie ma "
-         "- przez API nie da sie skasowac farmy.")
-    para("W praktyce znaczy to: KAZDY, kto ma klucz z gry, moze przeczytac WSZYSTKIE farmy i "
-         "nadpisac dowolna z nich. To swiadomy kompromis (gra bez logowania, kod farmy jako "
+         "- przez API nie da sie skasowac fermy.")
+    para("W praktyce znaczy to: KAZDY, kto ma klucz z gry, moze przeczytac WSZYSTKIE fermy i "
+         "nadpisac dowolna z nich. To swiadomy kompromis (gra bez logowania, kod fermy jako "
          "jedyny identyfikator). Ochrona przed utrata danych to codzienne kopie (rozdzial 13). "
          "Uwaga: komentarz w tools/supabase_setup.sql twierdzil kiedys, ze polityki nie pozwalaja "
          "listowac cudzych farm - to nieprawda, using (true) pozwala.")
@@ -947,9 +976,9 @@ def build():
     Authorization: Bearer <klucz>
     Content-Type: application/json
 
-  ODCZYT jednej farmy (Cloud.pull / pull_for):
+  ODCZYT jednej fermy (Cloud.pull / pull_for):
     GET  <url>/rest/v1/saves?player_id=eq.130090&select=payload,updated_at
-    -> 200 i  [ {"payload": {...}, "updated_at": 1795...} ]   farma jest
+    -> 200 i  [ {"payload": {...}, "updated_at": 1795...} ]   ferma jest
     -> 200 i  []                                              nie ma takiej
 
   ZAPIS (Cloud.push) - "upsert": wstaw, a jesli kod istnieje, nadpisz:
@@ -964,7 +993,7 @@ def build():
   KEY=$(python3 -c "import json;print(json.load(
         open('data/backend.json'))['api_key'])")
 
-  # jedna farma
+  # jedna ferma
   curl -s "$URL/rest/v1/saves?player_id=eq.130090&select=payload" \\
        -H "apikey: $KEY" -H "Authorization: Bearer $KEY"
 
@@ -973,28 +1002,28 @@ def build():
        -H "apikey: $KEY" -H "Authorization: Bearer $KEY\"""" % BACKEND.get("url"))
     head("Przydatne SQL (Supabase -> SQL Editor)")
     block("""
-  -- farmy od najbogatszej, z liczba ptakow i data zapisu
+  -- fermy od najbogatszej, z liczba ptakow i data zapisu
   select player_id,
          (payload->>'money')::numeric            as kasa,
          jsonb_array_length(payload->'chickens') as ptaki,
          to_timestamp(updated_at)                as zapisano
   from saves order by kasa desc;
 
-  -- jedna farma w calosci
+  -- jedna ferma w calosci
   select payload from saves where player_id = '130090';
 
-  -- reczna zmiana pieniedzy na farmie (NADPISUJE stan gracza!)
+  -- reczna zmiana pieniedzy na fermie (NADPISUJE stan gracza!)
   update saves
      set payload = jsonb_set(payload, '{money}', '5000'::jsonb)
    where player_id = '130090';""")
     para("Operator ->> wyciaga pole JSON jako tekst, -> jako JSON; jsonb_set podmienia jedno pole. "
          "Uwaga przy recznej edycji: otwarta u gracza gra przy nastepnym autozapisie nadpisze zmiane "
-         "swoim stanem. Gracz musi miec zamknieta gre, a po zmianie wczytac farme kodem.")
+         "swoim stanem. Gracz musi miec zamknieta gre, a po zmianie wczytac ferme kodem.")
     head("Darmowy plan i keepalive")
     para("Darmowy projekt Supabase jest wstrzymywany po tygodniu bez ruchu. Workflow "
          "supabase-keepalive.yml raz dziennie robi jedno zapytanie, zeby do tego nie doszlo. "
          "Wstrzymany projekt wznawia sie recznie w panelu Supabase - dane nie gina.")
-    head("Odtwarzanie farmy z kopii")
+    head("Odtwarzanie fermy z kopii")
     block("""
   kopie/saves-RRRR-MM-DD.json = lista wierszy {player_id, payload, updated_at}
 
@@ -1009,7 +1038,7 @@ def build():
        -H "Content-Type: application/json" \\
        -H "Prefer: resolution=merge-duplicates,return=minimal" \\
        --data @/tmp/przywroc.json""")
-    para("Gracz musi miec zamknieta gre, a potem wczytac farme kodem. Z tego srodowiska (Claude) "
+    para("Gracz musi miec zamknieta gre, a potem wczytac ferme kodem. Z tego srodowiska (Claude) "
          "adres supabase.co jest zablokowany - takie operacje robi sie z wlasnego komputera albo "
          "przez workflow GitHub Actions.")
 
@@ -1020,18 +1049,18 @@ def build():
   - autozapis co %s s ZEGARA (odliczany zegarem, nie klatkami)
   - odejscie od karty / okna (FOCUS_OUT) - natychmiast
   - zamkniecie gry, pauza aplikacji, wyjscie ze sceny
-  - po kazdym wczytaniu farmy z serwera
+  - po kazdym wczytaniu fermy z serwera
   - przed przeladowaniem przy aktualizacji (Updater)""" % _autosave())
     head("Kiedy NIE wysyla (Game.may_push_to_cloud - cztery bezpieczniki)")
     block("""
-  1. trwa wczytywanie farmy po kodzie (_force_pull) - lokalny stan jest
-     jeszcze stary i nadpisalby farme, na ktora gracz czeka
+  1. trwa wczytywanie fermy po kodzie (_force_pull) - lokalny stan jest
+     jeszcze stary i nadpisalby ferme, na ktora gracz czeka
   2. kod urzadzenia (Cloud.player_id) nie jest kodem, ktory ta sesja
      faktycznie zdobyla (_owned_code) - np. po nieudanym wczytaniu
   3. gracz nie przeszedl ekranu powitalnego (intro_seen = false) -
-     swieza farma po wyczyszczeniu przegladarki nie leci na serwer,
-     zanim gracz wybierze "Nowa farma" albo wpisze kod
-  4. farma jest pusta (zero ptakow, zero pieniedzy...) - pusta farma
+     swieza ferma po wyczyszczeniu przegladarki nie leci na serwer,
+     zanim gracz wybierze "Nowa ferma" albo wpisze kod
+  4. ferma jest pusta (zero ptakow, zero pieniedzy...) - pusta ferma
      nigdy nie nadpisze prawdziwej""")
     head("Zasady scalania przy odczycie (Game._on_cloud_pulled)")
     block("""
@@ -1039,8 +1068,8 @@ def build():
                               nowszy niz lokalnego zapisu
   wpisany kod (restore):      serwer wygrywa ZAWSZE; dopiero po udanej
                               odpowiedzi urzadzenie przyjmuje ten kod
-  brak farmy / brak sieci:    komunikat, stan lokalny bez zmian""")
-    para("Kod farmy: 6 cyfr, losowany przy \"Nowa farma\" (Cloud.new_player_id, %d..%d), "
+  brak fermy / brak sieci:    komunikat, stan lokalny bez zmian""")
+    para("Kod fermy: 6 cyfr, losowany przy \"Nowa ferma\" (Cloud.new_player_id, %d..%d), "
          "trzymany w user://player_id.txt. Wyczyszczenie danych strony kasuje go - dlatego gracz "
          "musi zapisac kod. Zakres przyjmuje tez stare 12-znakowe kody (LEGACY_*)." % (100000, 999999))
 
@@ -1069,7 +1098,7 @@ def build():
   co 60 s ZEGARA i przy powrocie do karty:
      GET version.json?t=<teraz>
      inna wersja niz GameData.VERSION?
-        -> zapis farmy + czekanie na serwer (max 5 s)
+        -> zapis fermy + czekanie na serwer (max 5 s)
         -> 1,5 s na zapis w IndexedDB przegladarki
         -> znacznik w localStorage "kury_update" {to, attempts, at}
         -> location.replace(index.html?v=<nowa>)
@@ -1109,7 +1138,7 @@ def build():
          "Actions w repozytorium na GitHubie.")
     head("Pozostale")
     para("kopia-farm.yml - codziennie zrzuca cala tabele saves do kopie/saves-RRRR-MM-DD.json "
-         "i commituje. sprawdz-farme.yml - recznie, podajesz kod, dostajesz podsumowanie farmy "
+         "i commituje. sprawdz-ferme.yml - recznie, podajesz kod, dostajesz podsumowanie fermy "
          "i liste wszystkich farm. supabase-keepalive.yml - codzienne zapytanie podtrzymujace "
          "darmowy projekt. Wszystkie biora adres i klucz z data/backend.json.")
 
@@ -1130,13 +1159,13 @@ def build():
          "Supabase na http://127.0.0.1:9 (nic tam nie slucha, kazde zapytanie od razu sie nie udaje), "
          "i sprawdzaja Cloud.is_test_server(). Workflow ustawia dodatkowo zmienna KURY_BEZ_SERWERA=1, "
          "ktora robi to samo juz w _ready() autoloadu Cloud. Przed 12.17 testy w CI pisaly do "
-         "prawdziwej bazy - zostaly po tym farmy 399975 i 439267 (smieci) i zmieniona farma 327733.")
-    para("tests/bot_24h.tscn to tez pomiar: bot gra pierwsza dobe nowej farmy na prawdziwej logice "
+         "prawdziwej bazy - zostaly po tym fermy 399975 i 439267 (smieci) i zmieniona ferma 327733.")
+    para("tests/bot_24h.tscn to tez pomiar: bot gra pierwsza dobe nowej fermy na prawdziwej logice "
          "(Simulation.advance + akcje Game) w trzech stylach - zaangazowany (sesja co 1,5 h), niedzielny "
          "(5 sesji) i maniak (16 h). Po \"--\" mozna podac katalog z innymi balance.json/breeds.json, "
-         "zeby porownac dwie ekonomie. Wynik: wartosc farmy co godzine, przychody, pasza, straty, "
+         "zeby porownac dwie ekonomie. Wynik: wartosc fermy co godzine, przychody, pasza, straty, "
          "godzina pierwszego zakupu kazdego ulepszenia.")
-    para("tests/fox_lab.tscn to nie test, tylko pomiar: 60 prob po 24 h na kilku farmach (bez "
+    para("tests/fox_lab.tscn to nie test, tylko pomiar: 60 prob po 24 h na kilku fermach (bez "
          "obrony, plot, owczarek, oba), dwa style gry. Wypisuje pierwszego lisa, lisy na dobe, "
          "kury na lisa i na dobe. Trwa okolo 12 minut, nie jest uruchamiany w CI.")
     head("Reguly konfiguracji, ktore zatrzymaja wdrozenie")
@@ -1150,14 +1179,15 @@ def build():
   - psy: dokladnie 2 (kundel, owczarek - tyle jest grafik); interval > 0,
     chance i kill_chance w [0, 1]; owczarek drozszy i w niczym nie
     gorszy od kundla; kundel nie drozszy niz pierwszy plot
-  - lis i choroba: odstepy kostek > 0, szanse w [0, 1],
+  - lis: odstepy kostek > 0, szanse w [0, 1],
     kills_min >= 1, kills_max >= kills_min,
     kill_interval_min > 0, kill_interval_max >= kill_interval_min,
     killed_return_multiplier >= 1
   - egg_spoil_hours > 0, magazyn na poziomie 0 > 50 jaj
   - magazyn: z kazdym poziomem wiekszy worek, wiekszy rabat
     (pack_discount < 0.95) i tanszy kilogram paszy
-  - lek, skup, szczepienie: cena > 0
+  - choroba: zaraza co minute, 30-100% stada co 10%, 3-12 h spokoju
+  - skup, szczepienie: cena > 0; leku nie ma
   - KAZDY klucz balance.json i breeds.json ma opis w tym dokumencie""")
 
     # ------------------------------------------------------------------ 15
@@ -1230,14 +1260,14 @@ def build():
     # ------------------------------------------------------------------ 17
     title("17. Znane ryzyka i ograniczenia")
     block("""
-  - Kazdy z kluczem z gry moze czytac i nadpisac kazda farme (RLS
+  - Kazdy z kluczem z gry moze czytac i nadpisac kazda ferme (RLS
     using(true)). Ochrona: codzienne kopie w kopie/.
-  - Kod farmy jest losowany bez sprawdzania, czy juz istnieje. Przy N
-    farmach szansa trafienia w cudzy kod przy nowej farmie = N/900000
-    (20 farm -> 0,002%%). Trafienie nadpisaloby cudza farme.
+  - Kod fermy jest losowany bez sprawdzania, czy juz istnieje. Przy N
+    fermach szansa trafienia w cudzy kod przy nowej fermie = N/900000
+    (20 farm -> 0,002%%). Trafienie nadpisaloby cudza ferme.
   - Wyczyszczenie danych strony kasuje kod z urzadzenia. Bez zapisanego
-    kodu farmy nie da sie odnalezc z poziomu gry (jest na serwerze;
-    da sie ja znalezc przez sprawdz-farme.yml albo SQL).
+    kodu fermy nie da sie odnalezc z poziomu gry (jest na serwerze;
+    da sie ja znalezc przez sprawdz-ferme.yml albo SQL).
   - Kopie robia sie raz dziennie. Stan miedzy kopiami jest tylko
     w ostatnim zapisie na serwerze.
   - Gra liczy wszystko u gracza. Zmodyfikowana gra moze wyslac dowolny

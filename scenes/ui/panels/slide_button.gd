@@ -3,8 +3,9 @@ extends Button
 ## Przycisk "przesun, zeby potwierdzic". Wlasciciel (25.11): okienko "na
 ## pewno?" przy kazdej transakcji bylo meczace, a bez niego latwo o
 ## przypadkowe dotkniecie. Teraz pole trzeba przeciagnac palcem od lewej do
-## prawej - kolor wypelnia je w miare przesuwania, a akcja rusza dopiero,
-## gdy suwak dojedzie do konca. Puszczony wczesniej wraca na start.
+## prawej - kolor wypelnia je w miare przesuwania, a akcja rusza, gdy
+## galka minie 2/3 drogi (od 12.20; wczesniej do samego konca). Puszczony
+## wczesniej wraca na start.
 ##
 ## Dziedziczy po Button, zeby napis, zawijanie, wyszarzenie i motyw dzialaly
 ## jak dotad. Zwykle klikniecie jest przechwytywane w _gui_input (wolanym
@@ -12,8 +13,13 @@ extends Button
 ## przesunieciu do konca - kod, ktory sie do niego podlacza, nie musi nic
 ## wiedziec o suwaku.
 
-## Ile trzeba przesunac (0..1), zeby akcja ruszyla.
-const DONE_AT := 0.92
+## Ile trzeba przesunac (0..1), zeby akcja ruszyla. Wlasciciel (25.11):
+## "ciezko przesunac cale do konca, za duzo smyrania" — wystarczaja 2/3.
+const DONE_AT := 0.66
+## Najdluzsza droga galki w pikselach. Szerokie suwaki (rozbudowy, pasza)
+## nie wymagaja juz przeciagniecia przez caly ekran: galka jedzie najwyzej
+## tyle, a 2/3 z tego to okolo 240 px - jeden ruch kciuka.
+const MAX_TRAVEL := 360.0
 ## Ruch palca, po ktorym wiadomo, ze to przesuwanie, a nie przewijanie.
 const INTENT_PX := 14.0
 ## Srednica galki wzgledem wysokosci pola.
@@ -127,7 +133,17 @@ func _knob_size() -> float:
 
 
 func _travel() -> float:
-	return maxf(1.0, size.x - _knob_size() - 24.0)
+	return clampf(size.x - _knob_size() - 24.0, 1.0, MAX_TRAVEL)
+
+
+## Droga galki w pikselach (dla testow, ktore przesuwaja suwak myszka).
+func travel() -> float:
+	return _travel()
+
+
+## Galka minela prog - puszczenie teraz wykona akcje.
+func ready_to_fire() -> bool:
+	return _sliding and _progress >= DONE_AT
 
 
 func _draw_track() -> void:
@@ -142,6 +158,9 @@ func _draw_track() -> void:
 	var fill := StyleBoxFlat.new()
 	if flat != null:
 		fill.bg_color = flat.bg_color.darkened(0.25)
+		# Za progiem pole jasnieje - widac, ze mozna puscic.
+		if _progress >= DONE_AT:
+			fill.bg_color = flat.bg_color.lightened(0.18)
 		fill.set_corner_radius_all(flat.corner_radius_top_left)
 		fill.border_color = flat.border_color
 		fill.set_border_width_all(flat.border_width_left)
@@ -160,6 +179,13 @@ func _draw_knob() -> void:
 	_knob.draw_circle(center + Vector2(0, 4), d * 0.5, Color(0, 0, 0, 0.16 * alpha))
 	_knob.draw_circle(center, d * 0.5, Color(1.0, 0.99, 0.96, alpha))
 	_knob.draw_arc(center, d * 0.5, 0.0, TAU, 48, Color(ink, 0.75 * alpha), 4.0, true)
+	# Za progiem zamiast strzalek "ptaszek": puszczaj, akcja ruszy.
+	if _progress >= DONE_AT and not disabled:
+		var t := d * 0.2
+		var tick := PackedVector2Array([center + Vector2(-t, 0.0),
+				center + Vector2(-t * 0.25, t * 0.75), center + Vector2(t * 1.1, -t * 0.8)])
+		_knob.draw_polyline(tick, Color("3E8E41"), 6.0, true)
+		return
 	# Strzalki ">>" na galce mowia, w ktora strone ciagnac.
 	var s := d * 0.17
 	for k in 2:

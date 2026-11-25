@@ -19,6 +19,12 @@ var _reported_no_feed := false
 var _shown_feed := -1
 var _autosave_left := AUTOSAVE_SECONDS
 var _started := false
+## GAME OVER zgloszone dla obecnej fermy (raz, do restartu).
+var _game_over_sent := false
+## Test dymny wylacza GAME OVER poza wlasnym testem: grzebie w stanie gry
+## (np. stado bez koguta i bez grosza) i pelnoekranowa plansza zaslonilaby
+## reszte sprawdzen.
+var game_over_enabled := true
 ## Zegar scienny z poprzedniej klatki.
 var _last_tick := 0.0
 ## Czas uzbierany, gdy okno bylo nieaktywne. Rozliczany po powrocie.
@@ -76,6 +82,7 @@ func _process(delta: float) -> void:
 
 	_check_unlocks()
 	_check_win()
+	_check_game_over()
 
 	# Odliczanie do autozapisu idzie ZEGAREM SCIENNYM, nie delta klatki.
 	# W karcie w tle przegladarka zwalnia petle gry kilkukrotnie, wiec przy
@@ -136,9 +143,17 @@ func _report(result: Dictionary) -> void:
 	if int(result["hatched"]) > 0 or int(result["grown_up"]) > 0:
 		Events.resources_changed.emit()
 
-	var sick := int(result["got_sick"])
-	if sick > 0:
-		Events.alert.emit(tr("ALERT_SICK_TITLE"), tr("ALERT_SICK_BODY") % sick)
+	# Choroba (12.20): okienko tylko przy WYBUCHU ogniska. Kolejne zarazenia
+	# co minute widac na wybiegu (zielona poswiata), wiec okienko co minute
+	# byloby tylko zawalidroga.
+	if int(result.get("outbreak", 0)) > 0:
+		Events.alert.emit(tr("ALERT_SICK_TITLE"), tr("ALERT_SICK_BODY"))
+		Events.resources_changed.emit()
+	if int(result.get("outbreak_over", 0)) > 0:
+		Events.notice.emit(tr("HINT_OUTBREAK_OVER") % int(result.get("outbreak_dead", 0)))
+		Events.resources_changed.emit()
+	if int(result.get("fox_massacre", 0)) > 0:
+		Events.notice.emit(tr("HINT_FOX_MASSACRE"))
 	var died_disease := int(result["died_disease"])
 	if died_disease > 0:
 		Events.notice.emit(tr("HINT_DIED_DISEASE") % died_disease)
@@ -182,6 +197,26 @@ func _check_win() -> void:
 	if reason.is_empty():
 		return
 	Events.game_won.emit(reason)
+	save()
+
+
+## Bankructwo: brak pary do rozrodu i brak pieniedzy, zeby ja odtworzyc.
+## Zgloszone raz; plansza GAME OVER ma tylko przycisk "od nowa".
+func _check_game_over() -> void:
+	if _game_over_sent or not game_over_enabled or not _started or state == null:
+		return
+	if not Simulation.check_bankrupt(state):
+		return
+	_game_over_sent = true
+	Events.game_over.emit()
+
+
+## Nowa ferma po bankructwie POD TYM SAMYM KODEM: wlasciciel zna swoj kod
+## na pamiec, wiec zmiana kodu przy przegranej tylko by przeszkadzala.
+func restart_after_game_over() -> void:
+	SaveGame.clear()
+	new_game()
+	state.intro_seen = true
 	save()
 
 
@@ -371,6 +406,7 @@ func _warn_no_rooster(breed_id: String, breed_name: String) -> void:
 
 
 func new_game() -> void:
+	_game_over_sent = false
 	_last_gap = 0.0
 	_reported_no_feed = false
 	_shown_feed = -1
@@ -452,6 +488,7 @@ func _apply_elapsed(elapsed: float) -> void:
 	var result := Simulation.advance(state, seconds, true)
 	_check_unlocks()
 	_check_win()
+	_check_game_over()
 	var laid := int(result["eggs_laid"])
 	if laid > 0:
 		Events.notice.emit(tr("HINT_WELCOME_BACK") % laid)
@@ -625,7 +662,7 @@ func buy_hen(breed_id: String, rooster: bool = false) -> bool:
 ## nia mniej. Zdrowe sztuki ida dopiero, gdy chorych nie ma.
 ## Zwraca uzyskana kwote albo 0, gdy nie ma czego sprzedac.
 ## Sprzedaje jednego ZDROWEGO ptaka. Chorej sztuki skup nie przyjmuje —
-## gracz musi ja wyleczyc albo ubic (`cull_hen`).
+## chora idzie tylko do McDonalda (`cull_hen`).
 func sell_hen(breed_id: String, rooster: bool = false) -> float:
 	var index := _find_hen(breed_id, false, rooster)
 	if index < 0:
@@ -657,6 +694,10 @@ func cull_hen(breed_id: String, rooster: bool = false) -> bool:
 		return false
 	state.chickens.remove_at(index)
 	state.money += mcdonalds_price()
+	# Do bilansu ogniska: chora poszla do McDonalda zamiast pasc, ale dla
+	# gracza to ta sama strata.
+	if state.outbreak_on:
+		state.outbreak_dead += 1
 	Events.hen_removed.emit(breed_id)
 	Events.resources_changed.emit()
 	if rooster and state.hens_of_breed(breed_id) > 0 and not state.has_rooster(breed_id):
@@ -683,10 +724,6 @@ func _find_hen(breed_id: String, sick: bool, rooster: bool = false) -> int:
 # --- weterynaria --------------------------------------------------------
 
 
-func medicine_price() -> float:
-	return float(GameData.balance().get("disease", {}).get("medicine_price", 140))
-
-
 ## Cena zaszczepienia calego stada: stala `vaccine_price` (teraz 0) plus
 ## `vaccine_price_per_hen` za kazdego niezaszczepionego ptaka (wlasciciel:
 ## "5 zl za sztuke"). Zaszczepionych nie liczymy drugi raz.
@@ -697,34 +734,10 @@ func vaccine_price() -> float:
 	return base + per_hen * state.unvaccinated_count()
 
 
-## Leczy jedna chora kure — najdrozsza, bo ja warto ratowac najbardziej.
-func buy_medicine() -> bool:
-	var price := medicine_price()
-	if state.money < price or state.sick_count() == 0:
-		return false
-	var best := -1
-	var best_value := -1.0
-	for i in state.chickens.size():
-		var hen: Chicken = state.chickens[i]
-		if not hen.sick:
-			continue
-		var value := float(GameData.breed(hen.breed_id).get("price", 0))
-		if value > best_value:
-			best_value = value
-			best = i
-	if best < 0:
-		return false
-	state.money -= price
-	var cured: Chicken = state.chickens[best]
-	cured.sick = false
-	cured.sick_seconds = 0.0
-	Events.resources_changed.emit()
-	Events.notice.emit(tr("HINT_CURED") % tr(GameData.breed(cured.breed_id).get("name", "")))
-	return true
-
-
-## Szczepi cale stado. Chroni do konca zycia, ale tylko kury, ktore zyja
-## teraz — mlode wyklute pozniej trzeba zaszczepic osobno.
+## Szczepi cale ZDROWE stado. Chroni do konca zycia, ale tylko kury, ktore
+## zyja teraz — mlode wyklute pozniej trzeba zaszczepic osobno. Od 12.20
+## szczepionka nie leczy (wlasciciel 25.11): chore zostaja chore i sie za nie
+## nie placi. Leku nie ma wcale.
 func buy_vaccine() -> bool:
 	if state.unvaccinated_count() == 0:
 		return false
@@ -734,11 +747,9 @@ func buy_vaccine() -> bool:
 	state.money -= price
 	var count := 0
 	for hen: Chicken in state.chickens:
-		if hen.vaccinated:
+		if hen.vaccinated or hen.sick:
 			continue
 		hen.vaccinated = true
-		hen.sick = false
-		hen.sick_seconds = 0.0
 		count += 1
 	Events.resources_changed.emit()
 	Events.notice.emit(tr("HINT_VACCINATED") % count)

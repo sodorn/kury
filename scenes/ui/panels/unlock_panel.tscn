@@ -20,7 +20,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.19, 0.12, 0.07, 0.72)
+color = Color(0.19, 0.12, 0.07, 0.78)
 
 [node name="Rays" type="TextureRect" parent="."]
 layout_mode = 1
@@ -29,13 +29,13 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -480.0
-offset_top = -480.0
-offset_right = 480.0
-offset_bottom = 480.0
+offset_left = -620.0
+offset_top = -900.0
+offset_right = 620.0
+offset_bottom = 340.0
 grow_horizontal = 2
 grow_vertical = 2
-pivot_offset = Vector2(480, 480)
+pivot_offset = Vector2(620, 620)
 texture = ExtResource("2")
 expand_mode = 1
 stretch_mode = 5
@@ -47,16 +47,22 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -470.0
-offset_top = -620.0
-offset_right = 470.0
-offset_bottom = 620.0
+offset_left = -500.0
+offset_top = -680.0
+offset_right = 500.0
+offset_bottom = 680.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Content" type="VBoxContainer" parent="Sheet"]
 layout_mode = 2
-theme_override_constants/separation = 22
+theme_override_constants/separation = 10
+
+[node name="Congrats" type="Label" parent="Sheet/Content"]
+layout_mode = 2
+theme_type_variation = &"TitleLabel"
+text = "UNLOCK_CONGRATS"
+horizontal_alignment = 1
 
 [node name="Title" type="Label" parent="Sheet/Content"]
 layout_mode = 2
@@ -69,7 +75,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 
 [node name="Portrait" type="TextureRect" parent="Sheet/Content/Frame"]
-custom_minimum_size = Vector2(420, 420)
+custom_minimum_size = Vector2(500, 500)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 6
@@ -77,6 +83,7 @@ clip_contents = true
 
 [node name="Name" type="Label" parent="Sheet/Content"]
 layout_mode = 2
+theme_type_variation = &"TitleLabel"
 horizontal_alignment = 1
 autowrap_mode = 3
 
@@ -85,12 +92,32 @@ layout_mode = 2
 theme_type_variation = &"NoteLabel"
 horizontal_alignment = 1
 
-[node name="Lore" type="Label" parent="Sheet/Content"]
+[node name="Scroll" type="ScrollContainer" parent="Sheet/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Text" type="VBoxContainer" parent="Sheet/Content/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 14
+
+[node name="Lore" type="Label" parent="Sheet/Content/Scroll/Text"]
 layout_mode = 2
 theme_type_variation = &"NoteLabel"
 autowrap_mode = 3
 
-[node name="Stats" type="Label" parent="Sheet/Content"]
+[node name="FactsTitle" type="Label" parent="Sheet/Content/Scroll/Text"]
+layout_mode = 2
+theme_type_variation = &"GroupLabel"
+text = "UNLOCK_FACTS"
+
+[node name="Facts" type="Label" parent="Sheet/Content/Scroll/Text"]
+layout_mode = 2
+theme_type_variation = &"NoteLabel"
+autowrap_mode = 3
+
+[node name="Stats" type="Label" parent="Sheet/Content/Scroll/Text"]
 layout_mode = 2
 theme_type_variation = &"NoteLabel"
 horizontal_alignment = 1
@@ -102,12 +129,12 @@ theme_type_variation = &"PrimaryButton"
 text = "UNLOCK_CLOSE"
 
 [node name="Sparks" type="CPUParticles2D" parent="."]
-position = Vector2(540, 420)
-amount = 26
-lifetime = 2.4
+position = Vector2(540, 360)
+amount = 32
+lifetime = 2.6
 texture = ExtResource("3")
 emission_shape = 3
-emission_rect_extents = Vector2(460, 40)
+emission_rect_extents = Vector2(480, 40)
 direction = Vector2(0, 1)
 spread = 24.0
 gravity = Vector2(0, 90)

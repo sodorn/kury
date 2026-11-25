@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 12.19
+  INSTRUKCJA OBSLUGI *** gra w wersji 12.20
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -29,35 +29,35 @@
   dostaniesz za dorosla sztuke - ale tym dluzej trwa odchow i tym czesciej
   taka kura choruje.
 
-  Przeszkody sa trzy: PASZA (kosztuje i konczy sie sama), CHOROBA (zabija kure
-  w kilka minut, jesli jej nie wyleczysz) i LIS (wchodzi na wybieg i zabija
-  kury jedna po drugiej).
+  Przeszkody sa trzy: PASZA (kosztuje i konczy sie sama), CHOROBA (przechodzi
+  z kury na kure co minute i nie ma na nia leku) i LIS (wchodzi na wybieg i
+  zabija kury jedna po drugiej, a bez psa potrafi wybic cale stado).
 
   CEL: uzbierac 2 500 000 zl.
 
 ==============================================================================
- 2. PIERWSZE URUCHOMIENIE I KOD FARMY
+ 2. PIERWSZE URUCHOMIENIE I KOD FERMY
 ==============================================================================
 
   Przy wejsciu do gry zobaczysz ekran powitalny. Sa na nim dwie drogi:
 
-    NOWA FARMA        - zaklada swieze gospodarstwo i nadaje mu nowy kod.
-    WCZYTAJ Z KODU    - wpisujesz szesciocyfrowy kod i wracasz na swoja farme.
+    NOWA FERMA        - zaklada swieze gospodarstwo i nadaje mu nowy kod.
+    WCZYTAJ Z KODU    - wpisujesz szesciocyfrowy kod i wracasz na swoja ferme.
 
   +--------------------------------------------------------------------------+
-  |  ZAPISZ SOBIE KOD SWOJEJ FARMY. GDZIES POZA GRA.                         |
+  |  ZAPISZ SOBIE KOD SWOJEJ FERMY. GDZIES POZA GRA.                         |
   |                                                                          |
   |  Kod to jedyny sposob, zeby wrocic do gospodarstwa. Gra trzyma go        |
   |  w pamieci przegladarki. Wyczyszczenie ciasteczek, tryb prywatny         |
   |  albo inne urzadzenie oznaczaja, ze przegladarka tego kodu juz nie       |
-  |  zna - i bez zapisanego kodu nie ma jak odnalezc farmy.                  |
+  |  zna - i bez zapisanego kodu nie ma jak odnalezc fermy.                  |
   |                                                                          |
-  |  Stan farmy lezy na serwerze, nie w przegladarce. Z kodem wrocisz        |
+  |  Stan fermy lezy na serwerze, nie w przegladarce. Z kodem wrocisz        |
   |  do niej z kazdego telefonu i kazdego komputera.                         |
   +--------------------------------------------------------------------------+
 
   Kod widzisz na ekranie powitalnym przy kazdym wejsciu do gry. Ten sam kod
-  mozesz podac koledze - wejdzie na TWOJA farme i bedzie na niej gral razem z
+  mozesz podac koledze - wejdzie na TWOJA ferme i bedzie na niej gral razem z
   toba.
 
 ==============================================================================
@@ -83,7 +83,7 @@
   |                                                                        |
   |     MAGAZYN                   SKLEP                                    |
   |     (pasza i pojemnosc        (sprzedaz jaj, kupno paszy,              |
-  |      na jaja)                  kupno kur i kogutow, leki)              |
+  |      na jaja)                  kupno kur i kogutow, szczepionki)       |
   +------------------------------------------------------------------------+
 
   Pies, jesli go kupisz, stoi przy kurniku. Plot widac dookola wybiegu -
@@ -93,9 +93,11 @@
  4. PETLA GRY - OD CZEGO ZACZAC
 ==============================================================================
 
-  SUWAKI. Kupno i sprzedaz kur, ubicie chorej, lek, szczepienie, plot, pies i
-  kazda rozbudowa to SUWAK: przeciagnij palcem od lewej do prawej, az pole sie
-  zapelni kolorem. Samo dotkniecie nic nie robi - nie kupisz nic przypadkiem.
+  SUWAKI. Kupno i sprzedaz kur, ubicie chorej, szczepienie, plot, pies i kazda
+  rozbudowa to SUWAK: przeciagnij palcem w prawo. Wystarczy 2/3 drogi - gdy
+  galka pokaze ptaszek, a pole pojasnieje, pusc palec. Samo dotkniecie nic nie
+  robi - nie kupisz nic przypadkiem. W sklepie kazda rasa ma dwie kolumny: po
+  lewej KUP KURE i KUP KOGUTA, po prawej SPRZEDAJ KURE i SPRZEDAJ KOGUTA.
   Sprzedaz jaj, pasza i wkladanie jaj do inkubatora to zwykle przyciski, bo
   klika sie je co chwile.
 
@@ -119,7 +121,7 @@
      piskląt naraz, wiekszy magazyn to wiecej jaj i tanszy worek paszy.
 
 
-  WAZNE: kura znosi jaja tylko wtedy, gdy na farmie stoi KOGUT JEJ RASY.
+  WAZNE: kura znosi jaja tylko wtedy, gdy na fermie stoi KOGUT JEJ RASY.
   Kupienie samych kur nic nie da. Kogut kosztuje 250% ceny kury tej samej rasy
   (kura za 35 zl to kogut za 87,50 zl), ale wystarczy jeden na cala rase. Przy
   sprzedazy dziala ten sam mnoznik: kogut idzie za 250% ceny skupu kury (kura
@@ -298,7 +300,7 @@
   KIEDY PRZYCHODZI
     gdy grasz          kostka co 60 min realnych, szansa 33%
     gdy nie grasz      kostka co 24 h realnych, szansa 17%
-    nie przyjdzie      przez pierwsze 30 min nowej farmy
+    nie przyjdzie      przez pierwsze 30 min nowej fermy
                        ani gdy masz mniej niz 5 kur
 
   JAK PRZYCHODZI
@@ -317,6 +319,12 @@
     KLIKAJ W NIEGO. Trzeba 20 trafien. Licznik widac nad lisem.
     Przegoniony reka wraca 10 razy szybciej niz normalnie -
     chyba ze masz psa albo plot.
+
+  RZEZ
+    Gdy ferma NIE MA PSA, okolo 5% lisow, ktore wejda na wybieg,
+    wpada w szal: zabija 4 razy szybciej i nie odchodzi, dopoki nie
+    wybije CALEGO stada. Ratunek: klikac (te same 20 trafien) albo
+    miec psa - przy psie rzezi nie ma wcale.
 
 ==============================================================================
  13. PSY I PLOT
@@ -351,22 +359,35 @@
  14. CHOROBA
 ==============================================================================
 
-  KIEDY        gdy grasz: kostka co 30 min realnych, szansa 33%
-               gdy nie grasz: co 12 h realnych, szansa 17%
-               nie choruje nikt przez pierwsze 30 min
-               ani przy stadzie mniejszym niz 5 kur
-               drozsza rasa choruje CZESCIEJ
+  KIEDY WYBUCHA  co minute kostka; szansa rosnie z wielkoscia stada:
+                   do 10 ptakow     nigdy
+                   20 ptakow        srednio co 20 h
+                   50 ptakow        srednio co 2 h
+                   100 i wiecej     srednio co 40 min
+                 (licza sie dorosle ptaki, kury i koguty). Tak samo, gdy
+                 grasz i gdy nie grasz. Przez pierwsze 30 min nowej fermy
+                 nikt nie choruje.
 
-  CO SIE DZIEJE  chora kura pada po 21 minutach, jesli jej nie wyleczysz
+  JAK SIE SZERZY pierwsza kura choruje od razu, potem zaraza przechodzi
+                 na kolejna zdrowa, NIEZASZCZEPIONA kure co 60 s.
+                 Ognisko zabiera od 30% do 100% stada (losowane co
+                 10%, w gore): przy 100 kurach i wylosowanych 40% padnie 40.
+                 Potem wygasa. Drozsza rasa lapie chetniej.
 
-  LEK            20 zl za sztuke, leczy jedna chora kure
+  CHORA KURA     nie znosi i pada po 5 minutach. LEKU NIE MA - chora
+                 jest stracona. Mozesz ja tylko sprzedac do McDonalda za 5 zl
+                 (zawsze lepsze to niz nic).
 
-  SZCZEPIENIE    5 zl za kure, chroni DO KONCA ZYCIA - ale tylko te kury,
-                 ktore zyja w chwili szczepienia. Nowe pisklęta trzeba
-                 zaszczepic osobno.
+  SZCZEPIENIE    5 zl za kazda ZDROWA kure, chroni DO KONCA ZYCIA. Chorej nie
+                 wyleczy. Dziala na kury zyjace w chwili szczepienia - nowe
+                 pisklęta trzeba zaszczepic osobno. Zaszczepienie stada,
+                 gdy ognisko juz ruszylo, ratuje te, ktorych jeszcze nie
+                 zlapalo.
 
-  SKUP           chorej kury nie musisz leczyc - mozesz ja sprzedac
-                 do McDonalda za 5 zl. Tyle samo za kazda rase.
+  PO OGNISKU     3-12 godzin spokoju - wtedy nic nie wybucha.
+
+  STAN W KURNIKU panel kurnika pokazuje wiersz CHOROBA: ognisko w toku,
+                 spokoj (ile jeszcze) albo ryzyko przy obecnym stadzie.
 
 ==============================================================================
  15. CZAS W GRZE
@@ -377,7 +398,7 @@
   budowy, "pasza starczy na", wiek gospodarstwa) sa podane przy zegarku - w
   czasie ziemskim. Gra nie pokazuje juz "dni gospodarstwa".
 
-  Gra liczy czas TAK SAMO, gdy grasz i gdy nie grasz. Zostawiona na noc farma
+  Gra liczy czas TAK SAMO, gdy grasz i gdy nie grasz. Zostawiona na noc ferma
   znosi jaja, zjada pasze, choruje i goszczy lisa. Po powrocie gra nadrabia
   zaleglosci - maksymalnie 72 godziny za jednym razem.
 
@@ -392,6 +413,15 @@
   ras, trzymaj inkubator caly czas pelny i sprzedawaj odchowane sztuki. Jaja
   sprzedawaj na biezaco, zeby bylo na pasze.
 
+  GAME OVER. Gdy na fermie nie zostanie zadna para kura + kogut tej samej
+  rasy, inkubator i odchow stoja puste, w magazynie nie ma jaj na wyleg, a za
+  cala gotowke (z jajami i ptakami na sprzedaz) nie da sie dokupic brakujacej
+  pary - gra konczy sie plansza GAME OVER: "Niestety, jesteś marnym hodowcą.
+  Poniosłeś bankructwo." Przycisk zaczyna nowa ferme pod TYM SAMYM kodem.
+
+  NOWA RASA. Pierwsza sztuka kazdej rasy otwiera duze okno z gratulacjami,
+  malowanym portretem rasy, jej historia i trzema ciekawostkami.
+
 ==============================================================================
  17. SCIAGAWKA
 ==============================================================================
@@ -400,9 +430,10 @@
   Rasa wyszarzona w sklepie    -> za niski poziom kurnika (patrz tabela ras)
   Jaja znikaja z magazynu      -> gnija po 4 h, albo magazyn jest pelny
   Kury padaja bez ostrzezenia  -> skonczyla sie pasza
+  Kury zielenieja i padaja     -> CHOROBA: szczep zdrowe, chore do McDonalda
   Pisklę nie wyrasta           -> brak paszy albo pelny kurnik
   Lis na wybiegu               -> KLIKAJ W NIEGO (20 razy), kup psa i plot
-  Nie moge wrocic do farmy     -> potrzebny KOD, zapisz go sobie poza gra
+  Nie moge wrocic do fermy     -> potrzebny KOD, zapisz go sobie poza gra
   Gra wyglada na cofnieta      -> odswiez z Ctrl+Shift+R
 
 ==============================================================================

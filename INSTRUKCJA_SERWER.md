@@ -1,7 +1,7 @@
 # Serwer na zapisy gry — instrukcja krok po kroku
 
 Po co: żeby postęp gry nie siedział w przeglądarce, tylko na serwerze.
-Wtedy ta sama farma działa na telefonie i na komputerze, a wyczyszczenie
+Wtedy ta sama ferma działa na telefonie i na komputerze, a wyczyszczenie
 przeglądarki niczego nie kasuje.
 
 Czas: około 20 minut. Nie trzeba karty kredytowej.
@@ -113,19 +113,19 @@ poprzednich etapach, na atrapie serwera.
 
 ## Jak to będzie działać od strony gracza
 
-Każde urządzenie dostaje przy pierwszym uruchomieniu **kod farmy** —
+Każde urządzenie dostaje przy pierwszym uruchomieniu **kod fermy** —
 coś w rodzaju `7K73-ABGC-63CK`. Widać go w Magazynie. Kod jest
-identyfikatorem konta: kto go zna, ten ma dostęp do tej farmy.
+identyfikatorem konta: kto go zna, ten ma dostęp do tej fermy.
 
-Żeby grać tą samą farmą na telefonie i na komputerze, trzeba będzie
+Żeby grać tą samą fermą na telefonie i na komputerze, trzeba będzie
 przepisać kod z jednego urządzenia na drugie. **Okienka do wpisania kodu
 jeszcze nie ma** — to następna rzecz do zrobienia po podpięciu serwera.
-Bez niego każde urządzenie ma własną, osobną farmę, tyle że trzymaną
+Bez niego każde urządzenie ma własną, osobną fermę, tyle że trzymaną
 na serwerze zamiast w przeglądarce.
 
 Uwaga na przyszłość, o której pamiętam: przy wpisywaniu cudzego kodu na
 urządzeniu, które ma nowszy zapis lokalny, trzeba wymusić pobranie
-z serwera — inaczej wygra lokalny i przepisze cudzą farmę. Zrobię to
+z serwera — inaczej wygra lokalny i przepisze cudzą fermę. Zrobię to
 przy okazji tego okienka.
 
 ---
@@ -144,7 +144,7 @@ kilkadziesiąt linii backendu. Protokół jest w `services/cloud.gd`.
 
 Darmowy projekt Supabase **usypia po tygodniu bez ruchu w bazie**. Uśpiona
 baza nie przyjmuje żadnych połączeń, więc gra pokazuje „serwer nie
-odpowiada" i nie da się wczytać farmy z kodu. Po Twoim pomyśle, żeby
+odpowiada" i nie da się wczytać fermy z kodu. Po Twoim pomyśle, żeby
 pingować bazę automatycznie, wstawiłem do repozytorium zadanie, które to
 robi za nas:
 
@@ -158,7 +158,7 @@ nie ma nic do poprawienia w dwóch miejscach.
 Jeśli baza nie odpowie poprawnie, zadanie kończy się błędem, a GitHub
 przyśle Ci maila. To znaczy, że dostaniesz ostrzeżenie **zanim** projekt
 zaśnie na dobre, a nie dopiero wtedy, gdy ktoś nie będzie mógł wczytać
-farmy.
+fermy.
 
 ### Jak sprawdzić, że działa (klikalnie, bez zgadywania)
 
@@ -177,6 +177,6 @@ ekranu z tej strony, tam jest napisany dokładny powód.
 ### Czego to NIE naprawia
 
 To zadanie trzyma bazę obudzoną. Nie tworzy kopii zapasowej zapisów —
-jeśli kiedyś skasujesz tabelę albo Supabase coś zgubi, farmy przepadają.
+jeśli kiedyś skasujesz tabelę albo Supabase coś zgubi, fermy przepadają.
 Osobna kopia zapasowa jest na liście do zrobienia
 (`POMYSLY_BUGI_SUGESTIE.TXT`, punkt 4.3).

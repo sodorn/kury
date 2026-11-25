@@ -286,21 +286,18 @@ func _decide(dt: float) -> void:
 
 
 func _doctor() -> void:
-	if _state.sick_count() == 0:
-		return
+	# Leku nie ma (12.20): chora jest stracona, wiec bot od razu sprzedaje ja
+	# do McDonalda — 5 zl lepsze niz trup.
 	for i in range(_state.chickens.size() - 1, -1, -1):
 		if i >= _state.chickens.size():
 			continue
 		var hen: Chicken = _state.chickens[i]
-		if not hen.sick:
-			continue
-		var worth := FarmState.hen_sell_price(hen.breed_id, false, hen.is_rooster)
-		if worth > Game.medicine_price() * 1.5 and _state.money >= Game.medicine_price():
-			Game.buy_medicine()
-		else:
+		if hen.sick:
 			Game.cull_hen(hen.breed_id, hen.is_rooster)
-	if _state.hen_count() >= 15 and _state.unvaccinated_count() >= 10 \
-			and _state.money > Game.vaccine_price() * 6.0:
+	# Szczepienie: gdy stado przekroczy 15 sztuk albo wlasnie trwa ognisko.
+	var worth_it := _state.hen_count() >= 15 or _state.outbreak_on
+	if worth_it and _state.unvaccinated_count() >= 3 \
+			and _state.money > Game.vaccine_price() * 2.0:
 		Game.buy_vaccine()
 		_mark("szczepienie")
 

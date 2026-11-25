@@ -4,7 +4,28 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.19): ROZBUDOWA TRWA - kurnik,
+- Aktualny etap: **ETAP 10** (wersja 12.20): CHOROBA JAKO OGNISKA - kostka co
+  minute zegara, szansa z krzywej disease.rate_per_hour od wielkosci stada
+  (do 10 ptakow 0, 20 -> 0,05/h, 50 -> 0,5/h, od 100 -> 1,5/h); wybuch zaraza
+  30-100% stada (co 10%, ceil), jedna kura co minute; chora pada po 5 min
+  ZEGARA; LEKU NIE MA (usuniete medicine_price, buy_medicine, przycisk);
+  szczepionka chroni tylko zdrowe i nie leczy (unvaccinated_count bez chorych);
+  po ognisku 3-12 h spokoju. Stan: FarmState.outbreak_on/left/timer/dead,
+  disease_calm (zapis; stare zapisy = 0). Wiersz "Choroba" w kurniku.
+  LIS: RZEZ - bez psa 5% wejsc wybija cale stado (fox.massacre_chance,
+  massacre_pace_factor 0,25; FarmState.fox_massacre). GAME OVER:
+  Simulation.check_bankrupt (brak zdrowej pary, pisklat, wylegu i jaj na
+  wyleg + gotowka nie starcza na brakujaca pare), Events.game_over,
+  GameOverPanel (pelny ekran), restart pod TYM SAMYM kodem
+  (Game.restart_after_game_over). Sklep: 2 kolumny (Kup kure | Sprzedaj kure,
+  Kup koguta | Sprzedaj koguta), suwak rusza od 2/3 drogi (DONE_AT 0,66),
+  droga galki max 360 px. Okno nowej rasy na ~70% ekranu: gratulacje, MALOWANY
+  PORTRET (tools/gen_portraits.py -> assets/portraits/*.webp, rsvg + PIL),
+  historia i 3 ciekawostki (breeds.json "facts", sprawdzone w sieci 25.11;
+  poprawione nieprawdy w historiach: feniks sie pierzy, cemani ma czerwona
+  krew, onagadori >10 m, dong tao do 2000 USD). FARMA -> FERMA w tekstach.
+  Czas w grze aktywnej i w tle plynie TAK SAMO (offline.scale 1/3).
+- Wersja 12.19: ROZBUDOWA TRWA - kurnik,
   magazyn i inkubator buduja sie 5/8/12/17/23/30/38/48/60 min zegara
   (upgrades[].build_minutes; FarmState.construction, Simulation._advance_construction,
   idzie tez w tle, przezywa zapis); tabliczka "Budowa m:ss" nad budynkiem.

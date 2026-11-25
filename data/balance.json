@@ -14,7 +14,7 @@
     ]
   },
   "economy": {
-    "_opis": "Ceny jak na rynku w listopadzie 2026 (wlasciciel, 24.11: 'realizm, o ile nie zepsuje grywalnosci'): worek 25 kg paszy dla niosek 50 zl (2 zl/kg, detal; hurt w magazynie do -40%), jaja w skupie 0,45-2,00 zl zaleznie od rasy. feed_per_hen_minute w kilogramach na ptaka na minute GRY. Pelny realizm (ok. 2,0 kg = tyle paszy na jajo co u prawdziwej nioski) testowal bot 24 h: gracz grajacy sesjami tracil cale stado z glodu w przerwach. 0,65 to najwiecej, przy czym gracz z pieciu sesji dziennie jeszcze utrzymuje farme (stosunek jaja/pasza ok. 8x zamiast 17,6x w 12.17 i 2,5x w rzeczywistosci). egg_spoil_hours: po tylu godzinach REALNYCH niesprzedane jaja sie psuja. feed_bulk_packs: ile workow kupuje przycisk hurtowy.",
+    "_opis": "Ceny jak na rynku w listopadzie 2026 (wlasciciel, 24.11: 'realizm, o ile nie zepsuje grywalnosci'): worek 25 kg paszy dla niosek 50 zl (2 zl/kg, detal; hurt w magazynie do -40%), jaja w skupie 0,45-2,00 zl zaleznie od rasy. feed_per_hen_minute w kilogramach na ptaka na minute GRY. Pelny realizm (ok. 2,0 kg = tyle paszy na jajo co u prawdziwej nioski) testowal bot 24 h: gracz grajacy sesjami tracil cale stado z glodu w przerwach. 0,65 to najwiecej, przy czym gracz z pieciu sesji dziennie jeszcze utrzymuje ferme (stosunek jaja/pasza ok. 8x zamiast 17,6x w 12.17 i 2,5x w rzeczywistosci). egg_spoil_hours: po tylu godzinach REALNYCH niesprzedane jaja sie psuja. feed_bulk_packs: ile workow kupuje przycisk hurtowy.",
     "feed_pack_size": 25,
     "feed_pack_price": 50,
     "rooster_price_multiplier": 2.5,
@@ -117,21 +117,23 @@
     "reference_hens": 10
   },
   "disease": {
-    "_opis": "CHOROBA. Ta sama logika co lis, tylko DWA RAZY czesciej: w grze aktywnej kostka co active_roll_minutes minut realnych z szansa active_chance, w nieaktywnej co offline_roll_hours godzin z szansa offline_chance. Lis losuje co 60 minut i co 24 godziny — choroba co 30 i co 12. Przez pierwsze grace_minutes i przy stadzie mniejszym niz min_hens nikt nie choruje. Drozsza rasa choruje czesciej (waga to pierwiastek z ceny). Chora kura pada po death_minutes minutach GRY, jesli jej nie wyleczysz.",
-    "death_minutes": 7.0,
-    "medicine_price": 20,
+    "_opis": "CHOROBA (12.20, wlasciciel 25.11). Ogniska zamiast pojedynczych zachorowan. Co roll_seconds sekund REALNYCH kostka z szansa z krzywej rate_per_hour (pary [liczba ptakow, szansa na godzine], miedzy punktami liniowo): do 10 ptakow zero, przy 20 rzadko, przy 50 czesto, od 100 bardzo czesto. Wybuch zaraza od kill_share_min do kill_share_max stada w krokach kill_share_step, zaokraglone w gore, po jednej kurze co spread_seconds. Chora pada po death_minutes minutach REALNYCH. Leku nie ma; chora mozna tylko sprzedac do McDonalda za mcdonalds_price. Szczepionka chroni zdrowe, chorych nie leczy. Po wygasnieciu ogniska calm_hours_min..calm_hours_max godzin spokoju. Przez pierwsze grace_minutes gry nikt nie choruje. Drozsza rasa zaraza sie chetniej (waga = pierwiastek z ceny).",
+    "death_minutes": 5.0,
     "vaccine_price": 0,
     "vaccine_price_per_hen": 5,
     "grace_minutes": 30,
-    "min_hens": 5,
     "mcdonalds_price": 5,
-    "active_roll_minutes": 30.0,
-    "active_chance": 0.3333333333,
-    "offline_roll_hours": 12.0,
-    "offline_chance": 0.1666666667
+    "roll_seconds": 60.0,
+    "rate_per_hour": [[10, 0.0], [20, 0.05], [50, 0.5], [100, 1.5]],
+    "spread_seconds": 60.0,
+    "kill_share_min": 0.3,
+    "kill_share_max": 1.0,
+    "kill_share_step": 0.1,
+    "calm_hours_min": 3.0,
+    "calm_hours_max": 12.0
   },
   "fox": {
-    "_opis": "LIS. Losowanie przyjscia: w grze AKTYWNEJ co active_roll_minutes minut realnych z szansa active_chance, w NIEaktywnej co offline_roll_hours godzin z szansa offline_chance. Po wejsciu lis zabija jedna kure co kill_interval_min..max sekund REALNYCH i odchodzi, gdy zabije kills_min..max sztuk. visit_max_minutes to tylko bezpiecznik, zeby lis nigdy nie zostal na wybiegu w nieskonczonosc. Gracz moze go przegonic scare_taps trafieniami; wtedy wraca hand_return_factor raza szybciej, chyba ze gospodarstwo ma psa albo plot. Lis ZABITY przez psa nie wraca wcale — nastepny przychodzi killed_return_multiplier raza pozniej.",
+    "_opis": "LIS. Losowanie przyjscia: w grze AKTYWNEJ co active_roll_minutes minut realnych z szansa active_chance, w NIEaktywnej co offline_roll_hours godzin z szansa offline_chance. Po wejsciu lis zabija jedna kure co kill_interval_min..max sekund REALNYCH i odchodzi, gdy zabije kills_min..max sztuk. visit_max_minutes to tylko bezpiecznik, zeby lis nigdy nie zostal na wybiegu w nieskonczonosc. Gracz moze go przegonic scare_taps trafieniami; wtedy wraca hand_return_factor raza szybciej, chyba ze gospodarstwo ma psa albo plot. Lis ZABITY przez psa nie wraca wcale — nastepny przychodzi killed_return_multiplier raza pozniej. RZEZ (12.20): na gospodarstwie BEZ psa massacre_chance wejsc konczy sie wybiciem calego stada; lis zabija wtedy massacre_pace_factor raza czesciej i zostaje, az skonczy, chyba ze gracz go przegoni.",
     "grace_minutes": 30.0,
     "min_hens": 5,
     "active_roll_minutes": 60.0,
@@ -149,7 +151,9 @@
     "killed_return_multiplier": 5.0,
     "lurk_min_seconds": 10.0,
     "lurk_max_seconds": 30.0,
-    "approach_seconds": 4.0
+    "approach_seconds": 4.0,
+    "massacre_chance": 0.05,
+    "massacre_pace_factor": 0.25
   },
   "win": {
     "_opis": "Jeden cel: pieniadze. Kolekcja ras przestala byc wyzwaniem, gdy zniknely progi odblokowania — po jednej sztuce kazdej rasy da sie kupic w niecale szesc godzin.",
@@ -340,7 +344,7 @@
     }
   },
   "session": {
-    "_opis": "require_code: czy ekran powitalny ma wymagac wpisania kodu farmy zamiast pozwalac kliknac 'Graj dalej'. require_code_after_minutes: 0 znaczy ZAWSZE, a liczba wieksza od zera — dopiero gdy od ostatniego zapisu minelo tyle minut realnych. Wlasciciel chce na razie 'zawsze': kazde wejscie ma pobierac caly stan z serwera, zeby bylo pewne, ze wczytywanie dziala i zeby dalo sie przeskakiwac miedzy farmami bez czyszczenia ciasteczek. Gracz, ktory nie ma jeszcze zadnej farmy, nie jest o nic pytany — nie ma czego wczytywac.",
+    "_opis": "require_code: czy ekran powitalny ma wymagac wpisania kodu fermy zamiast pozwalac kliknac 'Graj dalej'. require_code_after_minutes: 0 znaczy ZAWSZE, a liczba wieksza od zera — dopiero gdy od ostatniego zapisu minelo tyle minut realnych. Wlasciciel chce na razie 'zawsze': kazde wejscie ma pobierac caly stan z serwera, zeby bylo pewne, ze wczytywanie dziala i zeby dalo sie przeskakiwac miedzy fermami bez czyszczenia ciasteczek. Gracz, ktory nie ma jeszcze zadnej fermy, nie jest o nic pytany — nie ma czego wczytywac.",
     "require_code": true,
     "require_code_after_minutes": 0.0
   }

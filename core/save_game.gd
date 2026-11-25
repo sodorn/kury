@@ -63,6 +63,11 @@ static func to_dict(state: FarmState, unpaid_seconds: float = 0.0) -> Dictionary
 		"fox_roll_timer": state.fox_roll_timer,
 		"fox_hand_scared": state.fox_hand_scared,
 		"disease_timer": state.disease_timer,
+		"outbreak_on": state.outbreak_on,
+		"outbreak_left": state.outbreak_left,
+		"outbreak_timer": state.outbreak_timer,
+		"outbreak_dead": state.outbreak_dead,
+		"disease_calm": state.disease_calm,
 		"fox_visit_left": state.fox_visit_left,
 		"fox_pending": state.fox_pending,
 		"event_dry": state.event_dry,
@@ -107,6 +112,15 @@ static func from_dict(data: Dictionary) -> Dictionary:
 	state.fox_roll_timer = maxf(0.0, float(data.get("fox_roll_timer", 0.0)))
 	state.fox_hand_scared = bool(data.get("fox_hand_scared", false))
 	state.disease_timer = maxf(0.0, float(data.get("disease_timer", 0.0)))
+	# Ognisko choroby (od 12.20). Starsze zapisy go nie znaja — zaczynaja bez
+	# ogniska i bez okresu spokoju; chore kury ze starego zapisu i tak dojda
+	# do konca choroby.
+	state.outbreak_on = bool(data.get("outbreak_on", false))
+	state.outbreak_left = maxi(0, int(data.get("outbreak_left", 0)))
+	state.outbreak_timer = maxf(0.0, float(data.get("outbreak_timer", 0.0)))
+	state.outbreak_dead = maxi(0, int(data.get("outbreak_dead", 0)))
+	state.disease_calm = maxf(0.0, float(data.get("disease_calm", 0.0)))
+	state.fox_massacre = false
 	state.rooster_hints = Dictionary(data.get("rooster_hints", {}))
 	# Licznik suchych minut przenosi sie przez zapis — na tym polega narastanie
 	# szansy przy graniu z doskoku. Stare zapisy zaczynaja od zera.

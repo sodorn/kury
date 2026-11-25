@@ -79,3 +79,9 @@ signal game_won(reason: String)
 ## nie jako znikajacy pasek.
 @warning_ignore("unused_signal")
 signal alert(title: String, message: String)
+
+
+## Gry nie da sie kontynuowac: brak pary do rozrodu i brak pieniedzy na nia.
+## Pokazuje pelnoekranowe GAME OVER.
+@warning_ignore("unused_signal")
+signal game_over()

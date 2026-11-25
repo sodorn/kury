@@ -22,10 +22,10 @@ i katalog `D:\GIT\kury`.
          |
          | HTTPS, zapis i odczyt farm
          v
-  Supabase                    baza danych z farmami graczy
+  Supabase                    baza danych z fermami graczy
 
   Zapisy graczy NIE sa w grze ani w repozytorium. Siedza w Supabase.
-  Dlatego cofniecie wersji gry nie kasuje nikomu farmy.
+  Dlatego cofniecie wersji gry nie kasuje nikomu fermy.
 
 
 ================================================================================
@@ -34,7 +34,7 @@ i katalog `D:\GIT\kury`.
 
   Numer:  11.6
           |  \__ druga cyfra: kazde wydanie (poprawki, interfejs, balans)
-          \____ pierwsza: ZMIANA FORMATU ZAPISU - uwaga na stare farmy
+          \____ pierwsza: ZMIANA FORMATU ZAPISU - uwaga na stare fermy
 
   Numer widac na dole ekranu powitalnego w grze.
   Jesli jest inny, niz oczekujesz -> Ctrl+Shift+R (przegladarka trzyma stara).
@@ -131,7 +131,7 @@ i katalog `D:\GIT\kury`.
      Co oznacza kazda liczba: DOKUMENTACJA_TECHNICZNA.txt, rozdzial 7.
 
      Co to psuje: nic poza galezia gh-pages (sama zbudowana gra).
-     Zrodla zostaja. Farmy graczy zostaja - sa w Supabase.
+     Zrodla zostaja. Fermy graczy zostaja - sa w Supabase.
 
 
 ================================================================================
@@ -147,12 +147,12 @@ i katalog `D:\GIT\kury`.
 
   Tabela ma trzy kolumny:
 
-      player_id   text    KOD FARMY, szesc cyfr. Klucz glowny.
-      payload     jsonb   caly stan farmy jako JSON
+      player_id   text    KOD FERMY, szesc cyfr. Klucz glowny.
+      payload     jsonb   caly stan fermy jako JSON
       updated_at  bigint  czas uniksowy ostatniego zapisu
 
-  Kod farmy = player_id. Kto zna kod, ten ma dostep do farmy.
-  Zadnych hasel - swiadomy kompromis, zeby dalo sie przerzucic farme
+  Kod fermy = player_id. Kto zna kod, ten ma dostep do fermy.
+  Zadnych hasel - swiadomy kompromis, zeby dalo sie przerzucic ferme
   z telefonu na komputer bez zakladania konta.
 
   updated_at sluzy do rozstrzygania, kto wygrywa: gdy gra widzi na
@@ -198,7 +198,7 @@ i katalog `D:\GIT\kury`.
       $url = "https://xrhehgxmaspopvvflcrn.supabase.co/rest/v1/saves?select=player_id,updated_at"
       Invoke-RestMethod -Uri $url -Headers $h
 
-  Jedna konkretna farma:
+  Jedna konkretna ferma:
       $url = "https://xrhehgxmaspopvvflcrn.supabase.co/rest/v1/saves?player_id=eq.327733&select=player_id,updated_at"
       Invoke-RestMethod -Uri $url -Headers $h
 
@@ -208,11 +208,11 @@ i katalog `D:\GIT\kury`.
   SPOSOB 3: przez GitHub Actions, bez wpisywania czegokolwiek
   -----------------------------------------------------------
       github.com/sodorn/kury/actions
-      -> po lewej "Sprawdz farme w bazie"
-      -> "Run workflow" -> wpisz kod farmy -> "Run workflow"
+      -> po lewej "Sprawdz ferme w bazie"
+      -> "Run workflow" -> wpisz kod fermy -> "Run workflow"
       -> odswiez, kliknij przebieg, kliknij "sprawdz"
 
-  Powie, czy farma jest w bazie, kiedy byla zapisana i ile farm jest
+  Powie, czy ferma jest w bazie, kiedy byla zapisana i ile farm jest
   w ogole. Nie pokazuje zawartosci zapisu.
 
   SPOSOB 4: w panelu Supabase
@@ -278,7 +278,7 @@ i katalog `D:\GIT\kury`.
 ================================================================================
 
   STAN NA DZIS: automatycznej kopii NIE MA. Jesli tabela zniknie,
-  farmy przepadaja. Zrobienie tego automatem jest w kolejce
+  fermy przepadaja. Zrobienie tego automatem jest w kolejce
   (POMYSLY_BUGI_SUGESTIE.TXT, punkt 4.3).
 
   Recznie, z PowerShella - caly stan bazy do pliku:

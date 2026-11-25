@@ -67,6 +67,8 @@ func _ready() -> void:
 	_test_money_format()
 	_test_hatch_sex()
 	_test_fox_lurk()
+	_test_fox_massacre()
+	_test_game_over()
 	_test_fox_left_and_victims()
 	_test_feed_bulk()
 	_test_construction()
@@ -132,6 +134,10 @@ func _never_event(kind: String) -> void:
 	cfg["offline_chance"] = 0.0
 	cfg["min_hens"] = 1000000
 	cfg["grace_minutes"] = 1000000.0
+	# Choroba od 12.20 chodzi na krzywej szansy od wielkosci stada.
+	cfg["rate_per_hour"] = [[0, 0.0]]
+	# Lis: bez rzezi.
+	cfg["massacre_chance"] = 0.0
 
 
 func _fresh_state(hens: Array[String] = ["leghorn"], feed := 100.0) -> FarmState:
@@ -675,45 +681,220 @@ func _test_hunger() -> void:
 	Game.new_game()
 
 
-## Choroby: chora kura nie znosi, po czasie pada, a szczepienie chroni.
+## Choroby (12.20): ogniska. Chora nie znosi i pada po death_minutes minutach
+## REALNYCH; wybuch zaraza 30-100% stada po jednej kurze co minute; leku nie
+## ma; szczepionka chroni tylko zdrowe; po ognisku 3-12 godzin spokoju.
 func _test_disease() -> void:
+	var backup := _snapshot_event("disease")
+	var fox_backup := _snapshot_event("fox")
+	_never_event("fox")
 	var disease: Dictionary = GameData.balance().get("disease", {})
-	var death_seconds := float(disease.get("death_minutes", 7.0)) * 60.0
+	var scale := GameData.time_scale()
+	var death_real := float(disease.get("death_minutes", 5.0)) * 60.0
 
 	var sick := _fresh_state(["cemani"], 100.0)
 	sick.chickens[0].sick = true
 	var before := sick.eggs_on_ground.size()
-	Simulation.advance(sick, 300.0)
+	Simulation.advance(sick, 60.0)
 	_check(sick.eggs_on_ground.size() == before, "chora kura nie znosi jaj")
 	_check(sick.chickens[0].progress() == 0.0, "postep jajka chorej kury stoi na zerze")
 
+	# Smierc liczona zegarkiem: tuz przed czasem zyje, po czasie pada.
 	var dying := _fresh_state(["leghorn"], 100.0)
 	dying.chickens[0].sick = true
-	var result := Simulation.advance(dying, death_seconds + 5.0)
-	_check(int(result["died_disease"]) == 1, "chora kura pada po wyznaczonym czasie")
+	var early := Simulation.advance(dying, (death_real - 10.0) * scale)
+	_check(int(early["died_disease"]) == 0, "chora zyje jeszcze chwile przed czasem")
+	var result := Simulation.advance(dying, 15.0 * scale)
+	_check(int(result["died_disease"]) == 1, "chora kura pada po death_minutes minutach realnych")
 	_check(dying.chickens.is_empty() and dying.corpses.size() == 1, "po chorej kurze zostaja zwloki")
+	_check(float(disease.get("death_minutes", 0.0)) <= 6.0, "choroba zabija w kilka minut, nie w kwadrans")
 
-	var vaccinated := _fresh_state(["leghorn"], 100000.0)
-	for i in 30:
-		var hen := Chicken.create("leghorn")
+	# Krzywa szansy: do 10 ptakow zero, potem rosnie ze stadem.
+	_check(FarmState.disease_rate_per_hour(5) == 0.0, "stado 5: zero szansy")
+	_check(FarmState.disease_rate_per_hour(10) == 0.0, "stado 10: zero szansy")
+	var r20 := FarmState.disease_rate_per_hour(20)
+	var r50 := FarmState.disease_rate_per_hour(50)
+	var r100 := FarmState.disease_rate_per_hour(100)
+	_check(r20 > 0.0 and r20 <= 0.1, "stado 20: niska szansa (%.3f/h)" % r20)
+	_check(r50 >= 0.3, "stado 50: czesta choroba (%.2f/h)" % r50)
+	_check(r100 > r50 and r100 >= 1.0, "stado 100: bardzo czesta (%.2f/h)" % r100)
+	_check(is_equal_approx(FarmState.disease_rate_per_hour(400), r100), "powyzej 100 plasko")
+	_check(FarmState.disease_rate_per_hour(15) > 0.0 and FarmState.disease_rate_per_hour(15) < r20,
+			"miedzy punktami liniowo")
+
+	# Zaokraglenie w gore i przyklad wlasciciela: 40% ze 100 kur = 40 kur.
+	for case: Array in [[100, 0.4, 40], [100, 0.3, 30], [15, 0.3, 5], [15, 1.0, 15], [7, 0.3, 3]]:
+		disease["kill_share_min"] = case[1]
+		disease["kill_share_max"] = case[1]
+		var herd := _herd(int(case[0]))
+		var out := _empty_out()
+		Simulation._start_outbreak(herd, out, 1 << 30)
+		_check(int(out.get("outbreak", 0)) == int(case[2]),
+				"%d ptakow x %d%% = %d zarazonych (wyszlo %d)" % [case[0], int(case[1] * 100), case[2],
+				int(out.get("outbreak", 0))])
+	_restore_event("disease", backup)
+	disease = GameData.balance().get("disease", {})
+
+	# Losowanie udzialu w krokach 10%: przy 15 ptakach mozliwe tylko
+	# ceil(15 * 0.3) .. 15 z tych progow, i wypadaja oba konce.
+	var allowed := {}
+	for k in range(3, 11):
+		allowed[ceili(15 * k / 10.0 - 0.0001)] = true
+	var seen := {}
+	var bad := 0
+	for i in 300:
+		var herd := _herd(15)
+		var out := _empty_out()
+		Simulation._start_outbreak(herd, out, 1 << 30)
+		var target := int(out.get("outbreak", 0))
+		seen[target] = true
+		if not allowed.has(target):
+			bad += 1
+	_check(bad == 0, "udzial tylko z progow 30%..100% co 10%")
+	_check(seen.has(5) and seen.has(15), "wypada i 30%, i 100% stada")
+
+	# Przebieg ogniska: pierwsza od razu, potem jedna na minute.
+	disease["rate_per_hour"] = [[0, 100000.0]]
+	disease["kill_share_min"] = 0.4
+	disease["kill_share_max"] = 0.4
+	var farm := _herd(100)
+	_past_grace(farm)
+	# 90 s zamiast 60: kostka rzuca co pelne 60 s zegara, a krok 1 s gry to
+	# 3 s zegara z bledem zaokraglen — rowne 60 bywa 59,9999.
+	var start := Simulation.advance(farm, 90.0 * scale)
+	_check(int(start.get("outbreak", 0)) == 40, "wybuch zaplanowal 40 zarazen")
+	_check(farm.outbreak_on, "ognisko trwa")
+	var sick_now := farm.sick_count()
+	_check(sick_now >= 1 and sick_now <= 2, "na starcie choruje jedna, najwyzej dwie (%d)" % sick_now)
+	Simulation.advance(farm, 180.0 * scale)
+	_check(farm.sick_count() == sick_now + 3, "trzy minuty pozniej o trzy chore wiecej (%d)" % farm.sick_count())
+	# Pare godzin: ognisko wygasa po dokladnie 40 stratach.
+	var dead := 0
+	var over := 0
+	var over_dead := -1
+	var new_outbreaks := 0
+	for i in 120:
+		var step := Simulation.advance(farm, 60.0 * scale)
+		dead += int(step["died_disease"])
+		new_outbreaks += 1 if int(step.get("outbreak", 0)) > 0 else 0
+		if int(step.get("outbreak_over", 0)) > 0:
+			over += 1
+			over_dead = int(step.get("outbreak_dead", -1))
+	_check(dead == 40, "ognisko zabilo dokladnie 40 kur (%d)" % dead)
+	_check(farm.hen_count() == 60, "zostalo 60 kur (%d)" % farm.hen_count())
+	_check(over == 1 and over_dead == 40, "koniec ogniska zgloszony raz, z bilansem 40")
+	_check(not farm.outbreak_on and farm.sick_count() == 0, "po ognisku nikt nie choruje")
+	_check(new_outbreaks == 0, "w czasie spokoju nie wybucha nowe ognisko")
+	var calm_h := farm.disease_calm / 3600.0
+	_check(calm_h > 0.0 and calm_h <= float(disease.get("calm_hours_max", 12.0)),
+			"po ognisku spokoj (zostalo %.1f h)" % calm_h)
+	# Koniec spokoju: przy szansie 100000/h kolejne ognisko wybucha od razu.
+	Simulation.advance(farm, (farm.disease_calm + 120.0) * scale)
+	_check(farm.outbreak_on or farm.sick_count() > 0 or farm.hen_count() < 60,
+			"po spokoju choroba wraca")
+
+	# Spokoj trwa od calm_hours_min do calm_hours_max.
+	var low := float(disease.get("calm_hours_min", 3.0)) * 3600.0
+	var high := float(disease.get("calm_hours_max", 12.0)) * 3600.0
+	var calm_bad := 0
+	for i in 50:
+		var x := _herd(20)
+		x.outbreak_on = true
+		Simulation._end_outbreak(x, _empty_out())
+		if x.disease_calm < low or x.disease_calm > high:
+			calm_bad += 1
+	_check(calm_bad == 0 and low >= 3.0 * 3600.0 and high <= 12.0 * 3600.0, "spokoj 3-12 godzin")
+
+	# Szczepienie: zaszczepione nie lapia, ognisko gasnie, gdy brak kogo zarazic.
+	disease["kill_share_min"] = 1.0
+	disease["kill_share_max"] = 1.0
+	var vax := _herd(100)
+	_past_grace(vax)
+	for i in 60:
+		vax.chickens[i].vaccinated = true
+	var vax_dead := 0
+	for i in 90:
+		vax_dead += int(Simulation.advance(vax, 60.0 * scale)["died_disease"])
+	var vax_sick := 0
+	for hen: Chicken in vax.chickens:
+		if hen.vaccinated and hen.sick:
+			vax_sick += 1
+	_check(vax_sick == 0, "zaszczepiona kura nie choruje")
+	_check(vax_dead == 40, "przy 100%% padaja tylko niezaszczepione (%d z 40)" % vax_dead)
+	_check(vax.hen_count() == 60, "zaszczepione przezyly (%d)" % vax.hen_count())
+
+	# Cale stado zaszczepione: kostka nie ma kogo zarazic.
+	var all_vax := _herd(50)
+	_past_grace(all_vax)
+	for hen: Chicken in all_vax.chickens:
 		hen.vaccinated = true
-		vaccinated.chickens.append(hen)
-	var vax_result := Simulation.advance(vaccinated, 12.0 * 3600.0)
-	var vaccinated_sick := 0
-	for hen: Chicken in vaccinated.chickens:
-		if hen.sick and hen.vaccinated:
-			vaccinated_sick += 1
-	_check(vaccinated_sick == 0, "zaszczepiona kura nie choruje")
-	_check(int(vax_result["died_disease"]) <= 1, "zaszczepione stado nie pada z choroby")
+	var none := Simulation.advance(all_vax, 3600.0 * scale)
+	_check(int(none.get("outbreak", 0)) == 0 and not all_vax.outbreak_on, "w pelni zaszczepione stado nie choruje")
 
-	# Niezaszczepione stado po dlugim czasie musi w ogole chorowac,
-	# inaczej mechanika byla by martwa.
-	var exposed := _fresh_state(["leghorn"], 100000.0)
-	for i in 30:
-		exposed.chickens.append(Chicken.create("leghorn"))
-	var exposed_result := Simulation.advance(exposed, 12.0 * 3600.0)
-	_check(int(exposed_result["got_sick"]) > 0, "niezaszczepione stado choruje")
+	# Karencja: mloda farma nie choruje mimo pewnej kostki.
+	var young := _herd(100)
+	var quiet := Simulation.advance(young, 600.0 * scale)
+	_check(int(quiet["got_sick"]) == 0, "w okresie ochronnym nikt nie choruje")
+
+	# Gra w tle: bezpiecznik strat (polowa stada) dziala tez na ognisko.
+	var away := _herd(100)
+	_past_grace(away)
+	var away_out := Simulation.advance(away, 3.0 * 3600.0 * scale, true)
+	var away_loss := int(away_out["died_disease"])
+	_check(away_loss > 0 and away_loss <= 50, "w tle ognisko zabija najwyzej polowe (%d)" % away_loss)
+	_restore_event("disease", backup)
+
+	# Domyslna krzywa: stado 10 nie choruje przez dobe.
+	var small := _herd(10)
+	_past_grace(small)
+	var small_out := Simulation.advance(small, 24.0 * 3600.0 * scale, true)
+	_check(int(small_out["got_sick"]) == 0, "stado do 10 ptakow nie choruje wcale")
+
+	# Domyslna krzywa: stado 100 bez szczepien choruje w ciagu doby.
+	var big := _herd(100)
+	_past_grace(big)
+	var big_sick := 0
+	for i in 24:
+		big_sick += int(Simulation.advance(big, 3600.0 * scale)["got_sick"])
+	_check(big_sick > 0, "stado 100 bez szczepien choruje w ciagu doby")
+
+	# Zapis przenosi ognisko i spokoj.
+	var saved := _herd(30)
+	saved.outbreak_on = true
+	saved.outbreak_left = 7
+	saved.outbreak_timer = 12.5
+	saved.outbreak_dead = 3
+	saved.disease_calm = 999.0
+	var back: FarmState = SaveGame.from_dict(SaveGame.to_dict(saved))["state"]
+	_check(back.outbreak_on and back.outbreak_left == 7 and back.outbreak_dead == 3
+			and is_equal_approx(back.outbreak_timer, 12.5) and is_equal_approx(back.disease_calm, 999.0),
+			"ognisko i spokoj przezywaja zapis")
+	var old_save := SaveGame.to_dict(_herd(3))
+	for key: String in ["outbreak_on", "outbreak_left", "outbreak_timer", "outbreak_dead", "disease_calm"]:
+		old_save.erase(key)
+	var old_back: FarmState = SaveGame.from_dict(old_save)["state"]
+	_check(not old_back.outbreak_on and old_back.disease_calm == 0.0, "stary zapis bez ogniska wczytuje sie")
+
+	_restore_event("disease", backup)
+	_restore_event("fox", fox_backup)
 	Game.new_game()
+
+
+## Stado `count` leghornow z zapasem paszy na dlugo.
+func _herd(count: int) -> FarmState:
+	var hens: Array[String] = []
+	for i in count:
+		hens.append("leghorn")
+	return _fresh_state(hens, 10000000.0)
+
+
+## Przesuwa wiek farmy za karencje zdarzen (pol godziny zegarka z zapasem).
+func _past_grace(state: FarmState) -> void:
+	state.days = int(3600.0 * GameData.time_scale() / 600.0) + 2
+
+
+func _empty_out() -> Dictionary:
+	return {"died_hunger": 0, "died_disease": 0, "fox_took": 0, "got_sick": 0}
 
 
 ## Lis: przychodzi, daje graczowi chwile na reakcje i dopiero potem zabiera
@@ -824,6 +1005,8 @@ func _arm_fox(state: FarmState) -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})
 	fox["active_chance"] = 1.0
 	fox["offline_chance"] = 1.0
+	# Rzez ma wlasny test (_test_fox_massacre); tu lis bierze zwykly lup.
+	fox["massacre_chance"] = 0.0
 	# Bez fazy w krzakach: stare testy sprawdzaja wejscie w tym samym kroku.
 	# Czajenie sie i podchodzenie pod plot ma wlasny test (_test_fox_lurk).
 	fox["lurk_min_seconds"] = 0.0
@@ -894,22 +1077,32 @@ func _test_vet_and_selling() -> void:
 	Game.state.money = 100000.0
 
 	_check(Game.state.sick_count() == 2, "licznik chorych kur")
-	var before := Game.state.money
-	_check(Game.buy_medicine(), "lek da sie kupic, gdy sa chore kury")
-	_check(Game.state.money < before, "lek kosztuje")
-	_check(Game.state.sick_count() == 1, "lek leczy jedna kure")
-	var cured_cemani := true
+	# Leku nie ma (wlasciciel 25.11): ani w grze, ani w balansie.
+	_check(not Game.has_method("buy_medicine") and not Game.has_method("medicine_price"),
+			"w grze nie ma leku")
+	_check(not (GameData.balance().get("disease", {}) as Dictionary).has("medicine_price"),
+			"balans nie zna ceny leku")
+	# Szczepionka nie leczy i nie liczy chorych do ceny.
+	Game.state.chickens.append(Chicken.create("rhode"))
+	_check(Game.state.unvaccinated_count() == 1, "do szczepienia liczy sie tylko zdrowa")
+	var per_hen := float(GameData.balance()["disease"].get("vaccine_price_per_hen", 0))
+	var base := float(GameData.balance()["disease"].get("vaccine_price", 0))
+	_check(is_equal_approx(Game.vaccine_price(), base + per_hen), "cena szczepienia tylko za zdrowe")
+	_check(Game.buy_vaccine(), "szczepienie da sie kupic")
+	_check(Game.state.sick_count() == 2, "szczepionka nie leczy chorych")
+	var sick_vaccinated := 0
 	for hen: Chicken in Game.state.chickens:
-		if hen.breed_id == "cemani" and hen.sick:
-			cured_cemani = false
-	_check(cured_cemani, "lek ratuje najdrozsza chora kure")
+		if hen.sick and hen.vaccinated:
+			sick_vaccinated += 1
+	_check(sick_vaccinated == 0, "chore nie dostaja szczepienia")
+	_check(Game.state.vaccinated_count() == 1, "zaszczepiona jest tylko zdrowa")
 
 	_check(FarmState.hen_sell_price("leghorn") < float(GameData.breed("leghorn").get("price", 0)),
 			"sprzedaz jest tansza od zakupu")
 	_check(is_zero_approx(FarmState.hen_sell_price("leghorn", true)),
 			"chora kura nie ma ceny skupu")
 
-	# Chorej sztuki skup nie przyjmuje: zostaje lek albo ubicie za darmo.
+	# Chorej sztuki skup nie przyjmuje: zostaje tylko McDonald.
 	Game.state.chickens.clear()
 	var ill := Chicken.create("rhode")
 	ill.sick = true
@@ -918,19 +1111,19 @@ func _test_vet_and_selling() -> void:
 	_check(is_zero_approx(Game.sell_hen("rhode")), "chorej kury nie da sie sprzedac")
 	_check(Game.state.chickens.size() == 1, "nieudana sprzedaz nie usuwa kury ze stada")
 
-	# Chora sztuka idzie do skupu za drobne zamiast byc ubijana za darmo.
 	var purse := Game.state.money
-	_check(Game.cull_hen("rhode"), "chora kure da sie oddac do skupu")
+	Game.state.outbreak_on = true
+	Game.state.outbreak_dead = 0
+	_check(Game.cull_hen("rhode"), "chora kure da sie oddac do McDonalda")
 	_check(Game.state.chickens.is_empty(), "oddana kura znika ze stada")
+	_check(Game.state.outbreak_dead == 1, "ubita w ognisku liczy sie do strat ogniska")
+	Game.state.outbreak_on = false
 	_check(is_equal_approx(Game.state.money, purse + Game.mcdonalds_price()),
 			"za chora kure jest kilka zlotych, a nie zero")
 	var choroba_cfg: Dictionary = GameData.balance().get("disease", {})
 	_check(is_equal_approx(Game.mcdonalds_price(), float(choroba_cfg.get("mcdonalds_price", -1))),
 			"skup placi tyle, ile stoi w balance.json")
 	_check(Game.mcdonalds_price() > 0.0, "skup placi wiecej niz zero")
-	_check(is_equal_approx(Game.medicine_price(), float(choroba_cfg.get("medicine_price", -1))),
-			"lek kosztuje tyle, ile stoi w balance.json")
-	_check(Game.medicine_price() > 0.0, "lek kosztuje wiecej niz zero")
 	_check(not Game.cull_hen("rhode"), "nie ma juz czego ubijac")
 
 	# Zdrowa idzie normalnie, za pelna stawke.
@@ -938,7 +1131,7 @@ func _test_vet_and_selling() -> void:
 	var full_price := Game.sell_hen("rhode")
 	_check(is_equal_approx(full_price, FarmState.hen_sell_price("rhode")), "zdrowa idzie za pelna stawke")
 
-	# Kogut tez: chorego nie sprzedasz, ale ubic mozna.
+	# Kogut tez: chorego nie sprzedasz, ale do McDonalda mozna.
 	Game.state.chickens.clear()
 	var sick_cock := Chicken.create_rooster("marans")
 	sick_cock.sick = true
@@ -946,7 +1139,6 @@ func _test_vet_and_selling() -> void:
 	_check(is_zero_approx(Game.sell_hen("marans", true)), "chorego koguta tez nie kupia")
 	_check(Game.cull_hen("marans", true), "chorego koguta da sie ubic")
 	_check(Game.state.chickens.is_empty(), "ubity kogut znika ze stada")
-	_check(Game.state.chickens.is_empty(), "stado puste po obu sprzedazach")
 	_check(is_zero_approx(Game.sell_hen("rhode")), "nie ma czego sprzedac")
 
 	# Szczepienie obejmuje tylko kury zyjace w chwili szczepienia.
@@ -958,7 +1150,6 @@ func _test_vet_and_selling() -> void:
 	_check(Game.state.unvaccinated_count() == 0, "po szczepieniu cale stado jest chronione")
 	Game.state.chickens.append(Chicken.create("leghorn"))
 	_check(Game.state.unvaccinated_count() == 1, "nowa kura nie dziedziczy szczepienia")
-	_check(not Game.buy_vaccine() or true, "ponowne szczepienie dotyczy tylko nowych kur")
 	Game.new_game()
 
 
@@ -1759,7 +1950,8 @@ func _test_event_rules() -> void:
 	_check(int(fox.get("grace_minutes", 0)) == 30, "lis: pol godziny spokoju na start")
 	_check(int(disease.get("grace_minutes", 0)) == 30, "choroba: pol godziny spokoju na start")
 	_check(int(fox.get("min_hens", 0)) == 5, "lis: nie rusza stada mniejszego niz piec")
-	_check(int(disease.get("min_hens", 0)) == 5, "choroba: to samo ograniczenie")
+	# Choroba od 12.20: zero szansy do 10 ptakow wynika z krzywej.
+	_check(FarmState.disease_rate_per_hour(10) == 0.0, "choroba: stado do 10 ptakow bez szans")
 
 	# Licznik czasu gry idzie od zalozenia farmy i to on otwiera furtke.
 	var state := _fresh_state(["leghorn"], 100000.0)
@@ -1768,24 +1960,13 @@ func _test_event_rules() -> void:
 	_check(absf(state.played_seconds() - 1800.0) < 1.0,
 			"po pol godziny licznik pokazuje pol godziny (%.0f s)" % state.played_seconds())
 
-	# Czestosc. Wlasciciel podal ja wprost i inaczej niz dotad:
-	#   lis    — w grze aktywnej kostka raz na godzine realna, szansa 1/3,
-	#            czyli srednio jeden lis na trzy godziny grania;
-	#   lis    — w grze nieaktywnej kostka raz na dobe, szansa 1/6;
-	#   choroba— aktywna gra: kolejna kura co minute realna;
-	#            nieaktywna: co cztery godziny.
-	# Mierzymy to na samych ustawieniach, bo pelny pomiar statystyczny
-	# trwalby minuty, a liczby maja byc dokladnie takie, jak powiedzial.
-	# Wartosci mozna stroic w balance.json - test pilnuje tylko, zeby mialy
-	# sens: odstepy dodatnie, szanse to prawdopodobienstwa, minimum nie
-	# wieksze od maksimum.
-	for cfg: Dictionary in [fox, disease]:
-		var nazwa := "lis" if cfg == fox else "choroba"
-		_check(float(cfg.get("active_roll_minutes", 0.0)) > 0.0, "%s: odstep kostki w grze > 0" % nazwa)
-		_check(float(cfg.get("offline_roll_hours", 0.0)) > 0.0, "%s: odstep kostki w tle > 0" % nazwa)
-		for klucz: String in ["active_chance", "offline_chance"]:
-			var p := float(cfg.get(klucz, -1.0))
-			_check(p >= 0.0 and p <= 1.0, "%s: %s miedzy 0 a 1 (%.3f)" % [nazwa, klucz, p])
+	# Lis: kostka raz na godzine w grze, raz na dobe w tle. Test pilnuje
+	# sensu liczb: odstepy dodatnie, szanse to prawdopodobienstwa.
+	_check(float(fox.get("active_roll_minutes", 0.0)) > 0.0, "lis: odstep kostki w grze > 0")
+	_check(float(fox.get("offline_roll_hours", 0.0)) > 0.0, "lis: odstep kostki w tle > 0")
+	for klucz: String in ["active_chance", "offline_chance", "massacre_chance"]:
+		var p := float(fox.get(klucz, -1.0))
+		_check(p >= 0.0 and p <= 1.0, "lis: %s miedzy 0 a 1 (%.3f)" % [klucz, p])
 	_check(int(fox.get("kills_min", 0)) >= 1
 			and int(fox.get("kills_max", 0)) >= int(fox.get("kills_min", 0)),
 			"lis: lup min >= 1 i max >= min")
@@ -1795,41 +1976,35 @@ func _test_event_rules() -> void:
 	_check(float(fox.get("killed_return_multiplier", 0.0)) >= 1.0,
 			"zagryziony lis nie wraca szybciej niz zwykly")
 
-	# I pomiar na zywo, zeby liczby z balansu faktycznie cos robily.
-	var chore: Array[String] = []
-	for i in 12:
-		chore.append("leghorn")
-	var yard := _fresh_state(chore, 10000000.0)
-	yard.days = 40
-	# Pomiar na zywo: w aktywnej grze, przez wiele dob grania, choroba
-	# wypada mniej wiecej dwa razy czesciej niz lis. Mierzymy same kostki,
-	# zeby nie zalezec od tego, ktora kura akurat zachoruje.
-	var godzina := 3600.0 * GameData.time_scale()
-	var chorych := 0
-	var lisow := 0
-	for i in 60:
-		var dzien := _fresh_state(chore, 10000000.0)
-		dzien.days = 40
-		dzien.guard_level = 0
-		for h in 10:
-			var krok := Simulation.advance(dzien, godzina)
-			chorych += int(krok["got_sick"])
-			lisow += int(krok["fox_arrived"])
-			# Leczymy od razu, zeby stado nie znikalo i kostka miala kogo wybierac.
-			for chicken: Chicken in dzien.chickens:
-				chicken.sick = false
-	_check(chorych > 0, "w aktywnej grze kury choruja (%d)" % chorych)
-	_check(lisow > 0, "w aktywnej grze lis tez przychodzi (%d)" % lisow)
-	_check(chorych > lisow,
-			"choroba wypada czesciej niz lis (%d wobec %d)" % [chorych, lisow])
+	# Choroba: liczby od wlasciciela (25.11).
+	_check(is_equal_approx(float(disease.get("spread_seconds", 0.0)), 60.0), "choroba: zaraza co minute")
+	_check(is_equal_approx(float(disease.get("kill_share_min", 0.0)), 0.3)
+			and is_equal_approx(float(disease.get("kill_share_max", 0.0)), 1.0)
+			and is_equal_approx(float(disease.get("kill_share_step", 0.0)), 0.1),
+			"choroba: 30-100% stada co 10%")
+	_check(is_equal_approx(float(disease.get("calm_hours_min", 0.0)), 3.0)
+			and is_equal_approx(float(disease.get("calm_hours_max", 0.0)), 12.0),
+			"choroba: 3-12 godzin spokoju")
 
-	var spiace := _fresh_state(chore, 10000000.0)
-	spiace.days = 40
-	var offline_chore := 0
-	for i in 20:
-		offline_chore += int(Simulation.advance(spiace, 60.0 * GameData.time_scale(), true)["got_sick"])
-	_check(offline_chore == 0,
-			"w nieaktywnej grze 20 minut nie wystarcza na zachorowanie (%d)" % offline_chore)
+	# Pomiar na zywo: stado 50 bez szczepien w ciagu doby choruje,
+	# a stado 12 rzadko. Bez lisa: jego rzez potrafi wybic stado, zanim
+	# choroba zdazy wybuchnac.
+	var fox_snapshot := _snapshot_event("fox")
+	_never_event("fox")
+	var duze := 0
+	var male := 0
+	for i in 10:
+		var stado50 := _herd(50)
+		_past_grace(stado50)
+		var stado12 := _herd(12)
+		_past_grace(stado12)
+		for h in 24:
+			duze += 1 if int(Simulation.advance(stado50, 3600.0 * GameData.time_scale()).get("outbreak", 0)) > 0 else 0
+			male += 1 if int(Simulation.advance(stado12, 3600.0 * GameData.time_scale()).get("outbreak", 0)) > 0 else 0
+	_check(duze >= 10, "stado 50: kilka ognisk na dobe (%d w 10 dob)" % duze)
+	_check(male < duze, "stado 12 choruje rzadziej niz 50 (%d wobec %d)" % [male, duze])
+	_restore_event("fox", fox_snapshot)
+
 
 func _test_server_diagnosis() -> void:
 	var cases := [
@@ -2353,11 +2528,40 @@ func _test_strings() -> void:
 		keys.append(String(breed.get("desc", "")))
 		keys.append(String(breed.get("lore", "")))
 		keys.append(String(breed.get("rarity", "")))
+		# 12.20: trzy ciekawostki i malowany portret do okienka nowej rasy.
+		var facts: Array = breed.get("facts", [])
+		_check(facts.size() == 3, "rasa %s ma trzy ciekawostki" % breed.get("id", ""))
+		for fact: Variant in facts:
+			keys.append(String(fact))
+		var portrait := String(breed.get("portrait", ""))
+		_check(portrait.begins_with("res://assets/portraits/") and ResourceLoader.exists(portrait),
+				"rasa %s ma malowany portret (%s)" % [breed.get("id", ""), portrait])
+	for key: String in ["UNLOCK_CONGRATS", "UNLOCK_FACTS", "GAMEOVER_TITLE", "GAMEOVER_BODY",
+			"GAMEOVER_DETAIL", "GAMEOVER_RESTART", "HINT_OUTBREAK_OVER", "HINT_FOX_MASSACRE",
+			"PANEL_DISEASE", "PANEL_DISEASE_ON", "PANEL_DISEASE_CALM", "PANEL_DISEASE_RISK"]:
+		keys.append(key)
+	# FERMA, nie FARMA (wlasciciel 25.11): zaden tekst w grze nie mowi "farma".
+	var farma := 0
+	var csv := FileAccess.get_file_as_string("res://data/strings.csv")
+	for line: String in csv.split("\n"):
+		var value := line.substr(line.find(",") + 1).to_lower() if line.contains(",") else ""
+		for form: String in ["farma", "farmy", "farmę", "farmie", "farmą", "farmach"]:
+			if value.contains(form):
+				farma += 1
+	_check(farma == 0, "w tekstach gry nie ma slowa 'farma' (%d)" % farma)
 
+	# Napisy na suwakach kupna/sprzedazy maja celowo dwie linijki (12.20:
+	# pol szerokosci karty). Reszta nie moze miec zlamania - to znak, ze
+	# CSV wciagnal sasiedni wiersz.
+	var two_lines := ["PANEL_BUY_HEN", "PANEL_SELL_HEN", "PANEL_BUY_ROOSTER", "PANEL_SELL_ROOSTER"]
 	for key: String in keys:
 		var text := tr(key)
 		_check(text != key, "klucz '%s' ma tlumaczenie" % key)
-		_check(not text.contains("\n"), "tekst '%s' nie wciagnal sasiednich wierszy" % key)
+		if two_lines.has(key):
+			_check(text.count("\n") == 1 and not text.contains("PANEL_"),
+					"tekst '%s' ma dokladnie dwie linijki" % key)
+		else:
+			_check(not text.contains("\n"), "tekst '%s' nie wciagnal sasiednich wierszy" % key)
 		# Wciagniety wiersz zostawia w tekscie wzorzec KLUCZ, — tego nie moze byc.
 		_check(not text.contains("_LORE,") and not text.contains("_NAME,")
 				and not text.contains("UNLOCK_") and not text.contains("PANEL_"),
@@ -2435,6 +2639,128 @@ func _test_hatch_sex() -> void:
 
 ## 12.18: lis najpierw czai sie w krzakach i idzie pod plot. Dopiero tam
 ## plot losuje. Przy grze w tle tej fazy nie ma.
+## GAME OVER: bankructwo tylko wtedy, gdy naprawde nie da sie grac dalej.
+func _test_game_over() -> void:
+	var per_chick := int(GameData.balance()["incubator"].get("eggs_per_chick", 6))
+	var pair := FarmState.hen_buy_price("leghorn") + FarmState.hen_buy_price("leghorn", true)
+	Game.new_game()
+	_check(not Simulation.check_bankrupt(Game.state), "nowa ferma nie jest bankrutem")
+
+	var empty := FarmState.new()
+	empty.money = 0.0
+	_check(Simulation.check_bankrupt(empty), "zero ptakow i zero zlotych = bankructwo")
+	empty.money = pair
+	_check(not Simulation.check_bankrupt(empty), "starczy na pare leghornow = gramy dalej")
+	empty.money = pair - 1.0
+	_check(Simulation.check_bankrupt(empty), "brakuje zlotowki do pary = bankructwo")
+	empty.eggs = {"leghorn": 3}
+	empty.money = pair - 1.0
+	_check(not Simulation.check_bankrupt(empty), "jaja w magazynie licza sie do gotowki")
+	empty.eggs = {"marans": per_chick}
+	empty.money = 0.0
+	_check(not Simulation.check_bankrupt(empty), "jaja na wyleg ratuja ferme")
+	empty.eggs = {}
+
+	var lonely := FarmState.new()
+	lonely.chickens.append(Chicken.create("leghorn"))
+	lonely.money = FarmState.hen_buy_price("leghorn", true)
+	_check(not Simulation.check_bankrupt(lonely), "kura bez koguta, ale stac na koguta")
+	lonely.money = 0.0
+	_check(Simulation.check_bankrupt(lonely), "kura bez koguta i bez grosza = bankructwo")
+	lonely.chicks.append(Chick.create("leghorn", 0.0, true))
+	_check(not Simulation.check_bankrupt(lonely), "piskle rosnie - jeszcze nie koniec")
+	lonely.chicks.clear()
+
+	var couple := FarmState.new()
+	couple.chickens.append(Chicken.create("rhode"))
+	couple.chickens.append(Chicken.create_rooster("rhode"))
+	_check(not Simulation.check_bankrupt(couple), "para kura + kogut bez grosza to nie bankructwo")
+	couple.chickens[0].sick = true
+	couple.chickens[1].sick = true
+	_check(Simulation.check_bankrupt(couple), "chora para bez grosza = bankructwo (chore i tak padna)")
+
+	# Cudze ptaki do sprzedania tez sie licza.
+	var rich_birds := FarmState.new()
+	for i in 4:
+		rich_birds.chickens.append(Chicken.create("cemani"))
+	_check(not Simulation.check_bankrupt(rich_birds), "kury na sprzedaz pozwalaja kupic koguta")
+
+	# Game: zgloszenie raz i restart pod tym samym kodem.
+	var hits := [0]
+	var on_over := func() -> void: hits[0] += 1
+	Events.game_over.connect(on_over)
+	var code := Cloud.player_id
+	Game.state.chickens.clear()
+	Game.state.chicks.clear()
+	Game.state.incubating.clear()
+	Game.state.eggs = {}
+	Game.state.money = 0.0
+	Game._check_game_over()
+	Game._check_game_over()
+	_check(hits[0] == 1, "GAME OVER zgloszone dokladnie raz (%d)" % hits[0])
+	Game.restart_after_game_over()
+	_check(not Simulation.check_bankrupt(Game.state) and Game.state.hen_count() > 0,
+			"restart daje swieza ferme")
+	_check(Cloud.player_id == code, "restart zostawia ten sam kod fermy")
+	Game._check_game_over()
+	_check(hits[0] == 1, "po restarcie nie ma GAME OVER")
+	Events.game_over.disconnect(on_over)
+	Game.new_game()
+
+
+## Rzez (wlasciciel 25.11): okolo 5% wejsc lisa wybija CALE stado, ale
+## tylko bez psa. Gracz moze go przegonic; w tle dziala bezpiecznik strat.
+func _test_fox_massacre() -> void:
+	var fox: Dictionary = GameData.balance()["fox"]
+	var dis_backup := _snapshot_event("disease")
+	_never_event("disease")
+	var default_chance := float(_snapshot_event("fox").get("massacre_chance", -1.0))
+	_check(is_equal_approx(default_chance, 0.05), "rzez: okolo 5%% wejsc (%.2f)" % default_chance)
+	var scale := GameData.time_scale()
+
+	var state := _herd(20)
+	_arm_fox(state)
+	fox["massacre_chance"] = 1.0
+	var wejscie := Simulation.advance(state, 1.0)
+	_check(int(wejscie["fox_arrived"]) == 1, "rzez: lis wszedl")
+	_check(int(wejscie.get("fox_massacre", 0)) == 1 and state.fox_massacre, "rzez: zgloszona")
+	_check(state.fox_kill_left == 19, "rzez: lup to cale stado (%d)" % state.fox_kill_left)
+	for i in 60:
+		Simulation.advance(state, 2.0 * scale)
+		if state.fox_visit_left <= 0.0:
+			break
+	_check(state.hen_count() == 0, "rzez: bez psa i bez klikania stado wybite (%d)" % state.hen_count())
+	_check(state.fox_visit_left <= 0.0 and not state.fox_massacre, "rzez: lis poszedl, flaga zdjeta")
+
+	# Z psem rzezi nie ma, nawet przy pewnej kostce.
+	var pies := _herd(20)
+	_arm_fox(pies)
+	fox["massacre_chance"] = 1.0
+	pies.dog_level = 1
+	var z_psem := Simulation.advance(pies, 1.0)
+	_check(int(z_psem["fox_arrived"]) == 1 and int(z_psem.get("fox_massacre", 0)) == 0
+			and not pies.fox_massacre, "z psem lis nie robi rzezi")
+	_check(pies.fox_kill_left <= int(fox.get("kills_max", 10)), "z psem zwykly lup")
+
+	# Przegoniony palcem konczy rzez.
+	var palec := _herd(20)
+	_arm_fox(palec)
+	fox["massacre_chance"] = 1.0
+	Simulation.advance(palec, 1.0)
+	Simulation.fox_leaves(palec)
+	_check(not palec.fox_massacre and palec.hen_count() == 19, "przegoniony lis konczy rzez")
+
+	# W tle: bezpiecznik strat (polowa stada) obejmuje tez rzez.
+	var tlo := _herd(20)
+	_arm_fox(tlo)
+	fox["massacre_chance"] = 1.0
+	var w_tle := Simulation.advance(tlo, 1.0, true)
+	_check(int(w_tle["fox_took"]) == 10 and tlo.hen_count() == 10,
+			"w tle rzez zabiera najwyzej polowe (%d)" % int(w_tle["fox_took"]))
+	_disarm_fox()
+	_restore_event("disease", dis_backup)
+
+
 func _test_fox_lurk() -> void:
 	var state := _laying_state(["leghorn", "leghorn", "leghorn", "leghorn", "leghorn", "leghorn"])
 	_arm_fox(state)
@@ -2569,7 +2895,7 @@ func _test_construction() -> void:
 			_check(not names.has(nazwa), "%s: nazwa '%s' sie nie powtarza" % [id, nazwa])
 			names[nazwa] = true
 			var m := float(u.get("build_minutes", 0))
-			_check(m >= 5.0 and m <= 60.0, "%s poziom %d buduje sie 5-60 min (%g)" % [id, i + 2, m])
+			_check(m >= 5.0 and m <= 60.0, "%s poziom %d buduje sie 5-60 min (%.1f)" % [id, i + 2, m])
 			_check(m > last, "%s poziom %d buduje sie dluzej niz poprzedni" % [id, i + 2])
 			last = m
 		_check(float(ups[0].get("build_minutes", 0)) == 5.0, "%s: pierwsza rozbudowa 5 min" % id)
@@ -2589,7 +2915,7 @@ func _test_construction() -> void:
 			"w trakcie budowy kurnik ma stary poziom")
 	_check(state.is_building("coop"), "kurnik jest w budowie")
 	_check(absf(state.construction_left("coop") - minuty * 60.0) < 0.01,
-			"budowa trwa %g min zegara" % minuty)
+			"budowa trwa %.1f min zegara" % minuty)
 	_check(not Game.upgrade_building("coop"), "drugiej budowy tego samego budynku nie da sie zamowic")
 	_check(is_equal_approx(state.money, 1000000.0 - cena), "odmowa niczego nie pobiera")
 	_check(Game.upgrade_building("storage"), "inny budynek mozna budowac rownolegle")

@@ -221,10 +221,11 @@ func _build_coop() -> void:
 			func() -> String: return tr("PANEL_SERVER") if Cloud.is_enabled() else "",
 			func() -> String: return tr("PANEL_SERVER_OK") if Cloud.online else tr("PANEL_SERVER_DOWN"))
 	_add_row("PANEL_SICK", func() -> String: return str(Game.state.sick_count()))
+	_add_row("PANEL_DISEASE", func() -> String: return _disease_text())
 	_add_row("PANEL_CHICKS", func() -> String: return str(Game.state.chicks.size()))
 	_add_row("PANEL_VACCINATED",
 			func() -> String: return "%d / %d" % [
-				Game.state.hen_count() - Game.state.unvaccinated_count(), Game.state.hen_count()])
+				Game.state.vaccinated_count(), Game.state.hen_count()])
 	_add_row("PANEL_FEED_LEFT", func() -> String: return _feed_text())
 	_add_feed_time_rows()
 	# Wiek farmy w czasie ZIEMSKIM. Do 12.18 byl tu "dzien gospodarstwa"
@@ -455,14 +456,7 @@ func _build_shop() -> void:
 					NumberFormat.money(float(pack["price"]) * n)],
 			_on_buy_feed_bulk)
 
-	# Weterynaria: lek ratuje jedna chora kure, szczepienie chroni cale stado.
-	_add_action(false,
-			func() -> bool: return Game.state.money >= Game.medicine_price() and Game.state.sick_count() > 0,
-			func() -> String: return tr("PANEL_BUY_MEDICINE") % [
-				NumberFormat.money(Game.medicine_price()), Game.state.sick_count()],
-			_on_buy_medicine,
-			func() -> bool: return Game.state.sick_count() > 0,
-			func() -> float: return Game.medicine_price(), _actions, true)
+	# Weterynaria: leku nie ma (12.20) — szczepienie chroni zdrowe stado.
 	_add_action(false,
 			func() -> bool: return Game.state.money >= Game.vaccine_price(),
 			func() -> String: return tr("PANEL_BUY_VACCINE") % [
@@ -479,6 +473,29 @@ func _build_shop() -> void:
 
 	for breed: Dictionary in GameData.breeds():
 		_add_breed_card(breed)
+
+
+## Stan choroby w jednej linijce: ognisko w toku, spokoj po ognisku albo
+## ryzyko wybuchu przy obecnym stadzie.
+func _disease_text() -> String:
+	var state := Game.state
+	if state.outbreak_on:
+		if state.outbreak_left > 0:
+			return tr("PANEL_DISEASE_ON") % [state.outbreak_left, state.sick_count()]
+		return tr("PANEL_DISEASE_ON_DONE") % state.sick_count()
+	if state.disease_calm > 0.0:
+		return tr("PANEL_DISEASE_CALM") % NumberFormat.duration(state.disease_calm)
+	var rate := FarmState.disease_rate_per_hour(state.chickens.size())
+	var level := 0
+	if rate > 0.0:
+		level = 1
+	if rate >= 0.15:
+		level = 2
+	if rate >= 0.4:
+		level = 3
+	if rate >= 1.0:
+		level = 4
+	return tr("PANEL_DISEASE_RISK") % tr("DISEASE_RISK_%d" % level)
 
 
 ## Najwieksza liczba miejsc, jaka inkubator moze miec po rozbudowie.
@@ -746,11 +763,6 @@ func _do_sell_hen(breed_id: String, breed_name: String, rooster: bool) -> void:
 		_flash(tr(key) % [breed_name, NumberFormat.money(earned)])
 
 
-func _on_buy_medicine() -> void:
-	if not Game.buy_medicine():
-		_flash(tr("PANEL_NO_MONEY"))
-
-
 func _on_buy_vaccine() -> void:
 	if not Game.buy_vaccine():
 		_flash(tr("PANEL_NO_MONEY"))
@@ -1014,31 +1026,28 @@ func _add_breed_card(breed: Dictionary) -> void:
 	no_rooster.text = tr("PANEL_NO_ROOSTER")
 	card.add_child(no_rooster)
 
-	var buy := _new_slide()
-	buy.theme_type_variation = &"BuyButton"
-	buy.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# Dwie kolumny (wlasciciel 25.11): po lewej kupno, po prawej sprzedaz.
+	#   Kup kure    | Sprzedaj kure
+	#   Kup koguta  | Sprzedaj koguta
+	# Polowa szerokosci to od razu krotszy suwak. Sprzedaz zostaje widoczna
+	# (wyszarzona, gdy nie ma czego sprzedac), zeby kolumny sie nie rozjezdzaly.
+	var buy := _grid_slide(&"BuyButton")
 	buy.pressed.connect(func() -> void: _on_buy_hen(breed_id, breed_name))
-	card.add_child(buy)
-
-	var buy_rooster := _new_slide()
-	buy_rooster.theme_type_variation = &"BuyButton"
-	buy_rooster.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	buy_rooster.pressed.connect(func() -> void: _on_buy_hen(breed_id, breed_name, true))
-	card.add_child(buy_rooster)
-
-	var sell := _new_slide()
-	sell.theme_type_variation = &"SellButton"
-	sell.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var sell := _grid_slide(&"SellButton")
 	sell.pressed.connect(func() -> void: _on_sell_hen(breed_id, breed_name))
-	card.add_child(sell)
-
-	var sell_rooster := _new_slide()
-	sell_rooster.theme_type_variation = &"SellButton"
-	sell_rooster.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var buy_rooster := _grid_slide(&"BuyButton")
+	buy_rooster.pressed.connect(func() -> void: _on_buy_hen(breed_id, breed_name, true))
+	var sell_rooster := _grid_slide(&"SellButton")
 	sell_rooster.pressed.connect(func() -> void: _on_sell_hen(breed_id, breed_name, true))
-	card.add_child(sell_rooster)
+	for pair: Array in [[buy, sell], [buy_rooster, sell_rooster]]:
+		var row := HBoxContainer.new()
+		row.name = "Trade"
+		row.add_theme_constant_override("separation", 12)
+		for slide: SlideButton in pair:
+			row.add_child(slide)
+		card.add_child(row)
 
-	# Chora sztuke mozna oddac do skupu za drobne, zamiast placic za lek.
+	# Chora sztuke mozna oddac do skupu za drobne - leku nie ma (12.20).
 	# To swiadomy zart wlasciciela, nie przeoczenie.
 	var cull := _new_slide()
 	cull.theme_type_variation = &"CullButton"
@@ -1075,10 +1084,10 @@ func _add_breed_card(breed: Dictionary) -> void:
 		# pokazuje zdrowe, a nie cale stado tej rasy.
 		var healthy := Game.state.hens_of_breed(breed_id, true)
 		var healthy_cocks := Game.state.hens_of_breed(breed_id, true, true)
-		sell.visible = healthy > 0
+		sell.disabled = healthy <= 0
 		sell.text = tr("PANEL_SELL_HEN") % [
 			NumberFormat.money(FarmState.hen_sell_price(breed_id)), healthy]
-		sell_rooster.visible = healthy_cocks > 0
+		sell_rooster.disabled = healthy_cocks <= 0
 		sell_rooster.text = tr("PANEL_SELL_ROOSTER") % [
 			NumberFormat.money(FarmState.hen_sell_price(breed_id, false, true)), healthy_cocks]
 		var sick := owned - healthy + cocks - healthy_cocks
@@ -1091,8 +1100,24 @@ func _add_breed_card(breed: Dictionary) -> void:
 			owned])
 
 
-## Grafika rasy: najpierw prawdziwe zdjecie, w razie jego braku rysunek.
+## Suwak do siatki kupna i sprzedazy na karcie rasy: pol szerokosci karty.
+func _grid_slide(variation: StringName) -> SlideButton:
+	var slide := _new_slide()
+	slide.theme_type_variation = variation
+	slide.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	slide.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	slide.size_flags_stretch_ratio = 1.0
+	# Bez minimalnej szerokosci dluzszy napis rozpychalby swoja kolumne.
+	slide.custom_minimum_size.x = 10.0
+	slide.clip_text = false
+	return slide
+
+
+## Grafika rasy: malowany portret (12.20), potem zdjecie, na koncu rysunek.
 func _breed_image(breed: Dictionary) -> Texture2D:
+	var portrait: String = breed.get("portrait", "")
+	if portrait != "" and ResourceLoader.exists(portrait):
+		return load(portrait) as Texture2D
 	var photo: String = breed.get("photo", "")
 	if photo != "" and ResourceLoader.exists(photo):
 		return load(photo) as Texture2D

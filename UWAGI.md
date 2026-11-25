@@ -110,9 +110,9 @@ przy starcie.
 ## Nadal otwarte z wcześniejszych etapów
 
 - Samouczek na start i przycisk „?".
-- Okienko do przepisania kodu farmy na drugie urządzenie (razem
+- Okienko do przepisania kodu fermy na drugie urządzenie (razem
   z wymuszeniem pobrania z serwera, inaczej nowszy zapis lokalny
-  nadpisze cudzą farmę).
+  nadpisze cudzą fermę).
 - Zdjęcia ras do sklepu — lista nazw plików w `assets/photos/CZYTAJ_TO.md`.
 - Serwer na zapisy — instrukcja w `INSTRUKCJA_SERWER.md`.
 - Eksport APK — zablokowany, moje środowisko nie ma dostępu do Android SDK.

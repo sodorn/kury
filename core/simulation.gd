@@ -89,10 +89,11 @@ static func _step(state: FarmState, step: float, out: Dictionary, loss_budget: i
 			out["out_of_feed"] = true
 		_advance_hunger(state, step, out, loss_budget)
 
+	# Choroba przed wyjsciem dla pustej farmy: ognisko musi wygasnac takze
+	# wtedy, gdy wybilo cale stado.
+	_advance_disease(state, step, out, loss_budget, offline)
 	if state.chickens.is_empty():
 		return
-
-	_advance_disease(state, step, out, loss_budget, offline)
 	if state.feed <= 0.0:
 		# Glodne stado nie znosi jaj; samo czekanie na karme to juz kara.
 		return
@@ -219,8 +220,6 @@ static func _advance_hunger(state: FarmState, step: float, out: Dictionary, budg
 		out["died_hunger"] = int(out["died_hunger"]) + 1
 
 
-## Choroby: zdrowa kura moze zachorowac, chora przestaje znosic i po
-## `death_minutes` pada. Szczepienie chroni do konca zycia.
 ## Jaja maja termin przydatnosci liczony ZEGARKIEM. Bez tego gra zostawiona
 ## na noc witala gracza magazynem pelnym jaj sprzed doby i cala ekonomia
 ## stawala na glowie.
@@ -234,49 +233,133 @@ static func _advance_egg_spoilage(state: FarmState, step: float, out: Dictionary
 		out["eggs_spoiled"] = int(out.get("eggs_spoiled", 0)) + spoiled
 
 
+## Choroba (12.20): ogniska. Kostka co minute z szansa zalezna od wielkosci
+## stada; wybuch zaraza 30-100% stada po jednej kurze co minute; chora pada po
+## death_minutes minutach REALNYCH; leku nie ma, szczepionka chroni tylko
+## zdrowe; po wygasnieciu 3-12 godzin spokoju.
 static func _advance_disease(state: FarmState, step: float, out: Dictionary, budget: int,
-		offline: bool) -> void:
+		_offline: bool) -> void:
 	var disease: Dictionary = GameData.balance().get("disease", {})
-	var death_seconds := float(disease.get("death_minutes", 7.0)) * 60.0
+	var real := step / maxf(0.0001, GameData.time_scale())
+	# Od 12.20 choroba idzie w calosci czasem REALNYM (wlasciciel 25.11:
+	# "roznosi sie co minute"). Chora kura pada po death_minutes minutach
+	# zegarka. Leku nie ma — chora jest stracona, mozna ja tylko sprzedac
+	# do McDonalda.
+	var death_seconds := float(disease.get("death_minutes", 5.0)) * 60.0
 
-	# Najpierw przebieg choroby u tych, ktore juz choruja.
+	# 1. Przebieg choroby u tych, ktore juz choruja.
 	var index := state.chickens.size() - 1
 	while index >= 0:
 		var hen: Chicken = state.chickens[index]
 		if hen.sick:
-			hen.sick_seconds += step
+			hen.sick_seconds += real
 			if hen.sick_seconds >= death_seconds and _losses(out) < budget:
 				_kill_hen(state, index, "disease")
 				out["died_disease"] = int(out["died_disease"]) + 1
+				if state.outbreak_on:
+					state.outbreak_dead += 1
 		index -= 1
 
-	# Potem losowanie nowego zachorowania — jedno na cale gospodarstwo, nie na
-	# kura. Wczesniejsza stawka od sztuki sprawiala, ze duze stado chorowalo
-	# bez przerwy, a male prawie wcale.
-	# Nowe zachorowanie: w grze AKTYWNEJ co active_minutes minut realnych,
-	# w NIEaktywnej co offline_hours godzin. Prosty zegar zamiast dawnej
-	# krzywej narastania — wlasciciel podal tempo wprost.
-	var real := step / maxf(0.0001, GameData.time_scale())
+	# 2. Ognisko w toku: co spread_seconds zaraza przechodzi na kolejna kure,
+	#    az zarazi zaplanowana liczbe albo zabraknie zdrowych bez szczepienia.
+	if state.outbreak_on:
+		_spread_outbreak(state, out, budget, real)
+		if state.outbreak_left <= 0 and state.sick_count() == 0:
+			_end_outbreak(state, out)
+		return
+
+	# 3. Spokoj po ognisku: 3-12 godzin bez rzucania kostka.
+	if state.disease_calm > 0.0:
+		state.disease_calm = maxf(0.0, state.disease_calm - real)
+		return
+
+	# 4. Karencja na starcie gry (zegarkiem).
 	var played_real := state.played_seconds() / maxf(0.0001, GameData.time_scale())
 	if played_real < float(disease.get("grace_minutes", 30.0)) * 60.0:
 		return
-	if state.chickens.size() < int(disease.get("min_hens", 5)):
-		return
-	# Ta sama kostka co u lisa, tylko dwa razy czesciej: lis losuje co
-	# godzine i co dobe, choroba co pol godziny i co dwanascie godzin.
+
+	# 5. Kostka co roll_seconds. Szansa zalezy od wielkosci stada: do 10 sztuk
+	#    zero, przy 20 niska, przy 50 czesta, od 100 bardzo czesta — krzywa
+	#    rate_per_hour w balance.json. Ta sama w grze aktywnej i w tle.
+	var roll := maxf(1.0, float(disease.get("roll_seconds", 60.0)))
 	state.disease_timer += real
-	var interval := float(disease.get("offline_roll_hours", 12.0)) * 3600.0 if offline \
-			else float(disease.get("active_roll_minutes", 30.0)) * 60.0
-	if state.disease_timer < interval:
+	while state.disease_timer >= roll:
+		state.disease_timer -= roll
+		var chance := FarmState.disease_rate_per_hour(state.chickens.size()) * roll / 3600.0
+		if chance > 0.0 and randf() < chance:
+			_start_outbreak(state, out, budget)
+			state.disease_timer = 0.0
+			return
+
+
+## Wybuch choroby. Losuje, jaka czesc stada zarazi: od kill_share_min do
+## kill_share_max co kill_share_step (30%, 40%, ... 100%), zaokraglone w gore
+## (40% ze 100 kur = 40 kur). Pierwsza kura choruje od razu.
+static func _start_outbreak(state: FarmState, out: Dictionary, budget: int) -> void:
+	if _pick_for_infection(state) == null:
 		return
+	var disease: Dictionary = GameData.balance().get("disease", {})
+	var low := clampf(float(disease.get("kill_share_min", 0.3)), 0.0, 1.0)
+	var high := clampf(float(disease.get("kill_share_max", 1.0)), low, 1.0)
+	var step := maxf(0.01, float(disease.get("kill_share_step", 0.1)))
+	var steps := int(round((high - low) / step))
+	var share := minf(high, low + step * randi_range(0, steps))
+	# Odejmujemy drobinke przed sufitem: 0.3 * 100 w liczbach zmiennoprzecinkowych
+	# to 30.000000000000004 i sam ceil dalby 31.
+	var target := maxi(1, ceili(state.chickens.size() * share - 0.0001))
+	state.outbreak_on = true
+	state.outbreak_left = target
+	state.outbreak_timer = 0.0
+	state.outbreak_dead = 0
+	out["outbreak"] = target
+	out["outbreak_share"] = share
+	_spread_outbreak(state, out, budget, 0.0)
+
+
+## Kolejne zarazenia w trwajacym ognisku. Przy grze w tle zaraza staje, gdy
+## straty plus chore dobija do bezpiecznika strat (polowa stada) — po powrocie
+## gracza ognisko rusza dalej i mozna jeszcze zaszczepic reszte.
+static func _spread_outbreak(state: FarmState, out: Dictionary, budget: int, real: float) -> void:
+	if state.outbreak_left <= 0:
+		return
+	var gap := maxf(1.0, float(GameData.balance().get("disease", {}).get("spread_seconds", 60.0)))
+	state.outbreak_timer -= real
+	while state.outbreak_timer <= 0.0 and state.outbreak_left > 0:
+		if _losses(out) + state.sick_count() >= budget:
+			state.outbreak_timer = 0.0
+			return
+		var hen: Chicken = _pick_for_infection(state)
+		if hen == null:
+			# Nie ma juz kogo zarazic: reszta zaszczepiona albo wybita.
+			state.outbreak_left = 0
+			return
+		hen.sick = true
+		hen.sick_seconds = 0.0
+		state.outbreak_left -= 1
+		state.outbreak_timer += gap
+		out["got_sick"] = int(out["got_sick"]) + 1
+
+
+## Koniec ogniska: wszystkie zarazone padly albo poszly do McDonalda i nie ma
+## kogo wiecej zarazic. Potem 3-12 godzin spokoju.
+static func _end_outbreak(state: FarmState, out: Dictionary) -> void:
+	var disease: Dictionary = GameData.balance().get("disease", {})
+	var low := maxf(0.0, float(disease.get("calm_hours_min", 3.0)))
+	var high := maxf(low, float(disease.get("calm_hours_max", 12.0)))
+	state.disease_calm = randf_range(low, high) * 3600.0
+	out["outbreak_over"] = int(out.get("outbreak_over", 0)) + 1
+	out["outbreak_dead"] = state.outbreak_dead
+	state.outbreak_on = false
+	state.outbreak_left = 0
+	state.outbreak_timer = 0.0
+	state.outbreak_dead = 0
 	state.disease_timer = 0.0
-	var chance := float(disease.get("offline_chance", 0.1667)) if offline \
-			else float(disease.get("active_chance", 0.3333))
-	if randf() >= chance:
-		return
-	# Droga rasa choruje czesciej. Waga to pierwiastek z ceny, a nie sama cena:
-	# przy cenach od 40 do 8000 zl sama cena dawalaby cemani dwiescie razy
-	# wieksza szanse niz leghornowi, czyli w praktyce tylko cemani by chorowaly.
+
+
+## Losuje zdrowa, niezaszczepiona kure do zarazenia. Droga rasa choruje
+## czesciej — waga to pierwiastek z ceny (sama cena dawalaby cemani sto razy
+## wieksza szanse niz leghornowi). null, gdy nie ma kogo zarazic.
+static func _pick_for_infection(state: FarmState) -> Chicken:
 	var healthy: Array[Chicken] = []
 	var weights: Array[float] = []
 	var total := 0.0
@@ -288,17 +371,13 @@ static func _advance_disease(state: FarmState, step: float, out: Dictionary, bud
 		weights.append(weight)
 		total += weight
 	if healthy.is_empty():
-		return
+		return null
 	var roll := randf() * total
-	var chosen: Chicken = healthy[healthy.size() - 1]
 	for i in healthy.size():
 		roll -= weights[i]
 		if roll <= 0.0:
-			chosen = healthy[i]
-			break
-	chosen.sick = true
-	chosen.sick_seconds = 0.0
-	out["got_sick"] = int(out["got_sick"]) + 1
+			return healthy[i]
+	return healthy[healthy.size() - 1]
 
 
 static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget: int,
@@ -316,9 +395,7 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 			if not _fox_grabs_one(state, out, budget):
 				break
 			# Kazda kura ma wlasne, losowane od nowa odliczanie.
-			state.fox_kill_timer += randf_range(
-					float(fox.get("kill_interval_min", 3.0)),
-					float(fox.get("kill_interval_max", 10.0)))
+			state.fox_kill_timer += _fox_kill_gap(state)
 		# Pies probuje do skutku: co `interval` sekund rzuca kostka.
 		if state.dog_level > 0:
 			state.dog_timer -= real
@@ -413,10 +490,19 @@ static func _fox_arrives(state: FarmState, out: Dictionary, budget: int,
 	var quota := randi_range(int(fox.get("kills_min", 3)), int(fox.get("kills_max", 10)))
 	quota = clampi(quota, 1, maxi(1, state.chickens.size()))
 	var full := state.fox_visit_seconds()
+	# Rzez (wlasciciel 25.11): okolo 5% wejsc konczy sie wybiciem CALEGO stada,
+	# ale tylko na gospodarstwie bez psa. Lis zabija wtedy szybciej i zostaje,
+	# az skonczy — chyba ze gracz przegoni go palcem.
+	state.fox_massacre = state.dog_level <= 0 \
+			and randf() < float(fox.get("massacre_chance", 0.0))
+	if state.fox_massacre:
+		quota = state.chickens.size()
+		out["fox_massacre"] = int(out.get("fox_massacre", 0)) + 1
+		full = maxf(full, quota * float(fox.get("kill_interval_max", 10.0))
+				* _fox_pace_factor(state) + 10.0)
 
 	state.fox_kill_left = quota
-	state.fox_kill_pace = randf_range(float(fox.get("kill_interval_min", 3.0)),
-			float(fox.get("kill_interval_max", 10.0)))
+	state.fox_kill_pace = _fox_kill_gap(state)
 	state.fox_taps_left = maxi(1, int(fox.get("scare_taps", 20)))
 	state.fox_hand_scared = false
 	state.dog_timer = state.dog_interval()
@@ -497,12 +583,27 @@ static func _fox_visit_offline(state: FarmState, out: Dictionary, budget: int,
 			break
 		if not _fox_grabs_one(state, out, budget):
 			break
-		next_kill += randf_range(float(fox.get("kill_interval_min", 3.0)),
-				float(fox.get("kill_interval_max", 10.0)))
+		next_kill += _fox_kill_gap(state)
 	_fox_leaves(state)
 
 
+## Odstep miedzy kolejnymi ofiarami lisa, w sekundach REALNYCH. W rzezi
+## krotszy o massacre_pace_factor.
+static func _fox_kill_gap(state: FarmState) -> float:
+	var fox: Dictionary = GameData.balance().get("fox", {})
+	return randf_range(float(fox.get("kill_interval_min", 3.0)),
+			float(fox.get("kill_interval_max", 10.0))) * _fox_pace_factor(state)
+
+
+static func _fox_pace_factor(state: FarmState) -> float:
+	if not state.fox_massacre:
+		return 1.0
+	return clampf(float(GameData.balance().get("fox", {}).get("massacre_pace_factor", 0.25)),
+			0.05, 1.0)
+
+
 static func _fox_leaves(state: FarmState) -> void:
+	state.fox_massacre = false
 	state.fox_lurk_left = 0.0
 	state.fox_visit_left = 0.0
 	state.fox_kill_left = 0
@@ -591,6 +692,60 @@ static func check_unlocks(_state: FarmState) -> Array[String]:
 
 ## Sprawdza warunki wygranej. Zwraca powod ("money" albo "collection"),
 ## jesli gra wlasnie zostala wygrana, albo pusty napis.
+## GAME OVER (wlasciciel 25.11): gry nie da sie kontynuowac. Warunek jest
+## celowo ostrozny — falszywe bankructwo kasuje graczowi ferme:
+##  - nie ma zdrowej pary kura + kogut tej samej rasy (nikt nie zniesie jaj),
+##  - nie ma pisklat ani jaj w inkubatorze,
+##  - w magazynie nie ma jaj zadnej rasy na wyleg (eggs_per_chick),
+##  - i za cala gotowke (pieniadze + jaja + zdrowe ptaki innych ras + chore
+##    dla McDonalda) nie da sie dokupic brakujacej kury albo koguta do zadnej
+##    rasy, na ktora pozwala kurnik.
+## Pasze pomijamy: glodne stado i tak padnie, a wtedy warunek zadziala.
+static func check_bankrupt(state: FarmState) -> bool:
+	if not state.chicks.is_empty() or not state.incubating.is_empty():
+		return false
+	var per_chick := int(GameData.balance().get("incubator", {}).get("eggs_per_chick", 6))
+	for breed_id: String in state.eggs:
+		if int(state.eggs[breed_id]) >= per_chick:
+			return false
+	var hens := {}
+	var cocks := {}
+	var bird_value := {}
+	var sick_value := 0.0
+	var cull := float(GameData.balance().get("disease", {}).get("mcdonalds_price", 5))
+	for bird: Chicken in state.chickens:
+		if bird.sick:
+			sick_value += cull
+			continue
+		if bird.is_rooster:
+			cocks[bird.breed_id] = true
+		else:
+			hens[bird.breed_id] = true
+		bird_value[bird.breed_id] = float(bird_value.get(bird.breed_id, 0.0)) \
+				+ FarmState.hen_sell_price(bird.breed_id, false, bird.is_rooster)
+	for breed_id: String in hens:
+		if cocks.has(breed_id):
+			return false
+	var all_birds := 0.0
+	for value: float in bird_value.values():
+		all_birds += value
+	var cash := state.money + state.eggs_value() + sick_value
+	for breed: Dictionary in GameData.breeds():
+		var breed_id: String = breed.get("id", "")
+		if state.coop_level < int(breed.get("coop_level", 0)):
+			continue
+		var cost := 0.0
+		if not hens.has(breed_id):
+			cost += FarmState.hen_buy_price(breed_id)
+		if not cocks.has(breed_id):
+			cost += FarmState.hen_buy_price(breed_id, true)
+		# Ptaki tej rasy zostaja w parze, wiec na zakupy idzie reszta.
+		var spare := all_birds - float(bird_value.get(breed_id, 0.0))
+		if cash + spare >= cost:
+			return false
+	return true
+
+
 static func check_win(state: FarmState) -> String:
 	if state.won:
 		return ""

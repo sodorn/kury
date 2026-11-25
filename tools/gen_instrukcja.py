@@ -200,34 +200,34 @@ Jest siedemnascie ras. Im drozsza rasa, tym drozsze jaja i tym wiecej dostaniesz
 za dorosla sztuke - ale tym dluzej trwa odchow i tym czesciej taka kura choruje.
 """)
 para("""
-Przeszkody sa trzy: PASZA (kosztuje i konczy sie sama), CHOROBA (zabija kure
-w kilka minut, jesli jej nie wyleczysz) i LIS (wchodzi na wybieg i zabija kury
-jedna po drugiej).
+Przeszkody sa trzy: PASZA (kosztuje i konczy sie sama), CHOROBA (przechodzi
+z kury na kure co minute i nie ma na nia leku) i LIS (wchodzi na wybieg
+i zabija kury jedna po drugiej, a bez psa potrafi wybic cale stado).
 """)
 para("CEL: uzbierac %s." % zl(BAL["win"]["money"]))
 
-title("2. PIERWSZE URUCHOMIENIE I KOD FARMY")
+title("2. PIERWSZE URUCHOMIENIE I KOD FERMY")
 para("""
 Przy wejsciu do gry zobaczysz ekran powitalny. Sa na nim dwie drogi:
 """)
 raw("""
-    NOWA FARMA        - zaklada swieze gospodarstwo i nadaje mu nowy kod.
-    WCZYTAJ Z KODU    - wpisujesz szesciocyfrowy kod i wracasz na swoja farme.
+    NOWA FERMA        - zaklada swieze gospodarstwo i nadaje mu nowy kod.
+    WCZYTAJ Z KODU    - wpisujesz szesciocyfrowy kod i wracasz na swoja ferme.
 """.rstrip("\n"))
 box([
-    "ZAPISZ SOBIE KOD SWOJEJ FARMY. GDZIES POZA GRA.",
+    "ZAPISZ SOBIE KOD SWOJEJ FERMY. GDZIES POZA GRA.",
     "",
     "Kod to jedyny sposob, zeby wrocic do gospodarstwa. Gra trzyma go",
     "w pamieci przegladarki. Wyczyszczenie ciasteczek, tryb prywatny",
     "albo inne urzadzenie oznaczaja, ze przegladarka tego kodu juz nie",
-    "zna - i bez zapisanego kodu nie ma jak odnalezc farmy.",
+    "zna - i bez zapisanego kodu nie ma jak odnalezc fermy.",
     "",
-    "Stan farmy lezy na serwerze, nie w przegladarce. Z kodem wrocisz",
+    "Stan fermy lezy na serwerze, nie w przegladarce. Z kodem wrocisz",
     "do niej z kazdego telefonu i kazdego komputera.",
 ])
 para("""
 Kod widzisz na ekranie powitalnym przy kazdym wejsciu do gry. Ten sam kod mozesz
-podac koledze - wejdzie na TWOJA farme i bedzie na niej gral razem z toba.
+podac koledze - wejdzie na TWOJA ferme i bedzie na niej gral razem z toba.
 """)
 
 title("3. EKRAN GRY")
@@ -251,7 +251,7 @@ raw("""
   |                                                                        |
   |     MAGAZYN                   SKLEP                                    |
   |     (pasza i pojemnosc        (sprzedaz jaj, kupno paszy,              |
-  |      na jaja)                  kupno kur i kogutow, leki)              |
+  |      na jaja)                  kupno kur i kogutow, szczepionki)       |
   +------------------------------------------------------------------------+
 """.rstrip())
 para("""
@@ -261,11 +261,13 @@ wyglad przy kazdej rozbudowie.
 
 title("4. PETLA GRY - OD CZEGO ZACZAC")
 para("""
-SUWAKI. Kupno i sprzedaz kur, ubicie chorej, lek, szczepienie, plot, pies
-i kazda rozbudowa to SUWAK: przeciagnij palcem od lewej do prawej, az pole
-sie zapelni kolorem. Samo dotkniecie nic nie robi - nie kupisz nic
-przypadkiem. Sprzedaz jaj, pasza i wkladanie jaj do inkubatora to zwykle
-przyciski, bo klika sie je co chwile.
+SUWAKI. Kupno i sprzedaz kur, ubicie chorej, szczepienie, plot, pies
+i kazda rozbudowa to SUWAK: przeciagnij palcem w prawo. Wystarczy 2/3 drogi
+- gdy galka pokaze ptaszek, a pole pojasnieje, pusc palec. Samo dotkniecie
+nic nie robi - nie kupisz nic przypadkiem. W sklepie kazda rasa ma dwie
+kolumny: po lewej KUP KURE i KUP KOGUTA, po prawej SPRZEDAJ KURE
+i SPRZEDAJ KOGUTA. Sprzedaz jaj, pasza i wkladanie jaj do inkubatora to
+zwykle przyciski, bo klika sie je co chwile.
 """)
 raw("""
   1. ZBIERAJ JAJA z wybiegu. Dotknij jajka palcem, idzie do magazynu.
@@ -291,7 +293,7 @@ raw("""
        BAL["incubator"]["eggs_per_chick"]))
 raw("")
 para("""
-WAZNE: kura znosi jaja tylko wtedy, gdy na farmie stoi KOGUT JEJ RASY. Kupienie
+WAZNE: kura znosi jaja tylko wtedy, gdy na fermie stoi KOGUT JEJ RASY. Kupienie
 samych kur nic nie da. Kogut kosztuje %d%% ceny kury tej samej rasy (kura za
 %s to kogut za %s), ale wystarczy jeden na cala rase. Przy sprzedazy dziala
 ten sam mnoznik: kogut idzie za %d%% ceny skupu kury (kura %s, kogut %s).
@@ -436,7 +438,7 @@ raw("""
   KIEDY PRZYCHODZI
     gdy grasz          kostka co %g min realnych, szansa %.0f%%
     gdy nie grasz      kostka co %g h realnych, szansa %.0f%%
-    nie przyjdzie      przez pierwsze %g min nowej farmy
+    nie przyjdzie      przez pierwsze %g min nowej fermy
                        ani gdy masz mniej niz %d kur
 
   JAK PRZYCHODZI
@@ -455,6 +457,12 @@ raw("""
     KLIKAJ W NIEGO. Trzeba %d trafien. Licznik widac nad lisem.
     Przegoniony reka wraca %g razy szybciej niz normalnie -
     chyba ze masz psa albo plot.
+
+  RZEZ
+    Gdy ferma NIE MA PSA, okolo %.0f%% lisow, ktore wejda na wybieg,
+    wpada w szal: zabija %g razy szybciej i nie odchodzi, dopoki nie
+    wybije CALEGO stada. Ratunek: klikac (te same %d trafien) albo
+    miec psa - przy psie rzezi nie ma wcale.
 """.rstrip() % (
     fox["active_roll_minutes"], fox["active_chance"] * 100,
     fox["offline_roll_hours"], fox["offline_chance"] * 100,
@@ -463,7 +471,8 @@ raw("""
     fox["kill_interval_min"], fox["kill_interval_max"],
     fox["kills_min"], fox["kills_max"],
     fox["visit_max_minutes"],
-    fox["scare_taps"], 1.0 / fox["hand_return_factor"]))
+    fox["scare_taps"], 1.0 / fox["hand_return_factor"],
+    fox["massacre_chance"] * 100, round(1.0 / fox["massacre_pace_factor"], 1), fox["scare_taps"]))
 
 title("13. PSY I PLOT")
 dogs = BAL["buildings"]["dog"]["upgrades"]
@@ -492,29 +501,59 @@ wiec najlepiej miec oba. Plot zmienia wyglad na kazdym poziomie.
 
 title("14. CHOROBA")
 dis = BAL["disease"]
+def ryzyko(n):
+    pts = dis["rate_per_hour"]
+    if n <= pts[0][0]:
+        return pts[0][1]
+    for a, b in zip(pts, pts[1:]):
+        if n <= b[0]:
+            return a[1] + (b[1] - a[1]) * (n - a[0]) / float(b[0] - a[0])
+    return pts[-1][1]
+def co_ile(n):
+    r = ryzyko(n)
+    if r <= 0:
+        return "nigdy"
+    h = 1.0 / r
+    return "srednio co %g h" % round(h, 1) if h >= 1 else "srednio co %d min" % round(h * 60)
 raw("""
-  KIEDY        gdy grasz: kostka co %g min realnych, szansa %.0f%%
-               gdy nie grasz: co %g h realnych, szansa %.0f%%
-               nie choruje nikt przez pierwsze %g min
-               ani przy stadzie mniejszym niz %d kur
-               drozsza rasa choruje CZESCIEJ
+  KIEDY WYBUCHA  co minute kostka; szansa rosnie z wielkoscia stada:
+                   do %d ptakow     %s
+                   %d ptakow        %s
+                   %d ptakow        %s
+                   %d i wiecej     %s
+                 (licza sie dorosle ptaki, kury i koguty). Tak samo, gdy
+                 grasz i gdy nie grasz. Przez pierwsze %g min nowej fermy
+                 nikt nie choruje.
 
-  CO SIE DZIEJE  chora kura pada po %g minutach, jesli jej nie wyleczysz
+  JAK SIE SZERZY pierwsza kura choruje od razu, potem zaraza przechodzi
+                 na kolejna zdrowa, NIEZASZCZEPIONA kure co %g s.
+                 Ognisko zabiera od %.0f%% do %.0f%% stada (losowane co
+                 %.0f%%, w gore): przy 100 kurach i wylosowanych 40%% padnie 40.
+                 Potem wygasa. Drozsza rasa lapie chetniej.
 
-  LEK            %s za sztuke, leczy jedna chora kure
+  CHORA KURA     nie znosi i pada po %g minutach. LEKU NIE MA - chora
+                 jest stracona. Mozesz ja tylko sprzedac do McDonalda za %s
+                 (zawsze lepsze to niz nic).
 
-  SZCZEPIENIE    %s za kure, chroni DO KONCA ZYCIA - ale tylko te kury,
-                 ktore zyja w chwili szczepienia. Nowe pisklęta trzeba
-                 zaszczepic osobno.
+  SZCZEPIENIE    %s za kazda ZDROWA kure, chroni DO KONCA ZYCIA. Chorej nie
+                 wyleczy. Dziala na kury zyjace w chwili szczepienia - nowe
+                 pisklęta trzeba zaszczepic osobno. Zaszczepienie stada,
+                 gdy ognisko juz ruszylo, ratuje te, ktorych jeszcze nie
+                 zlapalo.
 
-  SKUP           chorej kury nie musisz leczyc - mozesz ja sprzedac
-                 do McDonalda za %s. Tyle samo za kazda rase.
+  PO OGNISKU     %g-%g godzin spokoju - wtedy nic nie wybucha.
+
+  STAN W KURNIKU panel kurnika pokazuje wiersz CHOROBA: ognisko w toku,
+                 spokoj (ile jeszcze) albo ryzyko przy obecnym stadzie.
 """.rstrip() % (
-    dis["active_roll_minutes"], dis["active_chance"] * 100,
-    dis["offline_roll_hours"], dis["offline_chance"] * 100,
-    dis["grace_minutes"], dis["min_hens"], round(dis["death_minutes"] / SCALE, 1),
-    zl(dis["medicine_price"]), zl(dis["vaccine_price_per_hen"]),
-    zl(dis["mcdonalds_price"])))
+    dis["rate_per_hour"][0][0], co_ile(dis["rate_per_hour"][0][0]),
+    dis["rate_per_hour"][1][0], co_ile(dis["rate_per_hour"][1][0]),
+    dis["rate_per_hour"][2][0], co_ile(dis["rate_per_hour"][2][0]),
+    dis["rate_per_hour"][-1][0], co_ile(dis["rate_per_hour"][-1][0]),
+    dis["grace_minutes"], dis["spread_seconds"],
+    dis["kill_share_min"] * 100, dis["kill_share_max"] * 100, dis["kill_share_step"] * 100,
+    dis["death_minutes"], zl(dis["mcdonalds_price"]), zl(dis["vaccine_price_per_hen"]),
+    dis["calm_hours_min"], dis["calm_hours_max"]))
 
 title("15. CZAS W GRZE")
 para("""
@@ -524,7 +563,7 @@ Czas gry plynie %g razy wolniej od zegarka: jedna minuta przy zegarku to okolo
 ziemskim. Gra nie pokazuje juz "dni gospodarstwa".
 """ % (round(1.0 / SCALE, 2), round(60 * SCALE)))
 para("""
-Gra liczy czas TAK SAMO, gdy grasz i gdy nie grasz. Zostawiona na noc farma
+Gra liczy czas TAK SAMO, gdy grasz i gdy nie grasz. Zostawiona na noc ferma
 znosi jaja, zjada pasze, choruje i goszczy lisa. Po powrocie gra nadrabia
 zaleglosci - maksymalnie %d godziny za jednym razem.
 """ % BAL["offline"]["max_hours"])
@@ -539,6 +578,17 @@ Uzbieraj %s. Droga najkrotsza: zbuduj stado jednej z drozszych ras, trzymaj
 inkubator caly czas pelny i sprzedawaj odchowane sztuki. Jaja sprzedawaj na
 biezaco, zeby bylo na pasze.
 """ % zl(BAL["win"]["money"]))
+para("""
+GAME OVER. Gdy na fermie nie zostanie zadna para kura + kogut tej samej rasy,
+inkubator i odchow stoja puste, w magazynie nie ma jaj na wyleg, a za cala
+gotowke (z jajami i ptakami na sprzedaz) nie da sie dokupic brakujacej pary
+- gra konczy sie plansza GAME OVER: "Niestety, jesteś marnym hodowcą.
+Poniosłeś bankructwo." Przycisk zaczyna nowa ferme pod TYM SAMYM kodem.
+""")
+para("""
+NOWA RASA. Pierwsza sztuka kazdej rasy otwiera duze okno z gratulacjami,
+malowanym portretem rasy, jej historia i trzema ciekawostkami.
+""")
 
 title("17. SCIAGAWKA")
 raw("""
@@ -546,9 +596,10 @@ raw("""
   Rasa wyszarzona w sklepie    -> za niski poziom kurnika (patrz tabela ras)
   Jaja znikaja z magazynu      -> gnija po %g h, albo magazyn jest pelny
   Kury padaja bez ostrzezenia  -> skonczyla sie pasza
+  Kury zielenieja i padaja     -> CHOROBA: szczep zdrowe, chore do McDonalda
   Pisklę nie wyrasta           -> brak paszy albo pelny kurnik
   Lis na wybiegu               -> KLIKAJ W NIEGO (%d razy), kup psa i plot
-  Nie moge wrocic do farmy     -> potrzebny KOD, zapisz go sobie poza gra
+  Nie moge wrocic do fermy     -> potrzebny KOD, zapisz go sobie poza gra
   Gra wyglada na cofnieta      -> odswiez z Ctrl+Shift+R
 """.rstrip() % (ECO["egg_spoil_hours"], fox["scare_taps"]))
 

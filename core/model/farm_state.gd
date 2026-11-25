@@ -73,8 +73,22 @@ var dog_timer: float = 0.0
 ## osobno dla kazdej rasy. Po kilku razach gracz wie i okienko tylko
 ## przeszkadza.
 var rooster_hints: Dictionary = {}
-## Sekundy do nastepnego zachorowania.
+## Sekundy REALNE uzbierane do nastepnego rzutu kostka na nowa chorobe
+## (rzut co `disease.roll_seconds`).
 var disease_timer: float = 0.0
+## Ognisko choroby (12.20, wlasciciel 25.11). `outbreak_left` = ile kur
+## choroba jeszcze zarazi w tym ognisku; `outbreak_timer` = sekundy REALNE do
+## nastepnego zarazenia; `outbreak_dead` = ile kur padlo w tym ognisku
+## (do komunikatu na koniec); `outbreak_on` = ognisko trwa (sa chore albo
+## zostali kandydaci do zarazenia). `disease_calm` = sekundy REALNE spokoju po
+## wygasnieciu ogniska — wtedy kostka nie rzuca.
+var outbreak_on: bool = false
+var outbreak_left: int = 0
+var outbreak_timer: float = 0.0
+var outbreak_dead: int = 0
+var disease_calm: float = 0.0
+## Rzez: lis, ktory wszedl na wybieg bez psa, zabija cale stado (12.20).
+var fox_massacre: bool = false
 ## Ile kur lis zabierze, jesli nikt go nie przegoni.
 var fox_pending: int = 0
 ## Poziomy rozbudowy budynkow: kurnik, magazyn i obrona przed lisem.
@@ -206,12 +220,43 @@ func sick_count() -> int:
 	return count
 
 
+func vaccinated_count() -> int:
+	var count := 0
+	for hen: Chicken in chickens:
+		if hen.vaccinated:
+			count += 1
+	return count
+
+
+## Ile ZDROWYCH ptakow nie ma szczepienia. Chorych nie liczymy: szczepionka
+## nie leczy (wlasciciel 25.11), wiec szczepienie chorej to wyrzucone pieniadze.
 func unvaccinated_count() -> int:
 	var count := 0
 	for hen: Chicken in chickens:
-		if not hen.vaccinated:
+		if not hen.vaccinated and not hen.sick:
 			count += 1
 	return count
+
+
+## Szansa na wybuch choroby na GODZINE realna przy danym stadzie. Krzywa
+## z `disease.rate_per_hour` — pary [liczba ptakow, szansa na godzine],
+## miedzy punktami liniowo, ponizej pierwszego i powyzej ostatniego plasko.
+static func disease_rate_per_hour(flock: int) -> float:
+	var points: Array = GameData.balance().get("disease", {}).get("rate_per_hour", [])
+	if points.is_empty():
+		return 0.0
+	var first: Array = points[0]
+	if float(flock) <= float(first[0]):
+		return float(first[1])
+	for i in range(1, points.size()):
+		var a: Array = points[i - 1]
+		var b: Array = points[i]
+		if float(flock) <= float(b[0]):
+			var span := maxf(0.0001, float(b[0]) - float(a[0]))
+			var t := (float(flock) - float(a[0])) / span
+			return lerpf(float(a[1]), float(b[1]), t)
+	var last: Array = points[points.size() - 1]
+	return float(last[1])
 
 
 func owns_breed(breed_id: String) -> bool:

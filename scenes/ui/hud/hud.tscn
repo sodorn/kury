@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scenes/ui/hud/hud.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud/resource_counter.tscn" id="2"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/panels/unlock_panel.tscn" id="10"]
 [ext_resource type="PackedScene" path="res://scenes/ui/panels/start_panel.tscn" id="11"]
 [ext_resource type="PackedScene" path="res://scenes/ui/panels/alert_panel.tscn" id="12"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panels/game_over_panel.tscn" id="13"]
 
 [node name="Hud" type="CanvasLayer"]
 script = ExtResource("1")
@@ -91,3 +92,5 @@ theme_type_variation = &"NoteLabel"
 text = ""
 horizontal_alignment = 1
 autowrap_mode = 3
+
+[node name="GameOverPanel" parent="Root" instance=ExtResource("13")]

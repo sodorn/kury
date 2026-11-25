@@ -1,6 +1,7 @@
 extends Control
-## Okienko "nowa rasa odblokowana". Zlota ramka, obracajace sie promienie,
-## iskry i kawalek historii rasy.
+## Okienko "nowa rasa na fermie" (12.20: na 2/3 ekranu). Gratulacje, duzy
+## malowany portret rasy (tools/gen_portraits.py), historia, ciekawostki
+## sprawdzone w zrodlach i liczby ze sklepu. Zlota ramka, promienie, iskry.
 ##
 ## Odblokowania potrafia trafic sie po dwa naraz (gracz przekroczyl prog
 ## pieniedzy i liczbe kur w tej samej klatce), wiec rasy czekaja w kolejce
@@ -18,8 +19,11 @@ var _showing := false
 @onready var _portrait: TextureRect = $Sheet/Content/Frame/Portrait
 @onready var _name: Label = $Sheet/Content/Name
 @onready var _rarity: Label = $Sheet/Content/Rarity
-@onready var _lore: Label = $Sheet/Content/Lore
-@onready var _stats: Label = $Sheet/Content/Stats
+@onready var _lore: Label = $Sheet/Content/Scroll/Text/Lore
+@onready var _facts: Label = $Sheet/Content/Scroll/Text/Facts
+@onready var _facts_title: Label = $Sheet/Content/Scroll/Text/FactsTitle
+@onready var _stats: Label = $Sheet/Content/Scroll/Text/Stats
+@onready var _scroll: ScrollContainer = $Sheet/Content/Scroll
 @onready var _close: Button = $Sheet/Content/Close
 @onready var _sparks: CPUParticles2D = $Sparks
 
@@ -37,12 +41,16 @@ func _style_frame() -> void:
 	var frame := StyleBoxFlat.new()
 	frame.bg_color = Color("#FFFCF5")
 	frame.set_corner_radius_all(18)
-	frame.set_border_width_all(10)
+	frame.set_border_width_all(12)
 	frame.border_color = Color("#E8B64C")
-	frame.set_content_margin_all(10)
+	frame.set_content_margin_all(6)
 	frame.shadow_color = Color(0.36, 0.25, 0.16, 0.35)
 	frame.shadow_size = 10
 	$Sheet/Content/Frame.add_theme_stylebox_override("panel", frame)
+	var congrats := $Sheet/Content/Congrats as Label
+	congrats.add_theme_color_override("font_color", Color("#D9902A"))
+	congrats.add_theme_color_override("font_outline_color", Color("#FFF4D6"))
+	congrats.add_theme_constant_override("outline_size", 10)
 
 
 func _enqueue(breed_id: String) -> void:
@@ -75,9 +83,18 @@ func _show_next() -> void:
 
 
 func _fill(breed: Dictionary) -> void:
+	($Sheet/Content/Congrats as Label).text = tr("UNLOCK_CONGRATS")
+	($Sheet/Content/Title as Label).text = tr("UNLOCK_TITLE")
 	_name.text = tr(breed.get("name", ""))
 	_rarity.text = tr(breed.get("rarity", "")).to_upper()
 	_lore.text = tr(breed.get("lore", ""))
+	var facts: PackedStringArray = []
+	for key: Variant in breed.get("facts", []):
+		facts.append("•  " + tr(String(key)))
+	_facts.text = "\n".join(facts)
+	_facts.visible = not facts.is_empty()
+	_facts_title.visible = _facts.visible
+	_scroll.scroll_vertical = 0
 	_stats.text = "%s\n%s" % [
 		tr("UNLOCK_PRICE") % NumberFormat.money(float(breed.get("price", 0))),
 		tr("UNLOCK_EGG") % [
@@ -87,8 +104,11 @@ func _fill(breed: Dictionary) -> void:
 	_portrait.texture = _breed_image(breed)
 
 
-## Zdjecie rasy, a gdy go nie ma — rysunek z wybiegu.
+## Malowany portret rasy; bez niego zdjecie, a na koniec rysunek z wybiegu.
 func _breed_image(breed: Dictionary) -> Texture2D:
+	var portrait: String = breed.get("portrait", "")
+	if not portrait.is_empty() and ResourceLoader.exists(portrait):
+		return load(portrait)
 	var photo: String = breed.get("photo", "")
 	if not photo.is_empty() and ResourceLoader.exists(photo):
 		return load(photo)
