@@ -542,15 +542,17 @@ raw("""
                  grasz i gdy nie grasz. Przez pierwsze %g min nowej fermy
                  nikt nie choruje.
 
-  JAK SIE SZERZY pierwsza kura choruje od razu, potem zaraza przechodzi
-                 na kolejna zdrowa, NIEZASZCZEPIONA kure co %g s.
-                 Ognisko zabiera od %.0f%% do %.0f%% stada (losowane co
-                 %.0f%%, w gore): przy 100 kurach i wylosowanych 40%% padnie 40.
-                 Potem wygasa. Drozsza rasa lapie chetniej.
+  JAKA RASA      choroba atakuje JEDNA rase naraz (drozsza chetniej).
+                 Inne rasy sa odporne - im wiecej ras, tym mniej tracisz.
 
-  CHORA KURA     nie znosi i pada po %g minutach. LEKU NIE MA - chora
-                 jest stracona. Mozesz ja tylko sprzedac do McDonalda za %s
-                 (zawsze lepsze to niz nic).
+  JAK SIE SZERZY pierwszy ptak choruje od razu, potem zaraza przechodzi
+                 na kolejnego zdrowego, NIEZASZCZEPIONEGO ptaka tej rasy
+                 co %g s - az przejdzie przez cala rase. Potem wygasa.
+
+  CHORY PTAK     nie znosi. Po %g minutach pada albo zdrowieje: przezywa
+                 od %.0f%% do %.0f%% chorych (losowane przy wybuchu, co
+                 %.0f%%). Ozdrowialy jest odporny do konca zycia. LEKU NIE
+                 MA - chorego mozesz sprzedac do McDonalda za %s.
 
   SZCZEPIENIE    %s za kazda ZDROWA kure, chroni DO KONCA ZYCIA. Chorej nie
                  wyleczy. Dziala na kury zyjace w chwili szczepienia - nowe
@@ -567,9 +569,9 @@ raw("""
     dis["rate_per_hour"][1][0], co_ile(dis["rate_per_hour"][1][0]),
     dis["rate_per_hour"][2][0], co_ile(dis["rate_per_hour"][2][0]),
     dis["rate_per_hour"][-1][0], co_ile(dis["rate_per_hour"][-1][0]),
-    dis["grace_minutes"], dis["spread_seconds"],
-    dis["kill_share_min"] * 100, dis["kill_share_max"] * 100, dis["kill_share_step"] * 100,
-    dis["death_minutes"], zl(dis["mcdonalds_price"]), zl(dis["vaccine_price_per_hen"]),
+    dis["grace_minutes"], dis["spread_seconds"], dis["death_minutes"],
+    dis["survive_share_min"] * 100, dis["survive_share_max"] * 100, dis["survive_share_step"] * 100,
+    zl(dis["mcdonalds_price"]), zl(dis["vaccine_price_per_hen"]),
     dis["calm_hours_min"], dis["calm_hours_max"]))
 
 title("15. CZAS W GRZE")

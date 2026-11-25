@@ -147,10 +147,12 @@ func _report(result: Dictionary) -> void:
 	# co minute widac na wybiegu (zielona poswiata), wiec okienko co minute
 	# byloby tylko zawalidroga.
 	if int(result.get("outbreak", 0)) > 0:
-		Events.alert.emit(tr("ALERT_SICK_TITLE"), tr("ALERT_SICK_BODY"))
+		Events.alert.emit(tr("ALERT_SICK_TITLE"), tr("ALERT_SICK_BODY") % _breed_name(
+				String(result.get("outbreak_breed", state.outbreak_breed))))
 		Events.resources_changed.emit()
 	if int(result.get("outbreak_over", 0)) > 0:
-		Events.notice.emit(tr("HINT_OUTBREAK_OVER") % int(result.get("outbreak_dead", 0)))
+		Events.notice.emit(tr("HINT_OUTBREAK_OVER") % [int(result.get("outbreak_dead", 0)),
+				int(result.get("outbreak_saved", 0))])
 		Events.resources_changed.emit()
 	if int(result.get("fox_massacre", 0)) > 0:
 		Events.notice.emit(tr("HINT_FOX_MASSACRE"))
@@ -576,9 +578,10 @@ func _log_text(entry: Dictionary) -> String:
 					text += tr("LOG_FOX_DOG_KILLED")
 			return text
 		"outbreak":
-			return tr("LOG_OUTBREAK") % int(entry.get("target", 0))
+			return tr("LOG_OUTBREAK") % [_breed_name(String(entry.get("breed", ""))),
+					int(entry.get("target", 0))]
 		"outbreak_over":
-			return tr("LOG_OUTBREAK_OVER") % int(entry.get("dead", 0))
+			return tr("LOG_OUTBREAK_OVER") % [int(entry.get("dead", 0)), int(entry.get("saved", 0))]
 		"storage_full":
 			return tr("LOG_STORAGE_FULL")
 		"no_feed":
@@ -954,3 +957,9 @@ func incubate(breed_id: String) -> bool:
 ## Rozbudowuje inkubator o kolejny poziom z balance.json (z czasem budowy).
 func upgrade_incubator() -> bool:
 	return upgrade_building("incubator")
+
+
+## Nazwa rasy po polsku do komunikatow ("Leghorn"); pusty id -> "?".
+func _breed_name(breed_id: String) -> String:
+	var def := GameData.breed(breed_id)
+	return tr(String(def.get("name", ""))) if not def.is_empty() else "?"

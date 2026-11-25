@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 12.22
+  INSTRUKCJA OBSLUGI *** gra w wersji 12.23
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -356,7 +356,7 @@
    1. kundel ze schroniska z budą
       400 zl - rzuca sie na lisa co 10 s, przegania w 33%, zagryza w 0%
    2. owczarek niemiecki z rodowodem
-      2 500 zl - rzuca sie na lisa co 5 s, przegania w 67%, zagryza w 33%
+      8 000 zl - rzuca sie na lisa co 5 s, przegania w 67%, zagryza w 33%
 
   Pies pracuje sam, bez twojego udzialu, takze gdy nie patrzysz. Gdy lis
   wejdzie, pies rzuca kostka co tyle sekund. Przy udanej probie owczarek moze
@@ -365,13 +365,13 @@
 
   PLOTY:
    1. płot z siatki na drewnianych palikach
-      400 zl - lis zawraca w 50% podejsc
+      1 200 zl - lis zawraca w 50% podejsc
    2. płot z siatki zgrzewanej na stalowych słupkach
-      1 000 zl - lis zawraca w 65% podejsc
+      3 000 zl - lis zawraca w 65% podejsc
    3. płot 2 m z siatką wkopaną w ziemię
-      2 500 zl - lis zawraca w 80% podejsc
+      7 500 zl - lis zawraca w 80% podejsc
    4. płot 2 m z podmurówką i pastuchem elektrycznym
-      6 000 zl - lis zawraca w 95% podejsc
+      18 000 zl - lis zawraca w 95% podejsc
 
   Plot dziala INACZEJ niz pies: nie wygania lisa z wybiegu, tylko z takim
   prawdopodobienstwem w ogole go nie wpuszcza. Plot i pies licza sie osobno,
@@ -390,15 +390,17 @@
                  grasz i gdy nie grasz. Przez pierwsze 30 min nowej fermy
                  nikt nie choruje.
 
-  JAK SIE SZERZY pierwsza kura choruje od razu, potem zaraza przechodzi
-                 na kolejna zdrowa, NIEZASZCZEPIONA kure co 60 s.
-                 Ognisko zabiera od 30% do 100% stada (losowane co
-                 10%, w gore): przy 100 kurach i wylosowanych 40% padnie 40.
-                 Potem wygasa. Drozsza rasa lapie chetniej.
+  JAKA RASA      choroba atakuje JEDNA rase naraz (drozsza chetniej).
+                 Inne rasy sa odporne - im wiecej ras, tym mniej tracisz.
 
-  CHORA KURA     nie znosi i pada po 5 minutach. LEKU NIE MA - chora
-                 jest stracona. Mozesz ja tylko sprzedac do McDonalda za 5 zl
-                 (zawsze lepsze to niz nic).
+  JAK SIE SZERZY pierwszy ptak choruje od razu, potem zaraza przechodzi
+                 na kolejnego zdrowego, NIEZASZCZEPIONEGO ptaka tej rasy
+                 co 60 s - az przejdzie przez cala rase. Potem wygasa.
+
+  CHORY PTAK     nie znosi. Po 5 minutach pada albo zdrowieje: przezywa
+                 od 0% do 30% chorych (losowane przy wybuchu, co
+                 10%). Ozdrowialy jest odporny do konca zycia. LEKU NIE
+                 MA - chorego mozesz sprzedac do McDonalda za 5 zl.
 
   SZCZEPIENIE    5 zl za kazda ZDROWA kure, chroni DO KONCA ZYCIA. Chorej nie
                  wyleczy. Dziala na kury zyjace w chwili szczepienia - nowe

@@ -57,7 +57,7 @@
     "reference_hens": 10
   },
   "disease": {
-    "_opis": "CHOROBA (12.20, wlasciciel 25.11). Ogniska zamiast pojedynczych zachorowan. Co roll_seconds sekund REALNYCH kostka z szansa z krzywej rate_per_hour (pary [liczba ptakow, szansa na godzine], miedzy punktami liniowo): do 10 ptakow zero, przy 20 rzadko, przy 50 czesto, od 100 bardzo czesto. Wybuch zaraza od kill_share_min do kill_share_max stada w krokach kill_share_step, zaokraglone w gore, po jednej kurze co spread_seconds. Chora pada po death_minutes minutach REALNYCH. Leku nie ma; chora mozna tylko sprzedac do McDonalda za mcdonalds_price. Szczepionka chroni zdrowe, chorych nie leczy. Po wygasnieciu ogniska calm_hours_min..calm_hours_max godzin spokoju. Przez pierwsze grace_minutes gry nikt nie choruje. Drozsza rasa zaraza sie chetniej (waga = pierwiastek z ceny).",
+    "_opis": "CHOROBA (12.20, od 12.22 jedna rasa - wlasciciel 25.11). Co roll_seconds sekund REALNYCH kostka z szansa z krzywej rate_per_hour (pary [liczba ptakow w calym stadzie, szansa na godzine], miedzy punktami liniowo). Wybuch losuje JEDNA rase (drozsza chetniej, waga = pierwiastek z ceny) i zaraza po kolei WSZYSTKIE jej niezaszczepione ptaki, jednego co spread_seconds. Inne rasy sa odporne - premia za zroznicowane stado. Przy wybuchu losuje sie, jaka czesc chorych przezyje: od survive_share_min do survive_share_max co survive_share_step (0-30%); kazdy chory po death_minutes minutach REALNYCH albo pada, albo zdrowieje i jest odporny do konca zycia. Leku nie ma; chora mozna sprzedac do McDonalda za mcdonalds_price. Szczepionka chroni zdrowe, chorych nie leczy. Po wygasnieciu ogniska calm_hours_min..calm_hours_max godzin spokoju. Przez pierwsze grace_minutes gry nikt nie choruje.",
     "death_minutes": 5.0,
     "vaccine_price": 0,
     "vaccine_price_per_hen": 5,
@@ -66,9 +66,9 @@
     "roll_seconds": 60.0,
     "rate_per_hour": [[10, 0.0], [20, 0.05], [50, 0.5], [100, 1.5]],
     "spread_seconds": 60.0,
-    "kill_share_min": 0.3,
-    "kill_share_max": 1.0,
-    "kill_share_step": 0.1,
+    "survive_share_min": 0.0,
+    "survive_share_max": 0.3,
+    "survive_share_step": 0.1,
     "calm_hours_min": 3.0,
     "calm_hours_max": 12.0
   },

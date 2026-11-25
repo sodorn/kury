@@ -131,12 +131,13 @@ OPISY = {
                               "FarmState.disease_rate_per_hour"),
     "disease.spread_seconds": ("s ZEGARA", "W trakcie ogniska co tyle sekund zaraza przechodzi na "
                                "kolejna zdrowa, niezaszczepiona kure.", "Simulation._spread_outbreak"),
-    "disease.kill_share_min": ("0-1", "Najmniejsza czesc stada, jaka zarazi jedno ognisko.",
-                               "Simulation._start_outbreak"),
-    "disease.kill_share_max": ("0-1", "Najwieksza czesc stada w jednym ognisku.",
-                               "Simulation._start_outbreak"),
-    "disease.kill_share_step": ("0-1", "Krok losowania udzialu (0.1 = 30%, 40% ... 100%). Liczba kur "
-                                "zaokraglana w gore.", "Simulation._start_outbreak"),
+    "disease.survive_share_min": ("0-1", "Najmniejsza szansa, ze chory ptak wyzdrowieje (losowana "
+                                  "raz na ognisko).", "Simulation._start_outbreak"),
+    "disease.survive_share_max": ("0-1", "Najwieksza szansa wyzdrowienia (0.3 = do 30% chorych przezywa).",
+                                  "Simulation._start_outbreak"),
+    "disease.survive_share_step": ("0-1", "Krok losowania szansy wyzdrowienia (0.1 = 0%, 10%, 20%, 30%). "
+                                   "Ozdrowialy ptak jest odporny do konca zycia (jak zaszczepiony).",
+                                   "Simulation._advance_disease"),
     "disease.calm_hours_min": ("h ZEGARA", "Najkrotszy spokoj po wygasnieciu ogniska (kostka nie "
                                "rzuca).", "Simulation._end_outbreak"),
     "disease.calm_hours_max": ("h ZEGARA", "Najdluzszy spokoj po ognisku. Losowany z przedzialu "
@@ -719,10 +720,12 @@ def build():
               szansa = rate_per_hour(stado) * %s / 3600
               rate_per_hour: %s
               (miedzy punktami liniowo, poza nimi plasko)
-  wybuch:     udzial = %s..%s co %s, liczba = ceil(stado * udzial)
-              pierwsza kura od razu, kolejne co %s s ZEGARA
-  kto:        tylko zdrowe i niezaszczepione; waga = sqrt(cena rasy)
-  przebieg:   chora nie znosi; po %s min ZEGARA pada
+  wybuch:     losuje JEDNA rase (waga = sqrt(cena rasy)) i zaraza
+              WSZYSTKIE jej zdrowe, niezaszczepione ptaki; inne rasy
+              odporne. Szansa wyzdrowienia %s..%s co %s (raz na ognisko)
+              pierwszy ptak od razu, kolejne co %s s ZEGARA
+  przebieg:   chory nie znosi; po %s min ZEGARA pada albo zdrowieje
+              (wtedy odporny do konca zycia, flaga vaccinated)
   leczenie:   BRAK. Chora mozna tylko sprzedac do McDonalda za %s zl
   koniec:     nikt nie choruje i nie ma kogo zarazic -> spokoj
               %s..%s h ZEGARA (kostka nie rzuca)
@@ -730,11 +733,12 @@ def build():
               szczepienia = %s + %s * n zl; chroni zdrowe do konca
               zycia, chorych NIE leczy""" % (
         fmt(dis["grace_minutes"]), fmt(dis["roll_seconds"]), fmt(dis["roll_seconds"]), pts,
-        fmt(dis["kill_share_min"]), fmt(dis["kill_share_max"]), fmt(dis["kill_share_step"]),
+        fmt(dis["survive_share_min"]), fmt(dis["survive_share_max"]), fmt(dis["survive_share_step"]),
         fmt(dis["spread_seconds"]), fmt(dis["death_minutes"]), fmt(dis["mcdonalds_price"]),
         fmt(dis["calm_hours_min"]), fmt(dis["calm_hours_max"]), fmt(dis["vaccine_price"]),
         fmt(dis["vaccine_price_per_hen"])))
-    para("Stan ogniska (outbreak_on, outbreak_left, outbreak_timer, outbreak_dead) i spokoj "
+    para("Stan ogniska (outbreak_on, outbreak_left, outbreak_timer, outbreak_dead, outbreak_breed, "
+         "outbreak_survive, outbreak_saved) i spokoj "
          "(disease_calm) ida do zapisu. Przy grze w tle zaraza staje, gdy straty plus chore "
          "dobija do loss_budget - po powrocie gracza ognisko rusza dalej.")
 

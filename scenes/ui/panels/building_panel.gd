@@ -451,8 +451,9 @@ func _build_shop() -> void:
 func _disease_text() -> String:
 	var state := Game.state
 	if state.outbreak_on:
+		var rasa := tr(String(GameData.breed(state.outbreak_breed).get("name", "")))
 		if state.outbreak_left > 0:
-			return tr("PANEL_DISEASE_ON") % [state.outbreak_left, state.sick_count()]
+			return tr("PANEL_DISEASE_ON") % [rasa, state.outbreak_left, state.sick_count()]
 		return tr("PANEL_DISEASE_ON_DONE") % state.sick_count()
 	if state.disease_calm > 0.0:
 		return tr("PANEL_DISEASE_CALM") % NumberFormat.duration(state.disease_calm)
@@ -772,8 +773,8 @@ func _on_cull_hen(breed_id: String, breed_name: String) -> void:
 		_flash(tr("PANEL_HEN_MCDONALDS") % [breed_name, NumberFormat.money(Game.mcdonalds_price())])
 
 
-## Sprzedaz ptaka tez suwakiem: sprzedana kura nie wraca, a jedno
-## nieuwazne dotkniecie kosztowaloby caly wyhodowany egzemplarz.
+## Sprzedaz ptaka: od 12.22 zwykle dotkniecie (wlasciciel 25.11 - suwaki
+## tylko przy kupnie).
 func _on_sell_hen(breed_id: String, breed_name: String, rooster: bool = false) -> void:
 	_do_sell_hen(breed_id, breed_name, rooster)
 
@@ -1013,27 +1014,28 @@ func _add_breed_card(breed: Dictionary) -> void:
 	#   Kup koguta  | Sprzedaj koguta
 	# Polowa szerokosci to od razu krotszy suwak. Sprzedaz zostaje widoczna
 	# (wyszarzona, gdy nie ma czego sprzedac), zeby kolumny sie nie rozjezdzaly.
+	# 12.22 (wlasciciel 25.11): suwak tylko przy KUPNIE; sprzedaz to zwykly
+	# niski przycisk - jedno dotkniecie, jedna sztuka.
 	var buy := _grid_slide(&"BuyButton")
 	buy.pressed.connect(func() -> void: _on_buy_hen(breed_id, breed_name))
-	var sell := _grid_slide(&"SellButton")
+	var sell := _grid_button(&"SellButton")
 	sell.pressed.connect(func() -> void: _on_sell_hen(breed_id, breed_name))
 	var buy_rooster := _grid_slide(&"BuyButton")
 	buy_rooster.pressed.connect(func() -> void: _on_buy_hen(breed_id, breed_name, true))
-	var sell_rooster := _grid_slide(&"SellButton")
+	var sell_rooster := _grid_button(&"SellButton")
 	sell_rooster.pressed.connect(func() -> void: _on_sell_hen(breed_id, breed_name, true))
 	for pair: Array in [[buy, sell], [buy_rooster, sell_rooster]]:
 		var row := HBoxContainer.new()
 		row.name = "Trade"
 		row.add_theme_constant_override("separation", 12)
-		for slide: SlideButton in pair:
-			row.add_child(slide)
+		for button: Button in pair:
+			row.add_child(button)
 		card.add_child(row)
 
 	# Chora sztuke mozna oddac do skupu za drobne - leku nie ma (12.20).
-	# To swiadomy zart wlasciciela, nie przeoczenie.
-	var cull := _new_slide()
-	cull.theme_type_variation = &"CullButton"
-	_make_compact(cull)
+	# To swiadomy zart wlasciciela, nie przeoczenie. To tez sprzedaz, wiec
+	# od 12.22 zwykly przycisk, bez suwaka.
+	var cull := _grid_button(&"CullButton")
 	cull.pressed.connect(func() -> void: _on_cull_hen(breed_id, breed_name))
 	card.add_child(cull)
 
@@ -1053,8 +1055,10 @@ func _add_breed_card(breed: Dictionary) -> void:
 		locked_note.visible = locked
 		if locked:
 			locked_note.text = tr("PANEL_BREED_LOCKED") % Game.breed_required_level(breed_id)
-		buy.text = tr("PANEL_BUY_HEN") % NumberFormat.money(price)
-		buy_rooster.text = tr("PANEL_BUY_ROOSTER") % NumberFormat.money(cock_price)
+		# Ile masz - wprost na przyciskach kupna, krotko (wlasciciel 25.11:
+		# w opisie pod nazwa rasy bylo to za malo widoczne).
+		buy.text = tr("PANEL_BUY_HEN") % [NumberFormat.money(price), owned]
+		buy_rooster.text = tr("PANEL_BUY_ROOSTER") % [NumberFormat.money(cock_price), cocks]
 		buy.disabled = poor or locked
 		# Wczesniej ta linijka byla pisana dwa razy i druga gubila `locked`,
 		# wiec koguta dalo sie kupic do rasy zamknietej za poziomem kurnika.
@@ -1075,8 +1079,7 @@ func _add_breed_card(breed: Dictionary) -> void:
 		subtitle.text = "%s · %s" % [tr(breed.get("rarity", "")), tr(breed.get("desc", ""))]
 		numbers.text = tr("PANEL_BREED_NUMBERS") % [
 			NumberFormat.small_money(FarmState.egg_value(breed_id)),
-			NumberFormat.duration(float(breed.get("egg_seconds", 0)) / GameData.time_scale()),
-			owned, cocks])
+			NumberFormat.duration(float(breed.get("egg_seconds", 0)) / GameData.time_scale())])
 
 
 ## Suwak do siatki kupna i sprzedazy na karcie rasy: pol szerokosci karty.
@@ -1089,6 +1092,32 @@ func _grid_slide(variation: StringName) -> SlideButton:
 	# Bez minimalnej szerokosci dluzszy napis rozpychalby swoja kolumne.
 	slide.custom_minimum_size.x = 10.0
 	return slide
+
+
+## Zwykly przycisk do siatki sklepu, tej samej wysokosci co suwaki obok:
+## sprzedaz bez suwaka (12.22).
+func _grid_button(variation: StringName) -> Button:
+	var button := Button.new()
+	button.theme_type_variation = variation
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.size_flags_stretch_ratio = 1.0
+	button.autowrap_mode = TextServer.AUTOWRAP_OFF
+	button.clip_text = true
+	button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	button.add_theme_font_size_override("font_size", 30)
+	button.custom_minimum_size = Vector2(10.0, 72.0)
+	# Styl przycisku sklepu ma grube marginesy (~83 px wysokosci) i rozpychal
+	# wiersz razem z suwakiem obok. Kopie stylow z cienszymi marginesami.
+	button.ready.connect(func() -> void:
+		for state_name: String in ["normal", "hover", "pressed", "disabled", "focus"]:
+			var box := button.get_theme_stylebox(state_name)
+			if box == null:
+				continue
+			var thin := box.duplicate() as StyleBox
+			thin.content_margin_top = 4.0
+			thin.content_margin_bottom = 4.0
+			button.add_theme_stylebox_override(state_name, thin))
+	return button
 
 
 ## Niski suwak na jedna linijke tekstu (wlasciciel 25.11: "male slajdery na

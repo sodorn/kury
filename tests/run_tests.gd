@@ -726,48 +726,57 @@ func _test_disease() -> void:
 	_check(FarmState.disease_rate_per_hour(15) > 0.0 and FarmState.disease_rate_per_hour(15) < r20,
 			"miedzy punktami liniowo")
 
-	# Zaokraglenie w gore i przyklad wlasciciela: 40% ze 100 kur = 40 kur.
-	for case: Array in [[100, 0.4, 40], [100, 0.3, 30], [15, 0.3, 5], [15, 1.0, 15], [7, 0.3, 3]]:
-		disease["kill_share_min"] = case[1]
-		disease["kill_share_max"] = case[1]
-		var herd := _herd(int(case[0]))
+	# 12.22 (wlasciciel 25.11): ognisko bierze JEDNA rase, zaraza wszystkie
+	# jej niezaszczepione ptaki, inne rasy sa odporne.
+	var mix := _fresh_state([], 10000000.0)
+	for i in 12:
+		mix.chickens.append(Chicken.create("leghorn"))
+	for i in 7:
+		mix.chickens.append(Chicken.create("rhode"))
+	var picked := {}
+	for i in 200:
+		var trial := _fresh_state([], 1.0)
+		for hen: Chicken in mix.chickens:
+			trial.chickens.append(Chicken.create(hen.breed_id))
 		var out := _empty_out()
-		Simulation._start_outbreak(herd, out, 1 << 30)
-		_check(int(out.get("outbreak", 0)) == int(case[2]),
-				"%d ptakow x %d%% = %d zarazonych (wyszlo %d)" % [case[0], int(case[1] * 100), case[2],
-				int(out.get("outbreak", 0))])
-	_restore_event("disease", backup)
-	disease = GameData.balance().get("disease", {})
+		Simulation._start_outbreak(trial, out, 1 << 30)
+		var rasa := String(out.get("outbreak_breed", ""))
+		picked[rasa] = true
+		var ile := 12 if rasa == "leghorn" else 7
+		if int(out.get("outbreak", 0)) != ile or trial.outbreak_breed != rasa:
+			_check(false, "ognisko %s planuje %d zarazen (jest %d)" % [rasa, ile, int(out.get("outbreak", 0))])
+			break
+	_check(picked.has("leghorn") and picked.has("rhode") and picked.size() == 2,
+			"ognisko losuje jedna z ras na fermie (%s)" % str(picked.keys()))
 
-	# Losowanie udzialu w krokach 10%: przy 15 ptakach mozliwe tylko
-	# ceil(15 * 0.3) .. 15 z tych progow, i wypadaja oba konce.
-	var allowed := {}
-	for k in range(3, 11):
-		allowed[ceili(15 * k / 10.0 - 0.0001)] = true
-	var seen := {}
-	var bad := 0
+	# Przezywalnosc: losowana przy wybuchu, 0%, 10%, 20% albo 30%.
+	var szanse := {}
+	var zle := 0
 	for i in 300:
 		var herd := _herd(15)
-		var out := _empty_out()
-		Simulation._start_outbreak(herd, out, 1 << 30)
-		var target := int(out.get("outbreak", 0))
-		seen[target] = true
-		if not allowed.has(target):
-			bad += 1
-	_check(bad == 0, "udzial tylko z progow 30%..100% co 10%")
-	_check(seen.has(5) and seen.has(15), "wypada i 30%, i 100% stada")
+		Simulation._start_outbreak(herd, _empty_out(), 1 << 30)
+		var p := int(round(herd.outbreak_survive * 100.0))
+		szanse[p] = true
+		if not p in [0, 10, 20, 30]:
+			zle += 1
+	_check(zle == 0 and szanse.has(0) and szanse.has(30), "przezywa 0-30%% chorych, co 10%% (%s)" % str(szanse.keys()))
 
-	# Przebieg ogniska: pierwsza od razu, potem jedna na minute.
+	# Przebieg ogniska: pierwsza od razu, potem jedna na minute. 40 leghornow
+	# choruje, 60 zaszczepionych rhode jest bezpiecznych; nikt nie przezywa.
 	disease["rate_per_hour"] = [[0, 100000.0]]
-	disease["kill_share_min"] = 0.4
-	disease["kill_share_max"] = 0.4
-	var farm := _herd(100)
+	disease["survive_share_min"] = 0.0
+	disease["survive_share_max"] = 0.0
+	var farm := _herd(40)
+	for i in 60:
+		var odporna := Chicken.create("rhode")
+		odporna.vaccinated = true
+		farm.chickens.append(odporna)
 	_past_grace(farm)
 	# 90 s zamiast 60: kostka rzuca co pelne 60 s zegara, a krok 1 s gry to
 	# 3 s zegara z bledem zaokraglen — rowne 60 bywa 59,9999.
 	var start := Simulation.advance(farm, 90.0 * scale)
-	_check(int(start.get("outbreak", 0)) == 40, "wybuch zaplanowal 40 zarazen")
-	_check(farm.outbreak_on, "ognisko trwa")
+	_check(int(start.get("outbreak", 0)) == 40, "wybuch zaplanowal 40 zarazen (cala rasa)")
+	_check(farm.outbreak_on and farm.outbreak_breed == "leghorn", "ognisko trwa, rasa leghorn")
 	var sick_now := farm.sick_count()
 	_check(sick_now >= 1 and sick_now <= 2, "na starcie choruje jedna, najwyzej dwie (%d)" % sick_now)
 	Simulation.advance(farm, 180.0 * scale)
@@ -785,7 +794,7 @@ func _test_disease() -> void:
 			over += 1
 			over_dead = int(step.get("outbreak_dead", -1))
 	_check(dead == 40, "ognisko zabilo dokladnie 40 kur (%d)" % dead)
-	_check(farm.hen_count() == 60, "zostalo 60 kur (%d)" % farm.hen_count())
+	_check(farm.hen_count() == 60 and farm.hens_of_breed("rhode") == 60, "inna rasa nietknieta (%d)" % farm.hen_count())
 	_check(over == 1 and over_dead == 40, "koniec ogniska zgloszony raz, z bilansem 40")
 	_check(not farm.outbreak_on and farm.sick_count() == 0, "po ognisku nikt nie choruje")
 	_check(new_outbreaks == 0, "w czasie spokoju nie wybucha nowe ognisko")
@@ -793,9 +802,38 @@ func _test_disease() -> void:
 	_check(calm_h > 0.0 and calm_h <= float(disease.get("calm_hours_max", 12.0)),
 			"po ognisku spokoj (zostalo %.1f h)" % calm_h)
 	# Koniec spokoju: przy szansie 100000/h kolejne ognisko wybucha od razu.
+	for i in 10:
+		farm.chickens.append(Chicken.create("marans"))
 	Simulation.advance(farm, (farm.disease_calm + 120.0) * scale)
-	_check(farm.outbreak_on or farm.sick_count() > 0 or farm.hen_count() < 60,
+	_check(farm.outbreak_on or farm.sick_count() > 0 or farm.hen_count() < 70,
 			"po spokoju choroba wraca")
+
+	# Ozdrowiency: przy 30% czesc chorych wstaje, reszta pada, wszyscy z tej
+	# rasy przechodza chorobe, a ozdrowiali sa juz odporni.
+	disease["survive_share_min"] = 0.3
+	disease["survive_share_max"] = 0.3
+	var ozdrowiency := _herd(200)
+	_past_grace(ozdrowiency)
+	var padly := 0
+	var wstaly := 0
+	var bilans := -1
+	for i in 260:
+		var step := Simulation.advance(ozdrowiency, 60.0 * scale)
+		padly += int(step["died_disease"])
+		wstaly += int(step.get("recovered", 0))
+		if int(step.get("outbreak_over", 0)) > 0:
+			bilans = int(step.get("outbreak_saved", -1))
+			break
+	_check(padly + wstaly == 200, "cala rasa przeszla chorobe (padlo %d, wyzdrowialo %d)" % [padly, wstaly])
+	_check(wstaly >= 35 and wstaly <= 85, "przezylo okolo 30%% (%d z 200)" % wstaly)
+	_check(bilans == wstaly, "koniec ogniska podaje liczbe ozdrowialych")
+	var odporne := 0
+	for hen: Chicken in ozdrowiency.chickens:
+		if hen.vaccinated and not hen.sick:
+			odporne += 1
+	_check(odporne == wstaly, "ozdrowiale sa odporne (%d)" % odporne)
+	disease["survive_share_min"] = 0.0
+	disease["survive_share_max"] = 0.0
 
 	# Spokoj trwa od calm_hours_min do calm_hours_max.
 	var low := float(disease.get("calm_hours_min", 3.0)) * 3600.0
@@ -810,8 +848,6 @@ func _test_disease() -> void:
 	_check(calm_bad == 0 and low >= 3.0 * 3600.0 and high <= 12.0 * 3600.0, "spokoj 3-12 godzin")
 
 	# Szczepienie: zaszczepione nie lapia, ognisko gasnie, gdy brak kogo zarazic.
-	disease["kill_share_min"] = 1.0
-	disease["kill_share_max"] = 1.0
 	var vax := _herd(100)
 	_past_grace(vax)
 	for i in 60:
@@ -2058,10 +2094,10 @@ func _test_event_rules() -> void:
 
 	# Choroba: liczby od wlasciciela (25.11).
 	_check(is_equal_approx(float(disease.get("spread_seconds", 0.0)), 60.0), "choroba: zaraza co minute")
-	_check(is_equal_approx(float(disease.get("kill_share_min", 0.0)), 0.3)
-			and is_equal_approx(float(disease.get("kill_share_max", 0.0)), 1.0)
-			and is_equal_approx(float(disease.get("kill_share_step", 0.0)), 0.1),
-			"choroba: 30-100% stada co 10%")
+	_check(is_equal_approx(float(disease.get("survive_share_min", -1.0)), 0.0)
+			and is_equal_approx(float(disease.get("survive_share_max", 0.0)), 0.3)
+			and is_equal_approx(float(disease.get("survive_share_step", 0.0)), 0.1),
+			"choroba: przezywa 0-30% chorych, co 10%")
 	_check(is_equal_approx(float(disease.get("calm_hours_min", 0.0)), 3.0)
 			and is_equal_approx(float(disease.get("calm_hours_max", 0.0)), 12.0),
 			"choroba: 3-12 godzin spokoju")

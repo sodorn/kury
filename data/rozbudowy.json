@@ -50,13 +50,13 @@
 		{"poziom": 9, "nazwa": "mała wylęgarnia: dwie szafy na 360 jaj, klujnik i agregat", "cena": 9000, "budowa_min": 60, "jaj": 360}
 	],
 	"plot": [
-		{"poziom": 1, "nazwa": "płot z siatki na drewnianych palikach",       "cena": 400,  "lis_zawraca_proc": 50},
-		{"poziom": 2, "nazwa": "płot z siatki zgrzewanej na stalowych słupkach", "cena": 1000, "lis_zawraca_proc": 65},
-		{"poziom": 3, "nazwa": "płot 2 m z siatką wkopaną w ziemię",          "cena": 2500, "lis_zawraca_proc": 80},
-		{"poziom": 4, "nazwa": "płot 2 m z podmurówką i pastuchem elektrycznym", "cena": 6000, "lis_zawraca_proc": 95}
+		{"poziom": 1, "nazwa": "płot z siatki na drewnianych palikach",       "cena": 1200, "lis_zawraca_proc": 50},
+		{"poziom": 2, "nazwa": "płot z siatki zgrzewanej na stalowych słupkach", "cena": 3000, "lis_zawraca_proc": 65},
+		{"poziom": 3, "nazwa": "płot 2 m z siatką wkopaną w ziemię",          "cena": 7500, "lis_zawraca_proc": 80},
+		{"poziom": 4, "nazwa": "płot 2 m z podmurówką i pastuchem elektrycznym", "cena": 18000, "lis_zawraca_proc": 95}
 	],
 	"pies": [
 		{"poziom": 1, "nazwa": "kundel ze schroniska z budą",   "cena": 400,  "probuje_co_s": 10, "przegania_proc": 33.33, "zagryza_proc": 0},
-		{"poziom": 2, "nazwa": "owczarek niemiecki z rodowodem", "cena": 2500, "probuje_co_s": 5,  "przegania_proc": 66.67, "zagryza_proc": 33.33}
+		{"poziom": 2, "nazwa": "owczarek niemiecki z rodowodem", "cena": 8000, "probuje_co_s": 5,  "przegania_proc": 66.67, "zagryza_proc": 33.33}
 	]
 }

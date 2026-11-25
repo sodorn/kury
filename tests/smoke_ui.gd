@@ -376,6 +376,10 @@ func _test_shop() -> void:
 	var open_card := _card_button(rows[first_card])
 	var last_card := _card_button(rows[rows.size() - 1])
 	_check(open_card != null and open_card.visible, "karta rasy startowej ma przycisk zakupu")
+	if open_card != null:
+		var kury := Game.state.hens_of_breed("leghorn")
+		_check(open_card.text.contains("(masz %d)" % kury) and open_card is SlideButton,
+				"kupno kury: suwak z liczba posiadanych (%s)" % open_card.text)
 	_check(last_card != null and last_card.visible, "najdrozsza rasa tez ma przycisk zakupu")
 	_check(last_card != null and last_card.disabled, "ale bez pieniedzy przycisk jest wyszarzony")
 
@@ -579,18 +583,18 @@ func _test_sell_hen() -> void:
 		return
 	var hens_before: int = Game.state.hen_count()
 	var money_before: float = Game.state.money
-	_check(sell_button is SlideButton, "sprzedaz kury to suwak")
+	# 12.22 (wlasciciel 25.11): suwak tylko przy kupnie, sprzedaz to zwykle
+	# dotkniecie.
+	_check(not (sell_button is SlideButton) and sell_button.size.y <= 80.0,
+			"sprzedaz kury to zwykly niski przycisk, nie suwak (%s, %.0f px)" % [
+				sell_button.get_class(), sell_button.size.y])
 	_scroll_into_view(sell_button)
 	await _frames(10)
-	await _tap(sell_button.get_global_rect().get_center())
-	await _frames(20)
-	_check(Game.state.hen_count() == hens_before, "samo dotkniecie nic nie sprzedaje")
-	_check(_button_labelled(tr("CONFIRM_YES")) == null, "zadnego okienka 'na pewno?'")
 	var ekran := Rect2(Vector2.ZERO, get_viewport().get_visible_rect().size)
-	_check(ekran.encloses(sell_button.get_global_rect()), "suwak sprzedazy miesci sie na ekranie")
-	if sell_button is SlideButton:
-		await _slide(sell_button as SlideButton)
+	_check(ekran.encloses(sell_button.get_global_rect()), "przycisk sprzedazy miesci sie na ekranie")
+	await _tap(sell_button.get_global_rect().get_center())
 	await _seconds(2.0)
+	_check(_button_labelled(tr("CONFIRM_YES")) == null, "zadnego okienka 'na pewno?'")
 	_check(Game.state.hen_count() == hens_before - 1, "sprzedaz zmniejsza stado")
 	_check(Game.state.money > money_before, "sprzedaz kury daje pieniadze")
 	_check(_nodes_of_type("FarmChicken").size() <= Game.state.hen_count(),
@@ -1013,7 +1017,7 @@ func _test_sick_and_fox_look() -> void:
 	# Okienko ostrzezenia o chorobie.
 	var alert: Control = _main.get_node("Hud/Root/AlertPanel")
 	_check(not alert.visible, "ostrzezenie schowane, dopoki nic sie nie dzieje")
-	Events.alert.emit(tr("ALERT_SICK_TITLE"), tr("ALERT_SICK_BODY") % 2)
+	Events.alert.emit(tr("ALERT_SICK_TITLE"), tr("ALERT_SICK_BODY") % "Leghorn")
 	await _frames(40)
 	_check(alert.visible, "ostrzezenie o chorobie pokazuje sie jako okienko")
 	_check((alert.get_node("Sheet/Content/Title") as Label).text == tr("ALERT_SICK_TITLE"),

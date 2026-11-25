@@ -269,17 +269,26 @@ static func _advance_disease(state: FarmState, step: float, out: Dictionary, bud
 	# do McDonalda.
 	var death_seconds := float(disease.get("death_minutes", 5.0)) * 60.0
 
-	# 1. Przebieg choroby u tych, ktore juz choruja.
+	# 1. Przebieg choroby u tych, ktore juz choruja. Po death_minutes chory
+	#    albo pada, albo (z szansa outbreak_survive, 0-30%) zdrowieje i jest
+	#    odporny do konca zycia - jak po szczepieniu (wlasciciel 25.11).
 	var index := state.chickens.size() - 1
 	while index >= 0:
 		var hen: Chicken = state.chickens[index]
 		if hen.sick:
 			hen.sick_seconds += real
-			if hen.sick_seconds >= death_seconds and _losses(out) < budget:
-				_kill_hen(state, index, "disease")
-				out["died_disease"] = int(out["died_disease"]) + 1
-				if state.outbreak_on:
-					state.outbreak_dead += 1
+			if hen.sick_seconds >= death_seconds:
+				if state.outbreak_on and randf() < state.outbreak_survive:
+					hen.sick = false
+					hen.sick_seconds = 0.0
+					hen.vaccinated = true
+					state.outbreak_saved += 1
+					out["recovered"] = int(out.get("recovered", 0)) + 1
+				elif _losses(out) < budget:
+					_kill_hen(state, index, "disease")
+					out["died_disease"] = int(out["died_disease"]) + 1
+					if state.outbreak_on:
+						state.outbreak_dead += 1
 		index -= 1
 
 	# 2. Ognisko w toku: co spread_seconds zaraza przechodzi na kolejna kure,
@@ -314,29 +323,35 @@ static func _advance_disease(state: FarmState, step: float, out: Dictionary, bud
 			return
 
 
-## Wybuch choroby. Losuje, jaka czesc stada zarazi: od kill_share_min do
-## kill_share_max co kill_share_step (30%, 40%, ... 100%), zaokraglone w gore
-## (40% ze 100 kur = 40 kur). Pierwsza kura choruje od razu.
+## Wybuch choroby (12.22, wlasciciel 25.11). Losuje JEDNA rase - drozsza
+## chetniej - i zaraza po kolei wszystkie jej niezaszczepione ptaki; inne rasy
+## sa odporne (premia za zroznicowane stado). Losuje tez, jaka czesc chorych
+## przezyje: survive_share_min..max co survive_share_step (0%, 10%, 20%, 30%).
+## Pierwszy ptak choruje od razu.
 static func _start_outbreak(state: FarmState, out: Dictionary, budget: int) -> void:
-	if _pick_for_infection(state) == null:
+	var first := _pick_for_infection(state, "")
+	if first == null:
 		return
 	var disease: Dictionary = GameData.balance().get("disease", {})
-	var low := clampf(float(disease.get("kill_share_min", 0.3)), 0.0, 1.0)
-	var high := clampf(float(disease.get("kill_share_max", 1.0)), low, 1.0)
-	var step := maxf(0.01, float(disease.get("kill_share_step", 0.1)))
+	var low := clampf(float(disease.get("survive_share_min", 0.0)), 0.0, 1.0)
+	var high := clampf(float(disease.get("survive_share_max", 0.3)), low, 1.0)
+	var step := maxf(0.01, float(disease.get("survive_share_step", 0.1)))
 	var steps := int(round((high - low) / step))
-	var share := minf(high, low + step * randi_range(0, steps))
-	# Odejmujemy drobinke przed sufitem: 0.3 * 100 w liczbach zmiennoprzecinkowych
-	# to 30.000000000000004 i sam ceil dalby 31.
-	var target := maxi(1, ceili(state.chickens.size() * share - 0.0001))
+	state.outbreak_survive = minf(high, low + step * randi_range(0, steps))
+	state.outbreak_breed = first.breed_id
+	var target := 0
+	for hen: Chicken in state.chickens:
+		if hen.breed_id == first.breed_id and not hen.sick and not hen.vaccinated:
+			target += 1
 	state.outbreak_on = true
 	state.outbreak_left = target
 	state.outbreak_timer = 0.0
 	state.outbreak_dead = 0
+	state.outbreak_saved = 0
 	out["outbreak"] = target
-	out["outbreak_share"] = share
+	out["outbreak_breed"] = first.breed_id
 	out["outbreaks"] = int(out.get("outbreaks", 0)) + 1
-	_log(out, "outbreak", {"target": target, "share": share})
+	_log(out, "outbreak", {"target": target, "breed": first.breed_id})
 	_spread_outbreak(state, out, budget, 0.0)
 
 
@@ -352,7 +367,7 @@ static func _spread_outbreak(state: FarmState, out: Dictionary, budget: int, rea
 		if _losses(out) + state.sick_count() >= budget:
 			state.outbreak_timer = 0.0
 			return
-		var hen: Chicken = _pick_for_infection(state)
+		var hen: Chicken = _pick_for_infection(state, _outbreak_breed_of(state))
 		if hen == null:
 			# Nie ma juz kogo zarazic: reszta zaszczepiona albo wybita.
 			state.outbreak_left = 0
@@ -373,23 +388,41 @@ static func _end_outbreak(state: FarmState, out: Dictionary) -> void:
 	state.disease_calm = randf_range(low, high) * 3600.0
 	out["outbreak_over"] = int(out.get("outbreak_over", 0)) + 1
 	out["outbreak_dead"] = state.outbreak_dead
-	_log(out, "outbreak_over", {"dead": state.outbreak_dead})
+	out["outbreak_saved"] = state.outbreak_saved
+	_log(out, "outbreak_over", {"dead": state.outbreak_dead, "saved": state.outbreak_saved})
 	state.outbreak_on = false
 	state.outbreak_left = 0
 	state.outbreak_timer = 0.0
 	state.outbreak_dead = 0
+	state.outbreak_saved = 0
+	state.outbreak_breed = ""
+	state.outbreak_survive = 0.0
 	state.disease_timer = 0.0
 
 
-## Losuje zdrowa, niezaszczepiona kure do zarazenia. Droga rasa choruje
-## czesciej — waga to pierwiastek z ceny (sama cena dawalaby cemani sto razy
-## wieksza szanse niz leghornowi). null, gdy nie ma kogo zarazic.
-static func _pick_for_infection(state: FarmState) -> Chicken:
+## Rasa trwajacego ogniska. Zapis sprzed 12.22 jej nie ma - wtedy bierzemy
+## rase pierwszego chorego ptaka (a bez chorych: ognisko i tak wygasa).
+static func _outbreak_breed_of(state: FarmState) -> String:
+	if state.outbreak_breed.is_empty():
+		for hen: Chicken in state.chickens:
+			if hen.sick:
+				state.outbreak_breed = hen.breed_id
+				break
+	return state.outbreak_breed
+
+
+## Losuje zdrowego, niezaszczepionego ptaka do zarazenia; przy `breed_id`
+## tylko z tej rasy. Droga rasa choruje czesciej - waga to pierwiastek z ceny
+## (sama cena dawalaby cemani sto razy wieksza szanse niz leghornowi). null,
+## gdy nie ma kogo zarazic.
+static func _pick_for_infection(state: FarmState, breed_id: String) -> Chicken:
 	var healthy: Array[Chicken] = []
 	var weights: Array[float] = []
 	var total := 0.0
 	for hen: Chicken in state.chickens:
 		if hen.sick or hen.vaccinated:
+			continue
+		if not breed_id.is_empty() and hen.breed_id != breed_id:
 			continue
 		var weight := sqrt(maxf(1.0, float(GameData.breed(hen.breed_id).get("price", 1))))
 		healthy.append(hen)

@@ -4,7 +4,20 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.22): ROZBUDOWY W JEDNYM PLIKU
+- Aktualny etap: **ETAP 10** (wersja 12.23): CHOROBA JEDNEJ RASY
+  (wlasciciel 25.11): ognisko losuje jedna rase (waga sqrt ceny) i zaraza
+  po kolei WSZYSTKIE jej zdrowe, niezaszczepione ptaki; inne rasy odporne.
+  Przy wybuchu losowana szansa wyzdrowienia 0/10/20/30% (disease.
+  survive_share_min/max/step zamiast kill_share_*); ozdrowialy dostaje
+  vaccinated = true (odporny). FarmState.outbreak_breed/outbreak_survive/
+  outbreak_saved w zapisie (stare zapisy: rasa pierwszego chorego).
+  Komunikaty z nazwa rasy i liczba ozdrowialych. Szczepionka dalej nie
+  leczy chorych. SKLEP: liczba kur/kogutow na przyciskach kupna "(masz N)",
+  sprzedaz kury/koguta i "do McDonalda" zwyklymi niskimi przyciskami (suwak
+  tylko przy kupnie). PLOT x3: 1200/3000/7500/18000, OWCZAREK 8000.
+  Bot 24 h: zaangazowany ~24 tys. (12.22: ~33 tys.), choroba zabiera mu
+  ~40 ptakow (bylo ~27) - stado z jednej rasy obrywa najmocniej.
+- Wersja 12.22: ROZBUDOWY W JEDNYM PLIKU
   data/rozbudowy.json (wlasciciel 25.11: "w prostym do edytowania pliku").
   Polskie klucze, nazwy zwyklym tekstem: kurnik (miejsc), magazyn (jaj,
   pasza, pasza_kg, pasza_cena), inkubator (jaj; miejsca = jaj / 3), plot

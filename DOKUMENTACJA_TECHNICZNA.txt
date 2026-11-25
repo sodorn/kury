@@ -1,6 +1,6 @@
 ==============================================================================
   SYMULATOR HODOWLI KURCZAKOW - DOKUMENTACJA TECHNICZNA
-  gra w wersji 12.22   *   format zapisu w wersji 6   *   Godot 4.7.2
+  gra w wersji 12.23   *   format zapisu w wersji 6   *   Godot 4.7.2
 ==============================================================================
 
   Dokument dla programisty: jak gra jest zbudowana, jak dzialaja mechaniki, co
@@ -315,10 +315,12 @@
               szansa = rate_per_hour(stado) * 60.0 / 3600
               rate_per_hour: 10->0.0/h, 20->0.05/h, 50->0.5/h, 100->1.5/h
               (miedzy punktami liniowo, poza nimi plasko)
-  wybuch:     udzial = 0.3..1.0 co 0.1, liczba = ceil(stado * udzial)
-              pierwsza kura od razu, kolejne co 60.0 s ZEGARA
-  kto:        tylko zdrowe i niezaszczepione; waga = sqrt(cena rasy)
-  przebieg:   chora nie znosi; po 5.0 min ZEGARA pada
+  wybuch:     losuje JEDNA rase (waga = sqrt(cena rasy)) i zaraza
+              WSZYSTKIE jej zdrowe, niezaszczepione ptaki; inne rasy
+              odporne. Szansa wyzdrowienia 0.0..0.3 co 0.1 (raz na ognisko)
+              pierwszy ptak od razu, kolejne co 60.0 s ZEGARA
+  przebieg:   chory nie znosi; po 5.0 min ZEGARA pada albo zdrowieje
+              (wtedy odporny do konca zycia, flaga vaccinated)
   leczenie:   BRAK. Chora mozna tylko sprzedac do McDonalda za 5 zl
   koniec:     nikt nie choruje i nie ma kogo zarazic -> spokoj
               3.0..12.0 h ZEGARA (kostka nie rzuca)
@@ -326,10 +328,10 @@
               szczepienia = 0 + 5 * n zl; chroni zdrowe do konca
               zycia, chorych NIE leczy
 
-  Stan ogniska (outbreak_on, outbreak_left, outbreak_timer, outbreak_dead) i
-  spokoj (disease_calm) ida do zapisu. Przy grze w tle zaraza staje, gdy
-  straty plus chore dobija do loss_budget - po powrocie gracza ognisko rusza
-  dalej.
+  Stan ogniska (outbreak_on, outbreak_left, outbreak_timer, outbreak_dead,
+  outbreak_breed, outbreak_survive, outbreak_saved) i spokoj (disease_calm)
+  ida do zapisu. Przy grze w tle zaraza staje, gdy straty plus chore dobija do
+  loss_budget - po powrocie gracza ognisko rusza dalej.
 
   6.4 Lis - maszyna stanow
   ------------------------
@@ -385,7 +387,7 @@
   | poz. |      cena | rzut co | szansa | zagryza |
   +======+===========+=========+========+=========+
   |    1 |  400.0 zl |  10.0 s |    33% |      0% |
-  |    2 | 2500.0 zl |   5.0 s |    67% |     33% |
+  |    2 | 8000.0 zl |   5.0 s |    67% |     33% |
   +------+-----------+---------+--------+---------+
 
   Nazwy psow: rozbudowy.json -> pies (rozdzial 7).
@@ -643,21 +645,21 @@
       niezaszczepiona kure.
       uzycie: Simulation._spread_outbreak
 
-  disease.kill_share_min
+  disease.survive_share_min
+      = 0.0 [0-1]
+      Najmniejsza szansa, ze chory ptak wyzdrowieje (losowana raz na ognisko).
+      uzycie: Simulation._start_outbreak
+
+  disease.survive_share_max
       = 0.3 [0-1]
-      Najmniejsza czesc stada, jaka zarazi jedno ognisko.
+      Najwieksza szansa wyzdrowienia (0.3 = do 30% chorych przezywa).
       uzycie: Simulation._start_outbreak
 
-  disease.kill_share_max
-      = 1.0 [0-1]
-      Najwieksza czesc stada w jednym ognisku.
-      uzycie: Simulation._start_outbreak
-
-  disease.kill_share_step
+  disease.survive_share_step
       = 0.1 [0-1]
-      Krok losowania udzialu (0.1 = 30%, 40% ... 100%). Liczba kur zaokraglana
-      w gore.
-      uzycie: Simulation._start_outbreak
+      Krok losowania szansy wyzdrowienia (0.1 = 0%, 10%, 20%, 30%). Ozdrowialy
+      ptak jest odporny do konca zycia (jak zaszczepiony).
+      uzycie: Simulation._advance_disease
 
   disease.calm_hours_min
       = 3.0 [h ZEGARA]
@@ -979,17 +981,17 @@
     9000 zl, 60 min
 
   PLOT:
-    1. płot z siatki na drewnianych palikach - 400 zl, lis zawraca w 50%
-    2. płot z siatki zgrzewanej na stalowych słupkach - 1000 zl, lis zawraca w
+    1. płot z siatki na drewnianych palikach - 1200 zl, lis zawraca w 50%
+    2. płot z siatki zgrzewanej na stalowych słupkach - 3000 zl, lis zawraca w
     65%
-    3. płot 2 m z siatką wkopaną w ziemię - 2500 zl, lis zawraca w 80%
-    4. płot 2 m z podmurówką i pastuchem elektrycznym - 6000 zl, lis zawraca w
-    95%
+    3. płot 2 m z siatką wkopaną w ziemię - 7500 zl, lis zawraca w 80%
+    4. płot 2 m z podmurówką i pastuchem elektrycznym - 18000 zl, lis zawraca
+    w 95%
 
   PIES:
     1. kundel ze schroniska z budą - 400 zl, co 10 s, przegania 33.33%,
     zagryza 0%
-    2. owczarek niemiecki z rodowodem - 2500 zl, co 5 s, przegania 66.67%,
+    2. owczarek niemiecki z rodowodem - 8000 zl, co 5 s, przegania 66.67%,
     zagryza 33.33%
 
   breeds.json - pola kazdej rasy
@@ -1675,5 +1677,5 @@
     limity miejsca i ruchu planu darmowego.
 
 ==============================================================================
-  koniec dokumentu  *  wygenerowano z wersji 12.22
+  koniec dokumentu  *  wygenerowano z wersji 12.23
 ==============================================================================

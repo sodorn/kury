@@ -86,6 +86,12 @@ var outbreak_on: bool = false
 var outbreak_left: int = 0
 var outbreak_timer: float = 0.0
 var outbreak_dead: int = 0
+## 12.22: ognisko atakuje JEDNA rase (`outbreak_breed`); inne sa odporne.
+## `outbreak_survive` = szansa, ze chory ptak wyzdrowieje (0-30%, losowana
+## przy wybuchu); `outbreak_saved` = ilu wyzdrowialo w tym ognisku.
+var outbreak_breed: String = ""
+var outbreak_survive: float = 0.0
+var outbreak_saved: int = 0
 var disease_calm: float = 0.0
 ## Rzez: lis, ktory wszedl na wybieg bez psa, zabija cale stado (12.20).
 var fox_massacre: bool = false

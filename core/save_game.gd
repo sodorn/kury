@@ -67,6 +67,9 @@ static func to_dict(state: FarmState, unpaid_seconds: float = 0.0) -> Dictionary
 		"outbreak_left": state.outbreak_left,
 		"outbreak_timer": state.outbreak_timer,
 		"outbreak_dead": state.outbreak_dead,
+		"outbreak_breed": state.outbreak_breed,
+		"outbreak_survive": state.outbreak_survive,
+		"outbreak_saved": state.outbreak_saved,
 		"disease_calm": state.disease_calm,
 		"fox_visit_left": state.fox_visit_left,
 		"fox_pending": state.fox_pending,
@@ -119,6 +122,11 @@ static func from_dict(data: Dictionary) -> Dictionary:
 	state.outbreak_left = maxi(0, int(data.get("outbreak_left", 0)))
 	state.outbreak_timer = maxf(0.0, float(data.get("outbreak_timer", 0.0)))
 	state.outbreak_dead = maxi(0, int(data.get("outbreak_dead", 0)))
+	# 12.22: stare zapisy nie maja rasy ogniska - wtedy zaraza obejmuje rase
+	# pierwszej chorej (Simulation._outbreak_breed_of).
+	state.outbreak_breed = String(data.get("outbreak_breed", ""))
+	state.outbreak_survive = clampf(float(data.get("outbreak_survive", 0.0)), 0.0, 1.0)
+	state.outbreak_saved = maxi(0, int(data.get("outbreak_saved", 0)))
 	state.disease_calm = maxf(0.0, float(data.get("disease_calm", 0.0)))
 	state.fox_massacre = false
 	state.rooster_hints = Dictionary(data.get("rooster_hints", {}))
