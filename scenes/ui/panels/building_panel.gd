@@ -165,36 +165,19 @@ func _build_content(building_id: String) -> void:
 
 func _build_coop() -> void:
 	_add_upgrade("coop", func(upgrade: Dictionary) -> String:
-			return tr("PANEL_UPGRADE_COOP") % [
-				tr(String(upgrade.get("name", ""))),
-				int(upgrade.get("capacity", 0)),
-				NumberFormat.money(float(upgrade.get("price", 0))),
-				_build_time_text("coop")])
-	_add_action(false,
-			func() -> bool: return Game.state.money >= float(
-					Game.state.next_building_upgrade("dog").get("price", 0)),
-			func() -> String:
-				var upgrade := Game.state.next_building_upgrade("dog")
-				return tr("PANEL_BUY_DOG") % [
-					tr(_dog_buy_name(Game.state.dog_level + 1)),
-					NumberFormat.money(float(upgrade.get("price", 0)))],
-			func() -> void: _on_upgrade("dog"),
-			func() -> bool: return not Game.state.next_building_upgrade("dog").is_empty(),
-			func() -> float: return float(Game.state.next_building_upgrade("dog").get("price", 0)),
-			_upgrades, true)
-	_add_action(false,
-			func() -> bool: return Game.state.money >= float(
-					Game.state.next_building_upgrade("guard").get("price", 0)),
-			func() -> String:
-				var upgrade := Game.state.next_building_upgrade("guard")
-				return tr("PANEL_UPGRADE_GUARD") % [
-					tr(_guard_buy_name(Game.state.guard_level + 1)),
-					NumberFormat.money(float(upgrade.get("price", 0))),
-					int(round(float(upgrade.get("block_chance", 0.0)) * 100.0))],
-			func() -> void: _on_upgrade("guard"),
-			func() -> bool: return not Game.state.next_building_upgrade("guard").is_empty(),
-			func() -> float: return float(Game.state.next_building_upgrade("guard").get("price", 0)),
-			_upgrades, true)
+			return tr("UPG_COOP_EFFECT") % NumberFormat.count(int(upgrade.get("capacity", 0)),
+					"miejsce", "miejsca", "miejsc"))
+	_add_purchase("dog", "PANEL_BUY_DOG", func(upgrade: Dictionary) -> String:
+			var text := tr("PANEL_DOG_NEXT") % [String(upgrade.get("name", "")),
+					NumberFormat.amount_only(float(upgrade.get("interval", 0))),
+					int(round(float(upgrade.get("chance", 0.0)) * 100.0))]
+			var kill := int(round(float(upgrade.get("kill_chance", 0.0)) * 100.0))
+			if kill > 0:
+				text += tr("PANEL_DOG_NEXT_KILL") % kill
+			return text)
+	_add_purchase("guard", "PANEL_BUY_GUARD", func(upgrade: Dictionary) -> String:
+			return tr("PANEL_GUARD_NEXT") % [String(upgrade.get("name", "")),
+					int(round(float(upgrade.get("block_chance", 0.0)) * 100.0))])
 
 	_add_level_row(func() -> int: return Game.state.coop_level, _building_levels("coop"),
 			func() -> String: return _level_name("coop"))
@@ -209,13 +192,13 @@ func _build_coop() -> void:
 			func() -> String:
 				if Game.state.guard_level <= 0:
 					return tr("PANEL_FOX_GUARD_NONE")
-				return "%s — %d%%" % [tr(_guard_name(Game.state.guard_level)),
+				return "%s — %d%%" % [_owned_name("guard", Game.state.guard_level),
 						int(round(Game.state.fox_block_chance() * 100.0))])
 	_add_row("PANEL_FOX_DOG",
 			func() -> String:
 				if Game.state.dog_level <= 0:
 					return tr("PANEL_DOG_NONE")
-				return tr(_dog_name(Game.state.dog_level)))
+				return _owned_name("dog", Game.state.dog_level))
 	_add_row("PANEL_FARM_CODE", func() -> String: return Cloud.player_id)
 	_add_dynamic_row(
 			func() -> String: return tr("PANEL_SERVER") if Cloud.is_enabled() else "",
@@ -265,13 +248,12 @@ func _build_coop() -> void:
 
 func _build_storage() -> void:
 	_add_upgrade("storage", func(upgrade: Dictionary) -> String:
-			return tr("PANEL_UPGRADE_STORAGE") % [
-				tr(String(upgrade.get("name", ""))),
-				NumberFormat.money(float(upgrade.get("price", 0))),
-				int(float(upgrade.get("pack_size", 1))),
-				int(round(float(upgrade.get("pack_discount", 0.0)) * 100.0)),
-				NumberFormat.grouped(int(upgrade.get("egg_capacity", 0))),
-				_build_time_text("storage")])
+			var size := float(upgrade.get("pack_size", 25))
+			var price := float(upgrade.get("pack_price", 0))
+			return tr("UPG_STORAGE_EFFECT") % [
+				NumberFormat.eggs(int(upgrade.get("egg_capacity", 0))),
+				NumberFormat.feed_unit({"unit": upgrade.get("feed_unit", ""), "size": size}),
+				NumberFormat.money(price), NumberFormat.small_money(price / maxf(size, 1.0))])
 	_add_level_row(func() -> int: return Game.state.storage_level, _building_levels("storage"),
 			func() -> String: return _level_name("storage"))
 	_add_row("PANEL_EGGS_STORED", func() -> String: return "%s / %s" % [
@@ -291,15 +273,14 @@ func _build_storage() -> void:
 					int(Game.state.eggs.get(breed_id, 0)),
 					NumberFormat.money(int(Game.state.eggs.get(breed_id, 0)) * FarmState.egg_value(breed_id))])
 
-	# Cena za kilogram jest ponizej zlotowki - zwykle money() obcina do pelnych
-	# zlotych w dol i pokazywalo "0 zl/kg" (zgloszenie wlasciciela).
+	# Jedna jednostka paszy przy tym magazynie i jej cena za kilogram (cena za
+	# kg potrafi byc ponizej zlotowki - stad small_money).
 	_add_row("PANEL_FEED_PRICE",
 			func() -> String:
 				var pack := Game.state.feed_pack()
 				return tr("PANEL_FEED_PRICE_VALUE") % [
-					int(pack["size"]), NumberFormat.money(float(pack["price"])),
-					NumberFormat.small_money(float(pack["per_kg"])),
-					int(round(float(pack["discount"]) * 100.0))])
+					NumberFormat.feed_unit(pack), NumberFormat.money(float(pack["price"])),
+					NumberFormat.small_money(float(pack["per_kg"]))])
 
 
 ## Inkubator: postep wykluwania i wzrostu, wkladanie jaj, rozbudowa.
@@ -307,11 +288,10 @@ func _build_incubator() -> void:
 	var incubator: Dictionary = GameData.balance().get("incubator", {})
 	var levels: int = (incubator.get("upgrades", []) as Array).size() + 1
 	_add_upgrade("incubator", func(upgrade: Dictionary) -> String:
-			return tr("PANEL_UPGRADE_INCUBATOR") % [
-				tr(String(upgrade.get("name", ""))),
-				int(upgrade.get("slots", 0)),
-				NumberFormat.money(float(upgrade.get("price", 0))),
-				_build_time_text("incubator")])
+			var slots := int(upgrade.get("slots", 0))
+			var eggs := int(upgrade.get("eggs", slots * Game.eggs_per_chick()))
+			return tr("UPG_INCUBATOR_EFFECT") % [NumberFormat.eggs(eggs),
+				NumberFormat.count(slots, "pisklę", "pisklęta", "piskląt")])
 	_add_level_row(func() -> int: return Game.state.incubator_level, levels,
 			func() -> String: return _level_name("incubator"))
 	_add_row("PANEL_INCUBATOR_SLOTS",
@@ -441,7 +421,7 @@ func _build_shop() -> void:
 			func() -> String:
 				var pack := Game.state.feed_pack()
 				return tr("PANEL_BUY_FEED") % [
-					NumberFormat.grouped(int(pack["size"])), NumberFormat.money(float(pack["price"]))],
+					NumberFormat.feed_unit(pack), NumberFormat.money(float(pack["price"]))],
 			_on_buy_feed, Callable(), func() -> float: return float(Game.state.feed_pack()["price"]),
 			_actions, true)
 	_make_compact(feed_slide as SlideButton)
@@ -593,18 +573,30 @@ func _new_slide() -> SlideButton:
 	return slide
 
 
-## Rozbudowa budynku na samej gorze panelu: suwak, a w trakcie budowy
-## pasek postepu z czasem do konca (czas ziemski).
-func _add_upgrade(building_id: String, text_provider: Callable) -> void:
-	_add_action(true,
+## Rozbudowa budynku na samej gorze panelu. Wlasciciel 25.11: suwak na JEDNA
+## linijke ("Rozbuduj za 3 000 zl · budowa 8 min"), a nazwa i to, co daje
+## nastepny poziom, malym szarym drukiem nad nim. W trakcie budowy - pasek
+## postepu z czasem do konca (czas ziemski). `effect_provider(upgrade)` mowi,
+## co daje nastepny poziom ("55 miejsc dla ptakow").
+func _add_upgrade(building_id: String, effect_provider: Callable) -> void:
+	var next := _small_note()
+	_upgrades.add_child(next)
+	_refreshers.append(func() -> void:
+		var upgrade := Game.state.upgrade_entry(building_id)
+		next.visible = not upgrade.is_empty() and not Game.state.is_building(building_id)
+		if next.visible:
+			next.text = tr("PANEL_UPGRADE_NEXT") % [String(upgrade.get("name", "")),
+					effect_provider.call(upgrade)])
+	var slide := _add_action(true,
 			func() -> bool: return not Game.state.is_building(building_id) and Game.state.money \
 					>= float(Game.state.upgrade_entry(building_id).get("price", 0)),
 			func() -> String:
-				var upgrade := Game.state.upgrade_entry(building_id)
 				if Game.state.is_building(building_id):
-					return tr("PANEL_BUILDING_BUSY") % [tr(String(upgrade.get("name", ""))),
-						NumberFormat.duration(Game.state.construction_left(building_id))]
-				return text_provider.call(upgrade),
+					return tr("PANEL_BUILDING_BUSY") % NumberFormat.duration(
+							Game.state.construction_left(building_id))
+				return tr("PANEL_UPGRADE_SLIDE") % [NumberFormat.money(float(
+						Game.state.upgrade_entry(building_id).get("price", 0))),
+						_build_time_text(building_id)],
 			func() -> void: _on_upgrade(building_id),
 			func() -> bool: return not Game.state.upgrade_entry(building_id).is_empty(),
 			func() -> float:
@@ -612,6 +604,7 @@ func _add_upgrade(building_id: String, text_provider: Callable) -> void:
 					return 0.0
 				return float(Game.state.upgrade_entry(building_id).get("price", 0)),
 			_upgrades, true)
+	_make_compact(slide as SlideButton)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 6)
 	var head := HBoxContainer.new()
@@ -635,10 +628,50 @@ func _add_upgrade(building_id: String, text_provider: Callable) -> void:
 		box.visible = Game.state.is_building(building_id)
 		if not box.visible:
 			return
-		label.text = tr("PANEL_BUILDING") % tr(String(
-				Game.state.upgrade_entry(building_id).get("name", "")))
+		label.text = tr("PANEL_BUILDING") % String(
+				Game.state.upgrade_entry(building_id).get("name", ""))
 		detail.text = NumberFormat.clock(Game.state.construction_left(building_id))
 		bar.value = Game.state.construction_progress(building_id))
+
+
+## Plot i pies: kupuje sie je od reki, bez budowy. Tak samo jak rozbudowa -
+## maly szary opis nad niskim suwakiem "Kup psa za 400 zl".
+func _add_purchase(building_id: String, slide_key: String, effect_provider: Callable) -> void:
+	var next := _small_note()
+	_upgrades.add_child(next)
+	_refreshers.append(func() -> void:
+		var upgrade := Game.state.next_building_upgrade(building_id)
+		next.visible = not upgrade.is_empty()
+		if next.visible:
+			next.text = effect_provider.call(upgrade))
+	var slide := _add_action(false,
+			func() -> bool: return Game.state.money >= float(
+					Game.state.next_building_upgrade(building_id).get("price", 0)),
+			func() -> String: return tr(slide_key) % NumberFormat.money(float(
+					Game.state.next_building_upgrade(building_id).get("price", 0))),
+			func() -> void: _on_upgrade(building_id),
+			func() -> bool: return not Game.state.next_building_upgrade(building_id).is_empty(),
+			func() -> float: return float(Game.state.next_building_upgrade(building_id).get("price", 0)),
+			_upgrades, true)
+	_make_compact(slide as SlideButton)
+
+
+## Maly szary opis nad suwakiem (nazwa i dzialanie tego, co sie kupuje).
+func _small_note() -> Label:
+	var note := Label.new()
+	note.theme_type_variation = &"NoteLabel"
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.add_theme_font_size_override("font_size", 26)
+	note.add_theme_color_override("font_color", Color("#7A6A5C"))
+	return note
+
+
+## Nazwa posiadanego plotu albo psa - prosto z data/rozbudowy.json.
+func _owned_name(building_id: String, level: int) -> String:
+	var ups: Array = GameData.balance().get("buildings", {}).get(building_id, {}).get("upgrades", [])
+	if level <= 0 or ups.is_empty():
+		return ""
+	return String((ups[mini(level, ups.size()) - 1] as Dictionary).get("name", ""))
 
 
 ## Czas budowy nastepnego poziomu w zwyklym zdaniu ("budowa 12 min").
@@ -826,55 +859,6 @@ func _add_code_entry() -> void:
 		if is_open():
 			say.call(Cloud.describe_last()))
 	keypad.submitted.connect(func(_code: String) -> void: button.emit_signal("pressed"))
-
-
-## Nazwa obrony przed lisem na danym poziomie: nic, plot albo pies.
-func _guard_name(level: int) -> String:
-	match level:
-		1:
-			return "PANEL_FOX_GUARD_FENCE"
-		2:
-			return "PANEL_FOX_GUARD_SOLID"
-		3:
-			return "PANEL_FOX_GUARD_HIGH"
-		4:
-			return "PANEL_FOX_GUARD_ELECTRIC"
-	return "PANEL_FOX_GUARD_NONE"
-
-
-func _dog_name(level: int) -> String:
-	match level:
-		1:
-			return "PANEL_DOG_MUTT"
-		2:
-			return "PANEL_DOG_SHEPHERD"
-	return "PANEL_DOG_NONE"
-
-
-## Pies w bierniku: "Kup psa", nie "Kup pies".
-func _dog_buy_name(level: int) -> String:
-	match level:
-		1:
-			return "DOG_BUY_MUTT"
-		2:
-			return "DOG_BUY_SHEPHERD"
-	return "PANEL_DOG_NONE"
-
-
-## Ta sama ochrona w bierniku, do zdania "Kup psa podwórzowego za 1200 zł".
-## Mianownik dawal "Kup pies podwórzowy" — kolega Tomka slusznie sie z tego
-## smiali.
-func _guard_buy_name(level: int) -> String:
-	match level:
-		1:
-			return "GUARD_BUY_FENCE"
-		2:
-			return "GUARD_BUY_SOLID"
-		3:
-			return "GUARD_BUY_HIGH"
-		4:
-			return "GUARD_BUY_ELECTRIC"
-	return "PANEL_FOX_GUARD_NONE"
 
 
 ## Ile kur danej rasy ma gracz.

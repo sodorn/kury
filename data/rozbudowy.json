@@ -1,0 +1,62 @@
+{
+	"_jak_edytowac": [
+		"TU SA WSZYSTKIE POZIOMY BUDYNKOW: nazwa, cena, czas budowy i co daja.",
+		"Zmieniaj tylko wartosci po dwukropku. Tekst w cudzyslowie, liczby bez cudzyslowu, ulamki z kropka (1.5).",
+		"Poziom 0 to stan na starcie gry: jego cena i czas budowy sa pomijane.",
+		"Nie dopisuj i nie usuwaj poziomow bez rozmowy z Claude - stare zapisy pamietaja numer poziomu.",
+		"Ceny w zlotych. budowa_min to minuty prawdziwego czasu (zegar w telefonie).",
+		"kurnik.miejsc = ile doroslych ptakow (kury i koguty) zmiesci kurnik.",
+		"magazyn.jaj = ile jaj moze lezec w magazynie (nadmiar przepada).",
+		"magazyn.pasza / pasza_kg / pasza_cena = to, co kupuje JEDEN suwak 'Kup pasze' przy tym magazynie. Cena za kilogram ma spadac z kazdym poziomem.",
+		"inkubator.jaj = ile jaj grzeje sie naraz. Z 3 jaj wykluwa sie jedno piskle, wiec 48 jaj = 16 pisklat naraz.",
+		"plot.lis_zawraca_proc = w ilu procentach podejsc lis odchodzi od plotu z niczym.",
+		"pies: probuje_co_s = co ile sekund pies rzuca sie na lisa, przegania_proc = szansa, ze przegoni, zagryza_proc = szansa, ze przy okazji zagryzie lisa.",
+		"Po zmianie wyslij plik do repozytorium - testy sprawdza, czy wszystko sie zgadza, a gra po wdrozeniu wczyta nowe liczby."
+	],
+	"kurnik": [
+		{"poziom": 0, "nazwa": "budka z palet po dziadku",                   "cena": 0,      "budowa_min": 0,  "miejsc": 20},
+		{"poziom": 1, "nazwa": "budka z dobudówką z desek z odzysku",        "cena": 800,    "budowa_min": 5,  "miejsc": 35},
+		{"poziom": 2, "nazwa": "drewniany kurnik 3×4 m",                     "cena": 4800,   "budowa_min": 8,  "miejsc": 55},
+		{"poziom": 3, "nazwa": "ocieplony garaż blaszany 4×6 m",             "cena": 12000,  "budowa_min": 12, "miejsc": 80},
+		{"poziom": 4, "nazwa": "kurnik z płyty warstwowej 5×6 m",            "cena": 24500,  "budowa_min": 17, "miejsc": 110},
+		{"poziom": 5, "nazwa": "murowany kurnik 6×7 m",                      "cena": 45000,  "budowa_min": 23, "miejsc": 150},
+		{"poziom": 6, "nazwa": "murowany kurnik 8×8 m z wybiegiem",          "cena": 90000,  "budowa_min": 30, "miejsc": 200},
+		{"poziom": 7, "nazwa": "kurnik 10×10 m z automatycznym karmieniem",  "cena": 150000, "budowa_min": 38, "miejsc": 270},
+		{"poziom": 8, "nazwa": "kurnik 12×12 m z wolierą i wentylacją",      "cena": 300000, "budowa_min": 48, "miejsc": 360},
+		{"poziom": 9, "nazwa": "ekologiczna ferma: kurnik 12×20 m i 1 ha pastwiska", "cena": 500000, "budowa_min": 60, "miejsc": 500}
+	],
+	"magazyn": [
+		{"poziom": 0, "nazwa": "lodówka w piwnicy",                          "cena": 0,       "budowa_min": 0,  "jaj": 200,    "pasza": "worek",         "pasza_kg": 25,    "pasza_cena": 50},
+		{"poziom": 1, "nazwa": "mała szopka",                                "cena": 600,     "budowa_min": 5,  "jaj": 500,    "pasza": "worek",         "pasza_kg": 25,    "pasza_cena": 45},
+		{"poziom": 2, "nazwa": "garaż blaszany 3×5 m",                       "cena": 3000,    "budowa_min": 8,  "jaj": 1000,   "pasza": "big-bag",       "pasza_kg": 500,   "pasza_cena": 860},
+		{"poziom": 3, "nazwa": "ocieplony kontener 20 stóp z regałami",      "cena": 10500,   "budowa_min": 12, "jaj": 2000,   "pasza": "big-bag",       "pasza_kg": 1000,  "pasza_cena": 1640},
+		{"poziom": 4, "nazwa": "kontener-chłodnia i silos na paszę",         "cena": 30000,   "budowa_min": 17, "jaj": 4000,   "pasza": "dostawa luzem", "pasza_kg": 2000,  "pasza_cena": 3120},
+		{"poziom": 5, "nazwa": "magazyn z płyty warstwowej 8×10 m i silos 10 t", "cena": 80000, "budowa_min": 23, "jaj": 8000, "pasza": "dostawa luzem", "pasza_kg": 5000,  "pasza_cena": 7400},
+		{"poziom": 6, "nazwa": "hala stalowa 12×15 m z chłodnią",            "cena": 200000,  "budowa_min": 30, "jaj": 15000,  "pasza": "dostawa luzem", "pasza_kg": 10000, "pasza_cena": 14000},
+		{"poziom": 7, "nazwa": "hala 20×20 m z chłodnią i silosami 2×30 t",  "cena": 540000,  "budowa_min": 38, "jaj": 30000,  "pasza": "paszowóz",      "pasza_kg": 24000, "pasza_cena": 31680},
+		{"poziom": 8, "nazwa": "centrum magazynowe 800 m² z sortownią jaj",  "cena": 1000000, "budowa_min": 48, "jaj": 60000,  "pasza": "paszowóz",      "pasza_kg": 24000, "pasza_cena": 30240},
+		{"poziom": 9, "nazwa": "baza paszowa: hala 1500 m², silosy 2×150 t i waga", "cena": 1800000, "budowa_min": 60, "jaj": 100000, "pasza": "dwa paszowozy", "pasza_kg": 48000, "pasza_cena": 57600}
+	],
+	"inkubator": [
+		{"poziom": 0, "nazwa": "domowy inkubator ze styropianu i żarówki",   "cena": 0,     "budowa_min": 0,  "jaj": 9},
+		{"poziom": 1, "nazwa": "inkubator na 18 jaj z obracaniem",           "cena": 250,   "budowa_min": 5,  "jaj": 18},
+		{"poziom": 2, "nazwa": "inkubator na 30 jaj z wyświetlaczem",        "cena": 300,   "budowa_min": 8,  "jaj": 30},
+		{"poziom": 3, "nazwa": "inkubator na 48 jaj z automatycznym nawilżaniem", "cena": 450, "budowa_min": 12, "jaj": 48},
+		{"poziom": 4, "nazwa": "inkubator na 72 jaja z alarmem i zasilaniem 12 V", "cena": 700, "budowa_min": 17, "jaj": 72},
+		{"poziom": 5, "nazwa": "szafka lęgowa na 100 jaj z klujnikiem",      "cena": 1800,  "budowa_min": 23, "jaj": 100},
+		{"poziom": 6, "nazwa": "szafa lęgowa na 150 jaj z klujnikiem",       "cena": 2400,  "budowa_min": 30, "jaj": 150},
+		{"poziom": 7, "nazwa": "szafa lęgowa na 200 jaj z alarmem GSM",      "cena": 3200,  "budowa_min": 38, "jaj": 200},
+		{"poziom": 8, "nazwa": "szafa lęgowa na 270 jaj i agregat prądotwórczy", "cena": 6500, "budowa_min": 48, "jaj": 270},
+		{"poziom": 9, "nazwa": "mała wylęgarnia: dwie szafy na 360 jaj, klujnik i agregat", "cena": 9000, "budowa_min": 60, "jaj": 360}
+	],
+	"plot": [
+		{"poziom": 1, "nazwa": "płot z siatki na drewnianych palikach",       "cena": 400,  "lis_zawraca_proc": 50},
+		{"poziom": 2, "nazwa": "płot z siatki zgrzewanej na stalowych słupkach", "cena": 1000, "lis_zawraca_proc": 65},
+		{"poziom": 3, "nazwa": "płot 2 m z siatką wkopaną w ziemię",          "cena": 2500, "lis_zawraca_proc": 80},
+		{"poziom": 4, "nazwa": "płot 2 m z podmurówką i pastuchem elektrycznym", "cena": 6000, "lis_zawraca_proc": 95}
+	],
+	"pies": [
+		{"poziom": 1, "nazwa": "kundel ze schroniska z budą",   "cena": 400,  "probuje_co_s": 10, "przegania_proc": 33.33, "zagryza_proc": 0},
+		{"poziom": 2, "nazwa": "owczarek niemiecki z rodowodem", "cena": 2500, "probuje_co_s": 5,  "przegania_proc": 66.67, "zagryza_proc": 33.33}
+	]
+}

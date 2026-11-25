@@ -66,6 +66,12 @@ func _load_data(dir: String) -> void:
 	var br: Variant = JSON.parse_string(FileAccess.get_file_as_string(dir + "/breeds.json"))
 	GameData._ensure_loaded()
 	if bal is Dictionary:
+		# Od 12.22 poziomy budynkow siedza w rozbudowy.json; starsze katalogi
+		# maja je jeszcze w balance.json i pliku rozbudow nie maja.
+		if FileAccess.file_exists(dir + "/rozbudowy.json"):
+			var roz: Variant = JSON.parse_string(FileAccess.get_file_as_string(dir + "/rozbudowy.json"))
+			if roz is Dictionary:
+				GameData.apply_upgrades(bal, roz)
 		GameData._balance = bal
 	if br is Array:
 		GameData._breeds = br

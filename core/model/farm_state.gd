@@ -588,25 +588,27 @@ func coop_free() -> int:
 	return coop_capacity() - coop_occupied() - coop_reserved()
 
 
-## Worek paszy: rozmiar i cena przy obecnym poziomie magazynu.
-## Worek paszy przy obecnym magazynie. Cena liczona z ceny bazowej za kilogram
-## (economy.feed_pack_price / feed_pack_size) i rabatu hurtowego poziomu
-## magazynu (pack_discount, 0.10 = 10%). Wlasciciel: rabat 10-40%, rosnie ze
-## skala, a wiekszy magazyn to wiekszy worek.
+## Pasza do kupienia przy obecnym magazynie: JEDNA jednostka (worek, big-bag,
+## dostawa luzem...), jej waga i cena. Wszystko z data/rozbudowy.json (lista
+## "magazyn"): wiekszy magazyn = wieksza jednostka i nizsza cena za kilogram.
+## Wlasciciel 25.11: jeden suwak, zadnego "rabatu" ani "hurtu" w tekstach.
 func feed_pack() -> Dictionary:
 	var economy: Dictionary = GameData.balance().get("economy", {})
-	var base_size := maxf(1.0, float(economy.get("feed_pack_size", 25)))
-	var base_kg := float(economy.get("feed_pack_price", 25)) / base_size
+	var storage: Dictionary = GameData.balance().get("buildings", {}).get("storage", {})
+	var size := maxf(1.0, float(economy.get("feed_pack_size", 25)))
+	var price := float(economy.get("feed_pack_price", 50))
+	var unit := String(storage.get("feed_unit", "worek"))
 	var upgrade := current_building_upgrade("storage")
-	var size := float(upgrade.get("pack_size", base_size))
-	var discount := clampf(float(upgrade.get("pack_discount", 0.0)), 0.0, 0.95)
-	var per_kg := base_kg * (1.0 - discount)
+	if not upgrade.is_empty():
+		size = maxf(1.0, float(upgrade.get("pack_size", size)))
+		price = float(upgrade.get("pack_price", price))
+		unit = String(upgrade.get("feed_unit", unit))
 	return {
 		"size": size,
 		# Do pelnych groszy, zeby cena na przycisku i pobrana kwota sie zgadzaly.
-		"price": round(size * per_kg * 100.0) / 100.0,
-		"per_kg": per_kg,
-		"discount": discount,
+		"price": round(price * 100.0) / 100.0,
+		"per_kg": price / size,
+		"unit": unit,
 	}
 
 

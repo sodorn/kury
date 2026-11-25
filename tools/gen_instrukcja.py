@@ -17,9 +17,13 @@ zapala sie na czerwono.
 import csv
 import json
 import pathlib
+import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-BAL = json.loads((ROOT / "data" / "balance.json").read_text(encoding="utf-8"))
+sys.path.insert(0, str(ROOT / "tools"))
+import dane  # noqa: E402  (poziomy budynkow z data/rozbudowy.json)
+
+BAL = dane.load_balance()
 BREEDS = json.loads((ROOT / "data" / "breeds.json").read_text(encoding="utf-8"))
 if isinstance(BREEDS, dict):
     BREEDS = BREEDS["breeds"]
@@ -320,10 +324,11 @@ i znika z magazynu. Nie da sie zrobic zapasu na tydzien.
 
 title("6. PASZA I GLOD")
 para("""
-Kazdy dorosly ptak zjada %g kg paszy na godzine, pisklę %g tego. Worek
-kosztuje %s za %d kg (cena jak w sklepie rolniczym). Im wiekszy magazyn, tym
-wiekszy worek i nizsza cena za kilogram - masz lepszych dostawcow. Worek
-kupuje sie SUWAKIEM, jeden na raz.
+Kazdy dorosly ptak zjada %g kg paszy na godzine, pisklę %g tego. Na starcie
+pasze kupujesz w workach: %s za %d kg (cena jak w sklepie rolniczym). Im
+wiekszy magazyn, tym wieksza jednostka (big-bag, dostawa luzem, paszowoz)
+i nizsza cena za kilogram - tabela w rozdziale MAGAZYN. Pasze kupuje sie
+JEDNYM SUWAKIEM, jedna jednostka na raz.
 """ % (round(ECO["feed_per_hen_minute"] * 60 * SCALE, 2), ECO.get("chick_feed_multiplier", 0.5),
        zl(ECO["feed_pack_price"]), ECO["feed_pack_size"]))
 para("""
@@ -387,16 +392,20 @@ def budowa(u) -> str:
 
 
 def poziomy(cfg, wartosc, naglowek):
-    """Wiersze: nr | nazwa | wartosc | cena | budowa. Poziom startowy to 1."""
-    rows = [["1", S.get(cfg.get("name", ""), "start"), wartosc(cfg, None), "start", "-"]]
+    """Lista poziomow, po dwie linijki na poziom - tabela z dlugimi nazwami
+    nie miescila sie w 78 znakach (czytane na telefonie). Poziom startowy to 1.
+    `naglowek` zostal dla zgodnosci wywolan."""
+    def linie(nr, nazwa, opis):
+        raw("  %2d. %s\n      %s" % (nr, nazwa, opis))
+    linie(1, S.get(cfg.get("name", ""), cfg.get("name", "")), "%s - na start" % wartosc(cfg, None))
     for i, u in enumerate(cfg["upgrades"], start=2):
-        rows.append([str(i), S.get(u["name"], u["name"]), wartosc(cfg, u), zl(u["price"]), budowa(u)])
-    table(["poz.", "nazwa", naglowek, "cena", "budowa"], rows, align="rlrrr")
+        linie(i, S.get(u["name"], u["name"]),
+              "%s - %s, budowa %s" % (wartosc(cfg, u), zl(u["price"]), budowa(u)))
 
 
 title("9. KURNIK")
 coop = BAL["buildings"]["coop"]
-poziomy(coop, lambda c, u: num((u or c)["capacity"]), "miejsc")
+poziomy(coop, lambda c, u: "%s miejsc" % num((u or c)["capacity"]), "miejsc")
 para("""
 Limit liczy WSZYSTKIE dorosle ptaki razem z kogutami. Ponad limit nie kupisz
 ptaka, a podrosniete pisklę czeka przy inkubatorze, az zwolni sie miejsce.
@@ -412,22 +421,29 @@ z czasem. Plot i pies sa od razu.
 
 title("10. MAGAZYN")
 st = BAL["buildings"]["storage"]
-poziomy(st, lambda c, u: num((u or c)["egg_capacity"]), "limit jaj")
-BASE_KG = float(ECO["feed_pack_price"]) / float(ECO["feed_pack_size"])
-rows = [["1", num(ECO["feed_pack_size"]), zl(ECO["feed_pack_price"]), "-"]]
+poziomy(st, lambda c, u: "limit %s jaj" % num((u or c)["egg_capacity"]), "limit jaj")
+rows = [["1", "%s %s" % (st.get("feed_unit", "worek"), dane.weight(ECO["feed_pack_size"])),
+         zl(ECO["feed_pack_price"]), "%.2f zl" % (ECO["feed_pack_price"] / ECO["feed_pack_size"])]]
 for i, u in enumerate(st["upgrades"], start=2):
-    worek = round(u["pack_size"] * BASE_KG * (1 - u["pack_discount"]), 2)
-    rows.append([str(i), num(u["pack_size"]), zl(worek), "%d%%" % round(u["pack_discount"] * 100)])
-table(["poz.", "worek kg", "cena worka", "taniej o"], rows, align="rrrr")
+    rows.append([str(i), "%s %s" % (u["feed_unit"], dane.weight(u["pack_size"])), zl(u["pack_price"]),
+                 "%.2f zl" % (u["pack_price"] / u["pack_size"])])
+table(["poz.", "pasza (jeden suwak)", "cena", "za kg"], rows, align="rlrr")
 para("""
-Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i daje lepszych
-dostawcow - wiekszy worek i kilogram paszy tanszy o %d%% do %d%%. Im wiekszy
-magazyn, tym tansza pasza. Magazyn zmienia wyglad na poziomie 4 i 7.
-""" % (round(st["upgrades"][0]["pack_discount"] * 100), round(st["upgrades"][-1]["pack_discount"] * 100)))
+Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i pozwala kupowac
+pasze w wiekszych jednostkach, a im wieksza jednostka, tym tanszy kilogram
+(od %.2f zl na starcie do %.2f zl na ostatnim poziomie). Magazyn zmienia
+wyglad na poziomie 4 i 7.
+""" % (ECO["feed_pack_price"] / ECO["feed_pack_size"],
+       st["upgrades"][-1]["pack_price"] / st["upgrades"][-1]["pack_size"]))
 
 title("11. INKUBATOR")
 inc = BAL["incubator"]
-poziomy(inc, lambda c, u: num((u or c)["slots"]), "miejsc")
+poziomy(inc, lambda c, u: "%s jaj naraz (%s pisklat)" % (num((u or c)["eggs"]), num((u or c)["slots"])),
+        "jaj / pisklat")
+para("""
+Z %d jaj wykluwa sie jedno pisklę, wiec inkubator na 48 jaj grzeje naraz
+16 pisklat. Inkubatory sa tanie jak w sklepie rolniczym - drogie sa kurniki.
+""" % BAL["incubator"]["eggs_per_chick"])
 
 title("12. LIS")
 fox = BAL["fox"]
@@ -478,13 +494,10 @@ raw("""
 
 title("13. PSY I PLOT")
 dogs = BAL["buildings"]["dog"]["upgrades"]
-rows = []
-for d in dogs:
-    rows.append([d["name"], zl(d["price"]), "co %g s" % d["interval"],
-                 "%.0f%%" % (d["chance"] * 100),
-                 "%.0f%%" % (d["kill_chance"] * 100)])
-table(["pies", "cena", "probuje", "szansa", "szansa na zabicie"], rows,
-      align="lrrrr")
+raw("  PSY:")
+for nr, d in enumerate(dogs, start=1):
+    raw("  %2d. %s\n      %s - rzuca sie na lisa co %g s, przegania w %.0f%%, zagryza w %.0f%%"
+        % (nr, d["name"], zl(d["price"]), d["interval"], d["chance"] * 100, d["kill_chance"] * 100))
 para("""
 Pies pracuje sam, bez twojego udzialu, takze gdy nie patrzysz. Gdy lis wejdzie,
 pies rzuca kostka co tyle sekund. Przy udanej probie owczarek moze lisa ZAGRYZC -
@@ -492,9 +505,11 @@ wtedy lis zostaje rozszarpany na wybiegu, a nastepny przychodzi %g razy
 pozniej niz zwykle.
 """ % fox["killed_return_multiplier"])
 guard = BAL["buildings"]["guard"]["upgrades"]
-rows = [[str(i), "%.0f%%" % (u["block_chance"] * 100), zl(u["price"])]
-        for i, u in enumerate(guard, start=1)]
-table(["poziom plotu", "szansa, ze lis zawroci", "cena"], rows, align="rrr")
+raw("")
+raw("  PLOTY:")
+for nr, u in enumerate(guard, start=1):
+    raw("  %2d. %s\n      %s - lis zawraca w %.0f%% podejsc" % (nr, u["name"], zl(u["price"]),
+                                                            u["block_chance"] * 100))
 para("""
 Plot dziala INACZEJ niz pies: nie wygania lisa z wybiegu, tylko z takim
 prawdopodobienstwem w ogole go nie wpuszcza. Plot i pies licza sie osobno,

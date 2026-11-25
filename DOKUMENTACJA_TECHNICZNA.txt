@@ -1,6 +1,6 @@
 ==============================================================================
   SYMULATOR HODOWLI KURCZAKOW - DOKUMENTACJA TECHNICZNA
-  gra w wersji 12.21   *   format zapisu w wersji 6   *   Godot 4.7.2
+  gra w wersji 12.22   *   format zapisu w wersji 6   *   Godot 4.7.2
 ==============================================================================
 
   Dokument dla programisty: jak gra jest zbudowana, jak dzialaja mechaniki, co
@@ -70,6 +70,7 @@
   export_presets.cfg     ustawienia eksportu (Web, Android)
   data/
     balance.json         CALA liczbowa konfiguracja mechanik (rozdzial 7)
+    rozbudowy.json       poziomy budynkow, plot, pies: nazwy, ceny, czasy
     breeds.json          17 ras: ceny, czasy, grafiki
     buildings.json       budynki na fermie: id + klucze tekstow
     backend.json         adres i klucz Supabase, wlacznik backendu
@@ -270,23 +271,28 @@
   economy.egg_sale_lot (100) - FarmState.oldest_eggs wybiera NAJSTARSZE jaja
   ze wszystkich ras, bo te zgnija najpierw.
 
-  6.1a Pasza w hurcie
-  -------------------
+  6.1a Pasza: jedna jednostka na poziom magazynu
+  ----------------------------------------------
 
-  +=========+==========+=======+==========+=======+
-  | magazyn | worek kg | rabat |  cena zl | zl/kg |
-  +=========+==========+=======+==========+=======+
-  |       0 |       25 |    0% |    50.00 |  2.00 |
-  |       1 |      100 |   10% |   180.00 |  1.80 |
-  |       2 |      250 |   14% |   430.00 |  1.72 |
-  |       3 |      600 |   18% |   984.00 |  1.64 |
-  |       4 |     1500 |   22% |  2340.00 |  1.56 |
-  |       5 |     3500 |   26% |  5180.00 |  1.48 |
-  |       6 |     8000 |   30% | 11200.00 |  1.40 |
-  |       7 |    20000 |   34% | 26400.00 |  1.32 |
-  |       8 |    40000 |   37% | 50400.00 |  1.26 |
-  |       9 |    70000 |   40% | 84000.00 |  1.20 |
-  +---------+----------+-------+----------+-------+
+  Jeden suwak "Kup pasze" kupuje JEDNA jednostke paszy z data/rozbudowy.json
+  (magazyn[].pasza, pasza_kg, pasza_cena) dla obecnego poziomu magazynu. Cena
+  za kilogram spada z poziomem. W tekstach gry nie ma slow "rabat" ani "hurt"
+  (wlasciciel 25.11).
+
+  +=========+====================+==========+=======+
+  | magazyn | jednostka          |  cena zl | zl/kg |
+  +=========+====================+==========+=======+
+  |       0 | worek 25 kg        |    50.00 |  2.00 |
+  |       1 | worek 25 kg        |    45.00 |  1.80 |
+  |       2 | big-bag 500 kg     |   860.00 |  1.72 |
+  |       3 | big-bag 1 t        |  1640.00 |  1.64 |
+  |       4 | dostawa luzem 2 t  |  3120.00 |  1.56 |
+  |       5 | dostawa luzem 5 t  |  7400.00 |  1.48 |
+  |       6 | dostawa luzem 10 t | 14000.00 |  1.40 |
+  |       7 | paszowóz 24 t      | 31680.00 |  1.32 |
+  |       8 | paszowóz 24 t      | 30240.00 |  1.26 |
+  |       9 | dwa paszowozy 48 t | 57600.00 |  1.20 |
+  +---------+--------------------+----------+-------+
 
   6.2 Pasza i glod
   ----------------
@@ -375,12 +381,14 @@
   FarmState.dog_level (0 = brak, 1 = kundel, 2 = owczarek), plot w guard_level
   (0-4).
 
-  +========+==========+=========+=========+========+=========+
-  | poziom | pies     |    cena | rzut co | szansa | zagryza |
-  +========+==========+=========+=========+========+=========+
-  |      1 | kundel   |  400 zl |  10.0 s |    33% |      0% |
-  |      2 | owczarek | 2500 zl |   5.0 s |    67% |     33% |
-  +--------+----------+---------+---------+--------+---------+
+  +======+===========+=========+========+=========+
+  | poz. |      cena | rzut co | szansa | zagryza |
+  +======+===========+=========+========+=========+
+  |    1 |  400.0 zl |  10.0 s |    33% |      0% |
+  |    2 | 2500.0 zl |   5.0 s |    67% |     33% |
+  +------+-----------+---------+--------+---------+
+
+  Nazwy psow: rozbudowy.json -> pies (rozdzial 7).
 
   6.6 Inkubator i odchow
   ----------------------
@@ -444,19 +452,6 @@
 
   balance.json -> economy
   -----------------------
-  economy.feed_pack_size
-      = 25 [kg]
-      Wielkosc worka paszy przy magazynie na poziomie 0. Wyzsze poziomy maja
-      wlasne worki (buildings.storage.upgrades[].pack_size). Razem z
-      feed_pack_price wyznacza CENE BAZOWA kilograma, od ktorej liczy sie
-      rabaty hurtowe.
-      uzycie: FarmState.feed_pack(), panel sklepu
-
-  economy.feed_pack_price
-      = 50 [zl]
-      Cena worka paszy przy magazynie na poziomie 0.
-      uzycie: FarmState.feed_pack(), panel sklepu
-
   economy.rooster_price_multiplier
       = 2.5 [mnoznik]
       Cena koguta = cena kury tej samej rasy razy ta liczba. 2.5 oznacza 250%.
@@ -554,39 +549,10 @@
 
   balance.json -> incubator
   -------------------------
-  incubator.slots
-      = 3 [szt.]
-      Miejsca w inkubatorze na poziomie 0. Jedno miejsce = jedna partia (jedno
-      pisklę) naraz.
-      uzycie: FarmState.incubator_slots
-
   incubator.eggs_per_chick
       = 3 [szt.]
       Ile jaj tej samej rasy idzie na jedno pisklę.
       uzycie: Game.incubate
-
-  incubator.upgrades[].name
-      = ["INCU_T1", "INCU_T2", "INCU_T3", "INCU_T4", "INCU_T5", "INCU_T6",
-      "INCU_T7", "INCU_T8", "INCU_T9"] [klucz tekstu]
-      Nazwa poziomu z data/strings.csv.
-      uzycie: panel inkubatora
-
-  incubator.upgrades[].slots
-      = [6, 10, 16, 24, 34, 48, 66, 90, 120] [szt.]
-      Miejsca w inkubatorze na tym poziomie.
-      uzycie: FarmState.incubator_slots
-
-  incubator.upgrades[].price
-      = [600, 4000, 11000, 24000, 48000, 108000, 200000, 450000, 700000] [zl]
-      Cena przejscia NA ten poziom.
-      uzycie: Game.upgrade_incubator
-
-  incubator.upgrades[].build_minutes
-      = [5, 8, 12, 17, 23, 30, 38, 48, 60] [min ZEGARA]
-      Ile minut REALNYCH trwa budowa tego poziomu. Placi sie od razu, nowy
-      poziom wchodzi po skonczeniu; w trakcie budynek dziala na starym. 0 albo
-      brak = od razu.
-      uzycie: Game.upgrade_building, Simulation._advance_construction
 
   incubator.rooster_share
       = 0.5 [0..1]
@@ -594,11 +560,6 @@
       pol. Plec losowana przy wykluciu, zapisywana w pisklęciu ("rooster" w
       zapisie).
       uzycie: Chick.roll_rooster, Simulation._advance_incubator
-
-  incubator.name
-      = INCU_T0 [klucz tekstu]
-      Nazwa poziomu startowego inkubatora (poziom 1 w panelu).
-      uzycie: panel inkubatora
 
   balance.json -> hunger
   ----------------------
@@ -825,126 +786,6 @@
       true = wygrana takze za zebranie wszystkich ras.
       uzycie: Simulation.check_win
 
-  balance.json -> buildings
-  -------------------------
-  buildings.coop.capacity
-      = 20 [szt.]
-      Miejsca w kurniku na poziomie 0 (dorosle ptaki, z kogutami).
-      uzycie: FarmState.coop_capacity
-
-  buildings.coop.upgrades[].name
-      = ["COOP_T1", "COOP_T2", "COOP_T3", "COOP_T4", "COOP_T5", "COOP_T6",
-      "COOP_T7", "COOP_T8", "COOP_T9"] [klucz tekstu]
-      Nazwa poziomu kurnika.
-      uzycie: panel kurnika
-
-  buildings.coop.upgrades[].capacity
-      = [35, 55, 80, 110, 150, 200, 270, 360, 500] [szt.]
-      Miejsca w kurniku na tym poziomie.
-      uzycie: FarmState.coop_capacity
-
-  buildings.coop.upgrades[].price
-      = [800, 4800, 12000, 24500, 45000, 90000, 150000, 300000, 500000] [zl]
-      Cena przejscia NA ten poziom.
-      uzycie: Game.upgrade_building
-
-  buildings.coop.upgrades[].build_minutes
-      = [5, 8, 12, 17, 23, 30, 38, 48, 60] [min ZEGARA]
-      Ile minut REALNYCH trwa budowa tego poziomu. Placi sie od razu, nowy
-      poziom wchodzi po skonczeniu; w trakcie budynek dziala na starym. 0 albo
-      brak = od razu.
-      uzycie: Game.upgrade_building, Simulation._advance_construction
-
-  buildings.coop.name
-      = COOP_T0 [klucz tekstu]
-      Nazwa poziomu startowego kurnika.
-      uzycie: panel kurnika
-
-  buildings.storage.upgrades[].name
-      = ["STORE_T1", "STORE_T2", "STORE_T3", "STORE_T4", "STORE_T5",
-      "STORE_T6", "STORE_T7", "STORE_T8", "STORE_T9"] [klucz tekstu]
-      Nazwa poziomu magazynu.
-      uzycie: panel magazynu
-
-  buildings.storage.upgrades[].pack_size
-      = [100, 250, 600, 1500, 3500, 8000, 20000, 40000, 70000] [kg]
-      Worek paszy na tym poziomie.
-      uzycie: FarmState.feed_pack
-
-  buildings.storage.upgrades[].pack_discount
-      = [0.1, 0.14, 0.18, 0.22, 0.26, 0.3, 0.34, 0.37, 0.4] [0-1]
-      Rabat hurtowy na pasze na tym poziomie (0.10 = 10%). Cena worka =
-      pack_size * cena bazowa za kg (economy.feed_pack_price / feed_pack_size)
-      * (1 - rabat), do pelnych groszy. Musi rosnac z poziomem (test).
-      uzycie: FarmState.feed_pack
-
-  buildings.storage.upgrades[].price
-      = [600, 3000, 10500, 30000, 80000, 200000, 540000, 1000000, 1800000]
-      [zl]
-      Cena przejscia NA ten poziom.
-      uzycie: Game.upgrade_building
-
-  buildings.storage.upgrades[].egg_capacity
-      = [500, 1000, 2000, 4000, 8000, 15000, 30000, 60000, 100000] [szt.]
-      Limit jaj na tym poziomie.
-      uzycie: FarmState.egg_capacity
-
-  buildings.storage.upgrades[].build_minutes
-      = [5, 8, 12, 17, 23, 30, 38, 48, 60] [min ZEGARA]
-      Ile minut REALNYCH trwa budowa tego poziomu. Placi sie od razu, nowy
-      poziom wchodzi po skonczeniu; w trakcie budynek dziala na starym. 0 albo
-      brak = od razu.
-      uzycie: Game.upgrade_building, Simulation._advance_construction
-
-  buildings.storage.egg_capacity
-      = 200 [szt.]
-      Limit jaj w magazynie na poziomie 0.
-      uzycie: FarmState.egg_capacity
-
-  buildings.storage.name
-      = STORE_T0 [klucz tekstu]
-      Nazwa poziomu startowego magazynu.
-      uzycie: panel magazynu
-
-  buildings.guard.upgrades[].block_chance
-      = [0.5, 0.65, 0.8, 0.95] [0-1]
-      Szansa, ze lis po udanej kostce ZAWROCI przy plocie i w ogole nie
-      wejdzie.
-      uzycie: FarmState.fox_block_chance
-
-  buildings.guard.upgrades[].price
-      = [400, 1000, 2500, 6000] [zl]
-      Cena tego poziomu plotu. Poziomow musi byc 4 - tyle jest grafik
-      (tools/gen_fence.py).
-      uzycie: Game.upgrade_building
-
-  buildings.dog.upgrades[].name
-      = ["kundel", "owczarek"] [tekst]
-      Nazwa psa w panelu. Indeks 0 = kundel, 1 = owczarek (od indeksu zalezy
-      grafika).
-      uzycie: panel kurnika, scenes/farm/dog.gd
-
-  buildings.dog.upgrades[].interval
-      = [10.0, 5.0] [s ZEGARA]
-      Co tyle sekund wizyty lisa pies rzuca kostka.
-      uzycie: FarmState.dog_interval
-
-  buildings.dog.upgrades[].chance
-      = [0.3333333333, 0.6666666667] [0-1]
-      Szansa, ze rzut sie uda i lis wyleci z wybiegu.
-      uzycie: FarmState.dog_chance
-
-  buildings.dog.upgrades[].kill_chance
-      = [0.0, 0.3333333333] [0-1]
-      Przy udanym rzucie: szansa, ze pies lisa ZAGRYZIE (zamiast tylko
-      przegonic).
-      uzycie: FarmState.dog_kill_chance
-
-  buildings.dog.upgrades[].price
-      = [400, 2500] [zl]
-      Cena psa.
-      uzycie: Game.upgrade_building
-
   balance.json -> session
   -----------------------
   session.require_code
@@ -957,6 +798,199 @@
       = 0.0 [min ZEGARA]
       0 = kod przy KAZDYM wejsciu. Liczba > 0 = dopiero po takiej przerwie.
       uzycie: Game.must_enter_code
+
+  rozbudowy.json - poziomy budynkow (plik do recznej edycji)
+  ----------------------------------------------------------
+
+  Od 12.22 wszystkie poziomy kurnika, magazynu, inkubatora, plotu i psa sa w
+  jednym pliku data/rozbudowy.json: polskie klucze, nazwy zwyklym tekstem (bez
+  strings.csv). Na gorze pliku jest instrukcja "_jak_edytowac".
+  GameData.apply_upgrades przepisuje go przy starcie gry na
+  balance.buildings.coop/storage/guard/dog, balance.incubator i
+  economy.feed_pack_size/price - reszta kodu czyta stare pola. Zly numer
+  poziomu albo pusta nazwa = blad w tescie i nic sie nie wdraza.
+
+  kurnik[].poziom   [nr]
+      Numer poziomu, 0 = start. Kolejne liczby od 0 - inaczej gra zglasza blad
+      (test).
+      uzycie: GameData.apply_upgrades
+
+  kurnik[].nazwa   [tekst]
+      Nazwa poziomu kurnika, pokazywana w panelu i kronice.
+      uzycie: panel kurnika
+
+  kurnik[].cena   [zl]
+      Cena przejscia NA ten poziom (poziom 0: pomijana).
+      uzycie: Game.upgrade_building
+
+  kurnik[].budowa_min   [min ZEGARA]
+      Ile minut REALNYCH trwa budowa (5-60, rosnaco - test). Placi sie od
+      razu, w trakcie budynek dziala na starym poziomie.
+      uzycie: Simulation._advance_construction
+
+  kurnik[].miejsc   [szt.]
+      Dorosle ptaki (kury i koguty), ktore mieszcza sie w kurniku.
+      uzycie: FarmState.coop_capacity
+
+  magazyn[].poziom   [nr]
+      Numer poziomu, 0 = start.
+      uzycie: GameData.apply_upgrades
+
+  magazyn[].nazwa   [tekst]
+      Nazwa poziomu magazynu.
+      uzycie: panel magazynu
+
+  magazyn[].cena   [zl]
+      Cena przejscia NA ten poziom.
+      uzycie: Game.upgrade_building
+
+  magazyn[].budowa_min   [min ZEGARA]
+      Czas budowy jak w kurniku.
+      uzycie: Simulation._advance_construction
+
+  magazyn[].jaj   [szt.]
+      Limit jaj w magazynie; nadmiar przepada przy znoszeniu.
+      uzycie: FarmState.egg_capacity
+
+  magazyn[].pasza   [tekst]
+      Nazwa jednostki paszy kupowanej JEDNYM suwakiem przy tym magazynie
+      (worek, big-bag, dostawa luzem...). Waga dopisuje sie sama.
+      uzycie: FarmState.feed_pack, NumberFormat.feed_unit
+
+  magazyn[].pasza_kg   [kg]
+      Ile paszy przybywa po jednym zakupie.
+      uzycie: FarmState.feed_pack
+
+  magazyn[].pasza_cena   [zl]
+      Cena jednej jednostki. Cena za kg (pasza_cena / pasza_kg) musi spadac z
+      kazdym poziomem (test).
+      uzycie: FarmState.feed_pack
+
+  inkubator[].poziom   [nr]
+      Numer poziomu, 0 = start.
+      uzycie: GameData.apply_upgrades
+
+  inkubator[].nazwa   [tekst]
+      Nazwa poziomu inkubatora.
+      uzycie: panel inkubatora
+
+  inkubator[].cena   [zl]
+      Cena przejscia NA ten poziom.
+      uzycie: Game.upgrade_building
+
+  inkubator[].budowa_min   [min ZEGARA]
+      Czas budowy jak w kurniku.
+      uzycie: Simulation._advance_construction
+
+  inkubator[].jaj   [szt.]
+      Ile jaj grzeje sie naraz. Miejsca (pisklęta naraz) = jaj /
+      incubator.eggs_per_chick, w dol.
+      uzycie: FarmState.incubator_slots
+
+  plot[].poziom   [nr]
+      Numer plotu, od 1 (na starcie plotu nie ma). Musza byc 4 - tyle jest
+      grafik (tools/gen_fence.py).
+      uzycie: GameData.apply_upgrades
+
+  plot[].nazwa   [tekst]
+      Nazwa plotu w panelu kurnika.
+      uzycie: panel kurnika
+
+  plot[].cena   [zl]
+      Cena plotu. Stawia sie od razu.
+      uzycie: Game.upgrade_building
+
+  plot[].lis_zawraca_proc   [%]
+      W ilu procentach podejsc lis zawraca przy plocie i w ogole nie wchodzi.
+      uzycie: FarmState.fox_block_chance
+
+  pies[].poziom   [nr]
+      Numer psa, od 1. Musza byc 2: kundel i owczarek (od numeru zalezy
+      grafika).
+      uzycie: GameData.apply_upgrades
+
+  pies[].nazwa   [tekst]
+      Nazwa psa w panelu kurnika.
+      uzycie: panel kurnika
+
+  pies[].cena   [zl]
+      Cena psa.
+      uzycie: Game.upgrade_building
+
+  pies[].probuje_co_s   [s ZEGARA]
+      Co tyle sekund wizyty lisa pies rzuca kostka.
+      uzycie: FarmState.dog_interval
+
+  pies[].przegania_proc   [%]
+      Szansa, ze rzut sie uda i lis wyleci z wybiegu.
+      uzycie: FarmState.dog_chance
+
+  pies[].zagryza_proc   [%]
+      Przy udanym rzucie: szansa, ze pies lisa ZAGRYZIE.
+      uzycie: FarmState.dog_kill_chance
+
+  rozbudowy.json - aktualne wartosci
+  ----------------------------------
+
+  KURNIK:
+    0. budka z palet po dziadku - 20 miejsc, 0 zl, 0 min
+    1. budka z dobudówką z desek z odzysku - 35 miejsc, 800 zl, 5 min
+    2. drewniany kurnik 3×4 m - 55 miejsc, 4800 zl, 8 min
+    3. ocieplony garaż blaszany 4×6 m - 80 miejsc, 12000 zl, 12 min
+    4. kurnik z płyty warstwowej 5×6 m - 110 miejsc, 24500 zl, 17 min
+    5. murowany kurnik 6×7 m - 150 miejsc, 45000 zl, 23 min
+    6. murowany kurnik 8×8 m z wybiegiem - 200 miejsc, 90000 zl, 30 min
+    7. kurnik 10×10 m z automatycznym karmieniem - 270 miejsc, 150000 zl, 38
+    min
+    8. kurnik 12×12 m z wolierą i wentylacją - 360 miejsc, 300000 zl, 48 min
+    9. ekologiczna ferma: kurnik 12×20 m i 1 ha pastwiska - 500 miejsc, 500000
+    zl, 60 min
+
+  MAGAZYN:
+    0. lodówka w piwnicy - 200 jaj, 0 zl, 0 min
+    1. mała szopka - 500 jaj, 600 zl, 5 min
+    2. garaż blaszany 3×5 m - 1000 jaj, 3000 zl, 8 min
+    3. ocieplony kontener 20 stóp z regałami - 2000 jaj, 10500 zl, 12 min
+    4. kontener-chłodnia i silos na paszę - 4000 jaj, 30000 zl, 17 min
+    5. magazyn z płyty warstwowej 8×10 m i silos 10 t - 8000 jaj, 80000 zl, 23
+    min
+    6. hala stalowa 12×15 m z chłodnią - 15000 jaj, 200000 zl, 30 min
+    7. hala 20×20 m z chłodnią i silosami 2×30 t - 30000 jaj, 540000 zl, 38
+    min
+    8. centrum magazynowe 800 m² z sortownią jaj - 60000 jaj, 1000000 zl, 48
+    min
+    9. baza paszowa: hala 1500 m², silosy 2×150 t i waga - 100000 jaj, 1800000
+    zl, 60 min
+
+  INKUBATOR:
+    0. domowy inkubator ze styropianu i żarówki - 9 jaj, 0 zl, 0 min
+    1. inkubator na 18 jaj z obracaniem - 18 jaj, 250 zl, 5 min
+    2. inkubator na 30 jaj z wyświetlaczem - 30 jaj, 300 zl, 8 min
+    3. inkubator na 48 jaj z automatycznym nawilżaniem - 48 jaj, 450 zl, 12
+    min
+    4. inkubator na 72 jaja z alarmem i zasilaniem 12 V - 72 jaj, 700 zl, 17
+    min
+    5. szafka lęgowa na 100 jaj z klujnikiem - 100 jaj, 1800 zl, 23 min
+    6. szafa lęgowa na 150 jaj z klujnikiem - 150 jaj, 2400 zl, 30 min
+    7. szafa lęgowa na 200 jaj z alarmem GSM - 200 jaj, 3200 zl, 38 min
+    8. szafa lęgowa na 270 jaj i agregat prądotwórczy - 270 jaj, 6500 zl, 48
+    min
+    9. mała wylęgarnia: dwie szafy na 360 jaj, klujnik i agregat - 360 jaj,
+    9000 zl, 60 min
+
+  PLOT:
+    1. płot z siatki na drewnianych palikach - 400 zl, lis zawraca w 50%
+    2. płot z siatki zgrzewanej na stalowych słupkach - 1000 zl, lis zawraca w
+    65%
+    3. płot 2 m z siatką wkopaną w ziemię - 2500 zl, lis zawraca w 80%
+    4. płot 2 m z podmurówką i pastuchem elektrycznym - 6000 zl, lis zawraca w
+    95%
+
+  PIES:
+    1. kundel ze schroniska z budą - 400 zl, co 10 s, przegania 33.33%,
+    zagryza 0%
+    2. owczarek niemiecki z rodowodem - 2500 zl, co 5 s, przegania 66.67%,
+    zagryza 33.33%
 
   breeds.json - pola kazdej rasy
   ------------------------------
@@ -1057,9 +1091,9 @@
   --------------
 
   Lista budynkow stojacych na fermie: id (coop, incubator, storage, shop) i
-  klucze tekstow nazwy i opisu. Liczby budynkow sa w balance.json -> buildings
-  i incubator. Wyglad budynku zmienia sie na poziomach 3 i 6
-  (scenes/farm/farm.gd: LOOK_STEPS, grafiki z tools/gen_buildings.py).
+  klucze tekstow nazwy i opisu. Liczby budynkow sa w data/rozbudowy.json
+  (wyzej). Wyglad budynku zmienia sie na poziomach 3 i 6 (scenes/farm/farm.gd:
+  LOOK_STEPS, grafiki z tools/gen_buildings.py).
 
   strings.csv
   -----------
@@ -1516,11 +1550,14 @@
     kill_interval_min > 0, kill_interval_max >= kill_interval_min,
     killed_return_multiplier >= 1
   - egg_spoil_hours > 0, magazyn na poziomie 0 > 50 jaj
-  - magazyn: z kazdym poziomem wiekszy worek, wiekszy rabat
-    (pack_discount < 0.95) i tanszy kilogram paszy
+  - magazyn: z kazdym poziomem jednostka paszy nie mniejsza
+    i tanszy kilogram; teksty bez slow "rabat" i "hurt"
+  - rozbudowy.json: kolejne numery poziomow, kazdy z nazwa,
+    10 poziomow kurnika/magazynu/inkubatora, 4 ploty, 2 psy
   - choroba: zaraza co minute, 30-100% stada co 10%, 3-12 h spokoju
   - skup, szczepienie: cena > 0; leku nie ma
-  - KAZDY klucz balance.json i breeds.json ma opis w tym dokumencie
+  - KAZDY klucz balance.json, rozbudowy.json i breeds.json ma opis
+    w tym dokumencie
 
 ==============================================================================
  15. NARZEDZIA W TOOLS/
@@ -1550,8 +1587,9 @@
   Zmiana ceny / czasu / szansy - przez przegladarke, bez instalowania niczego
   ---------------------------------------------------------------------------
 
-  1. https://github.com/sodorn/kury/blob/main/data/balance.json
-     (albo data/breeds.json dla ras)
+  1. https://github.com/sodorn/kury/blob/main/data/rozbudowy.json
+     (nazwy i ceny budynkow, plot, pies, pasza w magazynie)
+     albo data/balance.json (reszta mechanik), data/breeds.json (rasy)
   2. ikona olowka "Edit this file" (prawy gorny rog podgladu pliku)
   3. zmien liczbe. Nie ruszaj cudzyslowow, przecinkow, nawiasow.
   4. "Commit changes..." -> opis zmiany -> "Commit changes"
@@ -1587,9 +1625,11 @@
   Nowy poziom budynku
   -------------------
 
-  Dopisz element do listy upgrades w balance.json (te same pola co pozostale).
-  Kurnik, magazyn, inkubator - dowolna liczba poziomow. Plot i pies - nie, bo
-  maja grafike na kazdy poziom.
+  Dopisz wpis na koncu listy w data/rozbudowy.json (te same pola, kolejny
+  numer "poziom"). Kurnik, magazyn, inkubator - dowolna liczba poziomow, ale
+  testy pilnuja teraz dokladnie 10 (do poprawy w tests/run_tests.gd). Plot i
+  pies - nie, bo maja grafike na kazdy poziom. Nie usuwaj poziomow ze srodka:
+  zapis gry pamieta numer poziomu.
 
   Nowe pole w zapisie gry
   -----------------------
@@ -1635,5 +1675,5 @@
     limity miejsca i ruchu planu darmowego.
 
 ==============================================================================
-  koniec dokumentu  *  wygenerowano z wersji 12.21
+  koniec dokumentu  *  wygenerowano z wersji 12.22
 ==============================================================================

@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 12.21
+  INSTRUKCJA OBSLUGI *** gra w wersji 12.22
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -144,10 +144,11 @@
  6. PASZA I GLOD
 ==============================================================================
 
-  Kazdy dorosly ptak zjada 13 kg paszy na godzine, pisklę 0.5 tego. Worek
-  kosztuje 50 zl za 25 kg (cena jak w sklepie rolniczym). Im wiekszy magazyn,
-  tym wiekszy worek i nizsza cena za kilogram - masz lepszych dostawcow. Worek
-  kupuje sie SUWAKIEM, jeden na raz.
+  Kazdy dorosly ptak zjada 13 kg paszy na godzine, pisklę 0.5 tego. Na starcie
+  pasze kupujesz w workach: 50 zl za 25 kg (cena jak w sklepie rolniczym). Im
+  wiekszy magazyn, tym wieksza jednostka (big-bag, dostawa luzem, paszowoz) i
+  nizsza cena za kilogram - tabela w rozdziale MAGAZYN. Pasze kupuje sie
+  JEDNYM SUWAKIEM, jedna jednostka na raz.
 
   ZANIM WYJDZIESZ Z GRY: kup paszy na cala przerwe. Kury jedza tez wtedy, gdy
   nie grasz, a magazyn trzyma tylko tyle jaj, ile sie w nim miesci - reszta
@@ -209,21 +210,26 @@
 ==============================================================================
  9. KURNIK
 ==============================================================================
-
-  +======+==========================+========+============+========+
-  | poz. | nazwa                    | miejsc |       cena | budowa |
-  +======+==========================+========+============+========+
-  |    1 | budka z palet po dziadku |     20 |      start |      - |
-  |    2 | kurnik na trytytkach     |     35 |     800 zl |  5 min |
-  |    3 | kurnik z przybudówką     |     55 |   4 800 zl |  8 min |
-  |    4 | kurza kamienica          |     80 |  12 000 zl | 12 min |
-  |    5 | kurnik z windą na grzędę |    110 |  24 500 zl | 17 min |
-  |    6 | kurzy apartamentowiec    |    150 |  45 000 zl | 23 min |
-  |    7 | galeria pierzasta        |    200 |  90 000 zl | 30 min |
-  |    8 | kurzy pałac kultury      |    270 | 150 000 zl | 38 min |
-  |    9 | ferma „Złoty Grzebień”   |    360 | 300 000 zl | 48 min |
-  |   10 | imperium gdakania        |    500 | 500 000 zl |    1 h |
-  +------+--------------------------+--------+------------+--------+
+   1. budka z palet po dziadku
+      20 miejsc - na start
+   2. budka z dobudówką z desek z odzysku
+      35 miejsc - 800 zl, budowa 5 min
+   3. drewniany kurnik 3×4 m
+      55 miejsc - 4 800 zl, budowa 8 min
+   4. ocieplony garaż blaszany 4×6 m
+      80 miejsc - 12 000 zl, budowa 12 min
+   5. kurnik z płyty warstwowej 5×6 m
+      110 miejsc - 24 500 zl, budowa 17 min
+   6. murowany kurnik 6×7 m
+      150 miejsc - 45 000 zl, budowa 23 min
+   7. murowany kurnik 8×8 m z wybiegiem
+      200 miejsc - 90 000 zl, budowa 30 min
+   8. kurnik 10×10 m z automatycznym karmieniem
+      270 miejsc - 150 000 zl, budowa 38 min
+   9. kurnik 12×12 m z wolierą i wentylacją
+      360 miejsc - 300 000 zl, budowa 48 min
+  10. ekologiczna ferma: kurnik 12×20 m i 1 ha pastwiska
+      500 miejsc - 500 000 zl, budowa 1 h
 
   Limit liczy WSZYSTKIE dorosle ptaki razem z kogutami. Ponad limit nie kupisz
   ptaka, a podrosniete pisklę czeka przy inkubatorze, az zwolni sie miejsce.
@@ -237,59 +243,73 @@
 ==============================================================================
  10. MAGAZYN
 ==============================================================================
+   1. lodówka w piwnicy
+      limit 200 jaj - na start
+   2. mała szopka
+      limit 500 jaj - 600 zl, budowa 5 min
+   3. garaż blaszany 3×5 m
+      limit 1 000 jaj - 3 000 zl, budowa 8 min
+   4. ocieplony kontener 20 stóp z regałami
+      limit 2 000 jaj - 10 500 zl, budowa 12 min
+   5. kontener-chłodnia i silos na paszę
+      limit 4 000 jaj - 30 000 zl, budowa 17 min
+   6. magazyn z płyty warstwowej 8×10 m i silos 10 t
+      limit 8 000 jaj - 80 000 zl, budowa 23 min
+   7. hala stalowa 12×15 m z chłodnią
+      limit 15 000 jaj - 200 000 zl, budowa 30 min
+   8. hala 20×20 m z chłodnią i silosami 2×30 t
+      limit 30 000 jaj - 540 000 zl, budowa 38 min
+   9. centrum magazynowe 800 m² z sortownią jaj
+      limit 60 000 jaj - 1 000 000 zl, budowa 48 min
+  10. baza paszowa: hala 1500 m², silosy 2×150 t i waga
+      limit 100 000 jaj - 1 800 000 zl, budowa 1 h
 
-  +======+=========================+===========+==============+========+
-  | poz. | nazwa                   | limit jaj |         cena | budowa |
-  +======+=========================+===========+==============+========+
-  |    1 | lodówka w piwnicy       |       200 |        start |      - |
-  |    2 | mała szopka             |       500 |       600 zl |  5 min |
-  |    3 | spiżarnia babci         |     1 000 |     3 000 zl |  8 min |
-  |    4 | spichlerz               |     2 000 |    10 500 zl | 12 min |
-  |    5 | stodoła z rampą         |     4 000 |    30 000 zl | 17 min |
-  |    6 | silos                   |     8 000 |    80 000 zl | 23 min |
-  |    7 | bliźniacze silosy       |    15 000 |   200 000 zl | 30 min |
-  |    8 | elewator zbożowy        |    30 000 |   540 000 zl | 38 min |
-  |    9 | port przeładunkowy pasz |    60 000 | 1 000 000 zl | 48 min |
-  |   10 | skarbiec jajczarski     |   100 000 | 1 800 000 zl |    1 h |
-  +------+-------------------------+-----------+--------------+--------+
+  +======+=====================+===========+=========+
+  | poz. | pasza (jeden suwak) |      cena |   za kg |
+  +======+=====================+===========+=========+
+  |    1 | worek 25 kg         |     50 zl | 2.00 zl |
+  |    2 | worek 25 kg         |     45 zl | 1.80 zl |
+  |    3 | big-bag 500 kg      |    860 zl | 1.72 zl |
+  |    4 | big-bag 1 t         |  1 640 zl | 1.64 zl |
+  |    5 | dostawa luzem 2 t   |  3 120 zl | 1.56 zl |
+  |    6 | dostawa luzem 5 t   |  7 400 zl | 1.48 zl |
+  |    7 | dostawa luzem 10 t  | 14 000 zl | 1.40 zl |
+  |    8 | paszowóz 24 t       | 31 680 zl | 1.32 zl |
+  |    9 | paszowóz 24 t       | 30 240 zl | 1.26 zl |
+  |   10 | dwa paszowozy 48 t  | 57 600 zl | 1.20 zl |
+  +------+---------------------+-----------+---------+
 
-  +======+==========+============+==========+
-  | poz. | worek kg | cena worka | taniej o |
-  +======+==========+============+==========+
-  |    1 |       25 |      50 zl |        - |
-  |    2 |      100 |     180 zl |      10% |
-  |    3 |      250 |     430 zl |      14% |
-  |    4 |      600 |     984 zl |      18% |
-  |    5 |    1 500 |   2 340 zl |      22% |
-  |    6 |    3 500 |   5 180 zl |      26% |
-  |    7 |    8 000 |  11 200 zl |      30% |
-  |    8 |   20 000 |  26 400 zl |      34% |
-  |    9 |   40 000 |  50 400 zl |      37% |
-  |   10 |   70 000 |  84 000 zl |      40% |
-  +------+----------+------------+----------+
-
-  Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i daje lepszych
-  dostawcow - wiekszy worek i kilogram paszy tanszy o 10% do 40%. Im wiekszy
-  magazyn, tym tansza pasza. Magazyn zmienia wyglad na poziomie 4 i 7.
+  Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i pozwala
+  kupowac pasze w wiekszych jednostkach, a im wieksza jednostka, tym tanszy
+  kilogram (od 2.00 zl na starcie do 1.20 zl na ostatnim poziomie). Magazyn
+  zmienia wyglad na poziomie 4 i 7.
 
 ==============================================================================
  11. INKUBATOR
 ==============================================================================
+   1. domowy inkubator ze styropianu i żarówki
+      9 jaj naraz (3 pisklat) - na start
+   2. inkubator na 18 jaj z obracaniem
+      18 jaj naraz (6 pisklat) - 250 zl, budowa 5 min
+   3. inkubator na 30 jaj z wyświetlaczem
+      30 jaj naraz (10 pisklat) - 300 zl, budowa 8 min
+   4. inkubator na 48 jaj z automatycznym nawilżaniem
+      48 jaj naraz (16 pisklat) - 450 zl, budowa 12 min
+   5. inkubator na 72 jaja z alarmem i zasilaniem 12 V
+      72 jaj naraz (24 pisklat) - 700 zl, budowa 17 min
+   6. szafka lęgowa na 100 jaj z klujnikiem
+      100 jaj naraz (33 pisklat) - 1 800 zl, budowa 23 min
+   7. szafa lęgowa na 150 jaj z klujnikiem
+      150 jaj naraz (50 pisklat) - 2 400 zl, budowa 30 min
+   8. szafa lęgowa na 200 jaj z alarmem GSM
+      200 jaj naraz (66 pisklat) - 3 200 zl, budowa 38 min
+   9. szafa lęgowa na 270 jaj i agregat prądotwórczy
+      270 jaj naraz (90 pisklat) - 6 500 zl, budowa 48 min
+  10. mała wylęgarnia: dwie szafy na 360 jaj, klujnik i agregat
+      360 jaj naraz (120 pisklat) - 9 000 zl, budowa 1 h
 
-  +======+===========================+========+============+========+
-  | poz. | nazwa                     | miejsc |       cena | budowa |
-  +======+===========================+========+============+========+
-  |    1 | lampka pod kocykiem       |      3 |      start |      - |
-  |    2 | pudło po butach z żarówką |      6 |     600 zl |  5 min |
-  |    3 | inkubator z odzysku       |     10 |   4 000 zl |  8 min |
-  |    4 | wylęgarka z termometrem   |     16 |  11 000 zl | 12 min |
-  |    5 | Ciepła Kołdra 3000        |     24 |  24 000 zl | 17 min |
-  |    6 | bliźniak dwukomorowy      |     34 |  48 000 zl | 23 min |
-  |    7 | kurza porodówka           |     48 | 108 000 zl | 30 min |
-  |    8 | wylęgarnia na trzy zmiany |     66 | 200 000 zl | 38 min |
-  |    9 | fabryka puchu             |     90 | 450 000 zl | 48 min |
-  |   10 | reaktor wylęgowy          |    120 | 700 000 zl |    1 h |
-  +------+---------------------------+--------+------------+--------+
+  Z 3 jaj wykluwa sie jedno pisklę, wiec inkubator na 48 jaj grzeje naraz 16
+  pisklat. Inkubatory sa tanie jak w sklepie rolniczym - drogie sa kurniki.
 
 ==============================================================================
  12. LIS
@@ -332,27 +352,26 @@
 ==============================================================================
  13. PSY I PLOT
 ==============================================================================
-
-  +==========+==========+=========+========+===================+
-  | pies     |     cena | probuje | szansa | szansa na zabicie |
-  +==========+==========+=========+========+===================+
-  | kundel   |   400 zl | co 10 s |    33% |                0% |
-  | owczarek | 2 500 zl |  co 5 s |    67% |               33% |
-  +----------+----------+---------+--------+-------------------+
+  PSY:
+   1. kundel ze schroniska z budą
+      400 zl - rzuca sie na lisa co 10 s, przegania w 33%, zagryza w 0%
+   2. owczarek niemiecki z rodowodem
+      2 500 zl - rzuca sie na lisa co 5 s, przegania w 67%, zagryza w 33%
 
   Pies pracuje sam, bez twojego udzialu, takze gdy nie patrzysz. Gdy lis
   wejdzie, pies rzuca kostka co tyle sekund. Przy udanej probie owczarek moze
   lisa ZAGRYZC - wtedy lis zostaje rozszarpany na wybiegu, a nastepny
   przychodzi 5 razy pozniej niz zwykle.
 
-  +==============+========================+==========+
-  | poziom plotu | szansa, ze lis zawroci |     cena |
-  +==============+========================+==========+
-  |            1 |                    50% |   400 zl |
-  |            2 |                    65% | 1 000 zl |
-  |            3 |                    80% | 2 500 zl |
-  |            4 |                    95% | 6 000 zl |
-  +--------------+------------------------+----------+
+  PLOTY:
+   1. płot z siatki na drewnianych palikach
+      400 zl - lis zawraca w 50% podejsc
+   2. płot z siatki zgrzewanej na stalowych słupkach
+      1 000 zl - lis zawraca w 65% podejsc
+   3. płot 2 m z siatką wkopaną w ziemię
+      2 500 zl - lis zawraca w 80% podejsc
+   4. płot 2 m z podmurówką i pastuchem elektrycznym
+      6 000 zl - lis zawraca w 95% podejsc
 
   Plot dziala INACZEJ niz pies: nie wygania lisa z wybiegu, tylko z takim
   prawdopodobienstwem w ogole go nie wpuszcza. Plot i pies licza sie osobno,

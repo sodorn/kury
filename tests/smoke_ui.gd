@@ -135,9 +135,9 @@ func _check_dog_offer(panel: Control) -> void:
 		if not button.visible:
 			continue
 		teksty.append(button.text)
-		if button.text.contains(tr("DOG_BUY_MUTT")) and pies < 0:
+		if button.text.contains(tr("PANEL_BUY_DOG").split(" za")[0]) and pies < 0:
 			pies = index
-		if button.text.contains(tr("GUARD_BUY_FENCE")) and plot < 0:
+		if button.text.contains(tr("PANEL_BUY_GUARD").split(" za")[0]) and plot < 0:
 			plot = index
 		index += 1
 	_check(pies >= 0, "jest przycisk zakupu psa: %s" % "; ".join(teksty))
@@ -149,6 +149,28 @@ func _check_dog_offer(panel: Control) -> void:
 	for tekst in teksty:
 		var czysty := tekst.contains("%s") or tekst.contains("%d")
 		_check(not czysty, "przycisk ma podstawione wszystkie wartosci: %s" % tekst)
+	# 12.22 (wlasciciel 25.11): rozbudowa, pies i plot to NISKIE suwaki na jedna
+	# linijke, a nazwa i dzialanie stoja malym drukiem nad nimi.
+	await _frames(4)
+	for node in _controls_of_type(actions, "Button"):
+		var b := node as Button
+		if b.visible:
+			_check(b is SlideButton and (b as SlideButton).compact and b.size.y <= 80.0,
+					"suwak na jedna linijke: '%s' (%.0f px)" % [b.text, b.size.y])
+	var opisy: Array[String] = []
+	for node in actions.find_children("*", "Label", true, false):
+		if (node as Label).is_visible_in_tree() and not (node as Label).text.is_empty():
+			opisy.append((node as Label).text)
+	var opis := " | ".join(opisy)
+	var nastepny := String(Game.state.upgrade_entry("coop").get("name", ""))
+	_check(opis.contains(nastepny), "nad suwakiem widac nazwe nastepnego kurnika '%s' (%s)" % [nastepny, opis])
+	_check(opis.contains(_first_name("dog")) and opis.contains(_first_name("guard")),
+			"nad suwakami widac nazwe psa i plotu z pliku rozbudow (%s)" % opis)
+	_shot("panel_kurnik_suwaki.png")
+
+
+func _first_name(id: String) -> String:
+	return String((GameData.balance()["buildings"][id]["upgrades"][0] as Dictionary).get("name", ""))
 
 
 ## Wlasciciel zglosil, ze przycisk rozbudowy inkubatora jest "caly czas
@@ -163,7 +185,7 @@ func _check_incubator_upgrade(panel: Control) -> void:
 	var przycisk: Button = null
 	for node in _controls_of_type(actions, "Button"):
 		var b := node as Button
-		if b.visible and b.text.contains(tr("PANEL_UPGRADE_INCUBATOR").split(":")[0]):
+		if b.visible and b.text.contains(tr("PANEL_UPGRADE_SLIDE").split(" za")[0]):
 			przycisk = b
 	_check(przycisk != null, "jest przycisk rozbudowy inkubatora")
 	if przycisk == null:
@@ -195,7 +217,7 @@ func _check_incubator_upgrade(panel: Control) -> void:
 	await _frames(20)
 	_check(Game.state.is_building("incubator"), "przesuniety suwak zaczyna budowe")
 	_check(Game.state.incubator_level == poziom, "w trakcie budowy poziom jeszcze stary")
-	_check(przycisk.disabled and przycisk.text.contains(tr("PANEL_BUILDING_BUSY").split(":")[0]),
+	_check(przycisk.disabled and przycisk.text.contains(tr("PANEL_BUILDING_BUSY").split(" —")[0]),
 			"w trakcie budowy suwak mowi, ze trwa budowa (%s)" % przycisk.text)
 	var paski := 0
 	for node in _controls_of_type(actions, "ProgressBar"):
@@ -333,8 +355,16 @@ func _test_shop() -> void:
 	_check(Game.state.egg_count() == 0, "sprzedaz jaj dziala do konca")
 	_check(sprzedaz.disabled, "bez jaj przycisk jest wyszarzony")
 	var pasza_btn := rows[1] as Button
-	_check(pasza_btn.text.begins_with("Kup worek paszy"),
-			"przycisk paszy: 'Kup worek paszy ...' (jest '%s')" % pasza_btn.text)
+	_check(pasza_btn.text.begins_with("Kup paszę: worek 25 kg za 50 zł"),
+			"przycisk paszy: 'Kup paszę: worek 25 kg za 50 zł' (jest '%s')" % pasza_btn.text)
+	# Dokladnie JEDEN suwak paszy (wlasciciel 25.11: zadnego "kup 10 workow").
+	var paszowe := 0
+	for b in actions.find_children("*", "Button", true, false):
+		if (b as Button).text.contains("pasz") and (b as Button).text.begins_with("Kup"):
+			paszowe += 1
+	_check(paszowe == 1, "w sklepie jest jeden suwak paszy (jest %d)" % paszowe)
+	_check(pasza_btn is SlideButton and (pasza_btn as SlideButton).compact,
+			"pasza kupowana niskim suwakiem")
 
 	var feed_before: float = Game.state.feed
 	(rows[1] as Button).emit_signal("pressed")
@@ -1362,8 +1392,18 @@ func _test_feed_panels() -> void:
 			# Cena za kilogram liczona z konfiguracji, nie wpisana na sztywno -
 			# wlasciciel sam zmienia ceny w balance.json.
 			var za_kg := NumberFormat.small_money(float(Game.state.feed_pack()["per_kg"])) + "/kg"
-			_check(calosc.contains(za_kg) and calosc.contains("rabat 10%"),
-					"magazyn poziom 1: %s i rabat 10%% (%s)" % [za_kg, calosc])
+			var jednostka := NumberFormat.feed_unit(Game.state.feed_pack())
+			_check(calosc.contains(za_kg) and calosc.contains(jednostka),
+					"magazyn poziom 1: %s, %s (%s)" % [jednostka, za_kg, calosc])
+		# Wlasciciel 25.11: zadnego "rabatu" ani "hurtu" nigdzie w panelu.
+		var panel_node: Node = _main.get_node("Hud/Root/BuildingPanel/Sheet")
+		var wszystko: Array[String] = []
+		for c in panel_node.find_children("*", "", true, false):
+			if (c is Label or c is Button) and (c as Control).is_visible_in_tree():
+				wszystko.append(c.text)
+		var caly := " | ".join(wszystko).to_lower()
+		_check(not caly.contains("rabat") and not caly.contains("hurt"),
+				"panel %s bez slow rabat/hurt" % id)
 		var akcje: Node = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Gutter/Scrollable/Actions")
 		var przyciski: Array[String] = []
 		for b in akcje.find_children("*", "Button", true, false):
@@ -1418,6 +1458,10 @@ func _test_achievements() -> void:
 	var star := ach.get_node("Star") as Button
 	_check(star.visible and star.get_global_rect().position.x < 200.0
 			and star.get_global_rect().position.y < 300.0, "gwiazdka osiagniec w lewym gornym rogu")
+	# 12.22: znaku "★" nie ma w czcionce (w przegladarce byl prostokat "26 05").
+	var ikona := star.get_node_or_null("StarIcon") as StarIcon
+	_check(star.text.is_empty() and ikona != null and ikona.size.x > 50.0
+			and ikona.points().size() == 10, "gwiazdka narysowana wielokatem, bez znaku z czcionki")
 	Game.state.mark_owned("cemani")
 	await _tap(star.get_global_rect().get_center())
 	await _frames(10)

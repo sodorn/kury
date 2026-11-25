@@ -23,6 +23,10 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUT = ROOT / "DOKUMENTACJA_TECHNICZNA.txt"
 BAL = json.loads((ROOT / "data" / "balance.json").read_text(encoding="utf-8"))
+sys.path.insert(0, str(ROOT / "tools"))
+import dane  # noqa: E402  (data/rozbudowy.json nalozone na balance - tak jak w grze)
+ROZ = dane.rozbudowy()
+BALX = dane.load_balance()
 BREEDS = json.loads((ROOT / "data" / "breeds.json").read_text(encoding="utf-8"))
 BACKEND = json.loads((ROOT / "data" / "backend.json").read_text(encoding="utf-8"))
 SCALE = float(BAL["offline"]["scale"])
@@ -47,13 +51,6 @@ OPISY = {
     "start.roosters": ("lista id ras", "Koguty nowej fermy. Bez koguta danej rasy jej kury nie znosza.",
                        "Game.new_game"),
     # -------------------------------------------------------------- economy
-    "economy.feed_pack_size": ("kg", "Wielkosc worka paszy przy magazynie na poziomie 0. Wyzsze "
-                               "poziomy maja wlasne worki (buildings.storage.upgrades[].pack_size). "
-                               "Razem z feed_pack_price wyznacza CENE BAZOWA kilograma, od ktorej "
-                               "liczy sie rabaty hurtowe.",
-                               "FarmState.feed_pack(), panel sklepu"),
-    "economy.feed_pack_price": ("zl", "Cena worka paszy przy magazynie na poziomie 0.",
-                                "FarmState.feed_pack(), panel sklepu"),
     "economy.rooster_price_multiplier": ("mnoznik", "Cena koguta = cena kury tej samej rasy razy ta "
                                          "liczba. 2.5 oznacza 250%.", "FarmState.hen_buy_price"),
     "economy.feed_per_hen_minute": ("kg / min GRY", "Ile paszy zjada jeden dorosly ptak (kura albo "
@@ -93,22 +90,11 @@ OPISY = {
     "day.seconds": ("s GRY", "Dlugosc doby gospodarstwa (licznik dni w interfejsie).",
                     "Simulation._advance_days"),
     # ------------------------------------------------------------ incubator
-    "incubator.slots": ("szt.", "Miejsca w inkubatorze na poziomie 0. Jedno miejsce = jedna partia "
-                        "(jedno pisklę) naraz.", "FarmState.incubator_slots"),
     "incubator.eggs_per_chick": ("szt.", "Ile jaj tej samej rasy idzie na jedno pisklę.",
                                  "Game.incubate"),
     "incubator.rooster_share": ("0..1", "Jaka czesc wyklutych piskląt to kogutki. 0.5 = jak w naturze, "
                                 "pol na pol. Plec losowana przy wykluciu, zapisywana w pisklęciu "
                                 "(\"rooster\" w zapisie).", "Chick.roll_rooster, Simulation._advance_incubator"),
-    "incubator.upgrades[].name": ("klucz tekstu", "Nazwa poziomu z data/strings.csv.", "panel inkubatora"),
-    "incubator.upgrades[].slots": ("szt.", "Miejsca w inkubatorze na tym poziomie.",
-                                   "FarmState.incubator_slots"),
-    "incubator.upgrades[].price": ("zl", "Cena przejscia NA ten poziom.", "Game.upgrade_incubator"),
-    "incubator.name": ("klucz tekstu", "Nazwa poziomu startowego inkubatora (poziom 1 w panelu).",
-                       "panel inkubatora"),
-    "incubator.upgrades[].build_minutes": ("min ZEGARA", "Ile minut REALNYCH trwa budowa tego poziomu. Placi sie od razu, "
-                 "nowy poziom wchodzi po skonczeniu; w trakcie budynek dziala na starym. "
-                 "0 albo brak = od razu.", "Game.upgrade_building, Simulation._advance_construction"),
     # --------------------------------------------------------------- hunger
     "hunger.grace_minutes": ("min GRY", "Po skonczeniu paszy przez tyle minut nic sie nie dzieje. "
                              "Potem zaczynaja padac kury.", "Simulation._advance_hunger"),
@@ -197,46 +183,6 @@ OPISY = {
     "win.collection": ("tak/nie", "true = wygrana takze za zebranie wszystkich ras.",
                        "Simulation.check_win"),
     # -------------------------------------------------------------- buildings
-    "buildings.coop.capacity": ("szt.", "Miejsca w kurniku na poziomie 0 (dorosle ptaki, z kogutami).",
-                                "FarmState.coop_capacity"),
-    "buildings.coop.upgrades[].name": ("klucz tekstu", "Nazwa poziomu kurnika.", "panel kurnika"),
-    "buildings.coop.upgrades[].capacity": ("szt.", "Miejsca w kurniku na tym poziomie.",
-                                           "FarmState.coop_capacity"),
-    "buildings.coop.upgrades[].price": ("zl", "Cena przejscia NA ten poziom.", "Game.upgrade_building"),
-    "buildings.coop.name": ("klucz tekstu", "Nazwa poziomu startowego kurnika.", "panel kurnika"),
-    "buildings.coop.upgrades[].build_minutes": ("min ZEGARA", "Ile minut REALNYCH trwa budowa tego poziomu. Placi sie od razu, "
-                 "nowy poziom wchodzi po skonczeniu; w trakcie budynek dziala na starym. "
-                 "0 albo brak = od razu.", "Game.upgrade_building, Simulation._advance_construction"),
-    "buildings.storage.egg_capacity": ("szt.", "Limit jaj w magazynie na poziomie 0.",
-                                       "FarmState.egg_capacity"),
-    "buildings.storage.upgrades[].name": ("klucz tekstu", "Nazwa poziomu magazynu.", "panel magazynu"),
-    "buildings.storage.upgrades[].pack_size": ("kg", "Worek paszy na tym poziomie.", "FarmState.feed_pack"),
-    "buildings.storage.upgrades[].pack_discount": ("0-1", "Rabat hurtowy na pasze na tym poziomie "
-                                                   "(0.10 = 10%). Cena worka = pack_size * cena bazowa "
-                                                   "za kg (economy.feed_pack_price / feed_pack_size) * "
-                                                   "(1 - rabat), do pelnych groszy. Musi rosnac z "
-                                                   "poziomem (test).", "FarmState.feed_pack"),
-    "buildings.storage.upgrades[].price": ("zl", "Cena przejscia NA ten poziom.", "Game.upgrade_building"),
-    "buildings.storage.name": ("klucz tekstu", "Nazwa poziomu startowego magazynu.", "panel magazynu"),
-    "buildings.storage.upgrades[].build_minutes": ("min ZEGARA", "Ile minut REALNYCH trwa budowa tego poziomu. Placi sie od razu, "
-                 "nowy poziom wchodzi po skonczeniu; w trakcie budynek dziala na starym. "
-                 "0 albo brak = od razu.", "Game.upgrade_building, Simulation._advance_construction"),
-    "buildings.storage.upgrades[].egg_capacity": ("szt.", "Limit jaj na tym poziomie.",
-                                                  "FarmState.egg_capacity"),
-    "buildings.guard.upgrades[].block_chance": ("0-1", "Szansa, ze lis po udanej kostce ZAWROCI przy "
-                                                "plocie i w ogole nie wejdzie.",
-                                                "FarmState.fox_block_chance"),
-    "buildings.guard.upgrades[].price": ("zl", "Cena tego poziomu plotu. Poziomow musi byc 4 - tyle "
-                                         "jest grafik (tools/gen_fence.py).", "Game.upgrade_building"),
-    "buildings.dog.upgrades[].name": ("tekst", "Nazwa psa w panelu. Indeks 0 = kundel, 1 = owczarek "
-                                      "(od indeksu zalezy grafika).", "panel kurnika, scenes/farm/dog.gd"),
-    "buildings.dog.upgrades[].interval": ("s ZEGARA", "Co tyle sekund wizyty lisa pies rzuca kostka.",
-                                          "FarmState.dog_interval"),
-    "buildings.dog.upgrades[].chance": ("0-1", "Szansa, ze rzut sie uda i lis wyleci z wybiegu.",
-                                        "FarmState.dog_chance"),
-    "buildings.dog.upgrades[].kill_chance": ("0-1", "Przy udanym rzucie: szansa, ze pies lisa ZAGRYZIE "
-                                             "(zamiast tylko przegonic).", "FarmState.dog_kill_chance"),
-    "buildings.dog.upgrades[].price": ("zl", "Cena psa.", "Game.upgrade_building"),
     # --------------------------------------------------------------- session
     "session.require_code": ("tak/nie", "true = przy wejsciu do gry trzeba wpisac kod fermy, a stan "
                              "przychodzi z serwera. Dziala tylko przy wlaczonym backendzie.",
@@ -276,6 +222,58 @@ OPISY_RAS = {
 
 # ===========================================================================
 L = []
+
+
+# ===========================================================================
+# OPISY POL data/rozbudowy.json (od 12.22). Plik do recznej edycji: polskie
+# klucze, nazwy poziomow zwyklym tekstem. GameData.apply_upgrades przepisuje go
+# na balance.buildings.* / balance.incubator / economy.feed_pack_*.
+# ===========================================================================
+OPISY_ROZ = {
+    "kurnik[].poziom": ("nr", "Numer poziomu, 0 = start. Kolejne liczby od 0 - inaczej gra zglasza "
+                        "blad (test).", "GameData.apply_upgrades"),
+    "kurnik[].nazwa": ("tekst", "Nazwa poziomu kurnika, pokazywana w panelu i kronice.", "panel kurnika"),
+    "kurnik[].cena": ("zl", "Cena przejscia NA ten poziom (poziom 0: pomijana).", "Game.upgrade_building"),
+    "kurnik[].budowa_min": ("min ZEGARA", "Ile minut REALNYCH trwa budowa (5-60, rosnaco - test). "
+                            "Placi sie od razu, w trakcie budynek dziala na starym poziomie.",
+                            "Simulation._advance_construction"),
+    "kurnik[].miejsc": ("szt.", "Dorosle ptaki (kury i koguty), ktore mieszcza sie w kurniku.",
+                        "FarmState.coop_capacity"),
+    "magazyn[].poziom": ("nr", "Numer poziomu, 0 = start.", "GameData.apply_upgrades"),
+    "magazyn[].nazwa": ("tekst", "Nazwa poziomu magazynu.", "panel magazynu"),
+    "magazyn[].cena": ("zl", "Cena przejscia NA ten poziom.", "Game.upgrade_building"),
+    "magazyn[].budowa_min": ("min ZEGARA", "Czas budowy jak w kurniku.", "Simulation._advance_construction"),
+    "magazyn[].jaj": ("szt.", "Limit jaj w magazynie; nadmiar przepada przy znoszeniu.",
+                      "FarmState.egg_capacity"),
+    "magazyn[].pasza": ("tekst", "Nazwa jednostki paszy kupowanej JEDNYM suwakiem przy tym "
+                        "magazynie (worek, big-bag, dostawa luzem...). Waga dopisuje sie sama.",
+                        "FarmState.feed_pack, NumberFormat.feed_unit"),
+    "magazyn[].pasza_kg": ("kg", "Ile paszy przybywa po jednym zakupie.", "FarmState.feed_pack"),
+    "magazyn[].pasza_cena": ("zl", "Cena jednej jednostki. Cena za kg (pasza_cena / pasza_kg) musi "
+                             "spadac z kazdym poziomem (test).", "FarmState.feed_pack"),
+    "inkubator[].poziom": ("nr", "Numer poziomu, 0 = start.", "GameData.apply_upgrades"),
+    "inkubator[].nazwa": ("tekst", "Nazwa poziomu inkubatora.", "panel inkubatora"),
+    "inkubator[].cena": ("zl", "Cena przejscia NA ten poziom.", "Game.upgrade_building"),
+    "inkubator[].budowa_min": ("min ZEGARA", "Czas budowy jak w kurniku.", "Simulation._advance_construction"),
+    "inkubator[].jaj": ("szt.", "Ile jaj grzeje sie naraz. Miejsca (pisklęta naraz) = jaj / "
+                        "incubator.eggs_per_chick, w dol.", "FarmState.incubator_slots"),
+    "plot[].poziom": ("nr", "Numer plotu, od 1 (na starcie plotu nie ma). Musza byc 4 - tyle jest "
+                      "grafik (tools/gen_fence.py).", "GameData.apply_upgrades"),
+    "plot[].nazwa": ("tekst", "Nazwa plotu w panelu kurnika.", "panel kurnika"),
+    "plot[].cena": ("zl", "Cena plotu. Stawia sie od razu.", "Game.upgrade_building"),
+    "plot[].lis_zawraca_proc": ("%", "W ilu procentach podejsc lis zawraca przy plocie i w ogole nie "
+                                "wchodzi.", "FarmState.fox_block_chance"),
+    "pies[].poziom": ("nr", "Numer psa, od 1. Musza byc 2: kundel i owczarek (od numeru zalezy "
+                      "grafika).", "GameData.apply_upgrades"),
+    "pies[].nazwa": ("tekst", "Nazwa psa w panelu kurnika.", "panel kurnika"),
+    "pies[].cena": ("zl", "Cena psa.", "Game.upgrade_building"),
+    "pies[].probuje_co_s": ("s ZEGARA", "Co tyle sekund wizyty lisa pies rzuca kostka.",
+                            "FarmState.dog_interval"),
+    "pies[].przegania_proc": ("%", "Szansa, ze rzut sie uda i lis wyleci z wybiegu.",
+                              "FarmState.dog_chance"),
+    "pies[].zagryza_proc": ("%", "Przy udanym rzucie: szansa, ze pies lisa ZAGRYZIE.",
+                            "FarmState.dog_kill_chance"),
+}
 
 
 def raw(text=""):
@@ -450,6 +448,9 @@ def check_keys():
     breed_fields = set()
     for b in BREEDS:
         breed_fields |= {k for k in b if not k.startswith("_")}
+    roz = {k for k, _ in leaves(ROZ)}
+    missing += sorted("rozbudowy.json:" + k for k in roz - set(OPISY_ROZ))
+    dead += sorted("rozbudowy.json:" + k for k in set(OPISY_ROZ) - roz)
     missing += sorted("breeds.json:" + f for f in breed_fields - set(OPISY_RAS))
     dead += sorted("breeds.json:" + f for f in set(OPISY_RAS) - breed_fields)
     return missing, dead
@@ -526,6 +527,7 @@ def build():
   export_presets.cfg     ustawienia eksportu (Web, Android)
   data/
     balance.json         CALA liczbowa konfiguracja mechanik (rozdzial 7)
+    rozbudowy.json       poziomy budynkow, plot, pies: nazwy, ceny, czasy
     breeds.json          17 ras: ceny, czasy, grafiki
     buildings.json       budynki na fermie: id + klucze tekstow
     backend.json         adres i klucz Supabase, wlacznik backendu
@@ -686,15 +688,15 @@ def build():
          "economy.egg_spoil_hours (%s h) znika. Sklep sprzedaje partiami po economy.egg_sale_lot "
          "(%s) - FarmState.oldest_eggs wybiera NAJSTARSZE jaja ze wszystkich ras, bo te zgnija "
          "najpierw." % (fmt(BAL["economy"]["egg_spoil_hours"]), BAL["economy"]["egg_sale_lot"]))
-    head("6.1a Pasza w hurcie")
-    eco = BAL["economy"]
-    per_kg = eco["feed_pack_price"] / eco["feed_pack_size"]
-    rows = [["0", eco["feed_pack_size"], "0%", "%.2f" % (eco["feed_pack_size"] * per_kg), "%.2f" % per_kg]]
-    for i, u in enumerate(BAL["buildings"]["storage"]["upgrades"], start=1):
-        kg = per_kg * (1 - u["pack_discount"])
-        rows.append([str(i), u["pack_size"], "%.0f%%" % (u["pack_discount"] * 100),
-                     "%.2f" % round(u["pack_size"] * kg, 2), "%.2f" % kg])
-    table(["magazyn", "worek kg", "rabat", "cena zl", "zl/kg"], rows, "rrrrr")
+    head("6.1a Pasza: jedna jednostka na poziom magazynu")
+    para("Jeden suwak \"Kup pasze\" kupuje JEDNA jednostke paszy z data/rozbudowy.json "
+         "(magazyn[].pasza, pasza_kg, pasza_cena) dla obecnego poziomu magazynu. Cena za kilogram "
+         "spada z poziomem. W tekstach gry nie ma slow \"rabat\" ani \"hurt\" (wlasciciel 25.11).")
+    rows = []
+    for lv in ROZ["magazyn"]:
+        rows.append([str(lv["poziom"]), "%s %s" % (lv["pasza"], dane.weight(lv["pasza_kg"])),
+                     "%.2f" % lv["pasza_cena"], "%.2f" % (lv["pasza_cena"] / lv["pasza_kg"])])
+    table(["magazyn", "jednostka", "cena zl", "zl/kg"], rows, "rlrr")
 
     head("6.2 Pasza i glod")
     block("""
@@ -783,11 +785,12 @@ def build():
     para("Plot i pies dzialaja niezaleznie. PLOT decyduje, czy lis w ogole wejdzie (block_chance). "
          "PIES skraca wizyte lisa, ktory juz wszedl. Pies stoi w FarmState.dog_level (0 = brak, "
          "1 = kundel, 2 = owczarek), plot w guard_level (0-4).")
-    dogs = BAL["buildings"]["dog"]["upgrades"]
-    table(["poziom", "pies", "cena", "rzut co", "szansa", "zagryza"],
-          [[i + 1, d["name"], "%s zl" % d["price"], "%s s" % fmt(d["interval"]),
+    dogs = BALX["buildings"]["dog"]["upgrades"]
+    table(["poz.", "cena", "rzut co", "szansa", "zagryza"],
+          [[i + 1, "%s zl" % fmt(d["price"]), "%s s" % fmt(d["interval"]),
             "%.0f%%" % (d["chance"] * 100), "%.0f%%" % (d["kill_chance"] * 100)]
-           for i, d in enumerate(dogs)], "rlrrrr")
+           for i, d in enumerate(dogs)], "rrrrr")
+    para("Nazwy psow: rozbudowy.json -> pies (rozdzial 7).")
 
     head("6.6 Inkubator i odchow")
     para("Game.incubate(rasa) zabiera eggs_per_chick (%s) jaja i zajmuje jedno miejsce na "
@@ -826,6 +829,39 @@ def build():
         L.extend(wrap_into(desc, "      "))
         L.extend(wrap_into("uzycie: " + where, "      "))
 
+    head("rozbudowy.json - poziomy budynkow (plik do recznej edycji)")
+    para("Od 12.22 wszystkie poziomy kurnika, magazynu, inkubatora, plotu i psa sa w jednym pliku "
+         "data/rozbudowy.json: polskie klucze, nazwy zwyklym tekstem (bez strings.csv). Na gorze "
+         "pliku jest instrukcja \"_jak_edytowac\". GameData.apply_upgrades przepisuje go przy "
+         "starcie gry na balance.buildings.coop/storage/guard/dog, balance.incubator i "
+         "economy.feed_pack_size/price - reszta kodu czyta stare pola. Zly numer poziomu albo "
+         "pusta nazwa = blad w tescie i nic sie nie wdraza.")
+    for key, (unit, desc, where) in OPISY_ROZ.items():
+        L.append("")
+        L.append("  " + key + "   [%s]" % unit)
+        L.extend(wrap_into(desc, "      "))
+        L.extend(wrap_into("uzycie: " + where, "      "))
+    head("rozbudowy.json - aktualne wartosci")
+    nazwy = {"kurnik": "miejsc", "magazyn": "jaj", "inkubator": "jaj"}
+    for lista, pole in nazwy.items():
+        L.append("")
+        L.append("  %s:" % lista.upper())
+        for lv in ROZ[lista]:
+            L.extend(wrap_into("%d. %s - %s %s, %s zl, %s min" % (
+                lv["poziom"], lv["nazwa"], fmt(lv[pole]), pole, fmt(lv["cena"]), fmt(lv["budowa_min"])),
+                "    "))
+    L.append("")
+    L.append("  PLOT:")
+    for lv in ROZ["plot"]:
+        L.extend(wrap_into("%d. %s - %s zl, lis zawraca w %s%%" % (
+            lv["poziom"], lv["nazwa"], fmt(lv["cena"]), fmt(lv["lis_zawraca_proc"])), "    "))
+    L.append("")
+    L.append("  PIES:")
+    for lv in ROZ["pies"]:
+        L.extend(wrap_into("%d. %s - %s zl, co %s s, przegania %s%%, zagryza %s%%" % (
+            lv["poziom"], lv["nazwa"], fmt(lv["cena"]), fmt(lv["probuje_co_s"]),
+            fmt(lv["przegania_proc"]), fmt(lv["zagryza_proc"])), "    "))
+
     head("breeds.json - pola kazdej rasy")
     for f, (unit, desc) in OPISY_RAS.items():
         L.append("")
@@ -841,7 +877,7 @@ def build():
 
     head("buildings.json")
     para("Lista budynkow stojacych na fermie: id (coop, incubator, storage, shop) i klucze tekstow "
-         "nazwy i opisu. Liczby budynkow sa w balance.json -> buildings i incubator. Wyglad "
+         "nazwy i opisu. Liczby budynkow sa w data/rozbudowy.json (wyzej). Wyglad "
          "budynku zmienia sie na poziomach 3 i 6 (scenes/farm/farm.gd: LOOK_STEPS, grafiki "
          "z tools/gen_buildings.py).")
 
@@ -1179,11 +1215,14 @@ def build():
     kill_interval_min > 0, kill_interval_max >= kill_interval_min,
     killed_return_multiplier >= 1
   - egg_spoil_hours > 0, magazyn na poziomie 0 > 50 jaj
-  - magazyn: z kazdym poziomem wiekszy worek, wiekszy rabat
-    (pack_discount < 0.95) i tanszy kilogram paszy
+  - magazyn: z kazdym poziomem jednostka paszy nie mniejsza
+    i tanszy kilogram; teksty bez slow "rabat" i "hurt"
+  - rozbudowy.json: kolejne numery poziomow, kazdy z nazwa,
+    10 poziomow kurnika/magazynu/inkubatora, 4 ploty, 2 psy
   - choroba: zaraza co minute, 30-100% stada co 10%, 3-12 h spokoju
   - skup, szczepienie: cena > 0; leku nie ma
-  - KAZDY klucz balance.json i breeds.json ma opis w tym dokumencie""")
+  - KAZDY klucz balance.json, rozbudowy.json i breeds.json ma opis
+    w tym dokumencie""")
 
     # ------------------------------------------------------------------ 15
     title("15. Narzedzia w tools/")
@@ -1209,8 +1248,9 @@ def build():
     title("16. Przepisy: typowe zmiany krok po kroku")
     head("Zmiana ceny / czasu / szansy - przez przegladarke, bez instalowania niczego")
     block("""
-  1. https://github.com/sodorn/kury/blob/main/data/balance.json
-     (albo data/breeds.json dla ras)
+  1. https://github.com/sodorn/kury/blob/main/data/rozbudowy.json
+     (nazwy i ceny budynkow, plot, pies, pasza w magazynie)
+     albo data/balance.json (reszta mechanik), data/breeds.json (rasy)
   2. ikona olowka "Edit this file" (prawy gorny rog podgladu pliku)
   3. zmien liczbe. Nie ruszaj cudzyslowow, przecinkow, nawiasow.
   4. "Commit changes..." -> opis zmiany -> "Commit changes"
@@ -1238,9 +1278,10 @@ def build():
   4. testy maja na sztywno liczbe ras (17) i opis rasy w sklepie -
      do poprawy w tests/run_tests.gd""")
     head("Nowy poziom budynku")
-    para("Dopisz element do listy upgrades w balance.json (te same pola co pozostale). Kurnik, "
-         "magazyn, inkubator - dowolna liczba poziomow. Plot i pies - nie, bo maja grafike na "
-         "kazdy poziom.")
+    para("Dopisz wpis na koncu listy w data/rozbudowy.json (te same pola, kolejny numer "
+         "\"poziom\"). Kurnik, magazyn, inkubator - dowolna liczba poziomow, ale testy pilnuja "
+         "teraz dokladnie 10 (do poprawy w tests/run_tests.gd). Plot i pies - nie, bo maja "
+         "grafike na kazdy poziom. Nie usuwaj poziomow ze srodka: zapis gry pamieta numer poziomu.")
     head("Nowe pole w zapisie gry")
     para("FarmState: nowe pole z wartoscia domyslna. SaveGame.to_dict: zapisz. SaveGame.from_dict: "
          "odczytaj z domyslna (stare zapisy go nie maja). Jesli zmieniasz znaczenie starego pola: "

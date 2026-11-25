@@ -11,7 +11,7 @@ const DATA_DIR := "res://data/"
 ## Numer wersji gry. Jedno miejsce do podbicia przy wydaniu — pokazuje sie
 ## na ekranie powitalnym, zeby bylo widac, czy przegladarka wczytala nowa
 ## wersje, czy podsunela stara z pamieci.
-const VERSION := "12.21"
+const VERSION := "12.22"
 
 static var _balance: Dictionary = {}
 static var _buildings: Array = []
@@ -70,8 +70,117 @@ static func _ensure_loaded() -> void:
 		return
 	_loaded = true
 	_balance = _load_json("balance.json", {})
+	for problem in apply_upgrades(_balance, _load_json("rozbudowy.json", {})):
+		push_error("GameData: rozbudowy.json: %s" % problem)
 	_buildings = _load_json("buildings.json", [])
 	_breeds = _load_json("breeds.json", [])
+
+
+## ROZBUDOWY (12.22, wlasciciel 25.11): wszystkie poziomy budynkow - nazwy,
+## ceny, czasy budowy i to, co daja - siedza w jednym pliku do recznej edycji,
+## data/rozbudowy.json, z polskimi kluczami. Tu przepisujemy go na uklad, ktory
+## zna reszta kodu (balance.buildings.*, balance.incubator, economy.feed_pack_*),
+## wiec logika gry sie nie zmienia. Nazwy poziomow sa zwyklym tekstem, nie
+## kluczami tlumaczen - tr() zwraca je bez zmian. Zwraca liste problemow
+## (pusta = plik w porzadku); testy pilnuja, zeby byla pusta.
+static func apply_upgrades(bal: Dictionary, file: Dictionary) -> Array[String]:
+	var problems: Array[String] = []
+	var buildings: Dictionary = bal.get_or_add("buildings", {})
+	var economy: Dictionary = bal.get_or_add("economy", {})
+	var incubator: Dictionary = bal.get_or_add("incubator", {})
+	var per_chick := maxi(1, int(incubator.get("eggs_per_chick", 3)))
+
+	var coop: Array = _levels(file, "kurnik", 0, problems)
+	if not coop.is_empty():
+		var cfg: Dictionary = buildings.get_or_add("coop", {})
+		cfg["name"] = String(coop[0].get("nazwa", ""))
+		cfg["capacity"] = int(coop[0].get("miejsc", 20))
+		cfg["upgrades"] = coop.slice(1).map(func(lv: Dictionary) -> Dictionary:
+			return _common(lv).merged({"capacity": int(lv.get("miejsc", 0))}))
+
+	var store: Array = _levels(file, "magazyn", 0, problems)
+	if not store.is_empty():
+		var cfg: Dictionary = buildings.get_or_add("storage", {})
+		cfg["name"] = String(store[0].get("nazwa", ""))
+		cfg["egg_capacity"] = int(store[0].get("jaj", 200))
+		cfg["feed_unit"] = String(store[0].get("pasza", "worek"))
+		economy["feed_pack_size"] = float(store[0].get("pasza_kg", 25))
+		economy["feed_pack_price"] = float(store[0].get("pasza_cena", 50))
+		cfg["upgrades"] = store.slice(1).map(func(lv: Dictionary) -> Dictionary:
+			return _common(lv).merged({
+				"egg_capacity": int(lv.get("jaj", 0)),
+				"feed_unit": String(lv.get("pasza", "worek")),
+				"pack_size": float(lv.get("pasza_kg", 25)),
+				"pack_price": float(lv.get("pasza_cena", 50)),
+			}))
+
+	var incu: Array = _levels(file, "inkubator", 0, problems)
+	if not incu.is_empty():
+		incubator["name"] = String(incu[0].get("nazwa", ""))
+		incubator["slots"] = maxi(1, floori(float(incu[0].get("jaj", 9)) / per_chick))
+		incubator["eggs"] = int(incu[0].get("jaj", 9))
+		incubator["upgrades"] = incu.slice(1).map(func(lv: Dictionary) -> Dictionary:
+			return _common(lv).merged({
+				"slots": maxi(1, floori(float(lv.get("jaj", 0)) / per_chick)),
+				"eggs": int(lv.get("jaj", 0)),
+			}))
+
+	var fence: Array = _levels(file, "plot", 1, problems)
+	if not fence.is_empty():
+		var cfg: Dictionary = buildings.get_or_add("guard", {})
+		cfg["upgrades"] = fence.map(func(lv: Dictionary) -> Dictionary:
+			return {
+				"name": String(lv.get("nazwa", "")),
+				"price": float(lv.get("cena", 0)),
+				"block_chance": clampf(float(lv.get("lis_zawraca_proc", 0)) / 100.0, 0.0, 1.0),
+			})
+
+	var dogs: Array = _levels(file, "pies", 1, problems)
+	if not dogs.is_empty():
+		var cfg: Dictionary = buildings.get_or_add("dog", {})
+		cfg["upgrades"] = dogs.map(func(lv: Dictionary) -> Dictionary:
+			return {
+				"name": String(lv.get("nazwa", "")),
+				"price": float(lv.get("cena", 0)),
+				"interval": maxf(0.5, float(lv.get("probuje_co_s", 10))),
+				"chance": clampf(float(lv.get("przegania_proc", 0)) / 100.0, 0.0, 1.0),
+				"kill_chance": clampf(float(lv.get("zagryza_proc", 0)) / 100.0, 0.0, 1.0),
+			})
+	return problems
+
+
+## Lista poziomow z pliku rozbudow, sprawdzona: kolejne numery od `first`,
+## kazdy z nazwa i nieujemna cena. Bledne wpisy trafiaja do `problems`.
+static func _levels(file: Dictionary, key: String, first: int, problems: Array[String]) -> Array:
+	var raw: Variant = file.get(key, [])
+	if not raw is Array or (raw as Array).is_empty():
+		problems.append("brak listy '%s'" % key)
+		return []
+	var out: Array = []
+	for i in (raw as Array).size():
+		var lv: Variant = (raw as Array)[i]
+		if not lv is Dictionary:
+			problems.append("%s: wpis %d nie jest w klamrach {}" % [key, i])
+			return []
+		var entry: Dictionary = lv
+		if int(entry.get("poziom", -1)) != first + i:
+			problems.append("%s: wpis %d ma poziom %s, a powinien %d" % [
+				key, i, str(entry.get("poziom", "?")), first + i])
+		if String(entry.get("nazwa", "")).strip_edges().is_empty():
+			problems.append("%s poziom %d: brak nazwy" % [key, first + i])
+		if float(entry.get("cena", 0)) < 0.0:
+			problems.append("%s poziom %d: ujemna cena" % [key, first + i])
+		out.append(entry)
+	return out
+
+
+## Wspolne pola poziomu budynku: nazwa, cena, czas budowy.
+static func _common(lv: Dictionary) -> Dictionary:
+	return {
+		"name": String(lv.get("nazwa", "")),
+		"price": float(lv.get("cena", 0)),
+		"build_minutes": float(lv.get("budowa_min", 0)),
+	}
 
 
 static func _load_json(file_name: String, fallback: Variant) -> Variant:

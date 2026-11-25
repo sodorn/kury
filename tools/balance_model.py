@@ -18,7 +18,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 BREEDS = {b["id"]: b for b in json.loads((ROOT / "data/breeds.json").read_text())}
-BALANCE = json.loads((ROOT / "data/balance.json").read_text())
+import sys
+sys.path.insert(0, str(ROOT / "tools"))
+import dane  # noqa: E402
+BALANCE = dane.load_balance()
 
 STEP = 1.0  # sekunda
 MAX_HOURS = 300

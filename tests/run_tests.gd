@@ -49,6 +49,7 @@ func _ready() -> void:
 	_test_guard_migration()
 	_test_fox_return_speed()
 	_test_upgrade_ladders()
+	_test_upgrades_file()
 	_test_egg_spoilage()
 	_test_egg_capacity()
 	_test_vaccine_price()
@@ -1490,13 +1491,85 @@ func _test_guard_migration() -> void:
 		_check(pies == chciane[1], "obrona %d -> pies %d (jest %d)" % [stary, chciane[1], pies])
 
 
-## Drabinki rozbudowy: kazdy poziom ma nazwe, jest drozszy od poprzedniego
-## i cos realnie dodaje. Pilnuje tez, zeby kolejny poziom nigdy nie byl
-## tanszy za jednostke — inaczej oplacaloby sie przeskakiwac poziomy.
+## 12.22: plik data/rozbudowy.json (do recznej edycji przez wlasciciela) jest
+## poprawny i gra naprawde z niego czyta - nazwy, ceny, pojemnosci, pasza,
+## plot i pies.
+func _test_upgrades_file() -> void:
+	var bal: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/balance.json"))
+	var plik: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/rozbudowy.json"))
+	_check(bal is Dictionary and plik is Dictionary, "balance.json i rozbudowy.json to poprawny JSON")
+	if not (bal is Dictionary and plik is Dictionary):
+		return
+	var problemy := GameData.apply_upgrades(bal, plik)
+	_check(problemy.is_empty(), "rozbudowy.json bez bledow: %s" % ", ".join(problemy))
+	var ile := {"kurnik": 10, "magazyn": 10, "inkubator": 10, "plot": 4, "pies": 2}
+	for lista: String in ile:
+		_check((plik.get(lista, []) as Array).size() == int(ile[lista]),
+				"rozbudowy.json: %s ma %d poziomow" % [lista, ile[lista]])
+	_check(plik.has("_jak_edytowac"), "rozbudowy.json ma instrukcje edycji")
+	# Ten sam plik po popsuciu numeru poziomu i nazwy - bledy maja byc nazwane.
+	var zepsuty: Dictionary = (plik as Dictionary).duplicate(true)
+	(zepsuty["kurnik"][2] as Dictionary)["poziom"] = 7
+	(zepsuty["plot"][0] as Dictionary)["nazwa"] = ""
+	var bledy := GameData.apply_upgrades({}, zepsuty)
+	_check(bledy.size() == 2, "zepsuty plik rozbudow zglasza 2 bledy (zglasza %d)" % bledy.size())
+
+	# Gra czyta z pliku: wartosci w balance() zgadzaja sie z plikiem.
+	var kurnik: Array = plik["kurnik"]
+	var coop: Dictionary = GameData.balance()["buildings"]["coop"]
+	_check(String(coop.get("name", "")) == String(kurnik[0]["nazwa"]), "kurnik startowy ma nazwe z pliku")
+	_check(int(coop.get("capacity", 0)) == int(kurnik[0]["miejsc"]), "kurnik startowy ma miejsca z pliku")
+	for i in range(1, kurnik.size()):
+		var u: Dictionary = coop["upgrades"][i - 1]
+		_check(String(u["name"]) == String(kurnik[i]["nazwa"]) and is_equal_approx(float(u["price"]),
+				float(kurnik[i]["cena"])) and int(u["capacity"]) == int(kurnik[i]["miejsc"]),
+				"kurnik poziom %d: nazwa, cena i miejsca z pliku" % i)
+	var magazyn: Array = plik["magazyn"]
+	var stan := FarmState.new()
+	for i in magazyn.size():
+		stan.storage_level = i
+		_check(stan.egg_capacity() == int(magazyn[i]["jaj"]), "magazyn %d: %d jaj z pliku" % [i, magazyn[i]["jaj"]])
+		var pasza := stan.feed_pack()
+		_check(is_equal_approx(float(pasza["price"]), float(magazyn[i]["pasza_cena"]))
+				and is_equal_approx(float(pasza["size"]), float(magazyn[i]["pasza_kg"]))
+				and String(pasza["unit"]) == String(magazyn[i]["pasza"]),
+				"magazyn %d: pasza %s z pliku" % [i, NumberFormat.feed_unit(pasza)])
+	var inkubator: Array = plik["inkubator"]
+	for i in inkubator.size():
+		stan.incubator_level = i
+		_check(stan.incubator_slots() == int(inkubator[i]["jaj"]) / 3,
+				"inkubator %d: %d jaj = %d pisklat naraz" % [i, inkubator[i]["jaj"], int(inkubator[i]["jaj"]) / 3])
+	var ploty: Array = plik["plot"]
+	for i in ploty.size():
+		stan.guard_level = i + 1
+		_check(is_equal_approx(stan.fox_block_chance(), float(ploty[i]["lis_zawraca_proc"]) / 100.0),
+				"plot %d: lis zawraca w %s%%" % [i + 1, ploty[i]["lis_zawraca_proc"]])
+	var psy: Array = plik["pies"]
+	for i in psy.size():
+		stan.dog_level = i + 1
+		_check(is_equal_approx(stan.dog_interval(), float(psy[i]["probuje_co_s"]))
+				and is_equal_approx(stan.dog_chance(), float(psy[i]["przegania_proc"]) / 100.0)
+				and is_equal_approx(stan.dog_kill_chance(), float(psy[i]["zagryza_proc"]) / 100.0),
+				"pies %d (%s) dziala wedlug pliku" % [i + 1, psy[i]["nazwa"]])
+	# Format wagi i polskie koncowki w opisach poziomow.
+	_check(NumberFormat.weight(25) == "25 kg" and NumberFormat.weight(2000) == "2 t"
+			and NumberFormat.weight(1500) == "1,5 t", "waga paszy: 25 kg, 2 t, 1,5 t")
+	_check(NumberFormat.count(22, "miejsce", "miejsca", "miejsc") == "22 miejsca"
+			and NumberFormat.count(55, "miejsce", "miejsca", "miejsc") == "55 miejsc"
+			and NumberFormat.count(1, "pisklę", "pisklęta", "piskląt") == "1 pisklę"
+			and NumberFormat.count(13, "pisklę", "pisklęta", "piskląt") == "13 piskląt",
+			"polskie koncowki liczebnikow")
+
+
+## Drabinki rozbudowy (od 12.22 z data/rozbudowy.json): kazdy poziom ma
+## nazwe zwyklym tekstem, jest drozszy od poprzedniego i cos realnie dodaje.
+## Kurnik dodatkowo nigdy nie jest tanszy za miejsce niz poprzedni poziom.
+## Inkubatory i magazyny tego nie maja - w realu wiekszy sprzet jest tanszy
+## na sztuke, a ceny maja byc z rynku (wlasciciel 25.11).
 func _test_upgrade_ladders() -> void:
 	var drabinki := {
 		"coop": ["capacity", GameData.balance().get("buildings", {}).get("coop", {})],
-		"storage": ["pack_size", GameData.balance().get("buildings", {}).get("storage", {})],
+		"storage": ["egg_capacity", GameData.balance().get("buildings", {}).get("storage", {})],
 		"incubator": ["slots", GameData.balance().get("incubator", {})],
 	}
 	for id: String in drabinki.keys():
@@ -1507,45 +1580,47 @@ func _test_upgrade_ladders() -> void:
 				% [id, upgrades.size()])
 		var poprzednia_cena := 0.0
 		var poprzednia_wartosc := float(dane.get(pole, 0))
-		if id == "coop":
-			poprzednia_wartosc = float(dane.get("capacity", 0))
 		var poprzedni_koszt_jednostki := 0.0
 		for i in upgrades.size():
 			var poziom: Dictionary = upgrades[i]
 			var nazwa := String(poziom.get("name", ""))
 			_check(not nazwa.is_empty(), "%s poziom %d ma nazwe" % [id, i + 1])
-			_check(tr(nazwa) != nazwa, "%s: nazwa %s jest przetlumaczona" % [id, nazwa])
+			_check(not nazwa.contains("_T"), "%s: nazwa %s to zwykly tekst, nie klucz" % [id, nazwa])
 			var cena := float(poziom.get("price", 0))
 			var wartosc := float(poziom.get(pole, 0))
 			_check(cena > poprzednia_cena, "%s poziom %d jest drozszy od poprzedniego" % [id, i + 1])
 			_check(wartosc > poprzednia_wartosc, "%s poziom %d cos dodaje" % [id, i + 1])
-			var koszt_jednostki := cena / maxf(1.0, wartosc - poprzednia_wartosc)
-			_check(koszt_jednostki > poprzedni_koszt_jednostki,
-					"%s poziom %d nie jest tanszy za jednostke niz poprzedni" % [id, i + 1])
+			if id == "coop":
+				var koszt_jednostki := cena / maxf(1.0, wartosc - poprzednia_wartosc)
+				_check(koszt_jednostki > poprzedni_koszt_jednostki,
+						"%s poziom %d nie jest tanszy za miejsce niz poprzedni" % [id, i + 1])
+				poprzedni_koszt_jednostki = koszt_jednostki
 			poprzednia_cena = cena
 			poprzednia_wartosc = wartosc
-			poprzedni_koszt_jednostki = koszt_jednostki
 
-	# Hurt: kazdy poziom magazynu to wiekszy worek i wiekszy rabat, wiec
-	# kilogram paszy tanieje (wlasciciel: rabat 10-40% rosnie ze skala).
+	# Pasza: przy kazdym poziomie magazynu JEDNA jednostka (worek, big-bag,
+	# dostawa luzem...), nie mniejsza niz poprzednio, a kilogram tanieje.
+	# Zadnych slow "rabat" ani "hurt" (wlasciciel 25.11).
 	var stan := FarmState.new()
 	var poprzedni := stan.feed_pack()
-	_check(is_zero_approx(float(poprzedni["discount"])), "bez rozbudowy magazynu nie ma rabatu")
+	_check(not String(poprzedni.get("unit", "")).is_empty(), "pasza na starcie ma nazwe jednostki")
+	_check(is_equal_approx(float(poprzedni["per_kg"]), 2.0), "na starcie kilogram paszy po 2 zl")
 	var poziomy: Array = GameData.balance().get("buildings", {}).get("storage", {}).get("upgrades", [])
 	for i in poziomy.size():
 		stan.storage_level = i + 1
 		var worek := stan.feed_pack()
 		var nazwa := String(poziomy[i].get("name", ""))
-		_check(float(worek["discount"]) > float(poprzedni["discount"]),
-				"%s: rabat rosnie (%.0f%% -> %.0f%%)" % [nazwa,
-				float(poprzedni["discount"]) * 100.0, float(worek["discount"]) * 100.0])
-		_check(float(worek["discount"]) < 0.95, "%s: rabat ponizej 95%%" % nazwa)
-		_check(float(worek["size"]) > float(poprzedni["size"]), "%s: worek wiekszy" % nazwa)
+		_check(not String(worek.get("unit", "")).is_empty(), "%s: jednostka paszy ma nazwe" % nazwa)
+		_check(float(worek["size"]) >= float(poprzedni["size"]), "%s: jednostka nie mniejsza" % nazwa)
 		_check(float(worek["per_kg"]) < float(poprzedni["per_kg"]), "%s: kilogram tanieje" % nazwa)
-		_check(is_equal_approx(float(worek["price"]),
-				round(float(worek["size"]) * float(worek["per_kg"]) * 100.0) / 100.0),
-				"%s: cena worka = kg x cena za kg z rabatem" % nazwa)
+		_check(is_equal_approx(float(worek["price"]), float(poziomy[i].get("pack_price", -1))),
+				"%s: cena jednostki prosto z pliku rozbudow" % nazwa)
 		poprzedni = worek
+	for key: String in ["PANEL_BUY_FEED", "PANEL_FEED_PRICE_VALUE", "HINT_BUILDING_UPGRADED_STORAGE",
+			"UPG_STORAGE_EFFECT", "PANEL_UPGRADE_NEXT", "PANEL_UPGRADE_SLIDE"]:
+		var tekst := tr(key).to_lower()
+		_check(not tekst.contains("rabat") and not tekst.contains("hurt"),
+				"%s bez slow rabat/hurt: %s" % [key, tr(key)])
 
 	# Inkubator nie moze wyprzedzic kurnika: nie ma gdzie wstawic piskląt.
 	var coop_max := 0
@@ -2370,13 +2445,13 @@ func _test_buildings() -> void:
 	_finish_build(Game.state, "coop")
 	_check(Game.state.coop_capacity() > before, "po rozbudowie miejsc jest wiecej")
 
-	# Magazyn: wiekszy worek i nizsza cena za kilogram.
+	# Magazyn: nizsza cena za kilogram (jednostka moze zostac ta sama).
 	var pack := Game.state.feed_pack()
 	var per_kg := float(pack["price"]) / float(pack["size"])
 	_check(Game.upgrade_building("storage"), "rozbudowa magazynu udaje sie")
 	_finish_build(Game.state, "storage")
 	var better := Game.state.feed_pack()
-	_check(float(better["size"]) > float(pack["size"]), "worek jest wiekszy")
+	_check(float(better["size"]) >= float(pack["size"]), "jednostka paszy nie mniejsza")
 	_check(float(better["price"]) / float(better["size"]) < per_kg, "kilogram paszy tanieje")
 	var feed_before := Game.state.feed
 	_check(Game.buy_feed(), "zakup paszy dziala po rozbudowie")
@@ -2529,7 +2604,8 @@ func _test_strings() -> void:
 		"UNLOCK_TITLE", "UNLOCK_PRICE", "UNLOCK_EGG", "UNLOCK_CLOSE",
 		"WIN_TITLE", "WIN_MONEY", "WIN_COLLECTION", "WIN_CONTINUE",
 		"PANEL_SELL_HEN", "PANEL_CULL_HEN", "PANEL_BUY_HEN",
-		"PANEL_UPGRADE_COOP", "PANEL_UPGRADE_GUARD", "PANEL_UPGRADE_STORAGE",
+		"PANEL_UPGRADE_NEXT", "PANEL_UPGRADE_SLIDE", "PANEL_GUARD_NEXT", "PANEL_DOG_NEXT",
+		"UPG_COOP_EFFECT", "UPG_STORAGE_EFFECT", "UPG_INCUBATOR_EFFECT",
 		"PANEL_COOP_SPACE", "PANEL_FOX_GUARD", "PANEL_LOCKED_PRICE",
 		"HINT_FOX_HERE", "HINT_FOX_SCARED", "HINT_COOP_FULL",
 	]
@@ -2956,13 +3032,13 @@ func _test_construction() -> void:
 		_check(ups.size() + 1 == 10, "%s ma 10 poziomow (ma %d)" % [id, ups.size() + 1])
 		var names := {}
 		var base := String(cfg.get("name", ""))
-		_check(not base.is_empty() and tr(base) != base, "%s: poziom startowy ma nazwe" % id)
-		names[tr(base)] = true
+		_check(not base.strip_edges().is_empty(), "%s: poziom startowy ma nazwe" % id)
+		names[base] = true
 		var last := 0.0
 		for i in ups.size():
 			var u: Dictionary = ups[i]
-			var nazwa := tr(String(u.get("name", "")))
-			_check(nazwa != String(u.get("name", "")), "%s poziom %d ma przetlumaczona nazwe" % [id, i + 2])
+			var nazwa := String(u.get("name", ""))
+			_check(not nazwa.strip_edges().is_empty(), "%s poziom %d ma nazwe" % [id, i + 2])
 			_check(not names.has(nazwa), "%s: nazwa '%s' sie nie powtarza" % [id, nazwa])
 			names[nazwa] = true
 			var m := float(u.get("build_minutes", 0))

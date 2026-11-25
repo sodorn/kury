@@ -80,3 +80,31 @@ static func clock(real_seconds: float) -> String:
 	if s >= 3600:
 		return "%d:%02d:%02d" % [s / 3600, (s % 3600) / 60, s % 60]
 	return "%d:%02d" % [s / 60, s % 60]
+
+
+## Waga paszy: "25 kg", "500 kg", "2 t", "1,5 t", "48 t".
+static func weight(kg: float) -> String:
+	if kg < 1000.0:
+		return "%s kg" % grouped(int(round(kg)))
+	var tenths := int(round(kg / 100.0))
+	if tenths % 10 == 0:
+		return "%s t" % grouped(tenths / 10)
+	return "%s,%d t" % [grouped(tenths / 10), tenths % 10]
+
+
+## Jednostka paszy z pliku rozbudow razem z waga: "worek 25 kg",
+## "dostawa luzem 2 t". `pack` to wynik FarmState.feed_pack().
+static func feed_unit(pack: Dictionary) -> String:
+	return "%s %s" % [String(pack.get("unit", "worek")), weight(float(pack.get("size", 25)))]
+
+
+## Liczba z polska koncowka: count(22, "miejsce", "miejsca", "miejsc")
+## -> "22 miejsca", count(55, ...) -> "55 miejsc", count(1, ...) -> "1 miejsce".
+static func count(n: int, one: String, few: String, many: String) -> String:
+	var a := absi(n)
+	var word := many
+	if a == 1:
+		word = one
+	elif a % 10 >= 2 and a % 10 <= 4 and not (a % 100 >= 12 and a % 100 <= 14):
+		word = few
+	return "%s %s" % [grouped(n), word]

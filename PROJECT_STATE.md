@@ -4,7 +4,31 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.21): LIS CO GODZINE W GRZE I W TLE
+- Aktualny etap: **ETAP 10** (wersja 12.22): ROZBUDOWY W JEDNYM PLIKU
+  data/rozbudowy.json (wlasciciel 25.11: "w prostym do edytowania pliku").
+  Polskie klucze, nazwy zwyklym tekstem: kurnik (miejsc), magazyn (jaj,
+  pasza, pasza_kg, pasza_cena), inkubator (jaj; miejsca = jaj / 3), plot
+  (lis_zawraca_proc), pies (probuje_co_s, przegania_proc, zagryza_proc).
+  GameData.apply_upgrades naklada plik na balance (buildings.*, incubator,
+  economy.feed_pack_*) - reszta kodu bez zmian; z balance.json usuniete
+  upgrades/name/capacity/slots/egg_capacity i feed_pack_*; tools/dane.py
+  robi to samo dla generatorow. Klucze COOP/INCU/STORE_T*, GUARD_BUY_*,
+  DOG_BUY_*, PANEL_FOX_GUARD_<poziom>, PANEL_DOG_MUTT/SHEPHERD usuniete.
+  PRZEGLAD NAZW I CEN (rynek PL, listopad 2026): kurnik i magazyn - te same
+  ceny i pojemnosci, nazwy z wymiarami pasujace do ceny (np. drewniany kurnik
+  3x4 m 4800, garaz blaszany 3x5 m 3000 zamiast "spizarni babci"); inkubatory
+  - ceny jak w sklepie (250 ... 9000 zl zamiast 600 ... 700 000), miejsca
+  bez zmian. Bot 24 h: zaangazowany ~33 tys. wartosci po dobie (bylo ~9 tys.),
+  maniak ~211 tys. (bylo ~18 tys.) - glownie tansze wylegi; dzwignia: ceny
+  inkubatorow w pliku. PASZA: jeden suwak "Kup pasze: worek 25 kg za 50 zl",
+  jednostka i cena z pliku (worek, big-bag, dostawa luzem, paszowoz),
+  zl/kg 2,00 -> 1,20; FarmState.feed_pack zwraca unit, bez "discount"; zero
+  slow rabat/hurt. ROZBUDOWA/PIES/PLOT: niski suwak na jedna linijke
+  ("Rozbuduj za X · budowa Y"), nazwa i dzialanie malym szarym drukiem nad
+  nim. GWIAZDKA osiagniec rysowana (StarIcon) - "★" nie ma w czcionce Baloo 2
+  i w przegladarce byl prostokat "26 05". Poprawki tekstu: Dong Tao bez
+  znaku spoza czcionki, bez emoji klodki, Cemani za 4000 zl na starcie.
+- Wersja 12.21: LIS CO GODZINE W GRZE I W TLE
   (fox.roll_minutes 60, fox.chance 1/3; usuniete active_*/offline_*). W tle
   wizyta od razu i lis znika, BEZ bezpiecznika strat (glod i choroba dalej
   max 50%). Naprawione: po nocy licznik kostki byl przeterminowany i lis

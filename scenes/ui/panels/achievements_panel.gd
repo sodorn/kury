@@ -30,7 +30,8 @@ func _ready() -> void:
 func _build_star() -> void:
 	_star = Button.new()
 	_star.name = "Star"
-	_star.text = "★"
+	# Bez tekstu: gwiazdke rysuje StarIcon (w czcionce nie ma znaku "★").
+	_star.text = ""
 	_star.tooltip_text = tr("ACH_TITLE")
 	_star.position = Vector2(24, 118)
 	_star.size = Vector2(112, 112)
@@ -51,6 +52,14 @@ func _build_star() -> void:
 		_star.add_theme_stylebox_override(state_name, round_box)
 	_star.mouse_filter = Control.MOUSE_FILTER_STOP
 	_star.pressed.connect(open)
+	var icon := StarIcon.new()
+	icon.name = "StarIcon"
+	icon.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	icon.offset_left = 14
+	icon.offset_top = 12
+	icon.offset_right = -14
+	icon.offset_bottom = -16
+	_star.add_child(icon)
 	add_child(_star)
 
 

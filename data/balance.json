@@ -14,9 +14,7 @@
     ]
   },
   "economy": {
-    "_opis": "Ceny jak na rynku w listopadzie 2026 (wlasciciel, 24.11: 'realizm, o ile nie zepsuje grywalnosci'): worek 25 kg paszy dla niosek 50 zl (2 zl/kg, detal; hurt w magazynie do -40%), jaja w skupie 0,45-2,00 zl zaleznie od rasy. feed_per_hen_minute w kilogramach na ptaka na minute GRY. Pelny realizm (ok. 2,0 kg = tyle paszy na jajo co u prawdziwej nioski) testowal bot 24 h: gracz grajacy sesjami tracil cale stado z glodu w przerwach. 0,65 to najwiecej, przy czym gracz z pieciu sesji dziennie jeszcze utrzymuje ferme (stosunek jaja/pasza ok. 8x zamiast 17,6x w 12.17 i 2,5x w rzeczywistosci). egg_spoil_hours: po tylu godzinach REALNYCH niesprzedane jaja sie psuja. feed_bulk_packs: ile workow kupuje przycisk hurtowy.",
-    "feed_pack_size": 25,
-    "feed_pack_price": 50,
+    "_opis": "Ceny jak na rynku w listopadzie 2026 (wlasciciel, 24.11: 'realizm, o ile nie zepsuje grywalnosci'): pasza dla niosek 2 zl/kg w worku 25 kg, taniej w wiekszych jednostkach (data/rozbudowy.json, lista 'magazyn'), jaja w skupie 0,45-2,00 zl zaleznie od rasy. feed_per_hen_minute w kilogramach na ptaka na minute GRY. Pelny realizm (ok. 2,0 kg = tyle paszy na jajo co u prawdziwej nioski) testowal bot 24 h: gracz grajacy sesjami tracil cale stado z glodu w przerwach. 0,65 to najwiecej, przy czym gracz z pieciu sesji dziennie jeszcze utrzymuje ferme. egg_spoil_hours: po tylu godzinach REALNYCH niesprzedane jaja sie psuja.",
     "rooster_price_multiplier": 2.5,
     "_opis_kogut": "Kogut kosztuje 250% ceny kury tej samej rasy (Tomek, 2026-11-24). Jeden kogut obsluguje cala rase, wiec przy cenie kury byl najtanszym obowiazkowym zakupem w grze.",
     "feed_per_hen_minute": 0.65,
@@ -46,67 +44,9 @@
     "seconds": 600
   },
   "incubator": {
-    "slots": 3,
     "eggs_per_chick": 3,
-    "upgrades": [
-      {
-        "name": "INCU_T1",
-        "slots": 6,
-        "price": 600,
-        "build_minutes": 5
-      },
-      {
-        "name": "INCU_T2",
-        "slots": 10,
-        "price": 4000,
-        "build_minutes": 8
-      },
-      {
-        "name": "INCU_T3",
-        "slots": 16,
-        "price": 11000,
-        "build_minutes": 12
-      },
-      {
-        "name": "INCU_T4",
-        "slots": 24,
-        "price": 24000,
-        "build_minutes": 17
-      },
-      {
-        "name": "INCU_T5",
-        "slots": 34,
-        "price": 48000,
-        "build_minutes": 23
-      },
-      {
-        "name": "INCU_T6",
-        "slots": 48,
-        "price": 108000,
-        "build_minutes": 30
-      },
-      {
-        "name": "INCU_T7",
-        "slots": 66,
-        "price": 200000,
-        "build_minutes": 38
-      },
-      {
-        "name": "INCU_T8",
-        "slots": 90,
-        "price": 450000,
-        "build_minutes": 48
-      },
-      {
-        "name": "INCU_T9",
-        "slots": 120,
-        "price": 700000,
-        "build_minutes": 60
-      }
-    ],
-    "_opis": "slots to liczba partii grzanych naraz; kazda partia to jedno pisklę. eggs_per_chick jaj danej rasy robi jedno pisklę tej rasy.",
-    "rooster_share": 0.5,
-    "name": "INCU_T0"
+    "_opis": "eggs_per_chick jaj danej rasy robi jedno piskle tej rasy. Ile jaj grzeje sie naraz na kazdym poziomie: data/rozbudowy.json, lista 'inkubator' (miejsca = jaja / eggs_per_chick).",
+    "rooster_share": 0.5
   },
   "hunger": {
     "_opis": "Po grace_minutes bez paszy stado zaczyna padac. Odstep miedzy zgonami to death_interval_seconds przy stadzie wielkosci reference_hens i skraca sie proporcjonalnie przy wiekszym - przy stalym odstepie stado liczace dwiescie sztuk gloddzilo godzinami i pasza przestawala byc problemem. Bez paszy stoi tez inkubator i odchow piskląt.",
@@ -159,186 +99,18 @@
     "collection": false
   },
   "buildings": {
-    "_opis": "Ulepszenia budynkow. Poziom 0 to stan poczatkowy, kazdy kolejny to wpis z upgrades. Od 12.19 kazdy z trzech budynkow (kurnik, magazyn, inkubator) ma 10 poziomow (start + 9 rozbudow), a rozbudowa sie BUDUJE: build_minutes minut realnego czasu (5 do 60), w trakcie budynek dziala na starym poziomie. name na poziomie budynku to nazwa poziomu startowego.",
+    "_opis": "Ulepszenia budynkow. OD 12.22 WSZYSTKIE POZIOMY (nazwy, ceny, czasy budowy, pojemnosci, pasza w magazynie, plot i pies) SA W data/rozbudowy.json - jednym pliku do recznej edycji. GameData.apply_upgrades przepisuje go tutaj przy wczytaniu gry. Rozbudowa sie BUDUJE: budowa_min minut realnego czasu, w trakcie budynek dziala na starym poziomie.",
     "coop": {
-      "_opis": "Pojemnosc kurnika liczona we wszystkich doroslych ptakach, razem z kogutami. Ponad limit nie kupisz ptaka, a podrosniete pisklę czeka przy inkubatorze. Drabinka siega 260, zeby przy siedemnastu rasach zmiescilo sie po kilka sztuk kazdej.",
-      "capacity": 20,
-      "upgrades": [
-        {
-          "name": "COOP_T1",
-          "capacity": 35,
-          "price": 800,
-          "build_minutes": 5
-        },
-        {
-          "name": "COOP_T2",
-          "capacity": 55,
-          "price": 4800,
-          "build_minutes": 8
-        },
-        {
-          "name": "COOP_T3",
-          "capacity": 80,
-          "price": 12000,
-          "build_minutes": 12
-        },
-        {
-          "name": "COOP_T4",
-          "capacity": 110,
-          "price": 24500,
-          "build_minutes": 17
-        },
-        {
-          "name": "COOP_T5",
-          "capacity": 150,
-          "price": 45000,
-          "build_minutes": 23
-        },
-        {
-          "name": "COOP_T6",
-          "capacity": 200,
-          "price": 90000,
-          "build_minutes": 30
-        },
-        {
-          "name": "COOP_T7",
-          "capacity": 270,
-          "price": 150000,
-          "build_minutes": 38
-        },
-        {
-          "name": "COOP_T8",
-          "capacity": 360,
-          "price": 300000,
-          "build_minutes": 48
-        },
-        {
-          "name": "COOP_T9",
-          "capacity": 500,
-          "price": 500000,
-          "build_minutes": 60
-        }
-      ],
-      "name": "COOP_T0"
+      "_opis": "Pojemnosc kurnika liczona we wszystkich doroslych ptakach, razem z kogutami. Ponad limit nie kupisz ptaka, a podrosniete piskle czeka przy inkubatorze. Poziomy: data/rozbudowy.json, lista 'kurnik'."
     },
     "storage": {
-      "_opis": "MAGAZYN. pack_size/pack_price to worek paszy, egg_capacity to LIMIT JAJ, ktore moga lezec w magazynie. Limit jest po to, zeby gra nie przechodzila sie sama: bez niego mozna bylo wrocic po dobie i zastac gore jaj. Nadmiar nad limit przepada przy znoszeniu — gracz musi zajrzec i sprzedac. Od 12.18 limity jaj sa 10 razy wieksze: przy realnej cenie paszy kura je w przerwie wiecej niz zarabia, jesli magazyn miesci tylko kilka minut niesienia - bot 24 h pokazal, ze bez tego gracz sesyjny bankrutuje w nocy. 12.21 (wlasciciel 25.11): limity jaj zmniejszone - lodowka w piwnicy 200, mala szopka 500, poziom 3 1000, dalej 2000/4000/8000/15000/30000/60000/100000. Nadmiar jaj przepada, zeby nicnierobienie nie dawalo fortuny.",
-      "upgrades": [
-        {
-          "name": "STORE_T1",
-          "pack_size": 100,
-          "pack_discount": 0.1,
-          "price": 600,
-          "egg_capacity": 500,
-          "build_minutes": 5
-        },
-        {
-          "name": "STORE_T2",
-          "pack_size": 250,
-          "pack_discount": 0.14,
-          "price": 3000,
-          "egg_capacity": 1000,
-          "build_minutes": 8
-        },
-        {
-          "name": "STORE_T3",
-          "pack_size": 600,
-          "pack_discount": 0.18,
-          "price": 10500,
-          "egg_capacity": 2000,
-          "build_minutes": 12
-        },
-        {
-          "name": "STORE_T4",
-          "pack_size": 1500,
-          "pack_discount": 0.22,
-          "price": 30000,
-          "egg_capacity": 4000,
-          "build_minutes": 17
-        },
-        {
-          "name": "STORE_T5",
-          "pack_size": 3500,
-          "pack_discount": 0.26,
-          "price": 80000,
-          "egg_capacity": 8000,
-          "build_minutes": 23
-        },
-        {
-          "name": "STORE_T6",
-          "pack_size": 8000,
-          "pack_discount": 0.3,
-          "price": 200000,
-          "egg_capacity": 15000,
-          "build_minutes": 30
-        },
-        {
-          "name": "STORE_T7",
-          "pack_size": 20000,
-          "pack_discount": 0.34,
-          "price": 540000,
-          "egg_capacity": 30000,
-          "build_minutes": 38
-        },
-        {
-          "name": "STORE_T8",
-          "pack_size": 40000,
-          "pack_discount": 0.37,
-          "price": 1000000,
-          "egg_capacity": 60000,
-          "build_minutes": 48
-        },
-        {
-          "name": "STORE_T9",
-          "pack_size": 70000,
-          "pack_discount": 0.4,
-          "price": 1800000,
-          "egg_capacity": 100000,
-          "build_minutes": 60
-        }
-      ],
-      "egg_capacity": 200,
-      "name": "STORE_T0"
+      "_opis": "MAGAZYN: limit jaj, ktore moga lezec w magazynie (nadmiar przepada przy znoszeniu, zeby nicnierobienie nie dawalo fortuny), i pasza kupowana JEDNYM suwakiem: przy kazdym poziomie inna jednostka (worek, big-bag, dostawa luzem, paszowoz) i nizsza cena za kilogram. Bez slow 'rabat' i 'hurt' (wlasciciel 25.11). Poziomy: data/rozbudowy.json, lista 'magazyn'."
     },
     "guard": {
-      "_opis": "PLOT. block_chance to szansa, ze lis w ogole nie wejdzie na wybieg — losowana przy kazdym podejsciu. Plot nie ma nic wspolnego z psem: pies dziala dopiero wtedy, gdy lis juz wszedl.",
-      "upgrades": [
-        {
-          "block_chance": 0.5,
-          "price": 400
-        },
-        {
-          "block_chance": 0.65,
-          "price": 1000
-        },
-        {
-          "block_chance": 0.8,
-          "price": 2500
-        },
-        {
-          "block_chance": 0.95,
-          "price": 6000
-        }
-      ]
+      "_opis": "PLOT. Szansa, ze lis w ogole nie wejdzie na wybieg - losowana przy kazdym podejsciu. Plot nie ma nic wspolnego z psem: pies dziala dopiero wtedy, gdy lis juz wszedl. Poziomy: data/rozbudowy.json, lista 'plot'."
     },
     "dog": {
-      "_opis": "PIES. Kupiony raz, zostaje i jest widoczny na podworku. Gdy lis wejdzie, pies probuje go wygonic: co `interval` sekund realnych rzuca kostka z szansa `chance`. Probuje do skutku albo dopoki lis sam nie odejdzie. Gdy mu sie uda, z szansa `kill_chance` zagryza lisa zamiast go odganiac — zagryziony lis nie wraca, a nastepny przychodzi duzo pozniej.",
-      "upgrades": [
-        {
-          "name": "kundel",
-          "interval": 10.0,
-          "chance": 0.3333333333,
-          "kill_chance": 0.0,
-          "price": 400
-        },
-        {
-          "name": "owczarek",
-          "interval": 5.0,
-          "chance": 0.6666666667,
-          "kill_chance": 0.3333333333,
-          "price": 2500
-        }
-      ]
+      "_opis": "PIES. Kupiony raz, zostaje i jest widoczny na podworku. Gdy lis wejdzie, pies probuje go wygonic: co kilka sekund realnych rzuca kostka. Gdy mu sie uda, czasem zagryza lisa zamiast go odganiac - zagryziony lis nie wraca, a nastepny przychodzi duzo pozniej. Poziomy: data/rozbudowy.json, lista 'pies'."
     }
   },
   "session": {

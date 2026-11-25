@@ -24,7 +24,10 @@ import json
 import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-BAL = json.loads((ROOT / "data" / "balance.json").read_text(encoding="utf-8"))
+import sys
+sys.path.insert(0, str(ROOT / "tools"))
+import dane  # noqa: E402
+BAL = dane.load_balance()
 BREEDS = json.loads((ROOT / "data" / "breeds.json").read_text(encoding="utf-8"))
 if isinstance(BREEDS, dict):
     BREEDS = BREEDS["breeds"]
