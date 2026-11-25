@@ -64,12 +64,12 @@ OPISY = {
     "economy.egg_sale_lot": ("szt.", "Ile jaj sprzedaje jedno dotkniecie przycisku w sklepie. "
                              "Najstarsze najpierw, bez wzgledu na rase. Mniej jaj niz partia = "
                              "sprzedaje resztke.", "Game.sell_eggs, Game.egg_sale_lot"),
+    "offline.report_hours": ("h ZEGARA", "Po przerwie co najmniej tylu godzin gra pokazuje KRONIKE "
+                             "FERMY z podsumowaniem i dziennikiem zdarzen.",
+                             "Game._apply_elapsed, AwayReportPanel"),
     "economy.egg_spoil_hours": ("h ZEGARA", "Po tylu godzinach niesprzedane jajo w magazynie gnije "
                                 "i znika. 0 wylacza gnicie. Wiek jaj trzyma FarmState.egg_ages.",
                                 "Simulation._advance_egg_spoilage, FarmState.age_eggs"),
-    "economy.feed_bulk_packs": ("szt.", "Ile workow kupuje przycisk hurtowy w sklepie (\"Kup 10 "
-                                "workow\"). Kupuje wszystkie albo zaden.",
-                                "Game.buy_feed, Game.feed_bulk_packs"),
     # ------------------------------------------------------------------ run
     "run.max_eggs_on_ground": ("szt.", "Ile jaj moze lezec naraz na trawie do zebrania palcem. "
                                "Nadmiar idzie prosto do magazynu (o ile jest miejsce).",
@@ -159,13 +159,9 @@ OPISY = {
     "fox.grace_minutes": ("min ZEGARA", "Przez tyle minut od zalozenia fermy lis nie przychodzi.",
                           "Simulation._advance_fox"),
     "fox.min_hens": ("szt.", "Przy mniejszym stadzie lis nie przychodzi.", "Simulation._advance_fox"),
-    "fox.active_roll_minutes": ("min ZEGARA", "W GRZE AKTYWNEJ co tyle minut leci kostka na przyjscie "
-                                "lisa.", "Simulation._advance_fox"),
-    "fox.active_chance": ("0-1", "Szansa, ze kostka w grze aktywnej przyprowadzi lisa.",
-                          "Simulation._advance_fox"),
-    "fox.offline_roll_hours": ("h ZEGARA", "Przy grze w tle kostka co tyle godzin.",
-                               "Simulation._advance_fox"),
-    "fox.offline_chance": ("0-1", "Szansa kostki przy grze w tle.", "Simulation._advance_fox"),
+    "fox.roll_minutes": ("min ZEGARA", "Co tyle minut leci kostka na przyjscie lisa - w grze i w tle "
+                         "tak samo (od 12.21).", "Simulation._advance_fox"),
+    "fox.chance": ("0-1", "Szansa, ze kostka przyprowadzi lisa.", "Simulation._advance_fox"),
     "fox.scare_taps": ("szt.", "Ile dotkniec trzeba, zeby przegonic lisa palcem.",
                        "Game.poke_fox, scenes/farm/fox.gd (licznik)"),
     "fox.hand_return_factor": ("mnoznik 0.01-1", "Lis przegoniony PALCEM wraca tyle razy szybciej "
@@ -629,8 +625,8 @@ def build():
   Game._apply_elapsed:     ogranicz do offline.max_hours = %s h
                            Simulation.advance(state, elapsed * scale,
                                               offline = true)""" % fmt(BAL["offline"]["max_hours"]))
-    para("Tryb offline zmienia trzy rzeczy: (1) kostka lisa losuje z offline_roll_hours "
-         "i offline_chance zamiast active_* (choroba ma jedna kostke na oba tryby), (2) jaja ida "
+    para("Tryb offline zmienia trzy rzeczy: (1) lis nie czai sie w krzakach, cala wizyta "
+         "rozgrywa sie od razu i lis znika, bez bezpiecznika strat (od 12.21), (2) jaja ida "
          "prosto do magazynu, nie na trawe, "
          "(3) straty z glodu, choroby i lisa RAZEM sa ograniczone do hunger.offline_max_share stada "
          "(loss_budget). Lis przy grze w tle rozgrywa cala wizyte od razu - z psem, ale bez "
@@ -745,12 +741,11 @@ def build():
    [BRAK LISA]
        |  co klatke: fox_roll_timer += krok (ZEGAR)
        |  karencja %s min ZEGARA i stado >= %s, inaczej czekaj
-       |  odstep = active_roll_minutes (%s min)
-       |           albo offline_roll_hours (%s h)
+       |  odstep = roll_minutes (%s min), w grze i w tle
        |           * hand_return_factor (%s), gdy ostatni lis przegoniony
        |             PALCEM i ferma nie ma ani psa, ani plotu
        |           * fox_next_multiplier (%s po zagryzieniu, potem 1)
-       v  minal odstep -> kostka: active_chance / offline_chance
+       v  minal odstep -> kostka: chance
    [KOSTKA UDANA]
        |  randf() < block_chance plotu ? -> zawraca (fox_blocked)
        v
@@ -772,8 +767,8 @@ def build():
    RZEZ: przy wejsciu na ferme BEZ psa z szansa massacre_chance (%s)
    lup = cale stado, odstepy * massacre_pace_factor (%s), wizyta
    wydluzona tak, zeby zdazyl. Przegonienie palcem ja przerywa.""" % (
-        fmt(fox["grace_minutes"]), fmt(fox["min_hens"]), fmt(fox["active_roll_minutes"]),
-        fmt(fox["offline_roll_hours"]), fmt(fox["hand_return_factor"]),
+        fmt(fox["grace_minutes"]), fmt(fox["min_hens"]), fmt(fox["roll_minutes"]),
+        fmt(fox["hand_return_factor"]),
         fmt(fox["killed_return_multiplier"]), fox["kills_min"], fox["kills_max"], fox["scare_taps"],
         fmt(fox["kill_interval_min"]), fmt(fox["kill_interval_max"]), fmt(fox["carcass_share"]),
         fmt(fox["visit_max_minutes"]), fmt(fox["massacre_chance"]), fmt(fox["massacre_pace_factor"])))

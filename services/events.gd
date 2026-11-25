@@ -85,3 +85,9 @@ signal alert(title: String, message: String)
 ## Pokazuje pelnoekranowe GAME OVER.
 @warning_ignore("unused_signal")
 signal game_over()
+
+
+## Kronika fermy (12.21): po przerwie dluzszej niz offline.report_hours gra
+## pokazuje raport, co sie dzialo pod nieobecnosc gracza.
+@warning_ignore("unused_signal")
+signal away_report(report: Dictionary)

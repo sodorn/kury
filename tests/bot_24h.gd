@@ -319,7 +319,7 @@ func _keep_feed(minutes_real: float) -> void:
 	var packs := int(ceil(need / float(pack["size"])))
 	var spent := 0.0
 	while packs > 0:
-		var n := mini(packs, Game.feed_bulk_packs())
+		var n := mini(packs, 10)
 		if not Game.buy_feed(n):
 			if not Game.buy_feed(1):
 				break

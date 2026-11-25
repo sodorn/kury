@@ -22,8 +22,7 @@
     "feed_per_hen_minute": 0.65,
     "chick_feed_multiplier": 0.5,
     "egg_sale_lot": 100,
-    "egg_spoil_hours": 4.0,
-    "feed_bulk_packs": 10
+    "egg_spoil_hours": 4.0
   },
   "run": {
     "_opis": "max_eggs_on_ground to tylko tyle, ile jaj lezy naraz na wybiegu do zebrania palcem. Nadmiar idzie prosto do magazynu. area musi sie zgadzac z piaskowym prostokatem w ground.svg - oba biora sie z RUN w tools/gen_ground.py.",
@@ -38,9 +37,10 @@
     "pickup_radius": 300
   },
   "offline": {
-    "_opis": "Czas gry plynie tak samo, gdy grasz i gdy nie grasz: scale razy wolniej od zegara sciennego. Dawny speed_divider 60 dla nieaktywnej gry zostal usuniety - teraz noc liczy sie tak samo jak granie. max_hours to sufit na jedno nadrabianie, w godzinach rzeczywistych.",
+    "_opis": "Czas gry plynie tak samo, gdy grasz i gdy nie grasz: scale razy wolniej od zegara sciennego. Dawny speed_divider 60 dla nieaktywnej gry zostal usuniety - teraz noc liczy sie tak samo jak granie. max_hours to sufit na jedno nadrabianie, w godzinach rzeczywistych. report_hours: po przerwie co najmniej tylu godzin zegara gra pokazuje KRONIKE FERMY - co sie dzialo pod nieobecnosc gracza (lis, choroba, jaja, budowy) z godzinami.",
     "max_hours": 72,
-    "scale": 0.3333333333
+    "scale": 0.3333333333,
+    "report_hours": 3.0
   },
   "day": {
     "seconds": 600
@@ -133,13 +133,11 @@
     "calm_hours_max": 12.0
   },
   "fox": {
-    "_opis": "LIS. Losowanie przyjscia: w grze AKTYWNEJ co active_roll_minutes minut realnych z szansa active_chance, w NIEaktywnej co offline_roll_hours godzin z szansa offline_chance. Po wejsciu lis zabija jedna kure co kill_interval_min..max sekund REALNYCH i odchodzi, gdy zabije kills_min..max sztuk. visit_max_minutes to tylko bezpiecznik, zeby lis nigdy nie zostal na wybiegu w nieskonczonosc. Gracz moze go przegonic scare_taps trafieniami; wtedy wraca hand_return_factor raza szybciej, chyba ze gospodarstwo ma psa albo plot. Lis ZABITY przez psa nie wraca wcale — nastepny przychodzi killed_return_multiplier raza pozniej. RZEZ (12.20): na gospodarstwie BEZ psa massacre_chance wejsc konczy sie wybiciem calego stada; lis zabija wtedy massacre_pace_factor raza czesciej i zostaje, az skonczy, chyba ze gracz go przegoni.",
+    "_opis": "LIS. Losowanie przyjscia: co roll_minutes minut ZEGARA z szansa chance - TAK SAMO w grze i w tle (12.21, wlasciciel 25.11: w kazdej godzinie jakas szansa). W grze lis czai sie lurk_min..lurk_max s w krzakach, idzie approach_seconds pod plot i dopiero tam plot losuje block_chance. W tle cala wizyta rozgrywa sie od razu i lis znika - nie czeka na gracza; w tle NIE ma bezpiecznika strat. Lup kills_min..kills_max kur, po jednej co kill_interval_min..max s; carcass_share z nich zostaje jako zwloki. Przegoniony palcem (scare_taps) wraca hand_return_factor razy szybciej, chyba ze jest pies albo plot. Zagryziony przez psa wraca killed_return_multiplier razy pozniej. Pierwsze grace_minutes fermy i stado mniejsze niz min_hens - spokoj. RZEZ (12.20): na fermie BEZ psa massacre_chance wejsc konczy sie wybiciem calego stada; lis zabija wtedy massacre_pace_factor raza czesciej.",
     "grace_minutes": 30.0,
     "min_hens": 5,
-    "active_roll_minutes": 60.0,
-    "active_chance": 0.3333333333,
-    "offline_roll_hours": 24.0,
-    "offline_chance": 0.1666666667,
+    "roll_minutes": 60.0,
+    "chance": 0.3333333333,
     "scare_taps": 20,
     "hand_return_factor": 0.1,
     "carcass_share": 0.5,
@@ -224,14 +222,14 @@
       "name": "COOP_T0"
     },
     "storage": {
-      "_opis": "MAGAZYN. pack_size/pack_price to worek paszy, egg_capacity to LIMIT JAJ, ktore moga lezec w magazynie. Limit jest po to, zeby gra nie przechodzila sie sama: bez niego mozna bylo wrocic po dobie i zastac gore jaj. Nadmiar nad limit przepada przy znoszeniu — gracz musi zajrzec i sprzedac. Od 12.18 limity jaj sa 10 razy wieksze: przy realnej cenie paszy kura je w przerwie wiecej niz zarabia, jesli magazyn miesci tylko kilka minut niesienia - bot 24 h pokazal, ze bez tego gracz sesyjny bankrutuje w nocy.",
+      "_opis": "MAGAZYN. pack_size/pack_price to worek paszy, egg_capacity to LIMIT JAJ, ktore moga lezec w magazynie. Limit jest po to, zeby gra nie przechodzila sie sama: bez niego mozna bylo wrocic po dobie i zastac gore jaj. Nadmiar nad limit przepada przy znoszeniu — gracz musi zajrzec i sprzedac. Od 12.18 limity jaj sa 10 razy wieksze: przy realnej cenie paszy kura je w przerwie wiecej niz zarabia, jesli magazyn miesci tylko kilka minut niesienia - bot 24 h pokazal, ze bez tego gracz sesyjny bankrutuje w nocy. 12.21 (wlasciciel 25.11): limity jaj zmniejszone - lodowka w piwnicy 200, mala szopka 500, poziom 3 1000, dalej 2000/4000/8000/15000/30000/60000/100000. Nadmiar jaj przepada, zeby nicnierobienie nie dawalo fortuny.",
       "upgrades": [
         {
           "name": "STORE_T1",
           "pack_size": 100,
           "pack_discount": 0.1,
           "price": 600,
-          "egg_capacity": 5000,
+          "egg_capacity": 500,
           "build_minutes": 5
         },
         {
@@ -239,7 +237,7 @@
           "pack_size": 250,
           "pack_discount": 0.14,
           "price": 3000,
-          "egg_capacity": 10000,
+          "egg_capacity": 1000,
           "build_minutes": 8
         },
         {
@@ -247,7 +245,7 @@
           "pack_size": 600,
           "pack_discount": 0.18,
           "price": 10500,
-          "egg_capacity": 20000,
+          "egg_capacity": 2000,
           "build_minutes": 12
         },
         {
@@ -255,7 +253,7 @@
           "pack_size": 1500,
           "pack_discount": 0.22,
           "price": 30000,
-          "egg_capacity": 100000,
+          "egg_capacity": 4000,
           "build_minutes": 17
         },
         {
@@ -263,7 +261,7 @@
           "pack_size": 3500,
           "pack_discount": 0.26,
           "price": 80000,
-          "egg_capacity": 500000,
+          "egg_capacity": 8000,
           "build_minutes": 23
         },
         {
@@ -271,7 +269,7 @@
           "pack_size": 8000,
           "pack_discount": 0.3,
           "price": 200000,
-          "egg_capacity": 1500000,
+          "egg_capacity": 15000,
           "build_minutes": 30
         },
         {
@@ -279,7 +277,7 @@
           "pack_size": 20000,
           "pack_discount": 0.34,
           "price": 540000,
-          "egg_capacity": 5000000,
+          "egg_capacity": 30000,
           "build_minutes": 38
         },
         {
@@ -287,7 +285,7 @@
           "pack_size": 40000,
           "pack_discount": 0.37,
           "price": 1000000,
-          "egg_capacity": 10000000,
+          "egg_capacity": 60000,
           "build_minutes": 48
         },
         {
@@ -295,11 +293,11 @@
           "pack_size": 70000,
           "pack_discount": 0.4,
           "price": 1800000,
-          "egg_capacity": 20000000,
+          "egg_capacity": 100000,
           "build_minutes": 60
         }
       ],
-      "egg_capacity": 2000,
+      "egg_capacity": 200,
       "name": "STORE_T0"
     },
     "guard": {

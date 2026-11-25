@@ -1,6 +1,6 @@
 ==============================================================================
   SYMULATOR HODOWLI KURCZAKOW - DOKUMENTACJA TECHNICZNA
-  gra w wersji 12.20   *   format zapisu w wersji 6   *   Godot 4.7.2
+  gra w wersji 12.21   *   format zapisu w wersji 6   *   Godot 4.7.2
 ==============================================================================
 
   Dokument dla programisty: jak gra jest zbudowana, jak dzialaja mechaniki, co
@@ -196,12 +196,11 @@
                            Simulation.advance(state, elapsed * scale,
                                               offline = true)
 
-  Tryb offline zmienia trzy rzeczy: (1) kostka lisa losuje z
-  offline_roll_hours i offline_chance zamiast active_* (choroba ma jedna
-  kostke na oba tryby), (2) jaja ida prosto do magazynu, nie na trawe, (3)
-  straty z glodu, choroby i lisa RAZEM sa ograniczone do
-  hunger.offline_max_share stada (loss_budget). Lis przy grze w tle rozgrywa
-  cala wizyte od razu - z psem, ale bez klikania
+  Tryb offline zmienia trzy rzeczy: (1) lis nie czai sie w krzakach, cala
+  wizyta rozgrywa sie od razu i lis znika, bez bezpiecznika strat (od 12.21),
+  (2) jaja ida prosto do magazynu, nie na trawe, (3) straty z glodu, choroby i
+  lisa RAZEM sa ograniczone do hunger.offline_max_share stada (loss_budget).
+  Lis przy grze w tle rozgrywa cala wizyte od razu - z psem, ale bez klikania
   (Simulation._fox_visit_offline).
 
   Dlugi krok jest dzielony na kawalki: Simulation.STEP = 1 s gry, przy
@@ -332,12 +331,11 @@
    [BRAK LISA]
        |  co klatke: fox_roll_timer += krok (ZEGAR)
        |  karencja 30.0 min ZEGARA i stado >= 5, inaczej czekaj
-       |  odstep = active_roll_minutes (60.0 min)
-       |           albo offline_roll_hours (24.0 h)
+       |  odstep = roll_minutes (60.0 min), w grze i w tle
        |           * hand_return_factor (0.1), gdy ostatni lis przegoniony
        |             PALCEM i ferma nie ma ani psa, ani plotu
        |           * fox_next_multiplier (5.0 po zagryzieniu, potem 1)
-       v  minal odstep -> kostka: active_chance / offline_chance
+       v  minal odstep -> kostka: chance
    [KOSTKA UDANA]
        |  randf() < block_chance plotu ? -> zawraca (fox_blocked)
        v
@@ -487,12 +485,6 @@
       gnicie. Wiek jaj trzyma FarmState.egg_ages.
       uzycie: Simulation._advance_egg_spoilage, FarmState.age_eggs
 
-  economy.feed_bulk_packs
-      = 10 [szt.]
-      Ile workow kupuje przycisk hurtowy w sklepie ("Kup 10 workow"). Kupuje
-      wszystkie albo zaden.
-      uzycie: Game.buy_feed, Game.feed_bulk_packs
-
   balance.json -> run
   -------------------
   run.max_eggs_on_ground
@@ -546,6 +538,12 @@
       wolniej od zegara. Zmiana przelicza WSZYSTKIE czasy oznaczone GRA -
       zmieniaj ostroznie.
       uzycie: GameData.time_scale, wszedzie
+
+  offline.report_hours
+      = 3.0 [h ZEGARA]
+      Po przerwie co najmniej tylu godzin gra pokazuje KRONIKE FERMY z
+      podsumowaniem i dziennikiem zdarzen.
+      uzycie: Game._apply_elapsed, AwayReportPanel
 
   balance.json -> day
   -------------------
@@ -722,24 +720,15 @@
       Przy mniejszym stadzie lis nie przychodzi.
       uzycie: Simulation._advance_fox
 
-  fox.active_roll_minutes
+  fox.roll_minutes
       = 60.0 [min ZEGARA]
-      W GRZE AKTYWNEJ co tyle minut leci kostka na przyjscie lisa.
+      Co tyle minut leci kostka na przyjscie lisa - w grze i w tle tak samo
+      (od 12.21).
       uzycie: Simulation._advance_fox
 
-  fox.active_chance
+  fox.chance
       = 0.3333 [0-1]
-      Szansa, ze kostka w grze aktywnej przyprowadzi lisa.
-      uzycie: Simulation._advance_fox
-
-  fox.offline_roll_hours
-      = 24.0 [h ZEGARA]
-      Przy grze w tle kostka co tyle godzin.
-      uzycie: Simulation._advance_fox
-
-  fox.offline_chance
-      = 0.1667 [0-1]
-      Szansa kostki przy grze w tle.
+      Szansa, ze kostka przyprowadzi lisa.
       uzycie: Simulation._advance_fox
 
   fox.scare_taps
@@ -896,8 +885,7 @@
       uzycie: Game.upgrade_building
 
   buildings.storage.upgrades[].egg_capacity
-      = [5000, 10000, 20000, 100000, 500000, 1500000, 5000000, 10000000,
-      20000000] [szt.]
+      = [500, 1000, 2000, 4000, 8000, 15000, 30000, 60000, 100000] [szt.]
       Limit jaj na tym poziomie.
       uzycie: FarmState.egg_capacity
 
@@ -909,7 +897,7 @@
       uzycie: Game.upgrade_building, Simulation._advance_construction
 
   buildings.storage.egg_capacity
-      = 2000 [szt.]
+      = 200 [szt.]
       Limit jaj w magazynie na poziomie 0.
       uzycie: FarmState.egg_capacity
 
@@ -1149,6 +1137,7 @@
   game_won(reason: String)
   alert(title: String, message: String)
   game_over()
+  away_report(report: Dictionary)
 
 ==============================================================================
  9. ZAPIS GRY - FORMAT I MIGRACJE
@@ -1646,5 +1635,5 @@
     limity miejsca i ruchu planu darmowego.
 
 ==============================================================================
-  koniec dokumentu  *  wygenerowano z wersji 12.20
+  koniec dokumentu  *  wygenerowano z wersji 12.21
 ==============================================================================

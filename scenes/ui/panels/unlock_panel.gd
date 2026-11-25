@@ -1,5 +1,6 @@
 extends Control
-## Okienko "nowa rasa na fermie" (12.20: na 2/3 ekranu). Gratulacje, duzy
+## Okienko "nowa rasa na fermie" (12.21: prawie caly ekran - wlasciciel 25.11).
+## To samo okno pokazuje KARTE RASY z ekranu Osiagniec (`show_card`). Gratulacje, duzy
 ## malowany portret rasy (tools/gen_portraits.py), historia, ciekawostki
 ## sprawdzone w zrodlach i liczby ze sklepu. Zlota ramka, promienie, iskry.
 ##
@@ -13,6 +14,8 @@ const SPIN_SECONDS := 26.0
 
 var _queue: Array[String] = []
 var _showing := false
+## true = okno otwarte z Osiagniec (bez gratulacji, bez kolejki).
+var _card_mode := false
 
 @onready var _rays: TextureRect = $Rays
 @onready var _sheet: PanelContainer = $Sheet
@@ -53,6 +56,14 @@ func _style_frame() -> void:
 	congrats.add_theme_constant_override("outline_size", 10)
 
 
+## Karta rasy z ekranu Osiagniec: ten sam wielki portret i opis, ale bez
+## gratulacji.
+func show_card(breed_id: String) -> void:
+	_card_mode = true
+	_fill(GameData.breed(breed_id))
+	_open()
+
+
 func _enqueue(breed_id: String) -> void:
 	if not _queue.has(breed_id):
 		_queue.append(breed_id)
@@ -65,7 +76,13 @@ func _show_next() -> void:
 		_showing = false
 		return
 	_showing = true
+	_card_mode = false
 	_fill(GameData.breed(_queue.pop_front()))
+	_open()
+
+
+func _open() -> void:
+	get_parent().move_child(self, -1)
 	show()
 	modulate.a = 0.0
 	_sheet.scale = Vector2(0.8, 0.8)
@@ -85,6 +102,10 @@ func _show_next() -> void:
 func _fill(breed: Dictionary) -> void:
 	($Sheet/Content/Congrats as Label).text = tr("UNLOCK_CONGRATS")
 	($Sheet/Content/Title as Label).text = tr("UNLOCK_TITLE")
+	($Sheet/Content/Congrats as Label).visible = not _card_mode
+	($Sheet/Content/Title as Label).visible = not _card_mode
+	_close.text = tr("UNLOCK_CARD_CLOSE") if _card_mode else tr("UNLOCK_CLOSE")
+	_rays.visible = not _card_mode
 	_name.text = tr(breed.get("name", ""))
 	_rarity.text = tr(breed.get("rarity", "")).to_upper()
 	_lore.text = tr(breed.get("lore", ""))
@@ -123,5 +144,8 @@ func _on_close() -> void:
 	var tween := create_tween()
 	tween.tween_property(self, "modulate:a", 0.0, FADE_TIME * 0.7)
 	tween.tween_callback(hide)
+	if _card_mode:
+		_card_mode = false
+		return
 	# Kolejna rasa z kolejki dopiero po zamknieciu poprzedniej.
 	tween.tween_callback(_show_next)

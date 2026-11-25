@@ -433,28 +433,18 @@ func _build_shop() -> void:
 					NumberFormat.eggs(n), NumberFormat.money(FarmState.eggs_worth(lot))],
 			_on_sell_eggs)
 
-	_add_action(false,
+	# Pasza: JEDEN worek, suwakiem (wlasciciel 25.11 - przy cenach w tysiacach
+	# zwykly przycisk to proszenie sie o pomylke). Cena za kilogram spada
+	# z poziomem magazynu, bez napisu o rabacie.
+	var feed_slide := _add_action(false,
 			func() -> bool: return Game.state.money >= float(Game.state.feed_pack()["price"]),
 			func() -> String:
 				var pack := Game.state.feed_pack()
-				if float(pack["discount"]) > 0.0:
-					return tr("PANEL_BUY_FEED_DISCOUNT") % [
-						int(pack["size"]), NumberFormat.money(float(pack["price"])),
-						int(round(float(pack["discount"]) * 100.0))]
 				return tr("PANEL_BUY_FEED") % [
-					int(pack["size"]), NumberFormat.money(float(pack["price"]))],
-			_on_buy_feed)
-	# Hurtem: dziesiec workow jednym dotknieciem.
-	_add_action(false,
-			func() -> bool: return Game.state.money >= float(Game.state.feed_pack()["price"]) \
-					* Game.feed_bulk_packs(),
-			func() -> String:
-				var pack := Game.state.feed_pack()
-				var n := Game.feed_bulk_packs()
-				return tr("PANEL_BUY_FEED_BULK") % [n,
-					NumberFormat.grouped(int(float(pack["size"]) * n)),
-					NumberFormat.money(float(pack["price"]) * n)],
-			_on_buy_feed_bulk)
+					NumberFormat.grouped(int(pack["size"])), NumberFormat.money(float(pack["price"]))],
+			_on_buy_feed, Callable(), func() -> float: return float(Game.state.feed_pack()["price"]),
+			_actions, true)
+	_make_compact(feed_slide as SlideButton)
 
 	# Weterynaria: leku nie ma (12.20) — szczepienie chroni zdrowe stado.
 	_add_action(false,
@@ -464,6 +454,7 @@ func _build_shop() -> void:
 			_on_buy_vaccine,
 			func() -> bool: return Game.state.unvaccinated_count() > 0,
 			func() -> float: return Game.vaccine_price(), _actions, true)
+	_make_compact(_actions.get_child(_actions.get_child_count() - 1) as SlideButton)
 
 	var vaccine_note := Label.new()
 	vaccine_note.theme_type_variation = &"NoteLabel"
@@ -588,7 +579,10 @@ func _add_action(primary: bool, enabled_provider: Callable, text_provider: Calla
 		if button.disabled and price_provider.is_valid() and Game.state != null:
 			var brak: float = float(price_provider.call()) - Game.state.money
 			if brak > 0.0:
-				base += "\n" + tr("PANEL_MISSING_MONEY") % NumberFormat.money(brak)
+				if button is SlideButton and (button as SlideButton).compact:
+					base += " · " + tr("PANEL_MISSING_SHORT") % NumberFormat.money(brak)
+				else:
+					base += "\n" + tr("PANEL_MISSING_MONEY") % NumberFormat.money(brak)
 		button.text = base)
 	return button
 
@@ -722,11 +716,6 @@ func _on_sell_eggs() -> void:
 
 func _on_buy_feed() -> void:
 	if Game.buy_feed():
-		_flash(tr("PANEL_FEED_BOUGHT"))
-
-
-func _on_buy_feed_bulk() -> void:
-	if Game.buy_feed(Game.feed_bulk_packs()):
 		_flash(tr("PANEL_FEED_BOUGHT"))
 
 
@@ -1026,6 +1015,15 @@ func _add_breed_card(breed: Dictionary) -> void:
 	no_rooster.text = tr("PANEL_NO_ROOSTER")
 	card.add_child(no_rooster)
 
+	# Rasa zamknieta za poziomem kurnika: malutki szary dopisek zamiast
+	# zawijanego napisu na przyciskach (wlasciciel 25.11).
+	var locked_note := Label.new()
+	locked_note.name = "LockedNote"
+	locked_note.add_theme_font_size_override("font_size", 22)
+	locked_note.add_theme_color_override("font_color", Color("#9A8C80"))
+	locked_note.add_theme_constant_override("line_spacing", 0)
+	card.add_child(locked_note)
+
 	# Dwie kolumny (wlasciciel 25.11): po lewej kupno, po prawej sprzedaz.
 	#   Kup kure    | Sprzedaj kure
 	#   Kup koguta  | Sprzedaj koguta
@@ -1051,7 +1049,7 @@ func _add_breed_card(breed: Dictionary) -> void:
 	# To swiadomy zart wlasciciela, nie przeoczenie.
 	var cull := _new_slide()
 	cull.theme_type_variation = &"CullButton"
-	cull.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_make_compact(cull)
 	cull.pressed.connect(func() -> void: _on_cull_hen(breed_id, breed_name))
 	card.add_child(cull)
 
@@ -1068,13 +1066,11 @@ func _add_breed_card(breed: Dictionary) -> void:
 		var locked := not Game.breed_allowed(breed_id)
 		# Kogut ma wlasna, wyzsza cene — i wlasny warunek "nie stac Cie".
 		var cock_price := FarmState.hen_buy_price(breed_id, true)
+		locked_note.visible = locked
 		if locked:
-			buy.text = tr("PANEL_BREED_LOCKED") % Game.breed_required_level(breed_id)
-			buy_rooster.text = buy.text
-		else:
-			buy.text = tr("PANEL_BUY_HEN") % [NumberFormat.money(price), owned]
-			buy_rooster.text = tr("PANEL_BUY_ROOSTER") % [
-					NumberFormat.money(cock_price), cocks]
+			locked_note.text = tr("PANEL_BREED_LOCKED") % Game.breed_required_level(breed_id)
+		buy.text = tr("PANEL_BUY_HEN") % NumberFormat.money(price)
+		buy_rooster.text = tr("PANEL_BUY_ROOSTER") % NumberFormat.money(cock_price)
 		buy.disabled = poor or locked
 		# Wczesniej ta linijka byla pisana dwa razy i druga gubila `locked`,
 		# wiec koguta dalo sie kupic do rasy zamknietej za poziomem kurnika.
@@ -1085,11 +1081,10 @@ func _add_breed_card(breed: Dictionary) -> void:
 		var healthy := Game.state.hens_of_breed(breed_id, true)
 		var healthy_cocks := Game.state.hens_of_breed(breed_id, true, true)
 		sell.disabled = healthy <= 0
-		sell.text = tr("PANEL_SELL_HEN") % [
-			NumberFormat.money(FarmState.hen_sell_price(breed_id)), healthy]
+		sell.text = tr("PANEL_SELL_HEN") % NumberFormat.money(FarmState.hen_sell_price(breed_id))
 		sell_rooster.disabled = healthy_cocks <= 0
-		sell_rooster.text = tr("PANEL_SELL_ROOSTER") % [
-			NumberFormat.money(FarmState.hen_sell_price(breed_id, false, true)), healthy_cocks]
+		sell_rooster.text = tr("PANEL_SELL_ROOSTER") % NumberFormat.money(
+				FarmState.hen_sell_price(breed_id, false, true))
 		var sick := owned - healthy + cocks - healthy_cocks
 		cull.visible = sick > 0
 		cull.text = tr("PANEL_CULL_HEN") % [NumberFormat.money(Game.mcdonalds_price()), sick]
@@ -1097,27 +1092,35 @@ func _add_breed_card(breed: Dictionary) -> void:
 		numbers.text = tr("PANEL_BREED_NUMBERS") % [
 			NumberFormat.small_money(FarmState.egg_value(breed_id)),
 			NumberFormat.duration(float(breed.get("egg_seconds", 0)) / GameData.time_scale()),
-			owned])
+			owned, cocks])
 
 
 ## Suwak do siatki kupna i sprzedazy na karcie rasy: pol szerokosci karty.
 func _grid_slide(variation: StringName) -> SlideButton:
 	var slide := _new_slide()
 	slide.theme_type_variation = variation
-	slide.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	slide.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	slide.size_flags_stretch_ratio = 1.0
+	_make_compact(slide)
 	# Bez minimalnej szerokosci dluzszy napis rozpychalby swoja kolumne.
 	slide.custom_minimum_size.x = 10.0
-	slide.clip_text = false
 	return slide
 
 
-## Grafika rasy: malowany portret (12.20), potem zdjecie, na koncu rysunek.
+## Niski suwak na jedna linijke tekstu (wlasciciel 25.11: "male slajdery na
+## jedna linijke"). Bez zawijania, mniejsza czcionka, wysokosc ~72 px.
+func _make_compact(slide: SlideButton) -> void:
+	slide.compact = true
+	slide.autowrap_mode = TextServer.AUTOWRAP_OFF
+	slide.clip_text = true
+	slide.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	slide.add_theme_font_size_override("font_size", 30)
+	slide.custom_minimum_size.y = 72.0
+
+
+## Grafika rasy w sklepie: ta sama postac co na wybiegu (wlasciciel 25.11 -
+## malowane portrety sa tylko w oknie nowej rasy i w Osiagnieciach).
 func _breed_image(breed: Dictionary) -> Texture2D:
-	var portrait: String = breed.get("portrait", "")
-	if portrait != "" and ResourceLoader.exists(portrait):
-		return load(portrait) as Texture2D
 	var photo: String = breed.get("photo", "")
 	if photo != "" and ResourceLoader.exists(photo):
 		return load(photo) as Texture2D

@@ -44,8 +44,8 @@ func _ready() -> void:
 	print("")
 	print("LABORATORIUM LISA  -  %d prob po %.0f h zegara na kazda farme" % [PROBY, ZEGAR_GODZ])
 	print("lis: kostka co %s min gry aktywnej (szansa %.0f%%), co %s h w tle (%.0f%%),"
-			% [fox["active_roll_minutes"], float(fox["active_chance"]) * 100,
-			fox["offline_roll_hours"], float(fox["offline_chance"]) * 100])
+			% [fox["roll_minutes"], float(fox["chance"]) * 100,
+			fox["roll_minutes"], float(fox["chance"]) * 100])
 	print("     karencja %s min, minimum %s ptakow, lup %s-%s"
 			% [fox["grace_minutes"], fox["min_hens"], fox["kills_min"], fox["kills_max"]])
 	for styl: Array in STYLE:

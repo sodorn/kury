@@ -1022,7 +1022,9 @@ def build_svg(breed_id):
     svg = Svg(seed=sum(ord(c) for c in breed_id))
     background(svg, b)
     bird(svg, b)
-    return svg.render(b.get("frame", (110, 70, 480)))
+    # Kadr z zapasem: caly ptak z grzebieniem, czubem i koncami ogona miesci
+    # sie w obrazku (12.20 obcinal glowy i ogony - wlasciciel 25.11).
+    return svg.render(b.get("frame", (60, 40, 560)))
 
 
 def finish(png_path, out_path):

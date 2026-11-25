@@ -72,6 +72,8 @@ func _run() -> void:
 	await _test_upgrade_looks()
 	await _test_dog_breeds()
 	await _test_fox_death()
+	await _test_achievements()
+	await _test_away_report()
 	await _test_game_over_screen()
 
 	SaveGame.clear()
@@ -306,7 +308,8 @@ func _test_shop() -> void:
 	var actions: VBoxContainer = _main.get_node("Hud/Root/BuildingPanel/Sheet/Content/Scroll/Gutter/Scrollable/Actions")
 	var rows := actions.get_children()
 	# 12.18: doszedl przycisk "kup 10 workow paszy". 12.20: zniknal lek.
-	_check(rows.size() == 5 + GameData.breeds().size(),
+	# 12.21: zniknal "kup 10 workow" (wlasciciel 25.11).
+	_check(rows.size() == 4 + GameData.breeds().size(),
 			"sklep ma przyciski, notke i karte kazdej rasy (jest %d)" % rows.size())
 	if rows.size() < 3:
 		return
@@ -347,7 +350,7 @@ func _test_shop() -> void:
 	_check(last_card != null and last_card.disabled, "ale bez pieniedzy przycisk jest wyszarzony")
 
 	var hens_before: int = Game.state.hen_count()
-	_check(open_card != null and open_card.text.begins_with("Kup kurę\n"),
+	_check(open_card != null and open_card.text.begins_with("Kup kurę ") and not open_card.text.contains("\n"),
 			"przycisk mowi 'Kup kurę' (jest '%s')" % (open_card.text if open_card else ""))
 	# Dwie kolumny (12.20): obok kupna kury jej sprzedaz, pod spodem kogut.
 	var trade_row := open_card.get_parent() if open_card else null
@@ -359,6 +362,7 @@ func _test_shop() -> void:
 		_check(absf(open_card.size.x - right.size.x) < 4.0, "obie kolumny rownej szerokosci")
 		_check(open_card.size.x < get_viewport().get_visible_rect().size.x * 0.5,
 				"suwak zajmuje pol karty (%.0f px)" % open_card.size.x)
+		_check(open_card.size.y <= 80.0, "suwak kupna jest niski, na jedna linijke (%.0f px)" % open_card.size.y)
 		var next_row := trade_row.get_parent().get_child(trade_row.get_index() + 1)
 		_check(next_row is HBoxContainer and (next_row.get_child(0) as Button).text.begins_with("Kup koguta")
 				and (next_row.get_child(1) as Button).text.begins_with("Sprzedaj koguta"),
@@ -767,9 +771,9 @@ func _test_unlock_popup() -> void:
 			"w okienku malowany portret rasy (jest %s)" % (portrait.texture.resource_path if portrait.texture else "brak"))
 	var sheet := popup.get_node("Sheet") as Control
 	var ekran := get_viewport().get_visible_rect().size
-	_check(sheet.size.y >= ekran.y * 0.64 and sheet.size.y <= ekran.y * 0.8,
-			"okienko zajmuje okolo 2/3 ekranu (%.0f z %.0f px)" % [sheet.size.y, ekran.y])
-	_check(portrait.size.x >= 480.0, "portret jest duzy (%.0f px)" % portrait.size.x)
+	_check(sheet.size.y >= ekran.y * 0.85,
+			"okienko zajmuje prawie caly ekran (%.0f z %.0f px)" % [sheet.size.y, ekran.y])
+	_check(portrait.size.x >= 760.0, "portret jest wielki (%.0f px)" % portrait.size.x)
 	_check(ekran.x >= sheet.get_global_rect().end.x and sheet.get_global_rect().position.x >= 0.0,
 			"okienko miesci sie w szerokosci ekranu")
 	_shot("okienko_rasy.png")
@@ -1405,4 +1409,59 @@ func _test_game_over_screen() -> void:
 	_check(Game.state.hen_count() > 0 and Game.state.money > 3.0, "restart daje swieza ferme")
 	_check(Cloud.player_id == code, "kod fermy zostaje ten sam")
 	Game.game_over_enabled = false
+
+
+## Osiagniecia: gwiazdka w lewym gornym rogu, siatka kart ras, zdobyta karta
+## otwiera wielkie okno z portretem i ciekawostkami.
+func _test_achievements() -> void:
+	var ach: Control = _main.get_node("Hud/Root/AchievementsPanel")
+	var star := ach.get_node("Star") as Button
+	_check(star.visible and star.get_global_rect().position.x < 200.0
+			and star.get_global_rect().position.y < 300.0, "gwiazdka osiagniec w lewym gornym rogu")
+	Game.state.mark_owned("cemani")
+	await _tap(star.get_global_rect().get_center())
+	await _frames(10)
+	_check(ach.is_open(), "gwiazdka otwiera osiagniecia")
+	var grid := ach.get_node("Sheet/Content").find_child("Grid", true, false) as GridContainer
+	_check(grid != null and grid.get_child_count() == GameData.breeds().size(), "karta dla kazdej rasy")
+	var card := grid.get_node_or_null("Card_cemani") as Button
+	_check(card != null and not card.disabled, "zdobyta karta cemani jest aktywna")
+	var locked := grid.get_node_or_null("Card_onagadori") as Button
+	if not Game.state.has_ever_owned("onagadori"):
+		_check(locked != null and locked.disabled
+				and (locked.find_child("Name", true, false) as Label).text == "???",
+				"niezdobyta karta to sylwetka i znaki zapytania")
+	_shot("osiagniecia.png")
+	card.pressed.emit()
+	await _seconds(0.6)
+	var popup: Control = _main.get_node("Hud/Root/UnlockPanel")
+	_check(popup.visible and not (popup.get_node("Sheet/Content/Congrats") as Label).visible,
+			"karta rasy otwiera wielkie okno bez gratulacji")
+	_shot("karta_rasy.png")
+	(popup.get_node("Sheet/Content/Close") as Button).pressed.emit()
+	await _seconds(0.5)
+	ach.close_panel()
+	await _frames(5)
+	_check(not ach.is_open(), "osiagniecia sie zamykaja")
+
+
+## Kronika fermy po dlugiej przerwie.
+func _test_away_report() -> void:
+	var panel: Control = _main.get_node("Hud/Root/AwayReportPanel")
+	var fake := {"eggs_laid": 820, "eggs_lost": 300, "eggs_spoiled": 0, "hatched": 0, "grown_up": 0,
+		"fox_blocked": 1, "fox_took": 5, "died_disease": 0, "died_hunger": 0, "got_sick": 0,
+		"out_of_feed": false, "built": [], "outbreaks": 0,
+		"log": [{"t": 1800.0, "kind": "fox_blocked"},
+			{"t": 9000.0, "kind": "fox", "taken": 5, "massacre": false, "dog": ""},
+			{"t": 12000.0, "kind": "storage_full"}]}
+	Events.away_report.emit(Game.build_away_report(fake, 7.5 * 3600.0, 12))
+	await _seconds(0.8)
+	_check(panel.visible, "kronika fermy sie pokazuje")
+	_check(panel.summary_text().contains("820") and panel.summary_text().contains("5"),
+			"kronika ma podsumowanie")
+	_check(panel.log_text().split("\n").size() == 3, "dziennik ma trzy wpisy z godzinami")
+	_shot("kronika_fermy.png")
+	(panel.find_child("Close", true, false) as Button).pressed.emit()
+	await _seconds(0.5)
+	_check(not panel.visible, "kronika sie zamyka")
 

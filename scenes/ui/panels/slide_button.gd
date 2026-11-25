@@ -20,6 +20,14 @@ const DONE_AT := 0.66
 ## nie wymagaja juz przeciagniecia przez caly ekran: galka jedzie najwyzej
 ## tyle, a 2/3 z tego to okolo 240 px - jeden ruch kciuka.
 const MAX_TRAVEL := 360.0
+
+## Niski suwak na jedna linijke (12.21, karta rasy w sklepie, pasza,
+## szczepienie): mniejsze marginesy pionowe i odstep na galke.
+@export var compact := false:
+	set(value):
+		compact = value
+		if is_inside_tree():
+			_restyle()
 ## Ruch palca, po ktorym wiadomo, ze to przesuwanie, a nie przewijanie.
 const INTENT_PX := 14.0
 ## Srednica galki wzgledem wysokosci pola.
@@ -96,7 +104,13 @@ func _restyle() -> void:
 			empty.content_margin_right = base.get_content_margin(SIDE_RIGHT)
 			empty.content_margin_top = base.get_content_margin(SIDE_TOP)
 			empty.content_margin_bottom = base.get_content_margin(SIDE_BOTTOM)
-		empty.content_margin_left += 74.0
+		if compact:
+			empty.content_margin_top = 6.0
+			empty.content_margin_bottom = 6.0
+			empty.content_margin_left = 10.0 + 58.0
+			empty.content_margin_right = 12.0
+		else:
+			empty.content_margin_left += 74.0
 		add_theme_stylebox_override(state_name, empty)
 	_redraw()
 	_restyling = false
@@ -129,6 +143,8 @@ func progress() -> float:
 ## Galka ma stala wielkosc kciuka - przy przyciskach na kilka linijek
 ## rosla do polowy pola i zaslaniala napis.
 func _knob_size() -> float:
+	if compact:
+		return clampf(size.y - 20.0, 36.0, 52.0)
 	return clampf((size.y - 18.0) * KNOB_SHARE, 40.0, 76.0)
 
 

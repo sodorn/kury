@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 12.20
+  INSTRUKCJA OBSLUGI *** gra w wersji 12.21
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -93,12 +93,12 @@
  4. PETLA GRY - OD CZEGO ZACZAC
 ==============================================================================
 
-  SUWAKI. Kupno i sprzedaz kur, ubicie chorej, szczepienie, plot, pies i kazda
-  rozbudowa to SUWAK: przeciagnij palcem w prawo. Wystarczy 2/3 drogi - gdy
-  galka pokaze ptaszek, a pole pojasnieje, pusc palec. Samo dotkniecie nic nie
-  robi - nie kupisz nic przypadkiem. W sklepie kazda rasa ma dwie kolumny: po
-  lewej KUP KURE i KUP KOGUTA, po prawej SPRZEDAJ KURE i SPRZEDAJ KOGUTA.
-  Sprzedaz jaj, pasza i wkladanie jaj do inkubatora to zwykle przyciski, bo
+  SUWAKI. Kupno i sprzedaz kur, ubicie chorej, pasza, szczepienie, plot, pies
+  i kazda rozbudowa to SUWAK: przeciagnij palcem w prawo. Wystarczy 2/3 drogi
+  - gdy galka pokaze ptaszek, a pole pojasnieje, pusc palec. Samo dotkniecie
+  nic nie robi - nie kupisz nic przypadkiem. W sklepie kazda rasa ma dwie
+  kolumny: po lewej KUP KURE i KUP KOGUTA, po prawej SPRZEDAJ KURE i SPRZEDAJ
+  KOGUTA. Sprzedaz jaj i wkladanie jaj do inkubatora to zwykle przyciski, bo
   klika sie je co chwile.
 
   1. ZBIERAJ JAJA z wybiegu. Dotknij jajka palcem, idzie do magazynu.
@@ -145,9 +145,9 @@
 ==============================================================================
 
   Kazdy dorosly ptak zjada 13 kg paszy na godzine, pisklę 0.5 tego. Worek
-  kosztuje 50 zl za 25 kg (cena jak w sklepie rolniczym); przy rozbudowanym
-  magazynie worki sa wieksze i tansze za kilogram. W sklepie jest tez przycisk
-  "Kup 10 workow" - przy wiekszym stadzie jeden worek znika w kilka minut.
+  kosztuje 50 zl za 25 kg (cena jak w sklepie rolniczym). Im wiekszy magazyn,
+  tym wiekszy worek i nizsza cena za kilogram - masz lepszych dostawcow. Worek
+  kupuje sie SUWAKIEM, jeden na raz.
 
   ZANIM WYJDZIESZ Z GRY: kup paszy na cala przerwe. Kury jedza tez wtedy, gdy
   nie grasz, a magazyn trzyma tylko tyle jaj, ile sie w nim miesci - reszta
@@ -238,39 +238,39 @@
  10. MAGAZYN
 ==============================================================================
 
-  +======+=========================+============+==============+========+
-  | poz. | nazwa                   |  limit jaj |         cena | budowa |
-  +======+=========================+============+==============+========+
-  |    1 | komórka na łopaty       |      2 000 |        start |      - |
-  |    2 | szopa z kłódką          |      5 000 |       600 zl |  5 min |
-  |    3 | spiżarnia babci         |     10 000 |     3 000 zl |  8 min |
-  |    4 | spichlerz               |     20 000 |    10 500 zl | 12 min |
-  |    5 | stodoła z rampą         |    100 000 |    30 000 zl | 17 min |
-  |    6 | silos                   |    500 000 |    80 000 zl | 23 min |
-  |    7 | bliźniacze silosy       |  1 500 000 |   200 000 zl | 30 min |
-  |    8 | elewator zbożowy        |  5 000 000 |   540 000 zl | 38 min |
-  |    9 | port przeładunkowy pasz | 10 000 000 | 1 000 000 zl | 48 min |
-  |   10 | skarbiec jajczarski     | 20 000 000 | 1 800 000 zl |    1 h |
-  +------+-------------------------+------------+--------------+--------+
+  +======+=========================+===========+==============+========+
+  | poz. | nazwa                   | limit jaj |         cena | budowa |
+  +======+=========================+===========+==============+========+
+  |    1 | lodówka w piwnicy       |       200 |        start |      - |
+  |    2 | mała szopka             |       500 |       600 zl |  5 min |
+  |    3 | spiżarnia babci         |     1 000 |     3 000 zl |  8 min |
+  |    4 | spichlerz               |     2 000 |    10 500 zl | 12 min |
+  |    5 | stodoła z rampą         |     4 000 |    30 000 zl | 17 min |
+  |    6 | silos                   |     8 000 |    80 000 zl | 23 min |
+  |    7 | bliźniacze silosy       |    15 000 |   200 000 zl | 30 min |
+  |    8 | elewator zbożowy        |    30 000 |   540 000 zl | 38 min |
+  |    9 | port przeładunkowy pasz |    60 000 | 1 000 000 zl | 48 min |
+  |   10 | skarbiec jajczarski     |   100 000 | 1 800 000 zl |    1 h |
+  +------+-------------------------+-----------+--------------+--------+
 
-  +======+==========+============+=======+
-  | poz. | worek kg | cena worka | rabat |
-  +======+==========+============+=======+
-  |    1 |       25 |      50 zl |     - |
-  |    2 |      100 |     180 zl |   10% |
-  |    3 |      250 |     430 zl |   14% |
-  |    4 |      600 |     984 zl |   18% |
-  |    5 |    1 500 |   2 340 zl |   22% |
-  |    6 |    3 500 |   5 180 zl |   26% |
-  |    7 |    8 000 |  11 200 zl |   30% |
-  |    8 |   20 000 |  26 400 zl |   34% |
-  |    9 |   40 000 |  50 400 zl |   37% |
-  |   10 |   70 000 |  84 000 zl |   40% |
-  +------+----------+------------+-------+
+  +======+==========+============+==========+
+  | poz. | worek kg | cena worka | taniej o |
+  +======+==========+============+==========+
+  |    1 |       25 |      50 zl |        - |
+  |    2 |      100 |     180 zl |      10% |
+  |    3 |      250 |     430 zl |      14% |
+  |    4 |      600 |     984 zl |      18% |
+  |    5 |    1 500 |   2 340 zl |      22% |
+  |    6 |    3 500 |   5 180 zl |      26% |
+  |    7 |    8 000 |  11 200 zl |      30% |
+  |    8 |   20 000 |  26 400 zl |      34% |
+  |    9 |   40 000 |  50 400 zl |      37% |
+  |   10 |   70 000 |  84 000 zl |      40% |
+  +------+----------+------------+----------+
 
-  Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i daje HURT -
-  wiekszy worek paszy z rabatem od 10% do 40%. Im wiekszy magazyn, tym tanszy
-  kilogram. Magazyn zmienia wyglad na poziomie 4 i 7.
+  Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i daje lepszych
+  dostawcow - wiekszy worek i kilogram paszy tanszy o 10% do 40%. Im wiekszy
+  magazyn, tym tansza pasza. Magazyn zmienia wyglad na poziomie 4 i 7.
 
 ==============================================================================
  11. INKUBATOR
@@ -298,8 +298,11 @@
   Lis to glowny powod, dla ktorego warto wydac pieniadze na obrone.
 
   KIEDY PRZYCHODZI
-    gdy grasz          kostka co 60 min realnych, szansa 33%
-    gdy nie grasz      kostka co 24 h realnych, szansa 17%
+    zawsze             kostka co 60 min realnych, szansa 33%
+                       - tak samo, gdy grasz i gdy nie grasz
+    gdy nie grasz      cala wizyta dzieje sie od razu: lis zabija
+                       i znika, nie czeka na Ciebie. Co zrobil,
+                       przeczytasz w KRONICE FERMY
     nie przyjdzie      przez pierwsze 30 min nowej fermy
                        ani gdy masz mniej niz 5 kur
 
@@ -419,8 +422,15 @@
   pary - gra konczy sie plansza GAME OVER: "Niestety, jesteś marnym hodowcą.
   Poniosłeś bankructwo." Przycisk zaczyna nowa ferme pod TYM SAMYM kodem.
 
-  NOWA RASA. Pierwsza sztuka kazdej rasy otwiera duze okno z gratulacjami,
-  malowanym portretem rasy, jej historia i trzema ciekawostkami.
+  NOWA RASA I OSIAGNIECIA. Pierwsza sztuka kazdej rasy otwiera wielkie okno z
+  gratulacjami, malowanym portretem rasy, jej historia i trzema ciekawostkami.
+  Wszystkie zdobyte karty ras sa potem pod GWIAZDKA w lewym gornym rogu
+  (OSIAGNIECIA). Niezdobyte rasy widac tam jako ciemne sylwetki.
+
+  KRONIKA FERMY. Po przerwie dluzszej niz 3 godziny gra pokazuje kronike: ile
+  jaj zniosly kury, ile przepadlo, ile razy byl lis i co zabral, czy wybuchla
+  choroba, co sie zbudowalo - i dziennik z godzinami ("02:14 Lis wszedl na
+  wybieg. Zabral ptakow: 6.").
 
 ==============================================================================
  17. SCIAGAWKA

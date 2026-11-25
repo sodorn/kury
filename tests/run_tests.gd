@@ -69,8 +69,8 @@ func _ready() -> void:
 	_test_fox_lurk()
 	_test_fox_massacre()
 	_test_game_over()
+	_test_away_fox_and_report()
 	_test_fox_left_and_victims()
-	_test_feed_bulk()
 	_test_construction()
 	_test_real_time_texts()
 	SaveGame.clear()
@@ -130,8 +130,7 @@ func _restore_event(kind: String, snapshot: Dictionary) -> void:
 ## lisa, ktory zjadal stado, i swiecil sie na czerwono bez bledu w kodzie.
 func _never_event(kind: String) -> void:
 	var cfg: Dictionary = GameData.balance().get(kind, {})
-	cfg["active_chance"] = 0.0
-	cfg["offline_chance"] = 0.0
+	cfg["chance"] = 0.0
 	cfg["min_hens"] = 1000000
 	cfg["grace_minutes"] = 1000000.0
 	# Choroba od 12.20 chodzi na krzywej szansy od wielkosci stada.
@@ -675,7 +674,11 @@ func _test_hunger() -> void:
 	for i in 10:
 		away.append("leghorn")
 	var offline := _fresh_state(away, 0.0)
+	# Lis w tle nie ma bezpiecznika (12.21) - tu mierzymy sam glod.
+	var lis := _snapshot_event("fox")
+	_never_event("fox")
 	Simulation.advance(offline, 24.0 * 3600.0, true)
+	_restore_event("fox", lis)
 	_check(offline.hen_count() > 0, "po dlugiej przerwie bez paszy stado nie ginie w calosci")
 	_check(offline.hen_count() >= 5, "bezpiecznik offline zostawia polowe stada")
 	Game.new_game()
@@ -1003,8 +1006,7 @@ func _arm_fox(state: FarmState) -> void:
 	if _fox_backup.is_empty():
 		_fox_backup = _snapshot_event("fox")
 	var fox: Dictionary = GameData.balance().get("fox", {})
-	fox["active_chance"] = 1.0
-	fox["offline_chance"] = 1.0
+	fox["chance"] = 1.0
 	# Rzez ma wlasny test (_test_fox_massacre); tu lis bierze zwykly lup.
 	fox["massacre_chance"] = 0.0
 	# Bez fazy w krzakach: stare testy sprawdzaja wejscie w tym samym kroku.
@@ -1030,7 +1032,7 @@ func _disarm_fox() -> void:
 ## psa albo plot. Sprawdzamy sam odstep miedzy losowaniami, bo to on decyduje.
 func _test_fox_return_speed() -> void:
 	var fox: Dictionary = GameData.balance().get("fox", {})
-	var odstep := float(fox.get("active_roll_minutes", 60.0)) * 60.0
+	var odstep := float(fox.get("roll_minutes", 60.0)) * 60.0
 	var kara := float(fox.get("hand_return_factor", 0.1))
 	_check(kara < 1.0, "kara za reczne przegonienie skraca odstep")
 
@@ -1752,7 +1754,10 @@ func _test_egg_capacity() -> void:
 		_check(lim > poprzedni, "magazyn %d miesci wiecej jaj niz poprzedni (%d > %d)"
 				% [i + 1, lim, poprzedni])
 		poprzedni = lim
-	_check(poprzedni >= 500000, "elewator miesci co najmniej pol miliona jaj (%d)" % poprzedni)
+	# 12.21 (wlasciciel 25.11): limity male - start 200, potem 500, 1000...
+	_check(int(storage.get("egg_capacity", 0)) == 200, "lodowka w piwnicy miesci 200 jaj")
+	_check(int(ups[0].get("egg_capacity", 0)) == 500 and int(ups[1].get("egg_capacity", 0)) == 1000,
+			"mala szopka 500, trzeci poziom 1000")
 
 	# Kura przy pelnym magazynie nie dokłada do niego jaj — i o to chodzi.
 	var farm := _fresh_state(["leghorn", "leghorn"], 1000.0)
@@ -1960,11 +1965,11 @@ func _test_event_rules() -> void:
 	_check(absf(state.played_seconds() - 1800.0) < 1.0,
 			"po pol godziny licznik pokazuje pol godziny (%.0f s)" % state.played_seconds())
 
-	# Lis: kostka raz na godzine w grze, raz na dobe w tle. Test pilnuje
-	# sensu liczb: odstepy dodatnie, szanse to prawdopodobienstwa.
-	_check(float(fox.get("active_roll_minutes", 0.0)) > 0.0, "lis: odstep kostki w grze > 0")
-	_check(float(fox.get("offline_roll_hours", 0.0)) > 0.0, "lis: odstep kostki w tle > 0")
-	for klucz: String in ["active_chance", "offline_chance", "massacre_chance"]:
+	# Lis: jedna kostka co roll_minutes, w grze i w tle (12.21).
+	_check(float(fox.get("roll_minutes", 0.0)) > 0.0, "lis: odstep kostki > 0")
+	_check(not fox.has("offline_roll_hours") and not fox.has("offline_chance"),
+			"lis: nie ma osobnej kostki dla gry w tle")
+	for klucz: String in ["chance", "massacre_chance"]:
 		var p := float(fox.get(klucz, -1.0))
 		_check(p >= 0.0 and p <= 1.0, "lis: %s miedzy 0 a 1 (%.3f)" % [klucz, p])
 	_check(int(fox.get("kills_min", 0)) >= 1
@@ -2269,6 +2274,10 @@ func _test_time_gap() -> void:
 	Game.state.feed = 100000.0
 	for i in 10:
 		Game.state.chickens.append(Chicken.create("leghorn"))
+	# Bez lisa: od 12.21 w tle przychodzi co godzine i potrafi wybic stado,
+	# a ten test mierzy samo rozliczenie czasu.
+	var lis_noc := _snapshot_event("fox")
+	_never_event("fox")
 	var noc := 8.0 * 3600.0
 	Game.apply_gap(noc, false)
 	var jaja_przed := Game.state.egg_count()
@@ -2284,6 +2293,7 @@ func _test_time_gap() -> void:
 	Game.apply_loaded_for_test(nocny)
 	_check(Game.state.egg_count() > jaja_przed,
 			"po wczytaniu noc zostaje rozliczona, a nie wyrzucona")
+	_restore_event("fox", lis_noc)
 	_check(is_zero_approx(Game._away_seconds), "dlug czasu zostal spłacony przy wczytaniu")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(sciezka))
 
@@ -2538,7 +2548,12 @@ func _test_strings() -> void:
 				"rasa %s ma malowany portret (%s)" % [breed.get("id", ""), portrait])
 	for key: String in ["UNLOCK_CONGRATS", "UNLOCK_FACTS", "GAMEOVER_TITLE", "GAMEOVER_BODY",
 			"GAMEOVER_DETAIL", "GAMEOVER_RESTART", "HINT_OUTBREAK_OVER", "HINT_FOX_MASSACRE",
-			"PANEL_DISEASE", "PANEL_DISEASE_ON", "PANEL_DISEASE_CALM", "PANEL_DISEASE_RISK"]:
+			"PANEL_DISEASE", "PANEL_DISEASE_ON", "PANEL_DISEASE_CALM", "PANEL_DISEASE_RISK",
+			"REPORT_TITLE", "REPORT_AWAY", "REPORT_EGGS", "REPORT_EGGS_LOST", "REPORT_FOX_VISITS",
+			"REPORT_FOX_TOOK", "REPORT_OUTBREAKS", "REPORT_FLOCK", "REPORT_QUIET", "LOG_FOX",
+			"LOG_FOX_BLOCKED", "LOG_OUTBREAK", "LOG_OUTBREAK_OVER", "LOG_STORAGE_FULL",
+			"LOG_NO_FEED", "LOG_BUILT", "ACH_TITLE", "ACH_COUNT", "ACH_CLOSE", "UNLOCK_CARD_CLOSE",
+			"PANEL_MISSING_SHORT"]:
 		keys.append(key)
 	# FERMA, nie FARMA (wlasciciel 25.11): zaden tekst w grze nie mowi "farma".
 	var farma := 0
@@ -2550,18 +2565,10 @@ func _test_strings() -> void:
 				farma += 1
 	_check(farma == 0, "w tekstach gry nie ma slowa 'farma' (%d)" % farma)
 
-	# Napisy na suwakach kupna/sprzedazy maja celowo dwie linijki (12.20:
-	# pol szerokosci karty). Reszta nie moze miec zlamania - to znak, ze
-	# CSV wciagnal sasiedni wiersz.
-	var two_lines := ["PANEL_BUY_HEN", "PANEL_SELL_HEN", "PANEL_BUY_ROOSTER", "PANEL_SELL_ROOSTER"]
 	for key: String in keys:
 		var text := tr(key)
 		_check(text != key, "klucz '%s' ma tlumaczenie" % key)
-		if two_lines.has(key):
-			_check(text.count("\n") == 1 and not text.contains("PANEL_"),
-					"tekst '%s' ma dokladnie dwie linijki" % key)
-		else:
-			_check(not text.contains("\n"), "tekst '%s' nie wciagnal sasiednich wierszy" % key)
+		_check(not text.contains("\n"), "tekst '%s' nie wciagnal sasiednich wierszy" % key)
 		# Wciagniety wiersz zostawia w tekscie wzorzec KLUCZ, — tego nie moze byc.
 		_check(not text.contains("_LORE,") and not text.contains("_NAME,")
 				and not text.contains("UNLOCK_") and not text.contains("PANEL_"),
@@ -2639,6 +2646,83 @@ func _test_hatch_sex() -> void:
 
 ## 12.18: lis najpierw czai sie w krzakach i idzie pod plot. Dopiero tam
 ## plot losuje. Przy grze w tle tej fazy nie ma.
+## 12.21 (wlasciciel 25.11): lis ma te sama kostke co godzine w grze i w tle;
+## w tle wizyta dzieje sie od razu i lis znika (nie czeka na gracza);
+## po przerwie dluzszej niz 3 h gra sklada KRONIKE FERMY z dziennikiem.
+func _test_away_fox_and_report() -> void:
+	var fox: Dictionary = GameData.balance()["fox"]
+	var dis_backup := _snapshot_event("disease")
+	_never_event("disease")
+	_check(is_equal_approx(float(fox.get("roll_minutes", 0.0)), 60.0), "lis: kostka co godzine")
+	var scale := GameData.time_scale()
+
+	# Noc 8 h w tle przy pewnej kostce: lis przychodzi co godzine, nie raz.
+	var night := _herd(60)
+	_arm_fox(night)
+	night.fox_roll_timer = 0.0
+	night.dog_level = 1
+	fox["kills_min"] = 1
+	fox["kills_max"] = 1
+	var res := Simulation.advance(night, 8.0 * 3600.0 * scale, true)
+	var wizyty := 0
+	for entry: Dictionary in res["log"]:
+		if entry["kind"] == "fox" or entry["kind"] == "fox_blocked":
+			wizyty += 1
+	_check(wizyty >= 7 and wizyty <= 9, "w tle lis co godzine: %d wizyt w 8 h" % wizyty)
+	_check(night.fox_visit_left <= 0.0 and night.fox_lurk_left <= 0.0,
+			"po nadrobieniu lis nie czeka na wybiegu")
+	# Kolejnosc i czasy w dzienniku rosna.
+	var rosnie := true
+	var last := -1.0
+	for entry: Dictionary in res["log"]:
+		rosnie = rosnie and float(entry["t"]) >= last
+		last = float(entry["t"])
+	_check(rosnie and last <= 8.0 * 3600.0 + 1.0, "dziennik po kolei, w granicach przerwy")
+
+	# Powrot do gry: licznik kostki NIE jest przeterminowany - lis nie wita
+	# gracza w pierwszej sekundzie.
+	_check(night.fox_roll_timer < 3600.0, "po nocy kostka lisa nie jest zalegla (%.0f s)" % night.fox_roll_timer)
+	var witaj := Simulation.advance(night, 5.0 * scale)
+	_check(int(witaj["fox_lurking"]) + int(witaj["fox_arrived"]) == 0 or night.fox_roll_timer < 10.0,
+			"pierwsze sekundy po powrocie bez zaleglego lisa")
+	_disarm_fox()
+
+	# Kronika: tekst z godzinami zegarka i podsumowaniem.
+	Game.new_game()
+	var fake := {"eggs_laid": 1234, "eggs_lost": 50, "eggs_spoiled": 0, "hatched": 2, "grown_up": 1,
+		"fox_blocked": 1, "fox_took": 6, "died_disease": 3, "died_hunger": 0, "got_sick": 4,
+		"out_of_feed": false, "built": ["storage"], "outbreaks": 1,
+		"log": [{"t": 60.0, "kind": "fox_blocked"},
+			{"t": 3700.0, "kind": "fox", "taken": 6, "massacre": false, "dog": "chased"},
+			{"t": 7200.0, "kind": "outbreak", "target": 4},
+			{"t": 9000.0, "kind": "outbreak_over", "dead": 3},
+			{"t": 9100.0, "kind": "storage_full"},
+			{"t": 9200.0, "kind": "built", "id": "storage", "level": 1}]}
+	var report := Game.build_away_report(fake, 4.0 * 3600.0, 10)
+	_check(int(report["fox_in"]) == 1 and int(report["fox_blocked"]) == 1 and int(report["fox_took"]) == 6,
+			"kronika liczy wizyty lisa")
+	var lines: Array = report["log"]
+	_check(lines.size() == 6, "kronika ma 6 wpisow")
+	var godzina := String(lines[1][1])
+	_check(godzina.length() == 5 and godzina[2] == ":", "wpis ma godzine zegarka (%s)" % godzina)
+	_check(String(lines[1][2]).contains("6") and String(lines[1][2]).contains("Pies"),
+			"wpis o lisie mowi ile i co zrobil pies: %s" % lines[1][2])
+	_check(String(lines[5][2]).contains("Magazyn"), "wpis o budowie nazywa budynek: %s" % lines[5][2])
+
+	# Game: krotka przerwa bez kroniki, dluga z kronika.
+	var hits := [0]
+	var on_report := func(_r: Dictionary) -> void: hits[0] += 1
+	Events.away_report.connect(on_report)
+	Game._apply_elapsed(3600.0)
+	_check(hits[0] == 0, "godzina przerwy - bez kroniki")
+	Game._apply_elapsed(4.0 * 3600.0)
+	_check(hits[0] == 1 and not Game.last_away_report.is_empty(), "4 h przerwy - kronika fermy")
+	Events.away_report.disconnect(on_report)
+	Game.last_away_report = {}
+	_restore_event("disease", dis_backup)
+	Game.new_game()
+
+
 ## GAME OVER: bankructwo tylko wtedy, gdy naprawde nie da sie grac dalej.
 func _test_game_over() -> void:
 	var per_chick := int(GameData.balance()["incubator"].get("eggs_per_chick", 6))
@@ -2750,13 +2834,17 @@ func _test_fox_massacre() -> void:
 	Simulation.fox_leaves(palec)
 	_check(not palec.fox_massacre and palec.hen_count() == 19, "przegoniony lis konczy rzez")
 
-	# W tle: bezpiecznik strat (polowa stada) obejmuje tez rzez.
+	# W tle: lis znika od razu, bez bezpiecznika.
 	var tlo := _herd(20)
 	_arm_fox(tlo)
 	fox["massacre_chance"] = 1.0
 	var w_tle := Simulation.advance(tlo, 1.0, true)
-	_check(int(w_tle["fox_took"]) == 10 and tlo.hen_count() == 10,
-			"w tle rzez zabiera najwyzej polowe (%d)" % int(w_tle["fox_took"]))
+	# 12.21: w tle lis nie ma bezpiecznika strat - rzez wybija wszystko.
+	_check(int(w_tle["fox_took"]) == 20 and tlo.hen_count() == 0,
+			"w tle rzez wybija cale stado (%d)" % int(w_tle["fox_took"]))
+	var wpis: Array = w_tle.get("log", [])
+	_check(wpis.size() == 1 and wpis[0]["kind"] == "fox" and int(wpis[0]["taken"]) == 20
+			and bool(wpis[0]["massacre"]), "rzez w tle trafia do dziennika")
 	_disarm_fox()
 	_restore_event("disease", dis_backup)
 
@@ -2848,23 +2936,6 @@ func _test_fox_left_and_victims() -> void:
 		for hex in b.get("feather_colors", []):
 			_check(Color.html_is_valid(String(hex)), "%s: kolor piora %s poprawny" % [b["id"], hex])
 	_disarm_fox()
-
-
-## Przycisk "kup 10 workow": wszystkie albo zaden.
-func _test_feed_bulk() -> void:
-	Game.new_game()
-	var pack := Game.state.feed_pack()
-	var n := Game.feed_bulk_packs()
-	_check(n >= 2, "hurt to wiecej niz jeden worek (%d)" % n)
-	Game.state.money = float(pack["price"]) * n - 0.01
-	var pasza := Game.state.feed
-	_check(not Game.buy_feed(n), "za malo pieniedzy na 10 workow - nic nie kupuje")
-	_check(Game.state.feed == pasza, "pasza bez zmian po nieudanym zakupie")
-	Game.state.money = float(pack["price"]) * n
-	_check(Game.buy_feed(n), "dokladnie tyle pieniedzy - kupuje")
-	_check(absf(Game.state.feed - pasza - float(pack["size"]) * n) < 0.01, "przybylo 10 workow")
-	_check(Game.state.money < 0.01, "pieniadze zeszly co do grosza")
-	Game.new_game()
 
 
 ## Konczy budowe prawdziwa sciezka symulacji (bez czekania pol godziny).

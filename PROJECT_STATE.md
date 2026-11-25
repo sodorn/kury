@@ -4,7 +4,22 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.20): CHOROBA JAKO OGNISKA - kostka co
+- Aktualny etap: **ETAP 10** (wersja 12.21): LIS CO GODZINE W GRZE I W TLE
+  (fox.roll_minutes 60, fox.chance 1/3; usuniete active_*/offline_*). W tle
+  wizyta od razu i lis znika, BEZ bezpiecznika strat (glod i choroba dalej
+  max 50%). Naprawione: po nocy licznik kostki byl przeterminowany i lis
+  wital gracza w pierwszej sekundzie. KRONIKA FERMY po przerwie >= 3 h
+  (offline.report_hours; Simulation summary["log"] z czasem, Game.
+  build_away_report, AwayReportPanel). MAGAZYN: limity jaj 200 (lodowka
+  w piwnicy) / 500 (mala szopka) / 1000 / 2000 / 4000 / 8000 / 15000 /
+  30000 / 60000 / 100000 (wlasciciel 25.11). Sklep: suwaki na jedna linijke
+  (SlideButton.compact), pasza JEDNYM suwakiem bez "rabatu", bez "Kup 10
+  workow" (feed_bulk_packs usuniety), dopisek o poziomie kurnika malym
+  szarym tekstem. W sklepie z powrotem postacie z wybiegu; malowane portrety
+  tylko w oknie nowej rasy (prawie caly ekran) i w OSIAGNIECIACH (gwiazdka
+  w lewym gornym rogu, AchievementsPanel, karty ras, UnlockPanel.show_card).
+  Portrety maja szerszy kadr (caly ptak).
+- Wersja 12.20: CHOROBA JAKO OGNISKA - kostka co
   minute zegara, szansa z krzywej disease.rate_per_hour od wielkosci stada
   (do 10 ptakow 0, 20 -> 0,05/h, 50 -> 0,5/h, od 100 -> 1,5/h); wybuch zaraza
   30-100% stada (co 10%, ceil), jedna kura co minute; chora pada po 5 min

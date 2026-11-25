@@ -261,13 +261,13 @@ wyglad przy kazdej rozbudowie.
 
 title("4. PETLA GRY - OD CZEGO ZACZAC")
 para("""
-SUWAKI. Kupno i sprzedaz kur, ubicie chorej, szczepienie, plot, pies
+SUWAKI. Kupno i sprzedaz kur, ubicie chorej, pasza, szczepienie, plot, pies
 i kazda rozbudowa to SUWAK: przeciagnij palcem w prawo. Wystarczy 2/3 drogi
 - gdy galka pokaze ptaszek, a pole pojasnieje, pusc palec. Samo dotkniecie
 nic nie robi - nie kupisz nic przypadkiem. W sklepie kazda rasa ma dwie
 kolumny: po lewej KUP KURE i KUP KOGUTA, po prawej SPRZEDAJ KURE
-i SPRZEDAJ KOGUTA. Sprzedaz jaj, pasza i wkladanie jaj do inkubatora to
-zwykle przyciski, bo klika sie je co chwile.
+i SPRZEDAJ KOGUTA. Sprzedaz jaj i wkladanie jaj do inkubatora to zwykle
+przyciski, bo klika sie je co chwile.
 """)
 raw("""
   1. ZBIERAJ JAJA z wybiegu. Dotknij jajka palcem, idzie do magazynu.
@@ -321,11 +321,11 @@ i znika z magazynu. Nie da sie zrobic zapasu na tydzien.
 title("6. PASZA I GLOD")
 para("""
 Kazdy dorosly ptak zjada %g kg paszy na godzine, pisklę %g tego. Worek
-kosztuje %s za %d kg (cena jak w sklepie rolniczym); przy rozbudowanym magazynie
-worki sa wieksze i tansze za kilogram. W sklepie jest tez przycisk "Kup %d
-workow" - przy wiekszym stadzie jeden worek znika w kilka minut.
+kosztuje %s za %d kg (cena jak w sklepie rolniczym). Im wiekszy magazyn, tym
+wiekszy worek i nizsza cena za kilogram - masz lepszych dostawcow. Worek
+kupuje sie SUWAKIEM, jeden na raz.
 """ % (round(ECO["feed_per_hen_minute"] * 60 * SCALE, 2), ECO.get("chick_feed_multiplier", 0.5),
-       zl(ECO["feed_pack_price"]), ECO["feed_pack_size"], ECO.get("feed_bulk_packs", 10)))
+       zl(ECO["feed_pack_price"]), ECO["feed_pack_size"]))
 para("""
 ZANIM WYJDZIESZ Z GRY: kup paszy na cala przerwe. Kury jedza tez wtedy, gdy nie
 grasz, a magazyn trzyma tylko tyle jaj, ile sie w nim miesci - reszta przepada.
@@ -418,11 +418,11 @@ rows = [["1", num(ECO["feed_pack_size"]), zl(ECO["feed_pack_price"]), "-"]]
 for i, u in enumerate(st["upgrades"], start=2):
     worek = round(u["pack_size"] * BASE_KG * (1 - u["pack_discount"]), 2)
     rows.append([str(i), num(u["pack_size"]), zl(worek), "%d%%" % round(u["pack_discount"] * 100)])
-table(["poz.", "worek kg", "cena worka", "rabat"], rows, align="rrrr")
+table(["poz.", "worek kg", "cena worka", "taniej o"], rows, align="rrrr")
 para("""
-Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i daje HURT -
-wiekszy worek paszy z rabatem od %d%% do %d%%. Im wiekszy magazyn, tym tanszy
-kilogram. Magazyn zmienia wyglad na poziomie 4 i 7.
+Rozbudowa magazynu robi dwie rzeczy naraz: podnosi limit jaj i daje lepszych
+dostawcow - wiekszy worek i kilogram paszy tanszy o %d%% do %d%%. Im wiekszy
+magazyn, tym tansza pasza. Magazyn zmienia wyglad na poziomie 4 i 7.
 """ % (round(st["upgrades"][0]["pack_discount"] * 100), round(st["upgrades"][-1]["pack_discount"] * 100)))
 
 title("11. INKUBATOR")
@@ -436,8 +436,11 @@ Lis to glowny powod, dla ktorego warto wydac pieniadze na obrone.
 """)
 raw("""
   KIEDY PRZYCHODZI
-    gdy grasz          kostka co %g min realnych, szansa %.0f%%
-    gdy nie grasz      kostka co %g h realnych, szansa %.0f%%
+    zawsze             kostka co %g min realnych, szansa %.0f%%
+                       - tak samo, gdy grasz i gdy nie grasz
+    gdy nie grasz      cala wizyta dzieje sie od razu: lis zabija
+                       i znika, nie czeka na Ciebie. Co zrobil,
+                       przeczytasz w KRONICE FERMY
     nie przyjdzie      przez pierwsze %g min nowej fermy
                        ani gdy masz mniej niz %d kur
 
@@ -464,8 +467,7 @@ raw("""
     wybije CALEGO stada. Ratunek: klikac (te same %d trafien) albo
     miec psa - przy psie rzezi nie ma wcale.
 """.rstrip() % (
-    fox["active_roll_minutes"], fox["active_chance"] * 100,
-    fox["offline_roll_hours"], fox["offline_chance"] * 100,
+    fox["roll_minutes"], fox["chance"] * 100,
     fox["grace_minutes"], fox["min_hens"],
     fox.get("lurk_min_seconds", 10), fox.get("lurk_max_seconds", 30), fox.get("approach_seconds", 4),
     fox["kill_interval_min"], fox["kill_interval_max"],
@@ -586,9 +588,17 @@ gotowke (z jajami i ptakami na sprzedaz) nie da sie dokupic brakujacej pary
 Poniosłeś bankructwo." Przycisk zaczyna nowa ferme pod TYM SAMYM kodem.
 """)
 para("""
-NOWA RASA. Pierwsza sztuka kazdej rasy otwiera duze okno z gratulacjami,
-malowanym portretem rasy, jej historia i trzema ciekawostkami.
+NOWA RASA I OSIAGNIECIA. Pierwsza sztuka kazdej rasy otwiera wielkie okno
+z gratulacjami, malowanym portretem rasy, jej historia i trzema
+ciekawostkami. Wszystkie zdobyte karty ras sa potem pod GWIAZDKA w lewym
+gornym rogu (OSIAGNIECIA). Niezdobyte rasy widac tam jako ciemne sylwetki.
 """)
+para("""
+KRONIKA FERMY. Po przerwie dluzszej niz %g godziny gra pokazuje kronike:
+ile jaj zniosly kury, ile przepadlo, ile razy byl lis i co zabral, czy
+wybuchla choroba, co sie zbudowalo - i dziennik z godzinami ("02:14 Lis
+wszedl na wybieg. Zabral ptakow: 6.").
+""" % BAL["offline"].get("report_hours", 3))
 
 title("17. SCIAGAWKA")
 raw("""

@@ -485,31 +485,119 @@ func _apply_elapsed(elapsed: float) -> void:
 	var seconds := real_seconds * GameData.time_scale()
 	if seconds < 1.0:
 		return
+	var flock_before := state.hen_count()
 	var result := Simulation.advance(state, seconds, true)
 	_check_unlocks()
 	_check_win()
 	_check_game_over()
-	var laid := int(result["eggs_laid"])
-	if laid > 0:
-		Events.notice.emit(tr("HINT_WELCOME_BACK") % laid)
-	# Budowa skonczona pod nieobecnosc gracza.
 	for id in result.get("built", []):
 		_announce_built(String(id))
-	var lost := int(result["died_hunger"]) + int(result["died_disease"]) + int(result["fox_took"])
-	if lost > 0:
-		Events.notice.emit(tr("HINT_LOST_WHILE_AWAY") % lost)
-	# Lis, ktory podszedl pod nasza nieobecnosc, czeka na wybiegu zamiast
-	# zabrac kury po cichu. Inaczej gracz nigdy by go nie zobaczyl, a wlasnie
-	# o to mial najwieksza pretensje.
-	if int(result["fox_arrived"]) > 0:
-		Events.fox_arrived.emit(state.fox_kill_left, state.fox_visit_left)
-		# Gracz ma wiedziec, ze pies pracuje — inaczej 200 zl wyglada
-		# jak wyrzucone w bloto.
-		Events.notice.emit(tr("HINT_FOX_HERE_DOG") if state.dog_level > 0 else tr("HINT_FOX_HERE"))
-	if int(result["fox_blocked"]) > 0:
-		Events.notice.emit(tr("HINT_FOX_BLOCKED"))
-		Events.fox_repelled.emit()
+	# Dluga przerwa (np. noc): zamiast dymkow KRONIKA FERMY z godzinami.
+	var report_hours := float(offline.get("report_hours", 3.0))
+	if real_seconds >= report_hours * 3600.0:
+		last_away_report = build_away_report(result, real_seconds, flock_before)
+		Events.away_report.emit(last_away_report)
+	else:
+		var laid := int(result["eggs_laid"])
+		if laid > 0:
+			Events.notice.emit(tr("HINT_WELCOME_BACK") % laid)
+		var lost := int(result["died_hunger"]) + int(result["died_disease"]) + int(result["fox_took"])
+		if lost > 0:
+			Events.notice.emit(tr("HINT_LOST_WHILE_AWAY") % lost)
+	# Lis w tle rozgrywa sie od razu i znika (12.21) - nie czeka na gracza.
+	# Zostaje tylko sprzatanie sceny, gdy w trakcie przerwy skonczyla sie
+	# wizyta rozpoczeta jeszcze przy graczu.
 	_report_fox_end(result)
+
+
+## Ostatnia kronika fermy (dla panelu, ktory czeka, az zniknie ekran startowy).
+var last_away_report: Dictionary = {}
+
+
+## Sklada kronike fermy z podsumowania nadrabiania. `real_seconds` to dlugosc
+## przerwy, `flock_before` - stado przed nia. Wpisy dziennika dostaja godzine
+## zegarka ("02:14").
+func build_away_report(result: Dictionary, real_seconds: float, flock_before: int) -> Dictionary:
+	var now := Time.get_unix_time_from_system()
+	var start := now - real_seconds
+	var bias := int(Time.get_time_zone_from_system().get("bias", 0)) * 60
+	var log_lines: Array = []
+	for entry: Dictionary in result.get("log", []):
+		var clock := Time.get_datetime_dict_from_unix_time(int(start + float(entry["t"])) + bias)
+		log_lines.append([float(entry["t"]), "%02d:%02d" % [clock["hour"], clock["minute"]],
+				_log_text(entry)])
+	var fox_in := 0
+	var massacre := false
+	for entry: Dictionary in result.get("log", []):
+		if entry["kind"] == "fox":
+			fox_in += 1
+			massacre = massacre or bool(entry.get("massacre", false))
+	var cocks := 0
+	for bird: Chicken in state.chickens:
+		if bird.is_rooster:
+			cocks += 1
+	return {
+		"away": real_seconds,
+		"eggs_laid": int(result["eggs_laid"]),
+		"eggs_lost": int(result.get("eggs_lost", 0)),
+		"eggs_spoiled": int(result.get("eggs_spoiled", 0)),
+		"hatched": int(result["hatched"]),
+		"grown_up": int(result["grown_up"]),
+		"fox_blocked": int(result["fox_blocked"]),
+		"fox_in": fox_in,
+		"fox_took": int(result["fox_took"]),
+		"fox_chased": int(result.get("fox_chased", 0)),
+		"fox_killed": int(result.get("fox_killed", 0)),
+		"fox_massacre": massacre,
+		"outbreaks": int(result.get("outbreaks", 0)),
+		"got_sick": int(result["got_sick"]),
+		"died_disease": int(result["died_disease"]),
+		"died_hunger": int(result["died_hunger"]),
+		"out_of_feed": bool(result["out_of_feed"]),
+		"built": result.get("built", []).duplicate(),
+		"flock_before": flock_before,
+		"hens": state.chickens.size() - cocks,
+		"roosters": cocks,
+		"log": log_lines,
+	}
+
+
+func _log_text(entry: Dictionary) -> String:
+	match String(entry["kind"]):
+		"fox_blocked":
+			return tr("LOG_FOX_BLOCKED")
+		"fox":
+			var text := tr("LOG_FOX_MASSACRE" if bool(entry.get("massacre", false)) else "LOG_FOX") \
+					% int(entry.get("taken", 0))
+			match String(entry.get("dog", "")):
+				"chased":
+					text += tr("LOG_FOX_DOG_CHASED")
+				"killed":
+					text += tr("LOG_FOX_DOG_KILLED")
+			return text
+		"outbreak":
+			return tr("LOG_OUTBREAK") % int(entry.get("target", 0))
+		"outbreak_over":
+			return tr("LOG_OUTBREAK_OVER") % int(entry.get("dead", 0))
+		"storage_full":
+			return tr("LOG_STORAGE_FULL")
+		"no_feed":
+			return tr("LOG_NO_FEED")
+		"built":
+			return tr("LOG_BUILT") % building_title(String(entry.get("id", "")))
+	return String(entry["kind"])
+
+
+## "Magazyn: mała szopka" - nazwa budynku z nazwa jego poziomu.
+func building_title(building_id: String) -> String:
+	var cfg: Dictionary = GameData.balance().get("incubator", {}) if building_id == "incubator" \
+			else GameData.balance().get("buildings", {}).get(building_id, {})
+	var level := state.building_level(building_id)
+	var level_name := String(cfg.get("name", ""))
+	var ups: Array = cfg.get("upgrades", [])
+	if level > 0 and not ups.is_empty():
+		level_name = String((ups[mini(level, ups.size()) - 1] as Dictionary).get("name", ""))
+	return "%s: %s" % [tr("BUILDING_%s_NAME" % building_id.to_upper()), tr(level_name)]
 
 
 ## Koniec wizyty lisa. WAZNE: scena lisa sama pilnuje tylko wlasnego zegara,
@@ -577,10 +665,6 @@ func sell_eggs(count: int = 0) -> float:
 	Events.resources_changed.emit()
 	return earned
 
-
-## Ile workow kupuje przycisk hurtowy w sklepie.
-func feed_bulk_packs() -> int:
-	return maxi(2, int(GameData.balance().get("economy", {}).get("feed_bulk_packs", 10)))
 
 
 ## Ile jaj idzie w jednej partii sprzedazy.

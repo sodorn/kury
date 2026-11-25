@@ -39,6 +39,10 @@ static func advance(state: FarmState, delta: float, offline: bool = false) -> Di
 		"fox_victims": [],
 		"built": [],
 		"rotted": 0,
+		# Dziennik zdarzen do raportu po powrocie (12.21): lista slownikow
+		# {"t": sekundy ZEGARA od poczatku tego advance, "kind": ..., ...}.
+		"log": [],
+		"_t": 0.0,
 	}
 	var remaining := maxf(delta, 0.0)
 	var step_size := STEP if remaining <= 600.0 else clampf(remaining / 600.0, STEP, MAX_STEP)
@@ -49,11 +53,26 @@ static func advance(state: FarmState, delta: float, offline: bool = false) -> Di
 	if offline:
 		var share := float(GameData.balance().get("hunger", {}).get("offline_max_share", 0.5))
 		loss_budget = int(floor(state.hen_count() * clampf(share, 0.0, 1.0)))
+	var done := 0.0
+	var scale := maxf(0.0001, GameData.time_scale())
 	while remaining > 0.0:
 		var step := minf(remaining, step_size)
+		summary["_t"] = done / scale
 		_step(state, step, summary, loss_budget, offline)
 		remaining -= step
+		done += step
 	return summary
+
+
+## Wpis do dziennika zdarzen. Czas to sekundy ZEGARA od poczatku `advance`;
+## Game przelicza je na godzine na zegarku gracza.
+static func _log(out: Dictionary, kind: String, data: Dictionary = {}) -> void:
+	var entry := data.duplicate()
+	entry["t"] = float(out.get("_t", 0.0))
+	entry["kind"] = kind
+	if not out.has("log"):
+		out["log"] = []
+	(out["log"] as Array).append(entry)
 
 
 ## Ile kur ubylo ze stada od poczatku tego wywolania `advance`.
@@ -86,6 +105,8 @@ static func _step(state: FarmState, step: float, out: Dictionary, loss_budget: i
 	else:
 		state.feed = 0.0
 		if not state.chickens.is_empty():
+			if not bool(out["out_of_feed"]):
+				_log(out, "no_feed")
 			out["out_of_feed"] = true
 		_advance_hunger(state, step, out, loss_budget)
 
@@ -132,6 +153,7 @@ static func _advance_construction(state: FarmState, step: float, out: Dictionary
 		var built: Array = out.get("built", [])
 		built.append(id)
 		out["built"] = built
+		_log(out, "built", {"id": id, "level": state.building_level(id)})
 
 
 ## Inkubator: partie jaj dochodza do wyklucia i zamieniaja sie w pisklęta.
@@ -313,6 +335,8 @@ static func _start_outbreak(state: FarmState, out: Dictionary, budget: int) -> v
 	state.outbreak_dead = 0
 	out["outbreak"] = target
 	out["outbreak_share"] = share
+	out["outbreaks"] = int(out.get("outbreaks", 0)) + 1
+	_log(out, "outbreak", {"target": target, "share": share})
 	_spread_outbreak(state, out, budget, 0.0)
 
 
@@ -349,6 +373,7 @@ static func _end_outbreak(state: FarmState, out: Dictionary) -> void:
 	state.disease_calm = randf_range(low, high) * 3600.0
 	out["outbreak_over"] = int(out.get("outbreak_over", 0)) + 1
 	out["outbreak_dead"] = state.outbreak_dead
+	_log(out, "outbreak_over", {"dead": state.outbreak_dead})
 	state.outbreak_on = false
 	state.outbreak_left = 0
 	state.outbreak_timer = 0.0
@@ -440,11 +465,13 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 	if state.chickens.size() < int(fox.get("min_hens", 5)):
 		return
 
-	# 3. Kostka. W grze aktywnej raz na active_roll_minutes, w nieaktywnej
-	#    raz na offline_roll_hours — dokladnie tak, jak chcial wlasciciel.
+	# 3. Kostka: co roll_minutes minut ZEGARA z szansa chance - tak samo
+	#    w grze i w tle (wlasciciel 25.11: "w kazdej godzinie jakas szansa").
+	#    Wczesniej w tle kostka leciala raz na dobe, a licznik uzbierany przez
+	#    noc odpalal kostke w pierwszej sekundzie po powrocie - stad lis
+	#    witajacy gracza prawie po kazdej dluzszej przerwie.
 	state.fox_roll_timer += real
-	var interval := float(fox.get("offline_roll_hours", 24.0)) * 3600.0 if offline \
-			else float(fox.get("active_roll_minutes", 60.0)) * 60.0
+	var interval := float(fox.get("roll_minutes", 60.0)) * 60.0
 	# Przegoniony golymi rekami lis wraca szybciej. Pies albo plot zdejmuja
 	# te kare — gospodarstwo wyglada na pilnowane.
 	if state.fox_hand_scared and state.dog_level <= 0 and state.guard_level <= 0:
@@ -455,9 +482,7 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 	state.fox_roll_timer = 0.0
 	state.fox_next_multiplier = 1.0
 
-	var chance := float(fox.get("offline_chance", 0.1667)) if offline \
-			else float(fox.get("active_chance", 0.3333))
-	if randf() >= chance:
+	if randf() >= float(fox.get("chance", 0.3333)):
 		return
 
 	# 4. W grze aktywnej lis najpierw czai sie w krzakach, potem podchodzi
@@ -475,6 +500,7 @@ static func _fox_at_fence(state: FarmState, out: Dictionary, budget: int,
 		offline: bool) -> void:
 	if randf() < state.fox_block_chance():
 		out["fox_blocked"] = int(out["fox_blocked"]) + 1
+		_log(out, "fox_blocked")
 		return
 	_fox_arrives(state, out, budget, offline)
 
@@ -511,8 +537,13 @@ static func _fox_arrives(state: FarmState, out: Dictionary, budget: int,
 	# wizyty: cala wizyte rozgrywamy od razu, na tej samej osi czasu co
 	# w grze aktywnej. Wczesniej lis zabieral wtedy CALY lup naraz, a pies
 	# w ogole nie dostawal szansy — czyli pilnowal tylko, gdy gracz patrzyl.
+	# W tle lis NIE ma bezpiecznika strat (wlasciciel 25.11: "niech zezre,
+	# ile chce") - budzet strat dotyczy tylko glodu i choroby.
 	if offline:
-		_fox_visit_offline(state, out, budget, full)
+		var before := int(out["fox_took"])
+		var massacre := state.fox_massacre
+		var dog := _fox_visit_offline(state, out, 1 << 30, full)
+		_log(out, "fox", {"taken": int(out["fox_took"]) - before, "massacre": massacre, "dog": dog})
 		return
 
 	# Pies rusza za lisem. Jesli da rade, skraca wizyte do swojego czasu —
@@ -561,7 +592,8 @@ static func fox_leaves(state: FarmState) -> void:
 ## kostka. Wygrywa to, co zdarzy sie wczesniej. Klikania palcem tu nie ma,
 ## bo gracza nie ma przy grze.
 static func _fox_visit_offline(state: FarmState, out: Dictionary, budget: int,
-		visit_seconds: float) -> void:
+		visit_seconds: float) -> String:
+	var dog_result := ""
 	var fox: Dictionary = GameData.balance().get("fox", {})
 	var next_kill := 0.0
 	var next_dog := state.dog_interval() if state.dog_level > 0 else INF
@@ -576,8 +608,10 @@ static func _fox_visit_offline(state: FarmState, out: Dictionary, budget: int,
 				state.fox_next_multiplier = maxf(1.0,
 						float(fox.get("killed_return_multiplier", 5.0)))
 				out["fox_killed"] = int(out.get("fox_killed", 0)) + 1
+				dog_result = "killed"
 			else:
 				out["fox_chased"] = int(out.get("fox_chased", 0)) + 1
+				dog_result = "chased"
 			break
 		if next_kill > visit_seconds:
 			break
@@ -585,6 +619,7 @@ static func _fox_visit_offline(state: FarmState, out: Dictionary, budget: int,
 			break
 		next_kill += _fox_kill_gap(state)
 	_fox_leaves(state)
+	return dog_result
 
 
 ## Odstep miedzy kolejnymi ofiarami lisa, w sekundach REALNYCH. W rzezi
@@ -654,6 +689,8 @@ static func _lay_eggs(state: FarmState, step: float, out: Dictionary, offline: b
 				# to jest wlasnie hamulec, dzieki ktoremu gra nie przechodzi
 				# sie sama przez noc.
 				if state.add_egg(hen.breed_id) <= 0:
+					if int(out.get("eggs_lost", 0)) == 0:
+						_log(out, "storage_full")
 					out["eggs_lost"] = int(out.get("eggs_lost", 0)) + 1
 					continue
 			else:
