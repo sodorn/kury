@@ -4,7 +4,11 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.23): CHOROBA JEDNEJ RASY
+- Aktualny etap: **ETAP 10** (wersja 12.24): SKLEP - liczba kur i kogutow
+  jako cyferki w kolkach obok nazwy rasy (bordowe = kury, ciemnobrazowe
+  z kogucikiem = koguty; _count_badge, HenBadge/RoosterBadge); z przyciskow
+  kupna zniknelo "(masz N)" (wlasciciel 25.11).
+- Wersja 12.23: CHOROBA JEDNEJ RASY
   (wlasciciel 25.11): ognisko losuje jedna rase (waga sqrt ceny) i zaraza
   po kolei WSZYSTKIE jej zdrowe, niezaszczepione ptaki; inne rasy odporne.
   Przy wybuchu losowana szansa wyzdrowienia 0/10/20/30% (disease.

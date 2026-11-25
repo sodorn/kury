@@ -980,13 +980,34 @@ func _add_breed_card(breed: Dictionary) -> void:
 	texts.add_theme_constant_override("separation", 4)
 	var title := Label.new()
 	title.text = breed_name
+	# 12.24 (wlasciciel 25.11): ile masz - cyferka w bordowym kolku obok
+	# nazwy rasy (kury), a obok kogucik z druga cyferka (koguty).
+	var name_row := HBoxContainer.new()
+	name_row.name = "NameRow"
+	name_row.add_theme_constant_override("separation", 10)
+	name_row.add_child(title)
+	var hen_badge := _count_badge(Color("#7A1F2B"))
+	hen_badge.name = "HenBadge"
+	name_row.add_child(hen_badge)
+	var cock_icon := TextureRect.new()
+	cock_icon.custom_minimum_size = Vector2(40, 40)
+	cock_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	cock_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	cock_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var cock_path := String(breed.get("rooster_sprite", ""))
+	if cock_path != "" and ResourceLoader.exists(cock_path):
+		cock_icon.texture = load(cock_path) as Texture2D
+	name_row.add_child(cock_icon)
+	var cock_badge := _count_badge(Color("#4A2A18"))
+	cock_badge.name = "RoosterBadge"
+	name_row.add_child(cock_badge)
 	var subtitle := Label.new()
 	subtitle.theme_type_variation = &"NoteLabel"
 	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var numbers := Label.new()
 	numbers.theme_type_variation = &"NoteLabel"
 	numbers.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	texts.add_child(title)
+	texts.add_child(name_row)
 	texts.add_child(subtitle)
 	texts.add_child(numbers)
 	top.add_child(texts)
@@ -1057,8 +1078,10 @@ func _add_breed_card(breed: Dictionary) -> void:
 			locked_note.text = tr("PANEL_BREED_LOCKED") % Game.breed_required_level(breed_id)
 		# Ile masz - wprost na przyciskach kupna, krotko (wlasciciel 25.11:
 		# w opisie pod nazwa rasy bylo to za malo widoczne).
-		buy.text = tr("PANEL_BUY_HEN") % [NumberFormat.money(price), owned]
-		buy_rooster.text = tr("PANEL_BUY_ROOSTER") % [NumberFormat.money(cock_price), cocks]
+		buy.text = tr("PANEL_BUY_HEN") % NumberFormat.money(price)
+		buy_rooster.text = tr("PANEL_BUY_ROOSTER") % NumberFormat.money(cock_price)
+		(hen_badge.get_child(0) as Label).text = str(owned)
+		(cock_badge.get_child(0) as Label).text = str(cocks)
 		buy.disabled = poor or locked
 		# Wczesniej ta linijka byla pisana dwa razy i druga gubila `locked`,
 		# wiec koguta dalo sie kupic do rasy zamknietej za poziomem kurnika.
@@ -1092,6 +1115,29 @@ func _grid_slide(variation: StringName) -> SlideButton:
 	# Bez minimalnej szerokosci dluzszy napis rozpychalby swoja kolumne.
 	slide.custom_minimum_size.x = 10.0
 	return slide
+
+
+## Kolko z liczba sztuk obok nazwy rasy w sklepie (bialy pogrubiony napis
+## na ciemnym tle, dobrze widoczny).
+func _count_badge(color: Color) -> PanelContainer:
+	var badge := PanelContainer.new()
+	badge.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	badge.custom_minimum_size = Vector2(44, 44)
+	var box := StyleBoxFlat.new()
+	box.bg_color = color
+	box.set_corner_radius_all(22)
+	box.content_margin_left = 10
+	box.content_margin_right = 10
+	box.content_margin_top = 0
+	box.content_margin_bottom = 0
+	badge.add_theme_stylebox_override("panel", box)
+	var label := Label.new()
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 28)
+	label.add_theme_color_override("font_color", Color.WHITE)
+	badge.add_child(label)
+	return badge
 
 
 ## Zwykly przycisk do siatki sklepu, tej samej wysokosci co suwaki obok:

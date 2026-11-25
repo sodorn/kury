@@ -378,8 +378,15 @@ func _test_shop() -> void:
 	_check(open_card != null and open_card.visible, "karta rasy startowej ma przycisk zakupu")
 	if open_card != null:
 		var kury := Game.state.hens_of_breed("leghorn")
-		_check(open_card.text.contains("(masz %d)" % kury) and open_card is SlideButton,
-				"kupno kury: suwak z liczba posiadanych (%s)" % open_card.text)
+		var koguty := Game.state.hens_of_breed("leghorn", false, true)
+		var karta: Node = rows[first_card]
+		var kolko := karta.find_child("HenBadge", true, false) as Control
+		var kolko_k := karta.find_child("RoosterBadge", true, false) as Control
+		_check(open_card is SlideButton and not open_card.text.contains("masz"),
+				"kupno kury: suwak bez dopisku 'masz' (%s)" % open_card.text)
+		_check(kolko != null and kolko.visible and (kolko.get_child(0) as Label).text == str(kury)
+				and kolko_k != null and (kolko_k.get_child(0) as Label).text == str(koguty),
+				"obok nazwy rasy kolka z liczba kur (%d) i kogutow (%d)" % [kury, koguty])
 	_check(last_card != null and last_card.visible, "najdrozsza rasa tez ma przycisk zakupu")
 	_check(last_card != null and last_card.disabled, "ale bez pieniedzy przycisk jest wyszarzony")
 

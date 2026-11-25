@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 12.23
+  INSTRUKCJA OBSLUGI *** gra w wersji 12.24
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
