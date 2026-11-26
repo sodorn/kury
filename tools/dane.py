@@ -62,7 +62,9 @@ def apply_upgrades(bal: dict, plik: dict) -> dict:
     b.setdefault("dog", {})["upgrades"] = [
         {"name": lv["nazwa"], "price": float(lv["cena"]), "interval": float(lv["probuje_co_s"]),
          "chance": float(lv["przegania_proc"]) / 100.0,
-         "kill_chance": float(lv["zagryza_proc"]) / 100.0} for lv in plik["pies"]]
+         "kill_chance": float(lv["zagryza_proc"]) / 100.0,
+         "life_days_min": float(lv["zyje_dni_min"]), "life_days_max": float(lv["zyje_dni_max"])}
+        for lv in plik["pies"]]
     return bal
 
 

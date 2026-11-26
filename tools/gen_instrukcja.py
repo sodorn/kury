@@ -204,7 +204,7 @@ Jest siedemnascie ras. Im drozsza rasa, tym drozsze jaja i tym wiecej dostaniesz
 za dorosla sztuke - ale tym dluzej trwa odchow i tym czesciej taka kura choruje.
 """)
 para("""
-Przeszkody sa trzy: PASZA (kosztuje i konczy sie sama), CHOROBA (przechodzi
+Przeszkody sa trzy: PASZA (kosztuje i konczy sie sama), ZARAZA (przechodzi
 z kury na kure co minute i nie ma na nia leku) i LIS (wchodzi na wybieg
 i zabija kury jedna po drugiej, a bez psa potrafi wybic cale stado).
 """)
@@ -507,7 +507,7 @@ prawdopodobienstwem w ogole go nie wpuszcza. Plot i pies licza sie osobno,
 wiec najlepiej miec oba. Plot zmienia wyglad na kazdym poziomie.
 """)
 
-title("14. CHOROBA")
+title("14. ZARAZA")
 dis = BAL["disease"]
 def ryzyko(n):
     pts = dis["rate_per_hour"]
@@ -533,7 +533,7 @@ raw("""
                  grasz i gdy nie grasz. Przez pierwsze %g min nowej fermy
                  nikt nie choruje.
 
-  JAKA RASA      choroba atakuje JEDNA rase naraz (drozsza chetniej).
+  JAKA RASA      zaraza atakuje JEDNA rase naraz (drozsza chetniej).
                  Inne rasy sa odporne - im wiecej ras, tym mniej tracisz.
 
   JAK SIE SZERZY pierwszy ptak choruje od razu, potem zaraza przechodzi
@@ -552,10 +552,10 @@ raw("""
                  zlapalo.
 
   PO OGNISKU     zwykle jest chwila oddechu, ale gra nie mowi, jak dluga.
-                 Choroba jest losowa - nie da sie jej przewidziec co do
+                 Zaraza jest losowa - nie da sie jej przewidziec co do
                  godziny.
 
-  STAN W KURNIKU panel kurnika pokazuje wiersz CHOROBA: ognisko w toku
+  STAN W KURNIKU panel kurnika pokazuje wiersz ZARAZA: ognisko w toku
                  albo ryzyko wybuchu przy obecnym stadzie.
 """.rstrip() % (
     dis["rate_per_hour"][0][0], co_ile(dis["rate_per_hour"][0][0]),
@@ -605,7 +605,7 @@ gornym rogu (OSIAGNIECIA). Niezdobyte rasy widac tam jako ciemne sylwetki.
 para("""
 KRONIKA FERMY. Po przerwie dluzszej niz %g godziny gra pokazuje kronike:
 ile jaj zniosly kury, ile przepadlo, ile razy byl lis i co zabral, czy
-wybuchla choroba, co sie zbudowalo - i dziennik z godzinami ("02:14 Lis
+wybuchla zaraza, co sie zbudowalo - i dziennik z godzinami ("02:14 Lis
 wszedl na wybieg. Zabral ptakow: 6.").
 """ % BAL["offline"].get("report_hours", 3))
 
@@ -615,7 +615,7 @@ raw("""
   Rasa wyszarzona w sklepie    -> za niski poziom kurnika (patrz tabela ras)
   Jaja znikaja z magazynu      -> gnija po %g h, albo magazyn jest pelny
   Kury padaja bez ostrzezenia  -> skonczyla sie pasza
-  Kury zielenieja i padaja     -> CHOROBA: szczep zdrowe, chore do McDonalda
+  Kury zielenieja i padaja     -> ZARAZA: szczep zdrowe, chore do McDonalda
   Pisklę nie wyrasta           -> brak paszy albo pelny kurnik
   Lis na wybiegu               -> KLIKAJ W NIEGO (%d razy), kup psa i plot
   Nie moge wrocic do fermy     -> potrzebny KOD, zapisz go sobie poza gra

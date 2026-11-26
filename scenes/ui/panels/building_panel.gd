@@ -155,6 +155,8 @@ func _build_content(building_id: String) -> void:
 			child.queue_free()
 			container.remove_child(child)
 
+	if Game.is_admin() and building_id != "shop":
+		_add_admin_levels(building_id)
 	match building_id:
 		"coop":
 			_build_coop()
@@ -360,6 +362,8 @@ func _build_incubator() -> void:
 				func() -> String:
 					# Wyszarzony przycisk ma powiedziec, czego brakuje: jaj czy
 					# miejsca w kurniku. Samo "nie da sie" niczego nie tlumaczy.
+					if Game.state.is_building("incubator"):
+						return tr("PANEL_INCUBATE_BUILDING")
 					if Game.incubation_blocked_by_coop(breed_id):
 						return tr("PANEL_INCUBATE_NO_ROOM") % [
 							breed_name, Game.state.coop_occupied(), Game.state.coop_reserved()]
@@ -401,6 +405,16 @@ func _build_shop() -> void:
 				return tr("PANEL_SELL_EGGS") % [
 					NumberFormat.eggs(n), NumberFormat.money(FarmState.eggs_worth(lot))],
 			_on_sell_eggs)
+	# 13.0 (wlasciciel 26.11): drugi przycisk - sprzedaj 80% jaj z magazynu.
+	var sell_most := _grid_button(&"SellButton")
+	sell_most.name = "SellEggsMost"
+	sell_most.pressed.connect(_on_sell_eggs_share)
+	_actions.add_child(sell_most)
+	_refreshers.append(func() -> void:
+		var n := _eggs_share_count()
+		sell_most.disabled = n <= 0
+		sell_most.text = tr("PANEL_SELL_EGGS_SHARE") % [NumberFormat.eggs(n),
+				NumberFormat.money(FarmState.eggs_worth(Game.state.oldest_eggs(n)))])
 
 	# Pasza (wlasciciel 25.11): dwa zwykle przyciski obok siebie - worek
 	# i big-bag z data/rozbudowy.json. Cena za kg spada z poziomem magazynu.
@@ -601,12 +615,16 @@ func _add_upgrade(building_id: String, effect_provider: Callable) -> void:
 			next.text = tr("PANEL_UPGRADE_NEXT") % [String(upgrade.get("name", "")),
 					effect_provider.call(upgrade)])
 	var slide := _add_action(true,
-			func() -> bool: return not Game.state.is_building(building_id) and Game.state.money \
+			func() -> bool: return not Game.state.is_building(building_id) \
+					and Game.upgrade_block_reason(building_id).is_empty() and Game.state.money \
 					>= float(Game.state.upgrade_entry(building_id).get("price", 0)),
 			func() -> String:
 				if Game.state.is_building(building_id):
 					return tr("PANEL_BUILDING_BUSY") % NumberFormat.duration(
 							Game.state.construction_left(building_id))
+				var blocked := Game.upgrade_block_reason(building_id)
+				if not blocked.is_empty():
+					return blocked
 				return tr("PANEL_UPGRADE_SLIDE") % [NumberFormat.money(float(
 						Game.state.upgrade_entry(building_id).get("price", 0))),
 						_build_time_text(building_id)],
@@ -755,6 +773,39 @@ func _flash(message: String) -> void:
 
 func _on_sell_eggs() -> void:
 	var sold := mini(Game.egg_sale_lot(), Game.state.egg_count())
+	var earned := Game.sell_eggs(sold)
+	if earned > 0.0:
+		_flash(tr("PANEL_SOLD") % [NumberFormat.eggs(sold), NumberFormat.money(earned)])
+
+
+## Ferma admina 000000: poziom w gore/dol za darmo (w kurniku tez plot i pies).
+func _add_admin_levels(building_id: String) -> void:
+	var ids: Array[String] = [building_id]
+	if building_id == "coop":
+		ids.append_array(["guard", "dog"])
+	for id in ids:
+		var row := HBoxContainer.new()
+		row.name = "Admin_%s" % id
+		row.add_theme_constant_override("separation", 12)
+		for delta: int in [1, -1]:
+			var b := _grid_button(&"")
+			b.text = "ADMIN %s lvl %s" % [id, "up" if delta > 0 else "down"]
+			b.pressed.connect(func() -> void:
+				Game.admin_change_level(id, delta)
+				_refresh())
+			row.add_child(b)
+		_upgrades.add_child(row)
+
+
+## Ile jaj idzie pod przycisk "sprzedaj 80%" (najstarsze najpierw).
+func _eggs_share_count() -> int:
+	return int(floor(Game.state.egg_count() * 0.8))
+
+
+func _on_sell_eggs_share() -> void:
+	var sold := _eggs_share_count()
+	if sold <= 0:
+		return
 	var earned := Game.sell_eggs(sold)
 	if earned > 0.0:
 		_flash(tr("PANEL_SOLD") % [NumberFormat.eggs(sold), NumberFormat.money(earned)])
@@ -987,9 +1038,9 @@ func _add_breed_card(breed: Dictionary) -> void:
 	top.add_theme_constant_override("separation", 20)
 
 	var picture := TextureRect.new()
-	picture.custom_minimum_size = Vector2(210, 210)
+	picture.custom_minimum_size = Vector2(170, 170)
 	picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	picture.texture = _breed_image(breed)
 	# Zdjecia realnych kur sa prostokatne — obcinamy je do kwadratu karty.
 	picture.clip_contents = true

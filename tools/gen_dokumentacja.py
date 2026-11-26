@@ -275,6 +275,11 @@ OPISY_ROZ = {
                               "FarmState.dog_chance"),
     "pies[].zagryza_proc": ("%", "Przy udanym rzucie: szansa, ze pies lisa ZAGRYZIE.",
                             "FarmState.dog_kill_chance"),
+    "pies[].zyje_dni_min": ("dni", "Najkrotsze zycie psa (dni prawdziwe, 24 h). Losowane przy zakupie "
+                            "rozkladem Gaussa: srodek przedzialu, odchylenie 1/4 szerokosci.",
+                            "FarmState.roll_dog_life"),
+    "pies[].zyje_dni_max": ("dni", "Najdluzsze zycie psa. Po nim pies umiera (Simulation._advance_dog), "
+                            "plot zostaje.", "FarmState.roll_dog_life"),
 }
 
 

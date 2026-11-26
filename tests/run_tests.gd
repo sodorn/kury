@@ -50,6 +50,7 @@ func _ready() -> void:
 	_test_fox_return_speed()
 	_test_upgrade_ladders()
 	_test_upgrades_file()
+	_test_v13_basics()
 	_test_egg_spoilage()
 	_test_egg_capacity()
 	_test_vaccine_price()
@@ -1525,6 +1526,68 @@ func _test_guard_migration() -> void:
 		var pies := odczyt.dog_level
 		_check(plot == chciane[0], "obrona %d -> plot %d (jest %d)" % [stary, chciane[0], plot])
 		_check(pies == chciane[1], "obrona %d -> pies %d (jest %d)" % [stary, chciane[1], pies])
+
+
+## 13.0: blokada inkubatora w trakcie rozbudowy, zycie psa, ferma admina.
+func _test_v13_basics() -> void:
+	var scale := GameData.time_scale()
+	# Inkubator: przy jajach w srodku nie da sie rozbudowac; w trakcie
+	# rozbudowy nic sie nie wykluwa i nie da sie wlozyc jaj.
+	var st := _fresh_state(["leghorn", "leghorn"], 1000.0)
+	st.add_egg("leghorn", 30)
+	st.incubating.append(EggBatch.create("leghorn", 1))
+	var old_state := Game.state
+	Game.state = st
+	st.money = 100000.0
+	_check(not Game.upgrade_building("incubator") and not Game.upgrade_block_reason("incubator").is_empty(),
+			"inkubatora z jajami nie da sie rozbudowac")
+	st.incubating.clear()
+	_check(Game.upgrade_building("incubator") and st.is_building("incubator"), "pusty inkubator sie rozbudowuje")
+	_check(not Game.can_incubate("leghorn"), "w trakcie rozbudowy nie wklada sie jaj")
+	var batch := EggBatch.create("leghorn", 1)
+	st.incubating.append(batch)
+	Simulation.advance(st, 60.0 * scale)
+	_check(is_zero_approx(batch.elapsed), "w trakcie rozbudowy nic sie nie wykluwa")
+	Game.state = old_state
+
+	# Pies: zycie losowane z przedzialu, po nim pies umiera.
+	var dogs: Array = GameData.balance()["buildings"]["dog"]["upgrades"]
+	_check(is_equal_approx(float(dogs[0]["life_days_min"]), 12.0) and is_equal_approx(float(dogs[0]["life_days_max"]), 22.0)
+			and is_equal_approx(float(dogs[1]["life_days_min"]), 4.0) and is_equal_approx(float(dogs[1]["life_days_max"]), 12.0),
+			"kundel zyje 12-22 dni, owczarek 4-12")
+	var poza := 0
+	var suma := 0.0
+	for i in 400:
+		var d := FarmState.new()
+		d.set_building_level("dog", 1)
+		var dni := d.dog_life / 86400.0
+		suma += dni
+		if dni < 12.0 or dni > 22.0:
+			poza += 1
+	_check(poza == 0 and absf(suma / 400.0 - 17.0) < 0.6, "kundel: zycie w 12-22 dni, srednio ~17 (%.1f)" % (suma / 400.0))
+	var pies := _fresh_state(["leghorn"], 100000.0)
+	pies.set_building_level("dog", 2)
+	_check(pies.dog_life >= 4.0 * 86400.0 and pies.dog_life <= 12.0 * 86400.0, "owczarek: zycie w 4-12 dni")
+	pies.dog_age = pies.dog_life - 5.0
+	var wynik := Simulation.advance(pies, 30.0 * scale)
+	_check(pies.dog_level == 0 and int(wynik.get("dog_died", 0)) == 2, "po swoim czasie pies umiera")
+	var zapis := SaveGame.from_dict(SaveGame.to_dict(_with_dog()))
+	_check(zapis.has("state") and (zapis["state"] as FarmState).dog_life > 0.0, "zycie psa w zapisie")
+
+	# Admin: tylko pod kodem 000000.
+	_check(Game.ADMIN_CODE == "000000", "kod fermy admina 000000")
+	var stary_kod := Cloud.player_id
+	Cloud.player_id = "123456"
+	_check(not Game.is_admin(), "zwykla ferma nie jest adminem")
+	Cloud.player_id = "000000"
+	_check(Game.is_admin(), "ferma 000000 jest adminem")
+	Cloud.player_id = stary_kod
+
+
+func _with_dog() -> FarmState:
+	var s := _fresh_state(["leghorn"], 10.0)
+	s.set_building_level("dog", 1)
+	return s
 
 
 ## 12.22: plik data/rozbudowy.json (do recznej edycji przez wlasciciela) jest

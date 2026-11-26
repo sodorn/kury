@@ -66,6 +66,23 @@ static func advance(state: FarmState, delta: float, offline: bool = false) -> Di
 
 ## Wpis do dziennika zdarzen. Czas to sekundy ZEGARA od poczatku `advance`;
 ## Game przelicza je na godzine na zegarku gracza.
+## 13.0: pies sie starzeje (czas ZEGARA) i po wylosowanej liczbie dni umiera.
+static func _advance_dog(state: FarmState, real: float, out: Dictionary) -> void:
+	if state.dog_level <= 0:
+		return
+	if state.dog_life <= 0.0:
+		state.roll_dog_life()
+	state.dog_age += real
+	if state.dog_age < state.dog_life:
+		return
+	var level := state.dog_level
+	state.dog_level = 0
+	state.dog_age = 0.0
+	state.dog_life = 0.0
+	out["dog_died"] = level
+	_log(out, "dog_died", {"level": level})
+
+
 static func _log(out: Dictionary, kind: String, data: Dictionary = {}) -> void:
 	var entry := data.duplicate()
 	entry["t"] = float(out.get("_t", 0.0))
@@ -91,6 +108,7 @@ static func _step(state: FarmState, step: float, out: Dictionary, loss_budget: i
 		out["grown_up"] = int(out["grown_up"]) + _advance_chicks(state, step)
 	out["rotted"] = int(out["rotted"]) + _advance_corpses(state, step)
 	_advance_construction(state, step, out)
+	_advance_dog(state, step / maxf(0.0001, GameData.time_scale()), out)
 	# Jaja starzeja sie niezaleznie od tego, czy stado jeszcze zyje — stad
 	# miejsce PRZED wyjsciem dla pustej farmy nizej.
 	_advance_egg_spoilage(state, step, out)
@@ -158,7 +176,10 @@ static func _advance_construction(state: FarmState, step: float, out: Dictionary
 
 ## Inkubator: partie jaj dochodza do wyklucia i zamieniaja sie w pisklęta.
 static func _advance_incubator(state: FarmState, step: float) -> int:
-	if state.incubating.is_empty():
+	# 13.0 (wlasciciel 26.11): w trakcie rozbudowy inkubator stoi - nic sie
+	# nie wykluwa. (Rozbudowy i tak nie da sie zaczac przy pelnym inkubatorze,
+	# ale stare zapisy moga miec obie rzeczy naraz.)
+	if state.incubating.is_empty() or state.is_building("incubator"):
 		return 0
 	var speed := state.incubation_speed()
 	var hatched := 0

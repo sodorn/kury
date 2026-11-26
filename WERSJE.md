@@ -3,6 +3,11 @@
 Ściągawka na wypadek, gdyby nowa wersja okazała się gorsza od poprzedniej.
 Wszystko tutaj działa w PowerShellu na Windowsie, w katalogu `D:\GIT\kury`.
 
+## Ważne punkty
+
+- **12.31 — ostatnia wersja przed 13.0.** Commit `36eb94e`, gałąź
+  `v12.31-final-przed-13`. Powrót: `git checkout v12.31-final-przed-13`.
+
 ## Jak numerujemy
 
 ```

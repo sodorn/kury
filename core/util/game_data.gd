@@ -11,7 +11,7 @@ const DATA_DIR := "res://data/"
 ## Numer wersji gry. Jedno miejsce do podbicia przy wydaniu — pokazuje sie
 ## na ekranie powitalnym, zeby bylo widac, czy przegladarka wczytala nowa
 ## wersje, czy podsunela stara z pamieci.
-const VERSION := "12.31"
+const VERSION := "13.0"
 
 static var _balance: Dictionary = {}
 static var _buildings: Array = []
@@ -154,6 +154,8 @@ static func apply_upgrades(bal: Dictionary, file: Dictionary) -> Array[String]:
 				"interval": maxf(0.5, float(lv.get("probuje_co_s", 10))),
 				"chance": clampf(float(lv.get("przegania_proc", 0)) / 100.0, 0.0, 1.0),
 				"kill_chance": clampf(float(lv.get("zagryza_proc", 0)) / 100.0, 0.0, 1.0),
+				"life_days_min": maxf(0.1, float(lv.get("zyje_dni_min", 10))),
+				"life_days_max": maxf(0.1, float(lv.get("zyje_dni_max", 10))),
 			})
 	return problems
 

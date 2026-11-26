@@ -1,6 +1,6 @@
 ==============================================================================
   SYMULATOR HODOWLI KURCZAKOW - DOKUMENTACJA TECHNICZNA
-  gra w wersji 12.31   *   format zapisu w wersji 6   *   Godot 4.7.2
+  gra w wersji 13.0   *   format zapisu w wersji 6   *   Godot 4.7.2
 ==============================================================================
 
   Dokument dla programisty: jak gra jest zbudowana, jak dzialaja mechaniki, co
@@ -926,6 +926,16 @@
       Przy udanym rzucie: szansa, ze pies lisa ZAGRYZIE.
       uzycie: FarmState.dog_kill_chance
 
+  pies[].zyje_dni_min   [dni]
+      Najkrotsze zycie psa (dni prawdziwe, 24 h). Losowane przy zakupie
+      rozkladem Gaussa: srodek przedzialu, odchylenie 1/4 szerokosci.
+      uzycie: FarmState.roll_dog_life
+
+  pies[].zyje_dni_max   [dni]
+      Najdluzsze zycie psa. Po nim pies umiera (Simulation._advance_dog), plot
+      zostaje.
+      uzycie: FarmState.roll_dog_life
+
   rozbudowy.json - aktualne wartosci
   ----------------------------------
 
@@ -1673,5 +1683,5 @@
     limity miejsca i ruchu planu darmowego.
 
 ==============================================================================
-  koniec dokumentu  *  wygenerowano z wersji 12.31
+  koniec dokumentu  *  wygenerowano z wersji 13.0
 ==============================================================================

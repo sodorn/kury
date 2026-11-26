@@ -117,7 +117,7 @@ func _on_pulled(payload: Dictionary, ok: bool, _for_player: String) -> void:
 	if not visible or not _choice.visible:
 		return
 	_load_button.disabled = false
-	if ok and not payload.is_empty():
+	if ok and (not payload.is_empty() or Game.is_admin()):
 		# Game juz podmienil stan; nie ma po co pokazywac kodu, gracz go zna.
 		_close()
 

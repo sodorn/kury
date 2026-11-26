@@ -69,6 +69,7 @@ func _run() -> void:
 	await _test_sick_and_fox_look()
 	await _test_fox_lurk_and_fence()
 	await _test_feed_panels()
+	_test_map_level_badges()
 	await _test_upgrade_looks()
 	await _test_panel_width()
 	await _test_dog_breeds()
@@ -332,8 +333,11 @@ func _test_shop() -> void:
 	var rows := actions.get_children()
 	# 12.18: doszedl przycisk "kup 10 workow paszy". 12.20: zniknal lek.
 	# 12.21: zniknal "kup 10 workow" (wlasciciel 25.11).
-	_check(rows.size() == 4 + GameData.breeds().size(),
+	# 13.0: doszedl "sprzedaj 80%".
+	_check(rows.size() == 5 + GameData.breeds().size(),
 			"sklep ma przyciski, notke i karte kazdej rasy (jest %d)" % rows.size())
+	var most := actions.get_node_or_null("SellEggsMost") as Button
+	_check(most != null and most.text.begins_with("Sprzedaj 80%"), "przycisk 'Sprzedaj 80%%' (%s)" % (most.text if most else "brak"))
 	if rows.size() < 3:
 		return
 
@@ -1139,6 +1143,17 @@ func _test_sick_and_fox_look() -> void:
 
 ## Rozbudowa ma byc WIDOCZNA na farmie, nie tylko w panelu. Plot ma rosnac
 ## z kazdym poziomem obrony, a budynki zmieniac wyglad na progach 3 i 6.
+## 13.0: poziom budynku w kolku przy budynku na mapie.
+func _test_map_level_badges() -> void:
+	for id: String in ["coop", "storage", "incubator"]:
+		var found: Building = null
+		for b in _main.find_children("*", "Building", true, false):
+			if (b as Building).building_id == id:
+				found = b
+		_check(found != null and found.level_badge_text() == str(Game.state.building_level(id) + 1),
+				"%s: na mapie kolko z poziomem (%s)" % [id, found.level_badge_text() if found else "brak"])
+
+
 func _test_upgrade_looks() -> void:
 	var farm: Node2D = _main.get_node("Farm")
 	var fence: Sprite2D = farm.get_node("Objects/FenceFront")

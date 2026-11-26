@@ -4,7 +4,25 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.31): poprawki inne fermy:
+- Aktualny etap: **ETAP 11** (wersja 13.0, etap 1 z planu 13.0 - wlasciciel
+  26.11, plik z lista K4). SNAPSHOT linii 12: 12.31 = commit 36eb94e, galaz
+  v12.31-final-przed-13 (tagi blokuje proxy). Zrobione w 13.0 (etap 1):
+  inkubator - przy jajach w srodku nie da sie rozbudowac
+  (Game.upgrade_block_reason), w trakcie rozbudowy nic sie nie wykluwa i nie
+  da sie wlozyc jaj; poziom budynku w kolku na mapie (Building, LevelBadge,
+  lewy dolny rog); "Sprzedaj 80%" jaj w sklepie (SellEggsMost); "choroba" ->
+  "zaraza" w tekstach gry; obrazki ras w sklepie 170 px i KEEP_ASPECT_CENTERED
+  (nie obcina dziobow); zycie psa (rozbudowy.json pies[].zyje_dni_min/max,
+  Gauss, FarmState.dog_age/dog_life w zapisie, Simulation._advance_dog,
+  alert + wpis w kronice); FERMA ADMINA 000000 (Game.ADMIN_CODE, is_admin,
+  zakladana pod tym kodem gdy jej brak; pasek w HUD: +1000 zl, lis, zabij
+  psa, zaraza; w panelach przyciski poziom up/down za darmo, w kurniku tez
+  plot i pies). DALSZE ETAPY 13.0: 2 ustawienia (zebatka, suwak/klik dla
+  typow przyciskow) + samouczek; 3 krzaki z lisem + zamowienia; 4 noc wg
+  czasu astronomicznego (kury spia, nie jedza); 5 grafiki (budynki od
+  dziadowskich do palacykow, szabo). Do decyzji: pasza, magazyny, ceny ras,
+  logowanie, kopie zapasowe, ochrona przed bankructwem.
+- Wersja 12.31: poprawki inne fermy:
   (1) karty = lista "unlocked" + rasy obecne w stadzie/inkubatorze/pisklętach
   (FarmState.ensure_starting_unlocks) - startowe leghorny nigdy nie byly na
   liscie, stad brak leghorna np. na 272180; lista ferm dociaga tez

@@ -57,6 +57,8 @@ static func to_dict(state: FarmState, unpaid_seconds: float = 0.0) -> Dictionary
 		"storage_level": state.storage_level,
 		"guard_level": state.guard_level,
 		"dog_level": state.dog_level,
+		"dog_age": state.dog_age,
+		"dog_life": state.dog_life,
 		"construction": state.construction,
 		"egg_ages": state.egg_ages,
 		"rooster_hints": state.rooster_hints,
@@ -102,6 +104,11 @@ static func from_dict(data: Dictionary) -> Dictionary:
 	state.storage_level = maxi(0, int(data.get("storage_level", 0)))
 	state.guard_level = maxi(0, int(data.get("guard_level", 0)))
 	state.dog_level = maxi(0, int(data.get("dog_level", 0)))
+	# 13.0: stare zapisy nie znaja wieku psa - pies dostaje nowe zycie od zera.
+	state.dog_age = maxf(0.0, float(data.get("dog_age", 0.0)))
+	state.dog_life = maxf(0.0, float(data.get("dog_life", 0.0)))
+	if state.dog_level > 0 and state.dog_life <= 0.0:
+		state.roll_dog_life()
 	# Wizyty lisa nie przenosimy przez zapis: gracz, ktory wylaczyl gre
 	# w trakcie, nie ma czego przeganiac po powrocie.
 	state.fox_visit_left = 0.0

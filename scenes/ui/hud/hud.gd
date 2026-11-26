@@ -16,6 +16,7 @@ func _ready() -> void:
 	Events.resources_changed.connect(_refresh)
 	get_viewport().size_changed.connect(_apply_safe_area)
 	_apply_safe_area()
+	_make_admin_bar()
 	_refresh()
 
 
@@ -23,6 +24,8 @@ func _refresh() -> void:
 	var state := Game.state
 	if state == null:
 		return
+	if _admin_bar != null:
+		_admin_bar.visible = Game.is_admin()
 	_money.set_value(state.money)
 	_eggs.set_value(state.egg_count())
 	_feed.set_value(floor(state.feed))
@@ -32,3 +35,28 @@ func _refresh() -> void:
 ## Odsuwa pasek od wyciecia na aparat / paska statusu telefonu.
 func _apply_safe_area() -> void:
 	_top_bar.add_theme_constant_override("margin_top", BAR_MARGIN + SafeArea.top_inset(get_viewport()))
+
+
+## 13.0: pasek przyciskow fermy admina (kod 000000) pod licznikami.
+var _admin_bar: HBoxContainer
+
+
+func _make_admin_bar() -> void:
+	_admin_bar = HBoxContainer.new()
+	_admin_bar.name = "AdminBar"
+	_admin_bar.add_theme_constant_override("separation", 8)
+	_admin_bar.position = Vector2(150, 130)
+	var actions := {
+		"+1000 zł": func() -> void: Game.admin_add_money(1000.0),
+		"Przywołaj lisa": func() -> void: Game.admin_call_fox(),
+		"Zabij psa": func() -> void: Game.admin_kill_dog(),
+		"Wywołaj zarazę": func() -> void: Game.admin_outbreak(),
+	}
+	for label: String in actions:
+		var b := Button.new()
+		b.text = label
+		b.add_theme_font_size_override("font_size", 24)
+		b.pressed.connect(actions[label])
+		_admin_bar.add_child(b)
+	_root.add_child(_admin_bar)
+	_admin_bar.visible = false

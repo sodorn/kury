@@ -150,6 +150,9 @@ func _report(result: Dictionary) -> void:
 		Events.alert.emit(tr("ALERT_SICK_TITLE"), tr("ALERT_SICK_BODY") % _breed_name(
 				String(result.get("outbreak_breed", state.outbreak_breed))))
 		Events.resources_changed.emit()
+	if int(result.get("dog_died", 0)) > 0:
+		Events.alert.emit(tr("ALERT_DOG_DIED_TITLE"), tr("ALERT_DOG_DIED_BODY") % _dog_name(
+				int(result["dog_died"])))
 	if int(result.get("outbreak_over", 0)) > 0:
 		Events.notice.emit(tr("HINT_OUTBREAK_OVER") % [int(result.get("outbreak_dead", 0)),
 				int(result.get("outbreak_saved", 0))])
@@ -276,6 +279,18 @@ func _on_cloud_pulled(payload: Dictionary, ok: bool, for_player: String) -> void
 	var forced := _force_pull
 	_force_pull = false
 	_restore_code = ""
+	# 13.0: ferma admina 000000 do testow - gdy jej jeszcze nie ma na
+	# serwerze, zakladamy ja pod tym kodem zamiast zglaszac "nie ma farmy".
+	if forced and ok and payload.is_empty() and for_player == ADMIN_CODE:
+		SaveGame.clear()
+		Cloud.set_player_id(ADMIN_CODE)
+		_owned_code = ADMIN_CODE
+		new_game()
+		state.intro_seen = true
+		save()
+		Events.resources_changed.emit()
+		Events.notice.emit(tr("HINT_ADMIN_FARM"))
+		return
 	if not ok or payload.is_empty():
 		if forced:
 			# Rozrozniamy dwa zupelnie rozne klopoty: serwer nie odpowiada
@@ -301,6 +316,67 @@ func _on_cloud_pulled(payload: Dictionary, ok: bool, for_player: String) -> void
 	_apply_loaded(remote)
 	save()
 	Events.notice.emit(tr("HINT_CODE_RESTORED") if forced else tr("HINT_CLOUD_LOADED"))
+
+
+# --- ferma admina (13.0) -------------------------------------------------
+
+## Kod fermy do testow (wlasciciel 26.11). Ma dodatkowe przyciski: poziom
+## budynku w gore/dol za darmo, +1000 zl, lis, smierc psa, zaraza.
+const ADMIN_CODE := "000000"
+
+
+func is_admin() -> bool:
+	return Cloud.player_id == ADMIN_CODE
+
+
+func admin_add_money(amount: float = 1000.0) -> void:
+	if not is_admin():
+		return
+	state.money += amount
+	Events.resources_changed.emit()
+	save()
+
+
+## Poziom budynku od razu i za darmo; `delta` +1 albo -1. Przerywa budowe.
+func admin_change_level(building_id: String, delta: int) -> bool:
+	if not is_admin():
+		return false
+	var level := state.building_level(building_id)
+	var top := level + 1 if not state.next_building_upgrade(building_id).is_empty() else level
+	var target := clampi(level + delta, 0, top)
+	if target == level:
+		return false
+	state.construction.erase(building_id)
+	state.set_building_level(building_id, target)
+	Events.resources_changed.emit()
+	save()
+	return true
+
+
+## Lis od razu wychodzi z krzakow (a dalej jak zwykle: plot, pies, palec).
+func admin_call_fox() -> void:
+	if not is_admin() or state.fox_visit_left > 0.0:
+		return
+	state.fox_lurk_left = maxf(1.0, state.fox_lurk_seconds())
+	Events.resources_changed.emit()
+
+
+func admin_kill_dog() -> void:
+	if not is_admin() or state.dog_level <= 0:
+		return
+	state.dog_age = state.dog_life
+	_report(Simulation.advance(state, 1.0))
+	Events.resources_changed.emit()
+
+
+func admin_outbreak() -> void:
+	if not is_admin() or state.outbreak_on:
+		return
+	var out := {"died_disease": 0, "log": []}
+	Simulation._start_outbreak(state, out, 1 << 30)
+	if int(out.get("outbreak", 0)) > 0:
+		Events.alert.emit(tr("ALERT_SICK_TITLE"), tr("ALERT_SICK_BODY") % _breed_name(state.outbreak_breed))
+	Events.resources_changed.emit()
 
 
 ## Zaklada nowa farme: swiezy kod i stan poczatkowy. Wywolywane z ekranu
@@ -588,6 +664,8 @@ func _log_text(entry: Dictionary) -> String:
 			return tr("LOG_NO_FEED")
 		"built":
 			return tr("LOG_BUILT") % building_title(String(entry.get("id", "")))
+		"dog_died":
+			return tr("LOG_DOG_DIED") % _dog_name(int(entry.get("level", 1)))
 	return String(entry["kind"])
 
 
@@ -879,6 +957,8 @@ func fox_taps_left() -> int:
 func upgrade_building(building_id: String) -> bool:
 	if state.is_building(building_id):
 		return false
+	if not upgrade_block_reason(building_id).is_empty():
+		return false
 	var upgrade := state.upgrade_entry(building_id)
 	if upgrade.is_empty():
 		return false
@@ -898,6 +978,15 @@ func upgrade_building(building_id: String) -> bool:
 	Events.resources_changed.emit()
 	_announce_built(building_id)
 	return true
+
+
+## Dlaczego rozbudowy nie wolno zaczac (pusty tekst = wolno). 13.0
+## (wlasciciel 26.11): inkubatora nie rozbudowuje sie, gdy cos sie w nim
+## wykluwa - najpierw trzeba poczekac na pisklęta.
+func upgrade_block_reason(building_id: String) -> String:
+	if building_id == "incubator" and not state.incubating.is_empty():
+		return tr("PANEL_INCUBATOR_BUSY")
+	return ""
 
 
 ## Komunikat po skonczonej rozbudowie.
@@ -929,7 +1018,9 @@ func eggs_per_chick() -> int:
 ## calego stada tej rasy. Wczesniej taka sprzedaz wyszarzala przycisk bez
 ## zadnego wyjasnienia (zglosili to koledzy Tomka).
 func can_incubate(breed_id: String) -> bool:
-	return state.incubating.size() < incubator_slots() \
+	# 13.0: w trakcie rozbudowy inkubatora nie wklada sie jaj.
+	return not state.is_building("incubator") \
+			and state.incubating.size() < incubator_slots() \
 			and state.coop_free() > 0 \
 			and int(state.eggs.get(breed_id, 0)) >= eggs_per_chick()
 
@@ -958,6 +1049,14 @@ func incubate(breed_id: String) -> bool:
 ## Rozbudowuje inkubator o kolejny poziom z balance.json (z czasem budowy).
 func upgrade_incubator() -> bool:
 	return upgrade_building("incubator")
+
+
+## Nazwa psa danego poziomu z data/rozbudowy.json.
+func _dog_name(level: int) -> String:
+	var ups: Array = GameData.balance().get("buildings", {}).get("dog", {}).get("upgrades", [])
+	if ups.is_empty() or level <= 0:
+		return ""
+	return String((ups[mini(level, ups.size()) - 1] as Dictionary).get("name", ""))
 
 
 ## Nazwa rasy po polsku do komunikatow ("Leghorn"); pusty id -> "?".
