@@ -118,7 +118,7 @@ func _fill(breed: Dictionary) -> void:
 	_scroll.scroll_vertical = 0
 	_stats.text = "%s\n%s" % [
 		tr("UNLOCK_PRICE") % NumberFormat.money(float(breed.get("price", 0))),
-		tr("UNLOCK_EGG") % [
+		tr("UNLOCK_EGG" if breed.get("rarity", "") == "RARITY_COMMON" else "UNLOCK_EGG_HATCH") % [
 			NumberFormat.small_money(float(breed.get("egg_value", 0))),
 			NumberFormat.duration(float(breed.get("egg_seconds", 0)) / GameData.time_scale())],
 	]

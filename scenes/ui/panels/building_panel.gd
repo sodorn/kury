@@ -1113,7 +1113,11 @@ func _add_breed_card(breed: Dictionary) -> void:
 		cull.visible = sick > 0
 		cull.text = tr("PANEL_CULL_HEN") % [NumberFormat.money(Game.mcdonalds_price()), sick]
 		subtitle.text = "%s · %s" % [tr(breed.get("rarity", "")), tr(breed.get("desc", ""))]
-		numbers.text = tr("PANEL_BREED_NUMBERS") % [
+		# Pospolite jaja ida do sklepu na jedzenie, reszta jako legowe do
+		# hodowcow (wlasciciel 26.11) - stad dwa podpisy.
+		var egg_key := "PANEL_BREED_NUMBERS" if breed.get("rarity", "") == "RARITY_COMMON" \
+				else "PANEL_BREED_NUMBERS_HATCH"
+		numbers.text = tr(egg_key) % [
 			NumberFormat.small_money(FarmState.egg_value(breed_id)),
 			NumberFormat.duration(float(breed.get("egg_seconds", 0)) / GameData.time_scale())])
 

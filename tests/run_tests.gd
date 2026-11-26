@@ -2642,7 +2642,7 @@ func _zl(value: float) -> String:
 ## o Ayam Cemani i wyswietlily sie graczowi jako gole nazwy.
 func _test_strings() -> void:
 	var keys: Array[String] = [
-		"UNLOCK_TITLE", "UNLOCK_PRICE", "UNLOCK_EGG", "UNLOCK_CLOSE",
+		"UNLOCK_TITLE", "UNLOCK_PRICE", "UNLOCK_EGG", "UNLOCK_EGG_HATCH", "UNLOCK_CLOSE",
 		"WIN_TITLE", "WIN_MONEY", "WIN_COLLECTION", "WIN_CONTINUE",
 		"PANEL_SELL_HEN", "PANEL_CULL_HEN", "PANEL_BUY_HEN",
 		"PANEL_UPGRADE_NEXT", "PANEL_UPGRADE_SLIDE", "PANEL_GUARD_NEXT", "PANEL_DOG_NEXT",

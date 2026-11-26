@@ -4,7 +4,17 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.28): CENY JAJ PRZEBALANSOWANE
+- Aktualny etap: **ETAP 10** (wersja 12.29): CENY JAJ RYNKOWE (wlasciciel
+  26.11: "podnies ceny jaj do rynkowych, nie balansuj reszty, najwyzej potem
+  spowolnimy gre"). Pospolite (RARITY_COMMON) = jaja do sklepu 0,70-0,90 zl,
+  pozostale = jaja legowe dla hodowcow wg ogloszen 11.2026: goloszyjka 5,
+  marans 6, araukana 6, silki 8, serama 7, brahma 8, czubatka 10,
+  pawlowska 13, feniks 14, totleger 15, sultanka 20, onagadori 30,
+  dong tao 40, cemani 90 zl. Sklep/odblokowanie: "Jajko do sklepu" vs
+  "Jajko legowe". UWAGA: jaja rzadkich ras zarabiaja teraz wiecej niz hodowla
+  (cemani ~7900 zl/h z kury vs 1725 zl/h z miejsca w inkubatorze) - wlasciciel
+  swiadomie to przyjal, ewentualne spowolnienie gry pozniej.
+- Wersja 12.28: CENY JAJ PRZEBALANSOWANE
   (wlasciciel 26.11, na jego polecenie - zasada "nie ruszac cen" tu nie
   dotyczy): egg_value = 0,175 zl * (1 + 0,15 * coop_level) * egg_seconds.
   W obrebie poziomu kurnika zarobek z kury rowny (drozsze jajko = wolniej),
