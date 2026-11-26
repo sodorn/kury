@@ -4,7 +4,15 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.27): CHOROBA BEZ ZAPOWIEDZI
+- Aktualny etap: **ETAP 10** (wersja 12.28): CENY JAJ PRZEBALANSOWANE
+  (wlasciciel 26.11, na jego polecenie - zasada "nie ruszac cen" tu nie
+  dotyczy): egg_value = 0,175 zl * (1 + 0,15 * coop_level) * egg_seconds.
+  W obrebie poziomu kurnika zarobek z kury rowny (drozsze jajko = wolniej),
+  kazdy poziom kurnika +15% zarobku z jaj -> nagroda za rozbudowe.
+  Leghorn 0,70 (bez zmian) ... cemani 5,60. egg_seconds bez zmian. Hodowla
+  dalej glownym zrodlem (cemani: 1725 zl/h z inkubatora vs 493 zl/h z jaj).
+  Opisy rhode i czubatki dopasowane.
+- Wersja 12.27: CHOROBA BEZ ZAPOWIEDZI
   (wlasciciel 26.11: "gracz nie ma prawa wiedziec, kiedy wydarza sie
   choroba"): wiersz Choroba w kurniku nie pokazuje "spokoj jeszcze przez X"
   (PANEL_DISEASE_CALM usuniety) - w czasie przerwy po ognisku widac zwykle

@@ -10,7 +10,7 @@ BUILDING_SHOP_DESC,"Kupujesz i sprzedajesz tu wszystko: jaja, kury, paszę i szc
 BREED_LEGHORN_NAME,Leghorn
 BREED_LEGHORN_DESC,"Biała nioska. Znosi najczęściej ze wszystkich, ale jaja są najtańsze."
 BREED_RHODE_NAME,Rhode Island
-BREED_RHODE_DESC,"Ruda i wytrzymała. Znosi wolniej, jaja warte wyraźnie więcej."
+BREED_RHODE_DESC,"Ruda i wytrzymała. Znosi trochę wolniej niż leghorn, za to jajko trochę droższe."
 BREED_SZABO_NAME,Kura szabo
 BREED_SZABO_DESC,"Pióra podwinięte na zewnątrz, jakby ją ktoś uczesał pod włos. Tania, a rzuca się w oczy."
 BREED_NAGOSZYJA_NAME,Kura nagoszyja
@@ -26,7 +26,7 @@ BREED_SERAMA_DESC,"Najmniejsza kura świata. Pierś wypięta, ogon do góry, cho
 BREED_BRAHMA_NAME,Brahma olbrzymia
 BREED_BRAHMA_DESC,"Największa kura w grze, z opierzonymi nogami. Spokojna i mięsna."
 BREED_CZUBATKA_NAME,Czubatka polska
-BREED_CZUBATKA_DESC,"Pióropusz na głowie zasłania jej pół świata. Jaja wyraźnie cenniejsze."
+BREED_CZUBATKA_DESC,"Pióropusz na głowie zasłania jej pół świata. Wymaga porządnego kurnika, ale jej jaja to już nie są grosze."
 BREED_PAVLOVSKAYA_NAME,Kura pawłowska
 BREED_PAVLOVSKAYA_DESC,"Korona z piór na głowie i opierzone nogi jak buciki. Rosyjska rzadkość."
 BREED_FENIKS_NAME,Feniks
