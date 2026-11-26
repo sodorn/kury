@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 12.26
+  INSTRUKCJA OBSLUGI *** gra w wersji 12.27
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -219,7 +219,7 @@
       80 miejsc - 12 000 zl, budowa 12 min
    5. kurnik z płyty warstwowej 5×6 m
       110 miejsc - 24 500 zl, budowa 17 min
-   6. murowany kurnik 6×7 m
+   6. murowany kurnik 5×7 m stawiany ze szwagrem
       150 miejsc - 45 000 zl, budowa 23 min
    7. murowany kurnik 8×8 m z wybiegiem
       200 miejsc - 90 000 zl, budowa 30 min
@@ -390,10 +390,12 @@
                  gdy ognisko juz ruszylo, ratuje te, ktorych jeszcze nie
                  zlapalo.
 
-  PO OGNISKU     3-12 godzin spokoju - wtedy nic nie wybucha.
+  PO OGNISKU     zwykle jest chwila oddechu, ale gra nie mowi, jak dluga.
+                 Choroba jest losowa - nie da sie jej przewidziec co do
+                 godziny.
 
-  STAN W KURNIKU panel kurnika pokazuje wiersz CHOROBA: ognisko w toku,
-                 spokoj (ile jeszcze) albo ryzyko przy obecnym stadzie.
+  STAN W KURNIKU panel kurnika pokazuje wiersz CHOROBA: ognisko w toku
+                 albo ryzyko wybuchu przy obecnym stadzie.
 
 ==============================================================================
  15. CZAS W GRZE

@@ -1,6 +1,6 @@
 ==============================================================================
   SYMULATOR HODOWLI KURCZAKOW - DOKUMENTACJA TECHNICZNA
-  gra w wersji 12.26   *   format zapisu w wersji 6   *   Godot 4.7.2
+  gra w wersji 12.27   *   format zapisu w wersji 6   *   Godot 4.7.2
 ==============================================================================
 
   Dokument dla programisty: jak gra jest zbudowana, jak dzialaja mechaniki, co
@@ -935,7 +935,8 @@
     2. drewniany kurnik 3×4 m - 55 miejsc, 4800 zl, 8 min
     3. ocieplony garaż blaszany 4×6 m - 80 miejsc, 12000 zl, 12 min
     4. kurnik z płyty warstwowej 5×6 m - 110 miejsc, 24500 zl, 17 min
-    5. murowany kurnik 6×7 m - 150 miejsc, 45000 zl, 23 min
+    5. murowany kurnik 5×7 m stawiany ze szwagrem - 150 miejsc, 45000 zl, 23
+    min
     6. murowany kurnik 8×8 m z wybiegiem - 200 miejsc, 90000 zl, 30 min
     7. kurnik 10×10 m z automatycznym karmieniem - 270 miejsc, 150000 zl, 38
     min
@@ -1672,5 +1673,5 @@
     limity miejsca i ruchu planu darmowego.
 
 ==============================================================================
-  koniec dokumentu  *  wygenerowano z wersji 12.26
+  koniec dokumentu  *  wygenerowano z wersji 12.27
 ==============================================================================

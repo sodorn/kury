@@ -445,8 +445,9 @@ func _build_shop() -> void:
 		_add_breed_card(breed)
 
 
-## Stan choroby w jednej linijce: ognisko w toku, spokoj po ognisku albo
-## ryzyko wybuchu przy obecnym stadzie.
+## Stan choroby w jednej linijce: ognisko w toku albo ryzyko wybuchu przy
+## obecnym stadzie. Przerwa po ognisku (disease_calm) dziala, ale gracz jej
+## nie widzi - choroba ma byc losowa, nie zapowiedziana (wlasciciel 26.11).
 func _disease_text() -> String:
 	var state := Game.state
 	if state.outbreak_on:
@@ -454,8 +455,6 @@ func _disease_text() -> String:
 		if state.outbreak_left > 0:
 			return tr("PANEL_DISEASE_ON") % [rasa, state.outbreak_left, state.sick_count()]
 		return tr("PANEL_DISEASE_ON_DONE") % state.sick_count()
-	if state.disease_calm > 0.0:
-		return tr("PANEL_DISEASE_CALM") % NumberFormat.duration(state.disease_calm)
 	var rate := FarmState.disease_rate_per_hour(state.chickens.size())
 	var level := 0
 	if rate > 0.0:

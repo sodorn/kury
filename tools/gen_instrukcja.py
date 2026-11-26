@@ -551,10 +551,12 @@ raw("""
                  gdy ognisko juz ruszylo, ratuje te, ktorych jeszcze nie
                  zlapalo.
 
-  PO OGNISKU     %g-%g godzin spokoju - wtedy nic nie wybucha.
+  PO OGNISKU     zwykle jest chwila oddechu, ale gra nie mowi, jak dluga.
+                 Choroba jest losowa - nie da sie jej przewidziec co do
+                 godziny.
 
-  STAN W KURNIKU panel kurnika pokazuje wiersz CHOROBA: ognisko w toku,
-                 spokoj (ile jeszcze) albo ryzyko przy obecnym stadzie.
+  STAN W KURNIKU panel kurnika pokazuje wiersz CHOROBA: ognisko w toku
+                 albo ryzyko wybuchu przy obecnym stadzie.
 """.rstrip() % (
     dis["rate_per_hour"][0][0], co_ile(dis["rate_per_hour"][0][0]),
     dis["rate_per_hour"][1][0], co_ile(dis["rate_per_hour"][1][0]),
@@ -562,8 +564,7 @@ raw("""
     dis["rate_per_hour"][-1][0], co_ile(dis["rate_per_hour"][-1][0]),
     dis["grace_minutes"], dis["spread_seconds"], dis["death_minutes"],
     dis["survive_share_min"] * 100, dis["survive_share_max"] * 100, dis["survive_share_step"] * 100,
-    zl(dis["mcdonalds_price"]), zl(dis["vaccine_price_per_hen"]),
-    dis["calm_hours_min"], dis["calm_hours_max"]))
+    zl(dis["mcdonalds_price"]), zl(dis["vaccine_price_per_hen"])))
 
 title("15. CZAS W GRZE")
 para("""

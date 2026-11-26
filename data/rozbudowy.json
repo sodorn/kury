@@ -19,7 +19,7 @@
 		{"poziom": 2, "nazwa": "drewniany kurnik 3×4 m",                     "cena": 4800,   "budowa_min": 8,  "miejsc": 55},
 		{"poziom": 3, "nazwa": "ocieplony garaż blaszany 4×6 m",             "cena": 12000,  "budowa_min": 12, "miejsc": 80},
 		{"poziom": 4, "nazwa": "kurnik z płyty warstwowej 5×6 m",            "cena": 24500,  "budowa_min": 17, "miejsc": 110},
-		{"poziom": 5, "nazwa": "murowany kurnik 6×7 m",                      "cena": 45000,  "budowa_min": 23, "miejsc": 150},
+		{"poziom": 5, "nazwa": "murowany kurnik 5×7 m stawiany ze szwagrem","cena": 45000,  "budowa_min": 23, "miejsc": 150},
 		{"poziom": 6, "nazwa": "murowany kurnik 8×8 m z wybiegiem",          "cena": 90000,  "budowa_min": 30, "miejsc": 200},
 		{"poziom": 7, "nazwa": "kurnik 10×10 m z automatycznym karmieniem",  "cena": 150000, "budowa_min": 38, "miejsc": 270},
 		{"poziom": 8, "nazwa": "kurnik 12×12 m z wolierą i wentylacją",      "cena": 300000, "budowa_min": 48, "miejsc": 360},

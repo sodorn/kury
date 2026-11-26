@@ -4,7 +4,16 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.26): ZNIZKA NA PASZE ZA WIELKOSC
+- Aktualny etap: **ETAP 10** (wersja 12.27): CHOROBA BEZ ZAPOWIEDZI
+  (wlasciciel 26.11: "gracz nie ma prawa wiedziec, kiedy wydarza sie
+  choroba"): wiersz Choroba w kurniku nie pokazuje "spokoj jeszcze przez X"
+  (PANEL_DISEASE_CALM usuniety) - w czasie przerwy po ognisku widac zwykle
+  ryzyko; HINT_OUTBREAK_OVER bez "na kilka godzin spokoj"; instrukcja bez
+  3-12 h. Mechanika disease_calm bez zmian. NAZWY vs CENY rozbudow
+  sprawdzone z rynkiem PL (11.2026): wszystko pasuje poza murowanym
+  kurnikiem 6x7 m za 45 000 (za tanio) -> "murowany kurnik 5x7 m stawiany
+  ze szwagrem"; ceny i balans bez zmian.
+- Wersja 12.26: ZNIZKA NA PASZE ZA WIELKOSC
   OPAKOWANIA, nie za magazyn (wlasciciel 25.11): rozbudowy.json ->
   pasza_zl_kg 2,00 i pasza_do_kupienia [worek 20 kg 0%, big-bag 500 kg 20%];
   magazyn[].pasza_zl_kg usuniete, magazyn podnosi tylko limit jaj.
