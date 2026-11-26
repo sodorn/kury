@@ -25,6 +25,9 @@ var _viewing_unlocked: Array = []
 var _listing := false
 ## Zdobyte karty z ostatnio pobranej listy ferm: kod -> Array id ras.
 var _cached_unlocked := {}
+## Statystyki podgladanej fermy (12.31): pieniadze, pasza, budynki, pies, plot.
+var _stats: GridContainer
+var _stats_note: Label
 var _star: Button
 ## Miejsce w drzewie HUD-u, do ktorego wracamy po zamknieciu (pod panelami
 ## budynkow - inaczej gwiazdka wisialaby nad otwartym sklepem).
@@ -143,13 +146,38 @@ func _build_sheet() -> void:
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_list.add_theme_constant_override("separation", 12)
 	_list_scroll.add_child(_list)
+	var inner := VBoxContainer.new()
+	inner.name = "GridBox"
+	inner.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	inner.add_theme_constant_override("separation", 16)
+	scroll.add_child(inner)
+	_stats_note = Label.new()
+	_stats_note.name = "StatsNote"
+	_stats_note.theme_type_variation = &"NoteLabel"
+	_stats_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_stats_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_stats_note.hide()
+	inner.add_child(_stats_note)
+	_stats = GridContainer.new()
+	_stats.name = "Stats"
+	_stats.columns = 2
+	_stats.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_stats.add_theme_constant_override("h_separation", 20)
+	_stats.add_theme_constant_override("v_separation", 8)
+	_stats.hide()
+	# Odstep od paska przewijania, zeby prawa kolumna nie wchodzila pod niego.
+	var stats_margin := MarginContainer.new()
+	stats_margin.add_theme_constant_override("margin_right", 28)
+	stats_margin.add_theme_constant_override("margin_left", 8)
+	stats_margin.add_child(_stats)
+	inner.add_child(stats_margin)
 	_grid = GridContainer.new()
 	_grid.name = "Grid"
 	_grid.columns = COLUMNS
 	_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_grid.add_theme_constant_override("h_separation", 14)
 	_grid.add_theme_constant_override("v_separation", 14)
-	scroll.add_child(_grid)
+	inner.add_child(_grid)
 
 	var close := Button.new()
 	close.name = "Close"
@@ -217,6 +245,8 @@ func _fill() -> void:
 
 func _show_grid() -> void:
 	_listing = false
+	_stats.hide()
+	_stats_note.hide()
 	_fill()
 	_list_scroll.hide()
 	_grid_scroll.show()
@@ -324,9 +354,90 @@ func _view_farm(code: String, current: bool) -> void:
 	_viewing = "" if current else code
 	_viewing_unlocked = []
 	if not current:
-		# Karty bierzemy z tej samej listy - nie trzeba pytac serwera drugi raz.
-		_viewing_unlocked = _cached_unlocked.get(code, [])
+		# Karty od razu z listy; pelne statystyki dociagamy osobnym zapytaniem.
+		_viewing_unlocked = (_cached_unlocked.get(code, []) as Array).duplicate()
 	_show_grid()
+	if current:
+		return
+	_stats_note.text = tr("ACH_STATS_LOADING")
+	_stats_note.show()
+	if not Cloud.farm_fetched.is_connected(_on_farm_fetched):
+		Cloud.farm_fetched.connect(_on_farm_fetched)
+	Cloud.fetch_farm(code)
+
+
+func _on_farm_fetched(code: String, payload: Dictionary, updated_at: int, ok: bool) -> void:
+	if code != _viewing or _listing:
+		return
+	if not ok or payload.is_empty():
+		_stats_note.text = tr("ACH_STATS_FAILED")
+		return
+	var loaded := SaveGame.from_dict(payload.duplicate(true))
+	var state := loaded.get("state") as FarmState
+	if state == null:
+		_stats_note.text = tr("ACH_STATS_FAILED")
+		return
+	for breed_id: String in state.unlocked_breeds:
+		if not _viewing_unlocked.has(breed_id):
+			_viewing_unlocked.append(breed_id)
+	_fill()
+	show_stats(state, updated_at)
+
+
+## Tabelka statystyk fermy. Publiczne, zeby test mogl ja wypelnic bez serwera.
+func show_stats(state: FarmState, updated_at: int) -> void:
+	for child in _stats.get_children():
+		_stats.remove_child(child)
+		child.queue_free()
+	_stats_note.text = tr("ACH_STATS_NOTE")
+	_stats_note.show()
+	var rows := [
+		["ACH_STAT_SAVED", _when(updated_at)],
+		["ACH_STAT_MONEY", NumberFormat.money(state.money)],
+		["ACH_STAT_FEED", NumberFormat.weight(state.feed)],
+		["ACH_STAT_FLOCK", "%d / %d" % [state.laying_hen_count(), state.rooster_count()]],
+		["ACH_STAT_EGGS", NumberFormat.grouped(state.egg_count())],
+		["ACH_STAT_COOP", _level_text(state, "coop")],
+		["ACH_STAT_STORAGE", _level_text(state, "storage")],
+		["ACH_STAT_INCUBATOR", _level_text(state, "incubator")],
+		["ACH_STAT_FENCE", _owned_text(state, "guard")],
+		["ACH_STAT_DOG", _owned_text(state, "dog")],
+		["ACH_STAT_DAYS", str(state.days)],
+	]
+	for pair: Array in rows:
+		var key_label := Label.new()
+		key_label.text = tr(pair[0])
+		key_label.add_theme_font_size_override("font_size", 26)
+		_stats.add_child(key_label)
+		var value := Label.new()
+		value.text = pair[1]
+		value.add_theme_font_size_override("font_size", 26)
+		value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		value.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		value.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		value.custom_minimum_size.x = 10.0
+		_stats.add_child(value)
+	_stats.show()
+
+
+## "drewniany kurnik 3×4 m · poziom 3"
+func _level_text(state: FarmState, building_id: String) -> String:
+	var cfg: Dictionary = GameData.balance().get("incubator", {}) if building_id == "incubator" \
+			else GameData.balance().get("buildings", {}).get(building_id, {})
+	var level := state.building_level(building_id)
+	var ups: Array = cfg.get("upgrades", [])
+	var name_key := String(cfg.get("name", "")) if level <= 0 or ups.is_empty() \
+			else String((ups[mini(level, ups.size()) - 1] as Dictionary).get("name", ""))
+	return tr("ACH_STAT_LEVEL") % [tr(name_key), level + 1]
+
+
+## Plot i pies: nazwa albo "brak".
+func _owned_text(state: FarmState, building_id: String) -> String:
+	var level := state.building_level(building_id)
+	var ups: Array = GameData.balance().get("buildings", {}).get(building_id, {}).get("upgrades", [])
+	if level <= 0 or ups.is_empty():
+		return tr("ACH_STAT_NONE")
+	return tr(String((ups[mini(level, ups.size()) - 1] as Dictionary).get("name", "")))
 
 
 ## Jedna karta w siatce. Zdobyta: portret w zlotej ramce i nazwa. Niezdobyta:

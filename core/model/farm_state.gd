@@ -142,8 +142,18 @@ static func from_start_config(start: Dictionary) -> FarmState:
 ## Lista `unlocked_breeds` sluzy teraz do czego innego: pamieta, ktore rasy
 ## gracz juz mial. Dzieki temu okienko z historia rasy pokazuje sie raz,
 ## przy pierwszym zakupie, i nie wyskakuje przy kazdej kolejnej sztuce.
+##
+## 12.31: kazda rasa, ktora gracz ma w stadzie, w inkubatorze albo wsrod
+## piskląt, liczy sie jako zdobyta. Startowe leghorny nigdy nie trafialy na
+## liste (nie byly kupione), wiec karta leghorna byla ciemna, choc gracz od
+## poczatku je hodowal. Wolane przy nowej grze i przy kazdym odczycie zapisu.
 func ensure_starting_unlocks() -> void:
-	pass
+	for hen: Chicken in chickens:
+		mark_owned(hen.breed_id)
+	for batch: EggBatch in incubating:
+		mark_owned(batch.breed_id)
+	for chick: Chick in chicks:
+		mark_owned(chick.breed_id)
 
 
 ## Czy gracz mial juz kiedys kure tej rasy.

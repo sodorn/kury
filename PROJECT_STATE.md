@@ -4,7 +4,15 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.30): INNE FERMY W OSIAGNIECIACH
+- Aktualny etap: **ETAP 10** (wersja 12.31): poprawki inne fermy:
+  (1) karty = lista "unlocked" + rasy obecne w stadzie/inkubatorze/pisklętach
+  (FarmState.ensure_starting_unlocks) - startowe leghorny nigdy nie byly na
+  liscie, stad brak leghorna np. na 272180; lista ferm dociaga tez
+  payload->chickens. (2) Podglad fermy pokazuje statystyki z pelnego zapisu
+  (Cloud.fetch_farm -> SaveGame.from_dict): pieniadze, pasza, kury/koguty,
+  jaja, kurnik/magazyn/inkubator, plot, pies, dni. (3) Poziom budynku
+  w panelu: numer w kolku (LevelBadge), bez "/ 10".
+- Wersja 12.30: INNE FERMY W OSIAGNIECIACH
   (wlasciciel 26.11): przycisk "Pokaz inne fermy" w panelu osiagniec ->
   lista ferm z serwera z kodami (Cloud.list_farms: player_id, updated_at,
   payload->unlocked; bez reszty zapisu). Najpierw "Twoje fermy" z tego

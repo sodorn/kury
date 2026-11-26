@@ -1554,6 +1554,11 @@ func _test_achievements() -> void:
 	var marans_card := grid.get_node_or_null("Card_marans") as Button
 	_check(cemani_card != null and not cemani_card.disabled and marans_card != null
 			and not marans_card.disabled, "karty cudzej fermy")
+	ach.show_stats(Game.state, 1795700000)
+	await _frames(5)
+	var stats := ach.find_child("Stats", true, false) as GridContainer
+	_check(stats != null and stats.visible and stats.get_child_count() == 22,
+			"statystyki cudzej fermy: 11 wierszy")
 	_shot("osiagniecia_cudza.png")
 	farms_btn.pressed.emit()
 	await _frames(3)

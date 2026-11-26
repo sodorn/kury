@@ -22,6 +22,9 @@ signal status_changed(online: bool)
 ## Lista ferm z serwera do panelu osiagniec (12.30). Wiersze:
 ## {"player_id": String, "updated_at": int, "unlocked": Array}.
 signal farms_listed(rows: Array, ok: bool)
+## Pelny zapis cudzej fermy do podgladu statystyk (12.31). Nie rusza
+## sygnalu `pulled`, bo ten przestawia gre na wczytana farme.
+signal farm_fetched(code: String, payload: Dictionary, updated_at: int, ok: bool)
 
 const PLAYER_ID_PATH := "user://player_id.txt"
 ## Kody ferm, na ktorych grano na tym urzadzeniu (12.30, wlasciciel 26.11:
@@ -371,6 +374,35 @@ func _remember_farm(code: String) -> void:
 		file.close()
 
 
+## Pobiera caly zapis jednej fermy tylko do podgladu.
+func fetch_farm(code: String) -> void:
+	if not is_enabled() or code.is_empty():
+		farm_fetched.emit(code, {}, 0, false)
+		return
+	var url := "%s/rest/v1/%s?player_id=eq.%s&select=payload,updated_at" % [
+			_base_url(), _table(), code.uri_encode()]
+	var http := HTTPRequest.new()
+	http.timeout = float(_config.get("timeout_seconds", 8))
+	http.accept_gzip = false
+	add_child(http)
+	http.request_completed.connect(
+			func(result: int, status: int, _head: PackedStringArray, body: PackedByteArray) -> void:
+				http.queue_free()
+				var json := JSON.new()
+				if result != HTTPRequest.RESULT_SUCCESS or status < 200 or status >= 300 \
+						or json.parse(_body_text(body)) != OK or typeof(json.data) != TYPE_ARRAY \
+						or (json.data as Array).is_empty():
+					farm_fetched.emit(code, {}, 0, false)
+					return
+				var row: Variant = (json.data as Array)[0]
+				var payload: Variant = row.get("payload", {}) if typeof(row) == TYPE_DICTIONARY else {}
+				farm_fetched.emit(code, payload if typeof(payload) == TYPE_DICTIONARY else {},
+						int(row.get("updated_at", 0)) if typeof(row) == TYPE_DICTIONARY else 0, true))
+	if http.request(url, _headers(), HTTPClient.METHOD_GET) != OK:
+		http.queue_free()
+		farm_fetched.emit(code, {}, 0, false)
+
+
 ## Pobiera liste WSZYSTKICH ferm z serwera: kod, czas ostatniego zapisu
 ## i zdobyte karty ras. Bez reszty zapisu - caly payload kazdej fermy to za
 ## duzo danych. Tylko do podgladu: nic tu nie zmienia tozsamosci urzadzenia.
@@ -378,7 +410,7 @@ func list_farms() -> void:
 	if not is_enabled():
 		farms_listed.emit([], false)
 		return
-	var url := "%s/rest/v1/%s?select=player_id,updated_at,unlocked:payload->unlocked&order=updated_at.desc&limit=500" % [
+	var url := "%s/rest/v1/%s?select=player_id,updated_at,unlocked:payload->unlocked,chickens:payload->chickens&order=updated_at.desc&limit=500" % [
 			_base_url(), _table()]
 	var http := HTTPRequest.new()
 	http.timeout = float(_config.get("timeout_seconds", 8))
@@ -398,11 +430,25 @@ func list_farms() -> void:
 				for raw: Variant in json.data:
 					if typeof(raw) != TYPE_DICTIONARY:
 						continue
+					# Zdobyte karty = lista "unlocked" plus rasy obecne w stadzie
+					# (startowe leghorny nie trafialy na liste - poprawka 12.31).
+					var owned: Array = []
 					var unlocked: Variant = raw.get("unlocked", [])
+					if typeof(unlocked) == TYPE_ARRAY:
+						for breed_id: Variant in unlocked:
+							if not owned.has(str(breed_id)):
+								owned.append(str(breed_id))
+					var flock: Variant = raw.get("chickens", [])
+					if typeof(flock) == TYPE_ARRAY:
+						for hen: Variant in flock:
+							if typeof(hen) == TYPE_DICTIONARY:
+								var breed_id := str(hen.get("breed", ""))
+								if not breed_id.is_empty() and not owned.has(breed_id):
+									owned.append(breed_id)
 					rows.append({
 						"player_id": str(raw.get("player_id", "")),
 						"updated_at": int(raw.get("updated_at", 0)),
-						"unlocked": unlocked if typeof(unlocked) == TYPE_ARRAY else [],
+						"unlocked": owned,
 					})
 				farms_listed.emit(rows, true))
 	if http.request(url, _headers(), HTTPClient.METHOD_GET) != OK:

@@ -938,17 +938,24 @@ func _add_level_row(level_provider: Callable, levels: int,
 	var value := Label.new()
 	value.theme_type_variation = &"CounterLabel"
 	_row_value(value)
+	# 12.31 (wlasciciel 26.11): numer poziomu w kolku jak liczba kur w sklepie,
+	# bez "/ 10" - kazdy budynek ma tyle samo poziomow, wiec to zbedne.
+	var badge := _count_badge(Color("#B7791F"))
+	badge.name = "LevelBadge"
 	row.add_child(label)
 	row.add_child(value)
+	row.add_child(badge)
+	row.add_theme_constant_override("separation", 12)
 	_rows.add_child(row)
 	_refreshers.append(func() -> void:
 		var shown: int = int(level_provider.call()) + 1
-		var key := "PANEL_LEVEL_MAX" if shown >= levels else "PANEL_LEVEL_VALUE"
-		value.text = tr(key) % [shown, levels]
+		(badge.get_child(0) as Label).text = str(shown)
 		# Przy nazwanych poziomach ("duży inkubator") sam numer nic nie mowi.
 		var named: String = name_provider.call() if name_provider.is_valid() else ""
-		if not named.is_empty():
-			value.text = "%s · %s" % [named, value.text])
+		if shown >= levels:
+			named = tr("PANEL_LEVEL_TOP") if named.is_empty() \
+					else "%s · %s" % [named, tr("PANEL_LEVEL_TOP")]
+		value.text = named)
 
 
 ## Ile poziomow ma budynek razem z poczatkowym.
