@@ -4,11 +4,27 @@ extends Control
 ## albo wykluta choc raz - FarmState.unlocked_breeds) pokazuje malowany
 ## portret; dotkniecie otwiera wielka karte z historia i ciekawostkami
 ## (UnlockPanel.show_card). Niezdobyta to ciemna sylwetka i znaki zapytania.
+##
+## INNE FERMY (12.30, wlasciciel 26.11): przycisk na gorze pokazuje liste ferm
+## z serwera z kodami - najpierw fermy z tego urzadzenia, potem pozostalych
+## graczy. Dotkniecie kodu pokazuje karty tamtej fermy. To tylko podglad:
+## nic nie wczytuje i nie zmienia kodu urzadzenia.
 
 const COLUMNS := 3
 
 var _grid: GridContainer
 var _count: Label
+var _farm_label: Label
+var _farms_button: Button
+var _grid_scroll: ScrollContainer
+var _list_scroll: ScrollContainer
+var _list: VBoxContainer
+## Kod podgladanej cudzej fermy; pusty = biezaca ferma z Game.state.
+var _viewing := ""
+var _viewing_unlocked: Array = []
+var _listing := false
+## Zdobyte karty z ostatnio pobranej listy ferm: kod -> Array id ras.
+var _cached_unlocked := {}
 var _star: Button
 ## Miejsce w drzewie HUD-u, do ktorego wracamy po zamknieciu (pod panelami
 ## budynkow - inaczej gwiazdka wisialaby nad otwartym sklepem).
@@ -91,6 +107,18 @@ func _build_sheet() -> void:
 	title.text = tr("ACH_TITLE")
 	box.add_child(title)
 
+	_farm_label = Label.new()
+	_farm_label.name = "FarmLabel"
+	_farm_label.theme_type_variation = &"GroupLabel"
+	_farm_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(_farm_label)
+
+	_farms_button = Button.new()
+	_farms_button.name = "FarmsButton"
+	_farms_button.custom_minimum_size = Vector2(0, 90)
+	_farms_button.pressed.connect(_on_farms_button)
+	box.add_child(_farms_button)
+
 	_count = Label.new()
 	_count.name = "Count"
 	_count.theme_type_variation = &"NoteLabel"
@@ -99,9 +127,22 @@ func _build_sheet() -> void:
 	box.add_child(_count)
 
 	var scroll := ScrollContainer.new()
+	scroll.name = "GridScroll"
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	box.add_child(scroll)
+	_grid_scroll = scroll
+	_list_scroll = ScrollContainer.new()
+	_list_scroll.name = "FarmsScroll"
+	_list_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_list_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_list_scroll.hide()
+	box.add_child(_list_scroll)
+	_list = VBoxContainer.new()
+	_list.name = "Farms"
+	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_list.add_theme_constant_override("separation", 12)
+	_list_scroll.add_child(_list)
 	_grid = GridContainer.new()
 	_grid.name = "Grid"
 	_grid.columns = COLUMNS
@@ -120,7 +161,9 @@ func _build_sheet() -> void:
 
 
 func open() -> void:
-	_fill()
+	_viewing = ""
+	_viewing_unlocked = []
+	_show_grid()
 	get_parent().move_child(self, -1)
 	# GAME OVER zostaje na samym wierzchu.
 	var over := get_parent().get_node_or_null("GameOverPanel") as Control
@@ -143,18 +186,147 @@ func is_open() -> bool:
 	return $Sheet.visible
 
 
+func is_listing() -> bool:
+	return _listing
+
+
+func viewing_code() -> String:
+	return _viewing
+
+
 func _fill() -> void:
 	for child in _grid.get_children():
+		_grid.remove_child(child)
 		child.queue_free()
 	var have := 0
 	var all := GameData.breeds()
 	for breed: Dictionary in all:
 		var breed_id: String = breed.get("id", "")
-		var owned := Game.state.has_ever_owned(breed_id)
+		var owned := Game.state.has_ever_owned(breed_id) if _viewing.is_empty() \
+				else _viewing_unlocked.has(breed_id)
 		if owned:
 			have += 1
 		_grid.add_child(_card(breed, owned))
-	_count.text = tr("ACH_COUNT") % [have, all.size()]
+	if _viewing.is_empty():
+		_count.text = tr("ACH_COUNT") % [have, all.size()]
+		_farm_label.text = tr("ACH_MY_FARM_LABEL") % Cloud.player_id
+	else:
+		_count.text = tr("ACH_COUNT_OTHER") % [have, all.size()]
+		_farm_label.text = tr("ACH_OTHER_FARM_LABEL") % _viewing
+
+
+func _show_grid() -> void:
+	_listing = false
+	_fill()
+	_list_scroll.hide()
+	_grid_scroll.show()
+	_count.show()
+	_grid_scroll.scroll_vertical = 0
+	_farms_button.text = tr("ACH_SHOW_FARMS")
+
+
+func _on_farms_button() -> void:
+	if _listing:
+		_show_grid()
+		return
+	_listing = true
+	_grid_scroll.hide()
+	_count.hide()
+	_list_scroll.show()
+	_farms_button.text = tr("ACH_BACK_TO_CARDS")
+	_farm_label.text = tr("ACH_FARMS_TITLE")
+	_clear_list()
+	_list.add_child(_note(tr("ACH_FARMS_LOADING")))
+	if not Cloud.farms_listed.is_connected(_on_farms_listed):
+		Cloud.farms_listed.connect(_on_farms_listed, CONNECT_ONE_SHOT)
+	Cloud.list_farms()
+
+
+func _clear_list() -> void:
+	for child in _list.get_children():
+		_list.remove_child(child)
+		child.queue_free()
+
+
+func _note(text: String) -> Label:
+	var label := Label.new()
+	label.theme_type_variation = &"NoteLabel"
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.text = text
+	return label
+
+
+func _on_farms_listed(rows: Array, ok: bool) -> void:
+	if not _listing:
+		return
+	_clear_list()
+	if not ok:
+		_list.add_child(_note(tr("ACH_FARMS_FAILED")))
+		return
+	var by_code := {}
+	_cached_unlocked.clear()
+	for row: Dictionary in rows:
+		by_code[String(row.get("player_id", ""))] = row
+		_cached_unlocked[String(row.get("player_id", ""))] = row.get("unlocked", [])
+	var mine := Cloud.my_farms()
+	var total := GameData.breeds().size()
+	var title_mine := Label.new()
+	title_mine.theme_type_variation = &"GroupLabel"
+	title_mine.text = tr("ACH_FARMS_MINE")
+	_list.add_child(title_mine)
+	for code: String in mine:
+		if code == Cloud.player_id:
+			_list.add_child(_farm_row(code, Game.state.unlocked_breeds.size(), total, 0, true))
+		elif by_code.has(code):
+			var row: Dictionary = by_code[code]
+			_list.add_child(_farm_row(code, (row["unlocked"] as Array).size(), total,
+					int(row["updated_at"]), false))
+	var title_others := Label.new()
+	title_others.theme_type_variation = &"GroupLabel"
+	title_others.text = tr("ACH_FARMS_OTHERS")
+	_list.add_child(title_others)
+	var others := 0
+	for row: Dictionary in rows:
+		var code := String(row.get("player_id", ""))
+		if code.is_empty() or mine.has(code):
+			continue
+		others += 1
+		_list.add_child(_farm_row(code, (row["unlocked"] as Array).size(), total,
+				int(row["updated_at"]), false))
+	if others == 0:
+		_list.add_child(_note(tr("ACH_FARMS_NONE")))
+
+
+func _farm_row(code: String, have: int, total: int, updated_at: int, current: bool) -> Button:
+	var button := Button.new()
+	button.name = "Farm_" + code
+	button.custom_minimum_size = Vector2(0, 96)
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	if current:
+		button.text = tr("ACH_FARM_ROW_CURRENT") % [code, have, total]
+	else:
+		button.text = tr("ACH_FARM_ROW") % [code, have, total, _when(updated_at)]
+	button.pressed.connect(func() -> void: _view_farm(code, current))
+	return button
+
+
+## Data ostatniego zapisu w czasie lokalnym, np. "26.11, 13:05".
+func _when(unix: int) -> String:
+	if unix <= 0:
+		return "?"
+	var bias := int(Time.get_time_zone_from_system().get("bias", 0))
+	var d := Time.get_datetime_dict_from_unix_time(unix + bias * 60)
+	return "%02d.%02d, %02d:%02d" % [d["day"], d["month"], d["hour"], d["minute"]]
+
+
+func _view_farm(code: String, current: bool) -> void:
+	_viewing = "" if current else code
+	_viewing_unlocked = []
+	if not current:
+		# Karty bierzemy z tej samej listy - nie trzeba pytac serwera drugi raz.
+		_viewing_unlocked = _cached_unlocked.get(code, [])
+	_show_grid()
 
 
 ## Jedna karta w siatce. Zdobyta: portret w zlotej ramce i nazwa. Niezdobyta:

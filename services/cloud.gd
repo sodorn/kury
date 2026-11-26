@@ -19,8 +19,14 @@ extends Node
 signal pulled(payload: Dictionary, ok: bool, for_player: String)
 signal pushed(ok: bool)
 signal status_changed(online: bool)
+## Lista ferm z serwera do panelu osiagniec (12.30). Wiersze:
+## {"player_id": String, "updated_at": int, "unlocked": Array}.
+signal farms_listed(rows: Array, ok: bool)
 
 const PLAYER_ID_PATH := "user://player_id.txt"
+## Kody ferm, na ktorych grano na tym urzadzeniu (12.30, wlasciciel 26.11:
+## "zeby nie musiec zapisywac kodow"). Dopisywane przy kazdej zmianie kodu.
+const MY_FARMS_PATH := "user://my_farms.json"
 const CONFIG_PATH := "res://data/backend.json"
 
 var player_id: String = ""
@@ -58,6 +64,7 @@ func _ready() -> void:
 	if not OS.get_environment("KURY_BEZ_SERWERA").is_empty():
 		use_test_server()
 	player_id = _load_or_create_player_id()
+	_remember_farm(player_id)
 	_push_http = HTTPRequest.new()
 	_push_http.timeout = float(_config.get("timeout_seconds", 8))
 	_push_http.accept_gzip = false
@@ -332,6 +339,75 @@ func _store_player_id(code: String) -> void:
 	if file != null:
 		file.store_string(code)
 		file.close()
+	_remember_farm(code)
+
+
+## Kody ferm, na ktorych grano na tym urzadzeniu, od najnowszej.
+func my_farms() -> Array[String]:
+	var out: Array[String] = []
+	if FileAccess.file_exists(MY_FARMS_PATH):
+		var json := JSON.new()
+		if json.parse(FileAccess.get_file_as_string(MY_FARMS_PATH)) == OK \
+				and typeof(json.data) == TYPE_ARRAY:
+			for code: Variant in json.data:
+				var text := str(code).strip_edges()
+				if not text.is_empty() and not out.has(text):
+					out.append(text)
+	if not player_id.is_empty() and not out.has(player_id):
+		out.push_front(player_id)
+	return out
+
+
+func _remember_farm(code: String) -> void:
+	var trimmed := code.strip_edges()
+	if trimmed.is_empty():
+		return
+	var list := my_farms()
+	list.erase(trimmed)
+	list.push_front(trimmed)
+	var file := FileAccess.open(MY_FARMS_PATH, FileAccess.WRITE)
+	if file != null:
+		file.store_string(JSON.stringify(list))
+		file.close()
+
+
+## Pobiera liste WSZYSTKICH ferm z serwera: kod, czas ostatniego zapisu
+## i zdobyte karty ras. Bez reszty zapisu - caly payload kazdej fermy to za
+## duzo danych. Tylko do podgladu: nic tu nie zmienia tozsamosci urzadzenia.
+func list_farms() -> void:
+	if not is_enabled():
+		farms_listed.emit([], false)
+		return
+	var url := "%s/rest/v1/%s?select=player_id,updated_at,unlocked:payload->unlocked&order=updated_at.desc&limit=500" % [
+			_base_url(), _table()]
+	var http := HTTPRequest.new()
+	http.timeout = float(_config.get("timeout_seconds", 8))
+	http.accept_gzip = false
+	add_child(http)
+	http.request_completed.connect(
+			func(result: int, code: int, _head: PackedStringArray, body: PackedByteArray) -> void:
+				http.queue_free()
+				if result != HTTPRequest.RESULT_SUCCESS or code < 200 or code >= 300:
+					farms_listed.emit([], false)
+					return
+				var json := JSON.new()
+				if json.parse(_body_text(body)) != OK or typeof(json.data) != TYPE_ARRAY:
+					farms_listed.emit([], false)
+					return
+				var rows: Array = []
+				for raw: Variant in json.data:
+					if typeof(raw) != TYPE_DICTIONARY:
+						continue
+					var unlocked: Variant = raw.get("unlocked", [])
+					rows.append({
+						"player_id": str(raw.get("player_id", "")),
+						"updated_at": int(raw.get("updated_at", 0)),
+						"unlocked": unlocked if typeof(unlocked) == TYPE_ARRAY else [],
+					})
+				farms_listed.emit(rows, true))
+	if http.request(url, _headers(), HTTPClient.METHOD_GET) != OK:
+		http.queue_free()
+		farms_listed.emit([], false)
 
 
 ## Jednozdaniowa diagnoza ostatniej rozmowy z serwerem. Kody HTTP tlumaczymy

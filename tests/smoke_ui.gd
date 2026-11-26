@@ -1526,6 +1526,41 @@ func _test_achievements() -> void:
 	_shot("karta_rasy.png")
 	(popup.get_node("Sheet/Content/Close") as Button).pressed.emit()
 	await _seconds(0.5)
+	# 12.30: lista ferm z kodami. W tescie serwer jest martwy, wiec lista ma
+	# pokazac komunikat zamiast wisiec, a przycisk wraca do kart.
+	var farms_btn := ach.find_child("FarmsButton", true, false) as Button
+	_check(farms_btn != null and farms_btn.visible, "przycisk innych ferm w osiagnieciach")
+	farms_btn.pressed.emit()
+	await _seconds(1.5)
+	var farms := ach.find_child("Farms", true, false) as VBoxContainer
+	_check(ach.is_listing() and farms != null and farms.get_child_count() > 0,
+			"lista ferm cos pokazuje")
+	_shot("osiagniecia_fermy_blad.png")
+	# Udawana odpowiedz serwera: dwie cudze fermy.
+	ach._on_farms_listed([
+		{"player_id": "130090", "updated_at": 1795700000, "unlocked": ["leghorn", "rhode", "marans", "cemani"]},
+		{"player_id": "555123", "updated_at": 1795600000, "unlocked": ["leghorn"]},
+	], true)
+	await _frames(5)
+	var row := farms.get_node_or_null("Farm_130090") as Button
+	_check(row != null and row.text.contains("130090") and row.text.contains("4/"),
+			"cudza ferma na liscie z kodem i kartami")
+	_check(farms.get_node_or_null("Farm_" + Cloud.player_id) != null, "wlasna ferma na liscie")
+	_shot("osiagniecia_fermy.png")
+	row.pressed.emit()
+	await _frames(5)
+	_check(not ach.is_listing() and ach.viewing_code() == "130090", "dotkniecie kodu pokazuje tamta ferme")
+	var cemani_card := grid.get_node_or_null("Card_cemani") as Button
+	var marans_card := grid.get_node_or_null("Card_marans") as Button
+	_check(cemani_card != null and not cemani_card.disabled and marans_card != null
+			and not marans_card.disabled, "karty cudzej fermy")
+	_shot("osiagniecia_cudza.png")
+	farms_btn.pressed.emit()
+	await _frames(3)
+	farms_btn.pressed.emit()
+	await _frames(5)
+	_check(not ach.is_listing() and grid.get_child_count() == GameData.breeds().size(),
+			"powrot z listy ferm do kart")
 	ach.close_panel()
 	await _frames(5)
 	_check(not ach.is_open(), "osiagniecia sie zamykaja")

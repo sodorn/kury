@@ -4,7 +4,15 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 10** (wersja 12.29): CENY JAJ RYNKOWE (wlasciciel
+- Aktualny etap: **ETAP 10** (wersja 12.30): INNE FERMY W OSIAGNIECIACH
+  (wlasciciel 26.11): przycisk "Pokaz inne fermy" w panelu osiagniec ->
+  lista ferm z serwera z kodami (Cloud.list_farms: player_id, updated_at,
+  payload->unlocked; bez reszty zapisu). Najpierw "Twoje fermy" z tego
+  urzadzenia (user://my_farms.json, dopisywane w Cloud._store_player_id),
+  potem fermy innych graczy. Dotkniecie kodu = podglad kart tamtej fermy,
+  NIC nie wczytuje i nie zmienia kodu urzadzenia. Kody sa widoczne dla
+  kazdego gracza (decyzja wlasciciela).
+- Wersja 12.29: CENY JAJ RYNKOWE (wlasciciel
   26.11: "podnies ceny jaj do rynkowych, nie balansuj reszty, najwyzej potem
   spowolnimy gre"). Pospolite (RARITY_COMMON) = jaja do sklepu 0,70-0,90 zl,
   pozostale = jaja legowe dla hodowcow wg ogloszen 11.2026: goloszyjka 5,
