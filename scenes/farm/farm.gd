@@ -382,7 +382,8 @@ func _on_fox_arrived(_count: int, seconds: float) -> void:
 		fox = _new_fox()
 		fox.stand_at_fence(_run, route["fence"], route["inside"], routes)
 	fox.enter_run(seconds)
-	if _dog != null:
+	# Gluchy kundel w ogole nie rusza - spi pod kurnikiem.
+	if _dog != null and not Game.state.dog_off_visit:
 		_dog.chase(fox, _run)
 
 

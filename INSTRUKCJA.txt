@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 13.0.2
+  INSTRUKCJA OBSLUGI *** gra w wersji 13.0.3
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -335,15 +335,23 @@
  13. PSY I PLOT
 ==============================================================================
   PSY:
-   1. kundel ze schroniska z budą
-      400 zl - rzuca sie na lisa co 10 s, przegania w 33%, zagryza w 0%
-   2. owczarek niemiecki z rodowodem
-      8 000 zl - rzuca sie na lisa co 5 s, przegania w 67%, zagryza w 100%
+   1. stary głuchy kundel
+      300 zl - co 10 s rzuca sie na lisa, gryzie w 33% prob za 5-12 pkt zycia, przy zerze lis ucieka, w 50% wizyt nie slyszy lisa
+   2. mały tchórzliwy kundel
+      900 zl - co 8 s rzuca sie na lisa, gryzie w 40% prob za 5-12 pkt zycia, przy zerze lis ucieka, w 33% wizyt po 3 s ucieka do budy
+   3. duży agresywny kundel
+      3 000 zl - co 6 s rzuca sie na lisa, gryzie w 55% prob za 8-16 pkt zycia, przy zerze lis ucieka
+   4. owczarek niemiecki z rodowodem
+      8 000 zl - co 5 s rzuca sie na lisa, gryzie w 67% prob za 8-20 pkt zycia, przy zerze zagryza
+   5. jagdterier — zabójca lisów
+      20 000 zl - co 1 s rzuca sie na lisa, gryzie w 100% prob za 50-50 pkt zycia, przy zerze zagryza
 
-  Pies pracuje sam, bez twojego udzialu, takze gdy nie patrzysz. Gdy lis
-  wejdzie, pies rzuca kostka co tyle sekund. Przy udanej probie owczarek moze
-  lisa ZAGRYZC - wtedy lis zostaje rozszarpany na wybiegu, a nastepny
-  przychodzi 5 razy pozniej niz zwykle.
+  Pies pracuje sam, bez twojego udzialu, takze gdy nie patrzysz. Lis ma 5-50
+  punktow zycia (zwykle ok. 20) - pasek nad nim. Twoj palec zabiera 1 punkt,
+  ugryzienie psa wiecej. Gdy zycie spadnie do zera, przy kundlach lis ucieka,
+  a owczarek i terier go ZAGRYZAJA - wtedy lis zostaje rozszarpany na wybiegu,
+  a nastepny przychodzi 5 razy pozniej niz zwykle. Z owczarkiem i terierem
+  pies sam wyrywa lisa z krzakow po jednym twoim kliknieciu.
 
   PLOTY:
    1. płot z siatki na drewnianych palikach

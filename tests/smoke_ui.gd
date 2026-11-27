@@ -1250,7 +1250,7 @@ func _test_dog_breeds() -> void:
 	var kundel: Texture2D = dog.get_node("Sprite").texture
 	var maly: float = dog.scale.x * kundel.get_width()
 
-	Game.state.dog_level = 2
+	Game.state.dog_level = 4
 	farm._sync_dog()
 	await _frames(4)
 	var owczarek: Texture2D = dog.get_node("Sprite").texture

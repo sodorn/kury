@@ -66,6 +66,23 @@ var fox_lurk_taps: int = 0
 ## 13.0.2 (wlasciciel 27.11): ZYCIE LISA. fox_taps_left to teraz jego punkty
 ## zycia (palec zabiera 1, pies wiecej), fox_hp_max - ile mial na poczatku.
 var fox_hp_max: int = 0
+## 13.0.2: piec psow. Przy tej wizycie lisa pies nie pomaga: stary gluchy
+## kundel go nie uslyszal albo maly tchorzliwy uciekl (bez zapisu).
+var dog_off_visit: bool = false
+## Ile sekund jeszcze pogoni, zanim tchorzliwy kundel ucieknie; -1 = nie ucieknie.
+var dog_quit_left: float = -1.0
+
+
+## Losowane przy wejsciu lisa: czy pies go uslyszy i czy nie stchorzy.
+func roll_dog_visit() -> void:
+	dog_off_visit = false
+	dog_quit_left = -1.0
+	if dog_level <= 0:
+		return
+	var cfg := current_building_upgrade("dog")
+	dog_off_visit = randf() < float(cfg.get("deaf_chance", 0.0))
+	if not dog_off_visit and randf() < float(cfg.get("quit_chance", 0.0)):
+		dog_quit_left = float(cfg.get("quit_after", 3.0))
 
 
 ## Losuje zycie lisa: Gauss (hp_mean, hp_sd) przyciety do hp_min..hp_max -

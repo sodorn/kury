@@ -1432,7 +1432,12 @@ func _test_body_unpacking() -> void:
 func _test_dog() -> void:
 	var dogs: Array = GameData.balance().get("buildings", {}).get("dog", {}).get("upgrades", [])
 	var fences: Array = GameData.balance().get("buildings", {}).get("guard", {}).get("upgrades", [])
-	_check(dogs.size() == 2, "sa dwa psy do kupienia")
+	# 13.0.2: piec psow (wlasciciel 27.11).
+	_check(dogs.size() == 5, "jest piec psow do kupienia")
+	var nazwy_psow := ["stary głuchy kundel", "mały tchórzliwy kundel", "duży agresywny kundel",
+			"owczarek niemiecki z rodowodem", "jagdterier — zabójca lisów"]
+	for i in mini(dogs.size(), nazwy_psow.size()):
+		_check(String(dogs[i].get("name", "")) == nazwy_psow[i], "pies %d to %s" % [i + 1, nazwy_psow[i]])
 	_check(float(dogs[0].get("price", 0)) <= float(fences[0].get("price", 0)),
 			"kundel nie drozszy niz najtanszy plot (%s wobec %s)"
 			% [dogs[0].get("price"), fences[0].get("price")])
@@ -1447,14 +1452,15 @@ func _test_dog() -> void:
 		_check(float(d.get("kill_chance", -1.0)) >= 0.0 and float(d.get("kill_chance", 2.0)) <= 1.0,
 				"szansa zagryzienia psa %s miedzy 0 a 1" % nazwa)
 		_check(float(d.get("price", 0)) > 0.0, "pies %s cos kosztuje" % nazwa)
-	_check(float(dogs[1].get("interval", 99.0)) <= float(dogs[0].get("interval", 0.0)),
-			"owczarek probuje nie rzadziej niz kundel")
-	_check(float(dogs[1].get("chance", 0.0)) >= float(dogs[0].get("chance", 1.0)),
-			"owczarek ma nie mniejsza szanse niz kundel")
-	_check(float(dogs[1].get("kill_chance", 0.0)) >= float(dogs[0].get("kill_chance", 1.0)),
-			"owczarek zagryza nie rzadziej niz kundel")
-	_check(float(dogs[1].get("price", 0)) > float(dogs[0].get("price", 0)),
-			"owczarek drozszy od kundla")
+	# Kazdy kolejny pies nie gorszy od poprzedniego i drozszy.
+	for i in range(1, dogs.size()):
+		var a: Dictionary = dogs[i - 1]
+		var b: Dictionary = dogs[i]
+		_check(float(b.get("interval", 99.0)) <= float(a.get("interval", 0.0))
+				and float(b.get("chance", 0.0)) >= float(a.get("chance", 1.0))
+				and float(b.get("kill_chance", 0.0)) >= float(a.get("kill_chance", 1.0))
+				and float(b.get("price", 0)) > float(a.get("price", 0)),
+				"pies %d nie gorszy i drozszy od psa %d" % [i + 1, i])
 
 	# Pies kupowalny od poczatku, bez plotu jako warunku.
 	Game.new_game()
@@ -1471,9 +1477,9 @@ func _test_dog() -> void:
 		hens.append("leghorn")
 	var bez := _fresh_state(hens, 0.0)
 	var kundel := _fresh_state(hens, 0.0)
-	kundel.dog_level = 1
+	kundel.dog_level = 3
 	var owczarek := _fresh_state(hens, 0.0)
-	owczarek.dog_level = 2
+	owczarek.dog_level = 4
 	_check(is_zero_approx(bez.dog_chance()), "bez psa nikt lisa nie goni")
 	_check(owczarek.dog_chance() > kundel.dog_chance(), "owczarek skuteczniejszy od kundla")
 	_check(owczarek.dog_interval() < kundel.dog_interval(), "owczarek probuje czesciej")
@@ -1489,7 +1495,7 @@ func _test_dog() -> void:
 		_arm_fox(a)
 		straty_bez += _przezyj_wizyte(a)
 		var b := _fresh_state(hens, 0.0)
-		b.dog_level = 2
+		b.dog_level = 4
 		_arm_fox(b)
 		var zabral := _przezyj_wizyte(b)
 		straty_z += zabral
@@ -1514,7 +1520,8 @@ func _przezyj_wizyte(state: FarmState) -> int:
 ## Migracja zapisow 5 -> 6: stara jedna drabinka obrony rozbita na plot
 ## i psa. Nikt nie moze stracic tego, za co zaplacil.
 func _test_guard_migration() -> void:
-	var oczekiwane := {0: [0, 0], 1: [1, 0], 2: [1, 1], 3: [2, 1], 4: [2, 2], 5: [3, 2]}
+	# Od wersji zapisu 7 psy przesuwaja sie na nowa drabinke 5 psow.
+	var oczekiwane := {0: [0, 0], 1: [1, 0], 2: [1, 2], 3: [2, 2], 4: [2, 4], 5: [3, 4]}
 	for stary: int in oczekiwane.keys():
 		var stan := FarmState.new()
 		stan.guard_level = stary
@@ -1535,6 +1542,52 @@ func _test_guard_migration() -> void:
 
 ## 13.0: blokada inkubatora w trakcie rozbudowy, zycie psa, ferma admina.
 func _test_v13_basics() -> void:
+	# 13.0.2: zapis wersji 6 - kundel staje sie malym kundlem, owczarek 4.
+	for para: Array in [[0, 0], [1, 2], [2, 4]]:
+		var z := SaveGame.to_dict(_fresh_state(["leghorn"], 10.0))
+		z["version"] = 6
+		z["dog_level"] = para[0]
+		var w: Dictionary = SaveGame.from_dict(z)
+		_check(w.has("state") and (w["state"] as FarmState).dog_level == para[1],
+				"stary pies %d -> nowy pies %d" % [para[0], para[1]])
+	# Stary gluchy kundel w polowie wizyt nie slyszy lisa, maly tchorzliwy
+	# w 1/3 wizyt ucieka po 3 s, reszta psow zawsze goni.
+	var gluchy := 0
+	var tchorz := 0
+	var p := _fresh_state(["leghorn"], 10.0)
+	for i in 1000:
+		p.set_building_level("dog", 1)
+		p.roll_dog_visit()
+		if p.dog_off_visit:
+			gluchy += 1
+		p.set_building_level("dog", 2)
+		p.roll_dog_visit()
+		if p.dog_quit_left >= 0.0:
+			tchorz += 1
+			_check(is_equal_approx(p.dog_quit_left, 3.0), "tchorz ucieka po 3 s")
+	_check(gluchy > 420 and gluchy < 580, "gluchy kundel nie slyszy w ~50%% wizyt (%d/1000)" % gluchy)
+	_check(tchorz > 270 and tchorz < 400, "tchorzliwy kundel ucieka w ~1/3 wizyt (%d/1000)" % tchorz)
+	for lv in [3, 4, 5]:
+		p.set_building_level("dog", lv)
+		var zawsze := true
+		for i in 200:
+			p.roll_dog_visit()
+			if p.dog_off_visit or p.dog_quit_left >= 0.0:
+				zawsze = false
+		_check(zawsze, "pies %d zawsze goni lisa" % lv)
+	# Terier: lis zdazy zabic najwyzej jedna kure i ginie.
+	var terier_max := 0
+	var terier_zabil := 0
+	for i in 100:
+		var t := _fresh_state(["leghorn", "leghorn", "leghorn", "leghorn", "leghorn", "leghorn",
+				"leghorn", "leghorn", "leghorn", "leghorn", "leghorn", "leghorn"], 100000.0)
+		t.set_building_level("dog", 5)
+		var out := {"fox_took": 0, "died_hunger": 0, "died_disease": 0, "fox_arrived": 0}
+		Simulation._fox_arrives(t, out, 1 << 30, true)
+		terier_max = maxi(terier_max, int(out["fox_took"]))
+		terier_zabil += int(out.get("fox_killed", 0))
+	_check(terier_max <= 1 and terier_zabil == 100,
+			"przy terierze lis bierze najwyzej 1 kure i zawsze ginie (%d, %d/100)" % [terier_max, terier_zabil])
 	var scale := GameData.time_scale()
 	# Inkubator: przy jajach w srodku nie da sie rozbudowac; w trakcie
 	# rozbudowy nic sie nie wykluwa i nie da sie wlozyc jaj.
@@ -1557,25 +1610,25 @@ func _test_v13_basics() -> void:
 
 	# Pies: zycie losowane z przedzialu, po nim pies umiera.
 	var dogs: Array = GameData.balance()["buildings"]["dog"]["upgrades"]
-	_check(is_equal_approx(float(dogs[0]["life_days_min"]), 12.0) and is_equal_approx(float(dogs[0]["life_days_max"]), 22.0)
-			and is_equal_approx(float(dogs[1]["life_days_min"]), 4.0) and is_equal_approx(float(dogs[1]["life_days_max"]), 12.0),
+	_check(is_equal_approx(float(dogs[2]["life_days_min"]), 12.0) and is_equal_approx(float(dogs[2]["life_days_max"]), 22.0)
+			and is_equal_approx(float(dogs[3]["life_days_min"]), 4.0) and is_equal_approx(float(dogs[3]["life_days_max"]), 12.0),
 			"kundel zyje 12-22 dni, owczarek 4-12")
 	var poza := 0
 	var suma := 0.0
 	for i in 400:
 		var d := FarmState.new()
-		d.set_building_level("dog", 1)
+		d.set_building_level("dog", 3)
 		var dni := d.dog_life / 86400.0
 		suma += dni
 		if dni < 12.0 or dni > 22.0:
 			poza += 1
 	_check(poza == 0 and absf(suma / 400.0 - 17.0) < 0.6, "kundel: zycie w 12-22 dni, srednio ~17 (%.1f)" % (suma / 400.0))
 	var pies := _fresh_state(["leghorn"], 100000.0)
-	pies.set_building_level("dog", 2)
+	pies.set_building_level("dog", 4)
 	_check(pies.dog_life >= 4.0 * 86400.0 and pies.dog_life <= 12.0 * 86400.0, "owczarek: zycie w 4-12 dni")
 	pies.dog_age = pies.dog_life - 5.0
 	var wynik := Simulation.advance(pies, 30.0 * scale)
-	_check(pies.dog_level == 0 and int(wynik.get("dog_died", 0)) == 2, "po swoim czasie pies umiera")
+	_check(pies.dog_level == 0 and int(wynik.get("dog_died", 0)) == 4, "po swoim czasie pies umiera")
 	var zapis := SaveGame.from_dict(SaveGame.to_dict(_with_dog()))
 	_check(zapis.has("state") and (zapis["state"] as FarmState).dog_life > 0.0, "zycie psa w zapisie")
 
@@ -1602,8 +1655,12 @@ func _test_v13_basics() -> void:
 		odszedl = Game.poke_lurking_fox()
 	_check(odszedl and lis.fox_lurk_left <= 0.0, "lis w krzakach ucieka, gdy zycie spadnie do zera")
 	lis.fox_lurk_left = 20.0
-	lis.set_building_level("dog", 2)
+	lis.set_building_level("dog", 4)
 	_check(Game.poke_lurking_fox() and lis.fox_lurk_left <= 0.0, "z owczarkiem wystarczy jedno klikniecie")
+	lis.fox_lurk_left = 20.0
+	lis.set_building_level("dog", 2)
+	_check(not Game.poke_lurking_fox() and lis.fox_lurk_left > 0.0, "maly tchorzliwy kundel nie wyrywa sie do krzakow")
+	Simulation.fox_leaves(lis)
 	Game.state = stary_stan
 	Cloud.player_id = stary_kod
 	# 13.0.2: zycie lisa - Gauss 5..50, zwykle przecietne; pies zabiera wiecej.
@@ -1630,7 +1687,7 @@ func _test_v13_basics() -> void:
 		hp_kmax = maxi(hp_kmax, hp_d)
 	_check(hp_kmin == 5 and hp_kmax == 12, "kundel gryzie za 5..12 (%d..%d)" % [hp_kmin, hp_kmax])
 	_check(hp_stan.dog_kill_chance() == 0.0, "kundel nie zagryza - lis ucieka")
-	hp_stan.set_building_level("dog", 2)
+	hp_stan.set_building_level("dog", 4)
 	hp_kmin = 99
 	hp_kmax = 0
 	for i in 500:
@@ -1693,7 +1750,7 @@ func _test_upgrades_file() -> void:
 		return
 	var problemy := GameData.apply_upgrades(bal, plik)
 	_check(problemy.is_empty(), "rozbudowy.json bez bledow: %s" % ", ".join(problemy))
-	var ile := {"kurnik": 10, "magazyn": 10, "inkubator": 10, "plot": 4, "pies": 2}
+	var ile := {"kurnik": 10, "magazyn": 10, "inkubator": 10, "plot": 4, "pies": 5}
 	for lista: String in ile:
 		_check((plik.get(lista, []) as Array).size() == int(ile[lista]),
 				"rozbudowy.json: %s ma %d poziomow" % [lista, ile[lista]])
@@ -2110,8 +2167,8 @@ func _test_dog_offline() -> void:
 						"po wizycie w tle stan lisa jest wyczyszczony (pies %d)" % dog)
 		return [float(zabite) / proby, zagryzione]
 	var bez: Array = sredni.call(0)
-	var kundel: Array = sredni.call(1)
-	var owczarek: Array = sredni.call(2)
+	var kundel: Array = sredni.call(3)
+	var owczarek: Array = sredni.call(4)
 	var fox_cfg: Dictionary = GameData.balance()["fox"]
 	var oczekiwany := (float(fox_cfg.get("kills_min", 3)) + float(fox_cfg.get("kills_max", 10))) / 2.0
 	_check(bez[0] > oczekiwany * 0.85,
@@ -2143,7 +2200,7 @@ func _test_dog_in_action() -> void:
 	var przegonien := 0
 	for i in 25:
 		var b := _fresh_state(hens, 0.0)
-		b.dog_level = 1
+		b.dog_level = 3
 		_arm_fox(b)
 		var przed := b.hen_count()
 		_przezyj_wizyte(b)
@@ -2155,7 +2212,7 @@ func _test_dog_in_action() -> void:
 	var zagryzien := 0
 	for i in 25:
 		var c := _fresh_state(hens, 0.0)
-		c.dog_level = 2
+		c.dog_level = 4
 		_arm_fox(c)
 		var przed := c.hen_count()
 		var wynik := Simulation.advance(c, 1.0)
@@ -2172,7 +2229,7 @@ func _test_dog_in_action() -> void:
 
 	# Zagryziony lis odracza nastepnego piec razy.
 	var d := _fresh_state(hens, 0.0)
-	d.dog_level = 2
+	d.dog_level = 4
 	_arm_fox(d)
 	Simulation.advance(d, 1.0)
 	var bezpiecznik := 0

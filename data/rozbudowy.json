@@ -10,7 +10,7 @@
 		"pasza_zl_kg = cena kilograma paszy bez znizki. pasza_do_kupienia = przyciski paszy w sklepie: nazwa, ile kg i znizka w procentach (zalezy od wielkosci opakowania, nie od magazynu).",
 		"inkubator.jaj = ile jaj grzeje sie naraz. Z 3 jaj wykluwa sie jedno piskle, wiec 48 jaj = 16 pisklat naraz.",
 		"plot.lis_zawraca_proc = w ilu procentach podejsc lis odchodzi od plotu z niczym.",
-		"pies: probuje_co_s = co ile sekund pies rzuca sie na lisa, przegania_proc = szansa, ze przegoni, obrazenia_min/max = ile punktow zycia lisa zabiera jedno udane ugryzienie (losowo z przedzialu), zagryza_proc = szansa, ze gdy lisowi skoncza sie punkty zycia, pies go zagryzie (inaczej lis ucieka), zyje_dni_min/max = ile dni (prawdziwych, 24 h) pies zyje - losowane rozkladem Gaussa, najczesciej srodek przedzialu.",
+		"pies: probuje_co_s = co ile sekund pies rzuca sie na lisa, przegania_proc = szansa, ze przegoni, obrazenia_min/max = ile punktow zycia lisa zabiera jedno udane ugryzienie (losowo z przedzialu), zagryza_proc = szansa, ze gdy lisowi skoncza sie punkty zycia, pies go zagryzie (inaczej lis ucieka), nie_slyszy_proc = szansa, ze pies w ogole nie zauwazy lisa przy danej wizycie, tchorzy_proc / tchorzy_po_s = szansa, ze pies po tylu sekundach pogoni sam ucieknie, zyje_dni_min/max = ile dni (prawdziwych, 24 h) pies zyje - losowane rozkladem Gaussa, najczesciej srodek przedzialu.",
 		"Po zmianie wyslij plik do repozytorium - testy sprawdza, czy wszystko sie zgadza, a gra po wdrozeniu wczyta nowe liczby."
 	],
 	"kurnik": [
@@ -61,7 +61,10 @@
 		{"poziom": 4, "nazwa": "płot 2 m z podmurówką i pastuchem elektrycznym", "cena": 18000, "lis_zawraca_proc": 95}
 	],
 	"pies": [
-		{"poziom": 1, "nazwa": "kundel ze schroniska z budą",   "cena": 400,  "probuje_co_s": 10, "przegania_proc": 33.33, "zagryza_proc": 0, "obrazenia_min": 5, "obrazenia_max": 12, "zyje_dni_min": 12, "zyje_dni_max": 22},
-		{"poziom": 2, "nazwa": "owczarek niemiecki z rodowodem", "cena": 8000, "probuje_co_s": 5,  "przegania_proc": 66.67, "zagryza_proc": 100, "obrazenia_min": 8, "obrazenia_max": 20, "zyje_dni_min": 4, "zyje_dni_max": 12}
+		{"poziom": 1, "nazwa": "stary głuchy kundel", "cena": 300, "probuje_co_s": 10, "przegania_proc": 33.33, "obrazenia_min": 5, "obrazenia_max": 12, "zagryza_proc": 0, "nie_slyszy_proc": 50, "tchorzy_proc": 0, "tchorzy_po_s": 0, "zyje_dni_min": 6, "zyje_dni_max": 12},
+		{"poziom": 2, "nazwa": "mały tchórzliwy kundel", "cena": 900, "probuje_co_s": 8, "przegania_proc": 40, "obrazenia_min": 5, "obrazenia_max": 12, "zagryza_proc": 0, "nie_slyszy_proc": 0, "tchorzy_proc": 33.33, "tchorzy_po_s": 3, "zyje_dni_min": 12, "zyje_dni_max": 22},
+		{"poziom": 3, "nazwa": "duży agresywny kundel", "cena": 3000, "probuje_co_s": 6, "przegania_proc": 55, "obrazenia_min": 8, "obrazenia_max": 16, "zagryza_proc": 0, "nie_slyszy_proc": 0, "tchorzy_proc": 0, "tchorzy_po_s": 0, "zyje_dni_min": 12, "zyje_dni_max": 22},
+		{"poziom": 4, "nazwa": "owczarek niemiecki z rodowodem", "cena": 8000, "probuje_co_s": 5, "przegania_proc": 66.67, "obrazenia_min": 8, "obrazenia_max": 20, "zagryza_proc": 100, "nie_slyszy_proc": 0, "tchorzy_proc": 0, "tchorzy_po_s": 0, "zyje_dni_min": 4, "zyje_dni_max": 12},
+		{"poziom": 5, "nazwa": "jagdterier — zabójca lisów", "cena": 20000, "probuje_co_s": 1, "przegania_proc": 100, "obrazenia_min": 50, "obrazenia_max": 50, "zagryza_proc": 100, "nie_slyszy_proc": 0, "tchorzy_proc": 0, "tchorzy_po_s": 0, "zyje_dni_min": 4, "zyje_dni_max": 12}
 	]
 }

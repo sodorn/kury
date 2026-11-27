@@ -484,8 +484,14 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 				break
 			# Kazda kura ma wlasne, losowane od nowa odliczanie.
 			state.fox_kill_timer += _fox_kill_gap(state)
+		# Tchorzliwy kundel po kilku sekundach pogoni sam ucieka.
+		if state.dog_level > 0 and not state.dog_off_visit and state.dog_quit_left >= 0.0:
+			state.dog_quit_left -= real
+			if state.dog_quit_left <= 0.0:
+				state.dog_off_visit = true
+				out["dog_fled"] = int(out.get("dog_fled", 0)) + 1
 		# Pies probuje do skutku: co `interval` sekund rzuca kostka.
-		if state.dog_level > 0:
+		if state.dog_level > 0 and not state.dog_off_visit:
 			state.dog_timer -= real
 			while state.dog_timer <= 0.0:
 				state.dog_timer += state.dog_interval()
@@ -603,6 +609,9 @@ static func _fox_arrives(state: FarmState, out: Dictionary, budget: int,
 		state.roll_fox_hp()
 	state.fox_hand_scared = false
 	state.dog_timer = state.dog_interval()
+	state.roll_dog_visit()
+	if state.dog_off_visit:
+		out["dog_deaf"] = int(out.get("dog_deaf", 0)) + 1
 
 	# Gdy gracza nie ma przy grze, nie ma kogo straszyc ani komu pokazywac
 	# wizyty: cala wizyte rozgrywamy od razu, na tej samej osi czasu co
@@ -620,7 +629,7 @@ static func _fox_arrives(state: FarmState, out: Dictionary, budget: int,
 	# Pies rusza za lisem. Jesli da rade, skraca wizyte do swojego czasu —
 	# lis przez te sekundy dalej zabija, uciekajac.
 	state.fox_visit_left = full
-	if state.dog_level > 0:
+	if state.dog_level > 0 and not state.dog_off_visit:
 		out["fox_dog"] = int(out.get("fox_dog", 0)) + 1
 	out["fox_arrived"] = int(out["fox_arrived"]) + 1
 	# Pierwsza ofiara zaraz po wejsciu — lis ZAWSZE cos zabiera.
@@ -667,8 +676,12 @@ static func _fox_visit_offline(state: FarmState, out: Dictionary, budget: int,
 	var dog_result := ""
 	var fox: Dictionary = GameData.balance().get("fox", {})
 	var next_kill := 0.0
-	var next_dog := state.dog_interval() if state.dog_level > 0 else INF
+	var next_dog := state.dog_interval() if state.dog_level > 0 and not state.dog_off_visit else INF
+	# Tchorzliwy kundel goni tylko do swojej chwili, potem ucieka.
+	var dog_end := state.dog_quit_left if state.dog_quit_left >= 0.0 else INF
 	while state.fox_kill_left > 0:
+		if next_dog > dog_end:
+			next_dog = INF
 		if next_dog < next_kill:
 			if next_dog > visit_seconds:
 				break
@@ -714,6 +727,8 @@ static func _fox_pace_factor(state: FarmState) -> float:
 static func _fox_leaves(state: FarmState) -> void:
 	state.fox_lurk_taps = 0
 	state.fox_hp_max = 0
+	state.dog_off_visit = false
+	state.dog_quit_left = -1.0
 	state.fox_massacre = false
 	state.fox_lurk_left = 0.0
 	state.fox_visit_left = 0.0

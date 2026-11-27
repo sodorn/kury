@@ -179,6 +179,13 @@ func _build_coop() -> void:
 			var kill := int(round(float(upgrade.get("kill_chance", 0.0)) * 100.0))
 			if kill > 0:
 				text += tr("PANEL_DOG_NEXT_KILL") % kill
+			var deaf := int(round(float(upgrade.get("deaf_chance", 0.0)) * 100.0))
+			if deaf > 0:
+				text += tr("PANEL_DOG_NEXT_DEAF") % deaf
+			var quit := int(round(float(upgrade.get("quit_chance", 0.0)) * 100.0))
+			if quit > 0:
+				text += tr("PANEL_DOG_NEXT_QUIT") % [quit,
+						NumberFormat.amount_only(float(upgrade.get("quit_after", 0)))]
 			return text)
 	_add_purchase("guard", "PANEL_BUY_GUARD", func(upgrade: Dictionary) -> String:
 			return tr("PANEL_GUARD_NEXT") % [String(upgrade.get("name", "")),

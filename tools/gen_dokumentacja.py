@@ -282,8 +282,15 @@ OPISY_ROZ = {
                             "FarmState.dog_interval"),
     "pies[].przegania_proc": ("%", "Szansa, ze rzut sie uda i lis wyleci z wybiegu.",
                               "FarmState.dog_chance"),
-    "pies[].zagryza_proc": ("%", "Gdy lisowi skonczy sie zycie: szansa, ze pies go ZAGRYZIE (inaczej lis ucieka). Od 13.0.2 kundel 0, owczarek 100.",
+    "pies[].zagryza_proc": ("%", "Gdy lisowi skonczy sie zycie: szansa, ze pies go ZAGRYZIE (inaczej lis ucieka). Kundle 0, owczarek i terier 100.",
                             "FarmState.dog_kill_chance"),
+    "pies[].nie_slyszy_proc": ("%", "Szansa, ze pies w ogole nie uslyszy lisa przy danej wizycie "
+                               "(stary gluchy kundel 50%). Losowane przy wejsciu lisa.",
+                               "FarmState.roll_dog_visit"),
+    "pies[].tchorzy_proc": ("%", "Szansa, ze pies po tchorzy_po_s sekundach pogoni sam ucieknie do budy "
+                            "(maly tchorzliwy kundel 33%).", "FarmState.roll_dog_visit, Simulation"),
+    "pies[].tchorzy_po_s": ("s", "Po ilu sekundach pogoni tchorzliwy pies ucieka.",
+                            "FarmState.dog_quit_left"),
     "pies[].obrazenia_min": ("pkt", "Najslabsze udane ugryzienie: tyle zycia zabiera lisu. Gdy zycie "
                              "spadnie do zera, lis ucieka albo (zagryza_proc) ginie.",
                              "FarmState.dog_damage, Simulation"),

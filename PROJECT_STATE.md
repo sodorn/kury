@@ -4,7 +4,18 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 11** (wersja 13.0.2, wlasciciel 27.11, wieczor):
+- Aktualny etap: **ETAP 11** (wersja 13.0.3, wlasciciel 27.11, 21:11):
+  piec psow (ZADANIA A10) z nazwami wlasciciela: 1 stary gluchy kundel
+  (nie_slyszy_proc 50 - przy wizycie w ogole nie rusza), 2 maly tchorzliwy
+  kundel (tchorzy_proc 33 / tchorzy_po_s 3 - ucieka z pogoni), 3 duzy
+  agresywny kundel, 4 owczarek, 5 jagdterier (co 1 s, 100%, 50 pkt - lis
+  bierze najwyzej 1 kure i ginie). FarmState.roll_dog_visit,
+  dog_off_visit/dog_quit_left (bez zapisu), Events.dog_fled. Zapis wersja 7:
+  stary kundel 1 -> 2, owczarek 2 -> 4. Klik w krzakach: jedno klikniecie
+  od poziomu 4. dog.gd: flip_h wedlug kierunku ruchu (sprajt patrzy
+  w prawo) - wczesniej pies biegl tylem. Kundle i terier: sprajt kundla
+  ze skala i kolorem (wlasne grafiki w ZADANIA E1b).
+- Poprzednio (wersja 13.0.2, wlasciciel 27.11, wieczor):
   (1) Ploty: tyl i boki zmieniaja sie z poziomem jak przod. Tylny plot to
   drugi sprajt FENCES (FenceBack, y 888), boki to fence_side_0..4.svg
   (tools/gen_fence.py side()), ground.svg bez narysowanego plotu;

@@ -61,6 +61,10 @@ signal fox_scared()
 @warning_ignore("unused_signal")
 signal fox_chased()
 
+## 13.0.2: tchorzliwy kundel uciekl z pogoni - scena odprowadza go do budy.
+@warning_ignore("unused_signal")
+signal dog_fled()
+
 ## 13.0.2: pies ugryzl lisa (zabral mu zycie), ale lis jeszcze stoi.
 @warning_ignore("unused_signal")
 signal fox_bitten()

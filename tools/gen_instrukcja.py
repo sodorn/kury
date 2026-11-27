@@ -487,14 +487,23 @@ title("13. PSY I PLOT")
 dogs = BAL["buildings"]["dog"]["upgrades"]
 raw("  PSY:")
 for nr, d in enumerate(dogs, start=1):
-    raw("  %2d. %s\n      %s - rzuca sie na lisa co %g s, przegania w %.0f%%, zagryza w %.0f%%"
-        % (nr, d["name"], zl(d["price"]), d["interval"], d["chance"] * 100, d["kill_chance"] * 100))
+    extra = ""
+    if d.get("deaf_chance", 0) > 0:
+        extra += ", w %.0f%% wizyt nie slyszy lisa" % (d["deaf_chance"] * 100)
+    if d.get("quit_chance", 0) > 0:
+        extra += ", w %.0f%% wizyt po %g s ucieka do budy" % (d["quit_chance"] * 100, d["quit_after"])
+    raw("  %2d. %s\n      %s - co %g s rzuca sie na lisa, gryzie w %.0f%% prob za %d-%d pkt zycia, "
+        "przy zerze %s%s"
+        % (nr, d["name"], zl(d["price"]), d["interval"], d["chance"] * 100, d["damage_min"],
+           d["damage_max"], "zagryza" if d["kill_chance"] >= 1 else "lis ucieka", extra))
 para("""
-Pies pracuje sam, bez twojego udzialu, takze gdy nie patrzysz. Gdy lis wejdzie,
-pies rzuca kostka co tyle sekund. Przy udanej probie owczarek moze lisa ZAGRYZC -
-wtedy lis zostaje rozszarpany na wybiegu, a nastepny przychodzi %g razy
-pozniej niz zwykle.
-""" % fox["killed_return_multiplier"])
+Pies pracuje sam, bez twojego udzialu, takze gdy nie patrzysz. Lis ma %d-%d
+punktow zycia (zwykle ok. %d) - pasek nad nim. Twoj palec zabiera 1 punkt,
+ugryzienie psa wiecej. Gdy zycie spadnie do zera, przy kundlach lis ucieka,
+a owczarek i terier go ZAGRYZAJA - wtedy lis zostaje rozszarpany na wybiegu,
+a nastepny przychodzi %g razy pozniej niz zwykle. Z owczarkiem i terierem
+pies sam wyrywa lisa z krzakow po jednym twoim kliknieciu.
+""" % (fox["hp_min"], fox["hp_max"], fox["hp_mean"], fox["killed_return_multiplier"]))
 guard = BAL["buildings"]["guard"]["upgrades"]
 raw("")
 raw("  PLOTY:")

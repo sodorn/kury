@@ -1,6 +1,6 @@
 ==============================================================================
   SYMULATOR HODOWLI KURCZAKOW - DOKUMENTACJA TECHNICZNA
-  gra w wersji 13.0.2   *   format zapisu w wersji 6   *   Godot 4.7.2
+  gra w wersji 13.0.3   *   format zapisu w wersji 7   *   Godot 4.7.2
 ==============================================================================
 
   Dokument dla programisty: jak gra jest zbudowana, jak dzialaja mechaniki, co
@@ -375,12 +375,15 @@
   FarmState.dog_level (0 = brak, 1 = kundel, 2 = owczarek), plot w guard_level
   (0-4).
 
-  +======+===========+=========+========+=========+
-  | poz. |      cena | rzut co | szansa | zagryza |
-  +======+===========+=========+========+=========+
-  |    1 |  400.0 zl |  10.0 s |    33% |      0% |
-  |    2 | 8000.0 zl |   5.0 s |    67% |    100% |
-  +------+-----------+---------+--------+---------+
+  +======+============+=========+========+=========+
+  | poz. |       cena | rzut co | szansa | zagryza |
+  +======+============+=========+========+=========+
+  |    1 |   300.0 zl |  10.0 s |    33% |      0% |
+  |    2 |   900.0 zl |   8.0 s |    40% |      0% |
+  |    3 |  3000.0 zl |   6.0 s |    55% |      0% |
+  |    4 |  8000.0 zl |   5.0 s |    67% |    100% |
+  |    5 | 20000.0 zl |   1.0 s |   100% |    100% |
+  +------+------------+---------+--------+---------+
 
   Nazwy psow: rozbudowy.json -> pies (rozdzial 7).
 
@@ -946,8 +949,22 @@
 
   pies[].zagryza_proc   [%]
       Gdy lisowi skonczy sie zycie: szansa, ze pies go ZAGRYZIE (inaczej lis
-      ucieka). Od 13.0.2 kundel 0, owczarek 100.
+      ucieka). Kundle 0, owczarek i terier 100.
       uzycie: FarmState.dog_kill_chance
+
+  pies[].nie_slyszy_proc   [%]
+      Szansa, ze pies w ogole nie uslyszy lisa przy danej wizycie (stary
+      gluchy kundel 50%). Losowane przy wejsciu lisa.
+      uzycie: FarmState.roll_dog_visit
+
+  pies[].tchorzy_proc   [%]
+      Szansa, ze pies po tchorzy_po_s sekundach pogoni sam ucieknie do budy
+      (maly tchorzliwy kundel 33%).
+      uzycie: FarmState.roll_dog_visit, Simulation
+
+  pies[].tchorzy_po_s   [s]
+      Po ilu sekundach pogoni tchorzliwy pies ucieka.
+      uzycie: FarmState.dog_quit_left
 
   pies[].obrazenia_min   [pkt]
       Najslabsze udane ugryzienie: tyle zycia zabiera lisu. Gdy zycie spadnie
@@ -1027,10 +1044,13 @@
     w 95%
 
   PIES:
-    1. kundel ze schroniska z budą - 400 zl, co 10 s, przegania 33.33%,
-    zagryza 0%
-    2. owczarek niemiecki z rodowodem - 8000 zl, co 5 s, przegania 66.67%,
+    1. stary głuchy kundel - 300 zl, co 10 s, przegania 33.33%, zagryza 0%
+    2. mały tchórzliwy kundel - 900 zl, co 8 s, przegania 40%, zagryza 0%
+    3. duży agresywny kundel - 3000 zl, co 6 s, przegania 55%, zagryza 0%
+    4. owczarek niemiecki z rodowodem - 8000 zl, co 5 s, przegania 66.67%,
     zagryza 100%
+    5. jagdterier — zabójca lisów - 20000 zl, co 1 s, przegania 100%, zagryza
+    100%
 
   breeds.json - pola kazdej rasy
   ------------------------------
@@ -1206,6 +1226,7 @@
   fox_visited(count: int)
   fox_scared()
   fox_chased()
+  dog_fled()
   fox_bitten()
   fox_killed()
   fox_repelled()
@@ -1221,10 +1242,10 @@
   Zapis to jeden dokument JSON (SaveGame.to_dict). Lokalnie lezy w
   user://save.json - w przegladarce Godot mapuje user:// na IndexedDB strony.
   Ten sam dokument jedzie na serwer jako pole payload. Aktualna wersja
-  formatu: 6 (SaveGame.VERSION).
+  formatu: 7 (SaveGame.VERSION).
 
   {
-    "version": 6,                 wersja FORMATU (nie gry)
+    "version": 7,                 wersja FORMATU (nie gry)
     "saved_at": 1795508306.0,     ostatnia POLICZONA chwila (unix, ZEGAR)
     "money": 1431.0, "feed": 1040.0, "days": 12, "day_fraction": 0.4,
     "eggs": {"leghorn": 40}, "egg_ages": {"leghorn": [...]},
@@ -1716,5 +1737,5 @@
     limity miejsca i ruchu planu darmowego.
 
 ==============================================================================
-  koniec dokumentu  *  wygenerowano z wersji 13.0.2
+  koniec dokumentu  *  wygenerowano z wersji 13.0.3
 ==============================================================================

@@ -38,12 +38,16 @@ var _rest_y := 0.0
 func _ready() -> void:
 	_home = position
 	_rest_y = _sprite.position.y
+	Events.dog_fled.connect(_go_home)
 	show_breed(Game.state.dog_level if Game.state != null else 1)
 
 
-## Dobiera wyglad i rozmiar do kupionego psa.
+## Dobiera wyglad i rozmiar do kupionego psa. 13.0.2: piec psow. Kundle
+## (1-3) i terier (5) na razie z tego samego sprajtu kundla - inny rozmiar
+## i masc; wlasne grafiki w ZADANIA (etap E).
 func show_breed(level: int) -> void:
-	if level >= 2:
+	_sprite.modulate = Color.WHITE
+	if level == 4:
 		_stand = SHEPHERD
 		_leap = SHEPHERD_LEAP
 		# Owczarek jest wiekszy od kundla juz samym sprajtem (248 vs 210 px),
@@ -55,7 +59,18 @@ func show_breed(level: int) -> void:
 		_stand = MUTT
 		_leap = MUTT_LEAP
 		_sprite.offset = Vector2(0, -56)
-		scale = Vector2(1.04, 1.04)
+		match level:
+			1:  # stary gluchy - siwy
+				scale = Vector2(1.0, 1.0)
+				_sprite.modulate = Color(0.82, 0.8, 0.78)
+			2:  # maly tchorzliwy
+				scale = Vector2(0.78, 0.78)
+			3:  # duzy agresywny - wiekszy i ciemniejszy
+				scale = Vector2(1.28, 1.28)
+				_sprite.modulate = Color(0.72, 0.62, 0.55)
+			_:  # terier - maly, czarny podpalany
+				scale = Vector2(0.85, 0.85)
+				_sprite.modulate = Color(0.45, 0.36, 0.3)
 	_sprite.texture = _stand
 
 
@@ -70,7 +85,14 @@ func _process(delta: float) -> void:
 	var want := Vector2(_target.position.x + side, _target.position.y + 6.0)
 	var before := position
 	position = position.lerp(want, clampf(delta * 3.2, 0.0, 1.0))
-	_sprite.flip_h = _target.position.x > position.x
+	# 13.0.2 (wlasciciel): pies biegl dupa do przodu. Sprajt patrzy w PRAWO,
+	# wiec odwracamy go tylko przy biegu w lewo - wedlug kierunku ruchu,
+	# a stojac pies patrzy na lisa.
+	var dx := position.x - before.x
+	if absf(dx) > 0.3:
+		_sprite.flip_h = dx < 0.0
+	elif absf(_target.position.x - position.x) > 4.0:
+		_sprite.flip_h = _target.position.x < position.x
 
 	# Susy zamiast sunięcia. Faza idzie od PRZEBYTEJ drogi, wiec pies
 	# podskakuje tylko wtedy, gdy naprawde biegnie, a stojac stoi spokojnie.
@@ -113,7 +135,8 @@ func _go_home() -> void:
 	_sprite.position.y = _rest_y
 	_sprite.scale = Vector2.ONE
 	_sprite.texture = _stand
-	_sprite.flip_h = _home.x > position.x
+	# Do budy biegnie przodem: w lewo = odwrocony.
+	_sprite.flip_h = _home.x < position.x
 	var back := create_tween()
 	back.tween_property(self, "position", _home, 0.9) \
 			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)

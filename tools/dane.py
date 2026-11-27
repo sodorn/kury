@@ -64,6 +64,8 @@ def apply_upgrades(bal: dict, plik: dict) -> dict:
          "chance": float(lv["przegania_proc"]) / 100.0,
          "kill_chance": float(lv["zagryza_proc"]) / 100.0,
          "damage_min": int(lv["obrazenia_min"]), "damage_max": int(lv["obrazenia_max"]),
+         "deaf_chance": float(lv["nie_slyszy_proc"]) / 100.0,
+         "quit_chance": float(lv["tchorzy_proc"]) / 100.0, "quit_after": float(lv["tchorzy_po_s"]),
          "life_days_min": float(lv["zyje_dni_min"]), "life_days_max": float(lv["zyje_dni_max"])}
         for lv in plik["pies"]]
     return bal

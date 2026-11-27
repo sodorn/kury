@@ -13,7 +13,8 @@ Zasady:
 - Zrobione pozycje przenosimy do PROJECT_STATE.md i usuwamy stąd.
 - Kolejność etapów: od najmniejszej roboty i największego zysku.
 
-Stan na 27.11.2026: wersja 13.0.2 (ploty z kazdej strony wedlug poziomu,
+Stan na 27.11.2026: wersja 13.0.3 (piec psow z nazwami wlasciciela,
+pies biegnie glowa do przodu). Wczesniej 13.0.2 (ploty z kazdej strony wedlug poziomu,
 wiecej krzakow, prawdziwa niesnosc ras, zycie lisa 5-50 z czerwonym
 paskiem). Wczesniej 13.1.1 (lis w krzakach do klikania, poprawki
 admina). Wczesniej 13.0.1 (poprawki po 13.2; numer na prosbe
@@ -50,22 +51,7 @@ A8. Magazyn wydluza czas, po jakim jaja sie psuja: rosnie lagodnie z
     poziomem, na najwyzszym 3 x czas poczatkowy (np. mnoznik 1,0 ... 3,0).
 A9. Lis bez ochrony grasuje 2 x dluzej (wiecej ofiar bez psa i plotu) -
     razem z nowa drabinka psow (A10), sprawdzic botem.
-A10. Piec psow zamiast dwoch (rozbudowy.json, nowe grafiki tylko gdzie trzeba):
-    1 stary gluchy kundel - jak dzisiejszy kundel + 50% szans, ze nie
-      zauwazy lisa;
-    2 maly tchorzliwy kundel - troche skuteczniejszy, 1/3 szans, ze po 3 s
-      poscigu sam ucieknie;
-    3 duzy agresywny kundel - duzo skuteczniejszy, szybciej odgania;
-    4 owczarek niemiecki - jak dzisiejszy;
-    5 pies-zabojca lisow (propozycja Claude: terier - jagdterier albo fox
-      terier, hodowane wlasnie na lisy; doberman to pies obronny, nie na
-      lisy) - lis zdazy zabic najwyzej 1 kure, pies od razu go zagryza,
-      zagryziony lis dlugo nie wraca.
-    Z poziomem 4+ jedno klikniecie lisa w krzakach = pies go przegania.
-    Od 13.0.2 kazdy pies ma w rozbudowy.json obrazenia_min/max (ile zycia
-    lisa zabiera ugryzienie) i zagryza_proc (czy przy zerze lis ginie) -
-    nowe psy dostaja wlasne wartosci (kundle 0% zagryzien, owczarek i terier
-    100%).
+(A10 ZROBIONE w 13.0.3: piec psow z nazwami wlasciciela - patrz PROJECT_STATE.)
 A11. Gesi-straznicy (pomysl wlasciciela): realnie gesi glosno alarmuja na
     lisa i czesto go odstraszaja same - gesi sa duze i agresywne. Propozycja:
     gesi kupowane jak pies; gdy lis sie czai, gesi gegaja (dzwiek + ikonka)
@@ -148,9 +134,14 @@ E1. Budynki: początkowe małe, proste, brzydkie, dziadowskie i śmiesznie
     odpowiadać nazwie z data/rozbudowy.json.
 E1a. Obrazek sklepu: handlarz trzymajacy kure za nogi do gory nogami
     (obecny wyglada zle).
-E1b. Pies jak lis: przy zmianie kierunku odwraca sie jak karta. Kundel -
-    tylko ruch; owczarek - ruch + nowy wyglad: czarny podpalany, ostre
-    uszy, wyzszy, mniej wydluzony, ostrzejsze ksztalty (wilczur).
+E1b. Pies jak lis: przy zmianie kierunku odwraca sie jak karta (w 13.0.3
+    naprawiony tylko kierunek - pies biegnie glowa do przodu, ale odwraca
+    sie od razu, bez animacji karty). Owczarek - nowy wyglad: czarny
+    podpalany, ostre uszy, wyzszy, mniej wydluzony, ostrzejsze ksztalty
+    (wilczur). Kundle 1-3 i jagdterier maja na razie sprajt kundla
+    przeskalowany i przyciemniony - kazdy potrzebuje wlasnej grafiki
+    (siwy stary kundel, maly chudy tchorz, duzy kudlaty agresor, jagdterier
+    czarny podpalany, krotkie nogi).
 E1c. Lis w nocy wbiega do kurnika (zamiast na pusty wybieg). W srodku nic
     nie widac - z kurnika sypia sie piora i tryska krew. Pies czeka na
     dworze; gdy zauwazy lisa, rusza i wbiega za nim do kurnika (znika),

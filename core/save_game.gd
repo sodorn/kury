@@ -11,7 +11,7 @@ extends RefCounted
 
 const PATH := "user://save.json"
 ## Numer formatu zapisu. Podnosic przy KAZDEJ zmianie ukladu pol.
-const VERSION := 6
+const VERSION := 7
 
 
 ## Zamienia stan gry na slownik gotowy do zapisu.
@@ -339,4 +339,11 @@ static func _migrate(data: Dictionary, from_version: int) -> Dictionary:
 		data["guard_level"] = nowe[0]
 		data["dog_level"] = nowe[1]
 		data["version"] = 6
+	if from_version < 7:
+		# Wersja 7 (13.0.2): piec psow zamiast dwoch. Stary kundel (1) to dzis
+		# maly tchorzliwy kundel (2) - troche lepszy od niego, wiec nikt nie
+		# traci; owczarek (2) przesuwa sie na swoje nowe miejsce (4).
+		var psy := {0: 0, 1: 2, 2: 4}
+		data["dog_level"] = psy.get(clampi(int(data.get("dog_level", 0)), 0, 2), 0)
+		data["version"] = 7
 	return data
