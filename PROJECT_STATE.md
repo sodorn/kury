@@ -4,7 +4,16 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 11** (wersja 13.0.4, wlasciciel 27.11, 22:22):
+- Aktualny etap: **ETAP 11** (wersja 13.0.5, wlasciciel 27.11, 22:44):
+  psy strojone symulacja na redukcje strat ok. 50/65/80/90/~99% (test
+  w _test_v13_basics, stado 30, bez rzezi). Gluchy nie slyszy w 25%,
+  maly tchorzliwy ucieka w 20% po 3 s. Ceny rynkowe: kundle 100/200/300
+  zl (oplata adopcyjna schronisk 20-200 zl), owczarek ZKwP 5000 (4-6
+  tys.), kangal 11000 (USA ok. 3000 USD). Jagdterier wypadl - realnie
+  kosztuje 1,5-6 tys., czyli mniej niz owczarek, a psy maja byc drozsze =
+  lepsze (decyzja wlasciciela). Kangal na razie sprajtem owczarka (1,3x,
+  plowy).
+- Poprzednio (wersja 13.0.4, wlasciciel 27.11, 22:22):
   (1) Lup lisa to PROCENT stada: FarmState.roll_fox_share (Gauss
   kill_share_mean 55, sd 15, przyciety 30..100); rzez 5% bez psa = cale
   stado. fox_kill_speed skraca odstepy, zeby caly lup zmiescil sie w ok.

@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 13.0.4
+  INSTRUKCJA OBSLUGI *** gra w wersji 13.0.5
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -343,21 +343,21 @@
 ==============================================================================
   PSY:
    1. stary głuchy kundel
-      300 zl - co 10 s rzuca sie na lisa, gryzie w 33% prob za 5-12 pkt zycia, przy zerze lis ucieka, w 50% wizyt nie slyszy lisa
+      100 zl - co 4 s rzuca sie na lisa, gryzie w 50% prob za 8-14 pkt zycia, przy zerze lis ucieka, w 25% wizyt nie slyszy lisa
    2. mały tchórzliwy kundel
-      900 zl - co 8 s rzuca sie na lisa, gryzie w 40% prob za 5-12 pkt zycia, przy zerze lis ucieka, w 33% wizyt po 3 s ucieka do budy
+      200 zl - co 3 s rzuca sie na lisa, gryzie w 60% prob za 8-16 pkt zycia, przy zerze lis ucieka, w 20% wizyt po 3 s ucieka do budy
    3. duży agresywny kundel
-      3 000 zl - co 6 s rzuca sie na lisa, gryzie w 55% prob za 8-16 pkt zycia, przy zerze lis ucieka
+      300 zl - co 3 s rzuca sie na lisa, gryzie w 60% prob za 10-17 pkt zycia, przy zerze lis ucieka
    4. owczarek niemiecki z rodowodem
-      8 000 zl - co 5 s rzuca sie na lisa, gryzie w 67% prob za 8-20 pkt zycia, przy zerze zagryza
-   5. jagdterier — zabójca lisów
-      20 000 zl - co 0.2 s rzuca sie na lisa, gryzie w 100% prob za 50-50 pkt zycia, przy zerze zagryza
+      5 000 zl - co 1.8 s rzuca sie na lisa, gryzie w 75% prob za 12-22 pkt zycia, przy zerze zagryza
+   5. kangal — turecki pogromca wilków
+      11 000 zl - co 0.2 s rzuca sie na lisa, gryzie w 100% prob za 50-50 pkt zycia, przy zerze zagryza
 
   Pies pracuje sam, bez twojego udzialu, takze gdy nie patrzysz. Lis ma 5-50
   punktow zycia (zwykle ok. 20) - pasek nad nim. Twoj palec zabiera 1 punkt,
   ugryzienie psa wiecej. Gdy zycie spadnie do zera, przy kundlach lis ucieka,
-  a owczarek i terier go ZAGRYZAJA - wtedy lis zostaje rozszarpany na wybiegu,
-  a nastepny przychodzi 5 razy pozniej niz zwykle. Z owczarkiem i terierem
+  a owczarek i kangal go ZAGRYZAJA - wtedy lis zostaje rozszarpany na wybiegu,
+  a nastepny przychodzi 5 razy pozniej niz zwykle. Z owczarkiem i kangalem
   pies sam wyrywa lisa z krzakow po jednym twoim kliknieciu.
 
   PLOTY:

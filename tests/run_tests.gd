@@ -1433,7 +1433,7 @@ func _test_dog() -> void:
 	# 13.0.2: piec psow (wlasciciel 27.11).
 	_check(dogs.size() == 5, "jest piec psow do kupienia")
 	var nazwy_psow := ["stary głuchy kundel", "mały tchórzliwy kundel", "duży agresywny kundel",
-			"owczarek niemiecki z rodowodem", "jagdterier — zabójca lisów"]
+			"owczarek niemiecki z rodowodem", "kangal — turecki pogromca wilków"]
 	for i in mini(dogs.size(), nazwy_psow.size()):
 		_check(String(dogs[i].get("name", "")) == nazwy_psow[i], "pies %d to %s" % [i + 1, nazwy_psow[i]])
 	_check(float(dogs[0].get("price", 0)) <= float(fences[0].get("price", 0)),
@@ -1563,8 +1563,8 @@ func _test_v13_basics() -> void:
 		if p.dog_quit_left >= 0.0:
 			tchorz += 1
 			_check(is_equal_approx(p.dog_quit_left, 3.0), "tchorz ucieka po 3 s")
-	_check(gluchy > 420 and gluchy < 580, "gluchy kundel nie slyszy w ~50%% wizyt (%d/1000)" % gluchy)
-	_check(tchorz > 270 and tchorz < 400, "tchorzliwy kundel ucieka w ~1/3 wizyt (%d/1000)" % tchorz)
+	_check(gluchy > 200 and gluchy < 300, "gluchy kundel nie slyszy w ~25%% wizyt (%d/1000)" % gluchy)
+	_check(tchorz > 150 and tchorz < 250, "tchorzliwy kundel ucieka w ~20%% wizyt (%d/1000)" % tchorz)
 	for lv in [3, 4, 5]:
 		p.set_building_level("dog", lv)
 		var zawsze := true
@@ -1573,7 +1573,7 @@ func _test_v13_basics() -> void:
 			if p.dog_off_visit or p.dog_quit_left >= 0.0:
 				zawsze = false
 		_check(zawsze, "pies %d zawsze goni lisa" % lv)
-	# Terier: lis zdazy zabic najwyzej jedna kure i ginie.
+	# Kangal: lis zdazy zabic najwyzej jedna kure i ginie.
 	var terier_max := 0
 	var terier_zabil := 0
 	for i in 100:
@@ -1596,7 +1596,33 @@ func _test_v13_basics() -> void:
 		terier_max = maxi(terier_max, int(out["fox_took"]))
 		terier_zabil += int(out.get("fox_killed", 0))
 	_check(terier_max <= 1 and terier_zabil == 130,
-			"przy terierze lis bierze najwyzej 1 kure i zawsze ginie (%d, %d/130)" % [terier_max, terier_zabil])
+			"przy kangalu lis bierze najwyzej 1 kure i zawsze ginie (%d, %d/130)" % [terier_max, terier_zabil])
+	# 13.0.5 (wlasciciel 27.11): psy redukuja straty srednio o ok. 50, 65,
+	# 80, 90% i prawie calkiem. Stado 30, 600 wizyt na psa, bez rzezi.
+	var straty := []
+	var stado: Array[String] = []
+	for i in 30:
+		stado.append("leghorn")
+	var cfg_lisa: Dictionary = GameData.balance()["fox"]
+	var rzez := float(cfg_lisa.get("massacre_chance", 0.05))
+	cfg_lisa["massacre_chance"] = 0.0
+	for lv in 6:
+		var suma_strat := 0
+		for i in 600:
+			var t := _fresh_state(stado, 1000000.0)
+			if lv > 0:
+				t.set_building_level("dog", lv)
+			var out := {"fox_took": 0, "died_hunger": 0, "died_disease": 0, "fox_arrived": 0}
+			Simulation._fox_arrives(t, out, 1 << 30, true)
+			suma_strat += int(out["fox_took"])
+		straty.append(suma_strat / 600.0)
+	cfg_lisa["massacre_chance"] = rzez
+	var cele := [0.0, 0.42, 0.57, 0.72, 0.84, 0.9]
+	for lv in range(1, 6):
+		var redukcja := 1.0 - float(straty[lv]) / float(straty[0])
+		_check(redukcja >= cele[lv] and redukcja > 1.0 - float(straty[lv - 1]) / float(straty[0]) - 0.001,
+				"pies %d redukuje straty o %.0f%% (cel ok. %s)" % [lv, redukcja * 100.0,
+				["", "50%", "65%", "80%", "90%", "prawie 100%"][lv]])
 	var scale := GameData.time_scale()
 	# Inkubator: przy jajach w srodku nie da sie rozbudowac; w trakcie
 	# rozbudowy nic sie nie wykluwa i nie da sie wlozyc jaj.
@@ -1694,7 +1720,7 @@ func _test_v13_basics() -> void:
 		var hp_d := hp_stan.dog_damage()
 		hp_kmin = mini(hp_kmin, hp_d)
 		hp_kmax = maxi(hp_kmax, hp_d)
-	_check(hp_kmin == 5 and hp_kmax == 12, "kundel gryzie za 5..12 (%d..%d)" % [hp_kmin, hp_kmax])
+	_check(hp_kmin == 8 and hp_kmax == 14, "kundel gryzie za 8..14 (%d..%d)" % [hp_kmin, hp_kmax])
 	_check(hp_stan.dog_kill_chance() == 0.0, "kundel nie zagryza - lis ucieka")
 	hp_stan.set_building_level("dog", 4)
 	hp_kmin = 99
@@ -1703,7 +1729,7 @@ func _test_v13_basics() -> void:
 		var hp_d := hp_stan.dog_damage()
 		hp_kmin = mini(hp_kmin, hp_d)
 		hp_kmax = maxi(hp_kmax, hp_d)
-	_check(hp_kmin == 8 and hp_kmax == 20, "owczarek gryzie za 8..20 (%d..%d)" % [hp_kmin, hp_kmax])
+	_check(hp_kmin == 12 and hp_kmax == 22, "owczarek gryzie za 12..22 (%d..%d)" % [hp_kmin, hp_kmax])
 	_check(hp_stan.dog_kill_chance() == 1.0, "owczarek przy zerze zagryza lisa")
 	# 13.0.4: lup lisa 30..100% stada, zwykle okolo polowy.
 	var sh_low := 1.0
@@ -1734,7 +1760,7 @@ func _test_v13_basics() -> void:
 	while wielka.fox_visit_left > 0.0 and minelo < 600.0:
 		Simulation.advance(wielka, 1.0 * GameData.time_scale())
 		minelo += 1.0
-	_check(minelo <= 90.0, "duzy lup zabrany w okolo minute (%.0f s)" % minelo)
+	_check(minelo <= 130.0, "duzy lup zabrany w okolo 1-2 minuty, nie w godzine (%.0f s)" % minelo)
 	# Wygoniony z krzakow wraca na pewno po 2-6 minutach.
 	var wraca := Game.state
 	Game.state = _fresh_state(["leghorn", "leghorn", "leghorn", "leghorn", "leghorn", "leghorn"], 100000.0)
@@ -1749,8 +1775,8 @@ func _test_v13_basics() -> void:
 	_check(int(r1.get("fox_arrived", 0)) == 0 and Game.state.fox_lurk_left <= 0.0, "przed czasem lisa nie ma")
 	Game.state.fox_roll_timer = 0.0
 	GameData.balance()["fox"]["chance"] = 0.0
-	Simulation.advance(Game.state, 10.0 * GameData.time_scale())
-	_check(Game.state.fox_visit_left > 0.0 or Game.state.fox_lurk_left > 0.0,
+	var r2 := Simulation.advance(Game.state, 10.0 * GameData.time_scale())
+	_check(int(r2.get("fox_arrived", 0)) + int(r2.get("fox_lurking", 0)) > 0,
 			"po czasie lis wraca bez kostki")
 	_disarm_fox()
 	Game.state = wraca

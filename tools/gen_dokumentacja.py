@@ -294,7 +294,7 @@ OPISY_ROZ = {
                             "FarmState.dog_interval"),
     "pies[].przegania_proc": ("%", "Szansa, ze rzut sie uda i lis wyleci z wybiegu.",
                               "FarmState.dog_chance"),
-    "pies[].zagryza_proc": ("%", "Gdy lisowi skonczy sie zycie: szansa, ze pies go ZAGRYZIE (inaczej lis ucieka). Kundle 0, owczarek i terier 100.",
+    "pies[].zagryza_proc": ("%", "Gdy lisowi skonczy sie zycie: szansa, ze pies go ZAGRYZIE (inaczej lis ucieka). Kundle 0, owczarek i kangal 100.",
                             "FarmState.dog_kill_chance"),
     "pies[].nie_slyszy_proc": ("%", "Szansa, ze pies w ogole nie uslyszy lisa przy danej wizycie "
                                "(stary gluchy kundel 50%). Losowane przy wejsciu lisa.",

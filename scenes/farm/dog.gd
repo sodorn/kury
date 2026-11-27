@@ -45,12 +45,12 @@ func _ready() -> void:
 	show_breed(Game.state.dog_level if Game.state != null else 1)
 
 
-## Dobiera wyglad i rozmiar do kupionego psa. 13.0.2: piec psow. Kundle
-## (1-3) i terier (5) na razie z tego samego sprajtu kundla - inny rozmiar
-## i masc; wlasne grafiki w ZADANIA (etap E).
+## Dobiera wyglad i rozmiar do kupionego psa. 13.0.5: piec psow. Kundle
+## (1-3) na razie z tego samego sprajtu kundla, kangal z owczarka - inny
+## rozmiar i masc; wlasne grafiki w ZADANIA (etap E1b).
 func show_breed(level: int) -> void:
 	_sprite.modulate = Color.WHITE
-	if level == 4:
+	if level >= 4:
 		_stand = SHEPHERD
 		_leap = SHEPHERD_LEAP
 		# Owczarek jest wiekszy od kundla juz samym sprajtem (248 vs 210 px),
@@ -58,6 +58,10 @@ func show_breed(level: int) -> void:
 		# kurnika i wygladal jak kon.
 		_sprite.offset = Vector2(0, -64)
 		scale = Vector2(1.07, 1.07)
+		if level >= 5:
+			# Kangal: wiekszy, plowy (na razie z owczarka - grafika w ZADANIA E1b).
+			scale = Vector2(1.3, 1.3)
+			_sprite.modulate = Color(1.0, 0.9, 0.7)
 	else:
 		_stand = MUTT
 		_leap = MUTT_LEAP
@@ -71,9 +75,6 @@ func show_breed(level: int) -> void:
 			3:  # duzy agresywny - wiekszy i ciemniejszy
 				scale = Vector2(1.28, 1.28)
 				_sprite.modulate = Color(0.72, 0.62, 0.55)
-			_:  # terier - maly, czarny podpalany
-				scale = Vector2(0.85, 0.85)
-				_sprite.modulate = Color(0.45, 0.36, 0.3)
 	_sprite.texture = _stand
 
 

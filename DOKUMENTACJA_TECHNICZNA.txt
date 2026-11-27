@@ -1,6 +1,6 @@
 ==============================================================================
   SYMULATOR HODOWLI KURCZAKOW - DOKUMENTACJA TECHNICZNA
-  gra w wersji 13.0.4   *   format zapisu w wersji 7   *   Godot 4.7.2
+  gra w wersji 13.0.5   *   format zapisu w wersji 7   *   Godot 4.7.2
 ==============================================================================
 
   Dokument dla programisty: jak gra jest zbudowana, jak dzialaja mechaniki, co
@@ -380,11 +380,11 @@
   +======+============+=========+========+=========+
   | poz. |       cena | rzut co | szansa | zagryza |
   +======+============+=========+========+=========+
-  |    1 |   300.0 zl |  10.0 s |    33% |      0% |
-  |    2 |   900.0 zl |   8.0 s |    40% |      0% |
-  |    3 |  3000.0 zl |   6.0 s |    55% |      0% |
-  |    4 |  8000.0 zl |   5.0 s |    67% |    100% |
-  |    5 | 20000.0 zl |   0.2 s |   100% |    100% |
+  |    1 |   100.0 zl |   4.0 s |    50% |      0% |
+  |    2 |   200.0 zl |   3.0 s |    60% |      0% |
+  |    3 |   300.0 zl |   3.0 s |    60% |      0% |
+  |    4 |  5000.0 zl |   1.8 s |    75% |    100% |
+  |    5 | 11000.0 zl |   0.2 s |   100% |    100% |
   +------+------------+---------+--------+---------+
 
   Nazwy psow: rozbudowy.json -> pies (rozdzial 7).
@@ -978,7 +978,7 @@
 
   pies[].zagryza_proc   [%]
       Gdy lisowi skonczy sie zycie: szansa, ze pies go ZAGRYZIE (inaczej lis
-      ucieka). Kundle 0, owczarek i terier 100.
+      ucieka). Kundle 0, owczarek i kangal 100.
       uzycie: FarmState.dog_kill_chance
 
   pies[].nie_slyszy_proc   [%]
@@ -1073,12 +1073,12 @@
     w 95%
 
   PIES:
-    1. stary głuchy kundel - 300 zl, co 10 s, przegania 33.33%, zagryza 0%
-    2. mały tchórzliwy kundel - 900 zl, co 8 s, przegania 40%, zagryza 0%
-    3. duży agresywny kundel - 3000 zl, co 6 s, przegania 55%, zagryza 0%
-    4. owczarek niemiecki z rodowodem - 8000 zl, co 5 s, przegania 66.67%,
+    1. stary głuchy kundel - 100 zl, co 4 s, przegania 50%, zagryza 0%
+    2. mały tchórzliwy kundel - 200 zl, co 3 s, przegania 60%, zagryza 0%
+    3. duży agresywny kundel - 300 zl, co 3 s, przegania 60%, zagryza 0%
+    4. owczarek niemiecki z rodowodem - 5000 zl, co 1.8 s, przegania 75%,
     zagryza 100%
-    5. jagdterier — zabójca lisów - 20000 zl, co 0.2 s, przegania 100%,
+    5. kangal — turecki pogromca wilków - 11000 zl, co 0.2 s, przegania 100%,
     zagryza 100%
 
   breeds.json - pola kazdej rasy
@@ -1766,5 +1766,5 @@
     limity miejsca i ruchu planu darmowego.
 
 ==============================================================================
-  koniec dokumentu  *  wygenerowano z wersji 13.0.4
+  koniec dokumentu  *  wygenerowano z wersji 13.0.5
 ==============================================================================

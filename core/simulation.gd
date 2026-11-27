@@ -735,7 +735,7 @@ static func _fox_visit_offline(state: FarmState, out: Dictionary, budget: int,
 static func _fox_kill_gap(state: FarmState) -> float:
 	var fox: Dictionary = GameData.balance().get("fox", {})
 	# Najwyzej cztery kury na sekunde - tyle zdazy nawet szalejacy lis,
-	# a terier (co 0,2 s) zawsze zdazy przed druga ofiara.
+	# a kangal (co 0,2 s) zawsze zdazy przed druga ofiara.
 	return maxf(0.25, randf_range(float(fox.get("kill_interval_min", 3.0)),
 			float(fox.get("kill_interval_max", 10.0))) * _fox_pace_factor(state) * state.fox_kill_speed)
 

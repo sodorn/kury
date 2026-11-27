@@ -508,8 +508,8 @@ para("""
 Pies pracuje sam, bez twojego udzialu, takze gdy nie patrzysz. Lis ma %d-%d
 punktow zycia (zwykle ok. %d) - pasek nad nim. Twoj palec zabiera 1 punkt,
 ugryzienie psa wiecej. Gdy zycie spadnie do zera, przy kundlach lis ucieka,
-a owczarek i terier go ZAGRYZAJA - wtedy lis zostaje rozszarpany na wybiegu,
-a nastepny przychodzi %g razy pozniej niz zwykle. Z owczarkiem i terierem
+a owczarek i kangal go ZAGRYZAJA - wtedy lis zostaje rozszarpany na wybiegu,
+a nastepny przychodzi %g razy pozniej niz zwykle. Z owczarkiem i kangalem
 pies sam wyrywa lisa z krzakow po jednym twoim kliknieciu.
 """ % (fox["hp_min"], fox["hp_max"], fox["hp_mean"], fox["killed_return_multiplier"]))
 guard = BAL["buildings"]["guard"]["upgrades"]

@@ -61,10 +61,10 @@
 		{"poziom": 4, "nazwa": "płot 2 m z podmurówką i pastuchem elektrycznym", "cena": 18000, "lis_zawraca_proc": 95}
 	],
 	"pies": [
-		{"poziom": 1, "nazwa": "stary głuchy kundel", "cena": 300, "probuje_co_s": 10, "przegania_proc": 33.33, "obrazenia_min": 5, "obrazenia_max": 12, "zagryza_proc": 0, "nie_slyszy_proc": 50, "tchorzy_proc": 0, "tchorzy_po_s": 0, "zyje_dni_min": 6, "zyje_dni_max": 12},
-		{"poziom": 2, "nazwa": "mały tchórzliwy kundel", "cena": 900, "probuje_co_s": 8, "przegania_proc": 40, "obrazenia_min": 5, "obrazenia_max": 12, "zagryza_proc": 0, "nie_slyszy_proc": 0, "tchorzy_proc": 33.33, "tchorzy_po_s": 3, "zyje_dni_min": 12, "zyje_dni_max": 22},
-		{"poziom": 3, "nazwa": "duży agresywny kundel", "cena": 3000, "probuje_co_s": 6, "przegania_proc": 55, "obrazenia_min": 8, "obrazenia_max": 16, "zagryza_proc": 0, "nie_slyszy_proc": 0, "tchorzy_proc": 0, "tchorzy_po_s": 0, "zyje_dni_min": 12, "zyje_dni_max": 22},
-		{"poziom": 4, "nazwa": "owczarek niemiecki z rodowodem", "cena": 8000, "probuje_co_s": 5, "przegania_proc": 66.67, "obrazenia_min": 8, "obrazenia_max": 20, "zagryza_proc": 100, "nie_slyszy_proc": 0, "tchorzy_proc": 0, "tchorzy_po_s": 0, "zyje_dni_min": 4, "zyje_dni_max": 12},
-		{"poziom": 5, "nazwa": "jagdterier — zabójca lisów", "cena": 20000, "probuje_co_s": 0.2, "przegania_proc": 100, "obrazenia_min": 50, "obrazenia_max": 50, "zagryza_proc": 100, "nie_slyszy_proc": 0, "tchorzy_proc": 0, "tchorzy_po_s": 0, "zyje_dni_min": 4, "zyje_dni_max": 12}
+		{"poziom": 1, "nazwa": "stary głuchy kundel", "cena": 100, "probuje_co_s": 4, "przegania_proc": 50, "obrazenia_min": 8, "obrazenia_max": 14, "zagryza_proc": 0, "nie_slyszy_proc": 25, "tchorzy_proc": 0, "tchorzy_po_s": 0, "zyje_dni_min": 6, "zyje_dni_max": 12},
+		{"poziom": 2, "nazwa": "mały tchórzliwy kundel", "cena": 200, "probuje_co_s": 3, "przegania_proc": 60, "obrazenia_min": 8, "obrazenia_max": 16, "zagryza_proc": 0, "nie_slyszy_proc": 0, "tchorzy_proc": 20, "tchorzy_po_s": 3, "zyje_dni_min": 12, "zyje_dni_max": 22},
+		{"poziom": 3, "nazwa": "duży agresywny kundel", "cena": 300, "probuje_co_s": 3, "przegania_proc": 60, "obrazenia_min": 10, "obrazenia_max": 17, "zagryza_proc": 0, "nie_slyszy_proc": 0, "tchorzy_proc": 0, "tchorzy_po_s": 0, "zyje_dni_min": 12, "zyje_dni_max": 22},
+		{"poziom": 4, "nazwa": "owczarek niemiecki z rodowodem", "cena": 5000, "probuje_co_s": 1.8, "przegania_proc": 75, "obrazenia_min": 12, "obrazenia_max": 22, "zagryza_proc": 100, "nie_slyszy_proc": 0, "tchorzy_proc": 0, "tchorzy_po_s": 0, "zyje_dni_min": 4, "zyje_dni_max": 12},
+		{"poziom": 5, "nazwa": "kangal — turecki pogromca wilków", "cena": 11000, "probuje_co_s": 0.2, "przegania_proc": 100, "obrazenia_min": 50, "obrazenia_max": 50, "zagryza_proc": 100, "nie_slyszy_proc": 0, "tchorzy_proc": 0, "tchorzy_po_s": 0, "zyje_dni_min": 4, "zyje_dni_max": 12}
 	]
 }

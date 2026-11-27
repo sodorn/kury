@@ -13,7 +13,8 @@ Zasady:
 - Zrobione pozycje przenosimy do PROJECT_STATE.md i usuwamy stąd.
 - Kolejność etapów: od najmniejszej roboty i największego zysku.
 
-Stan na 27.11.2026: wersja 13.0.4 (lis zabija 30-100% stada, w krzakach
+Stan na 27.11.2026: wersja 13.0.5 (psy wedlug skutecznosci 50/65/80/90/~99%,
+ceny rynkowe, kangal zamiast teriera). Wczesniej 13.0.4 (lis zabija 30-100% stada, w krzakach
 odskakuje do innych krzakow i wraca po 2-6 min, w nocy wchodzi do
 kurnika). Wczesniej 13.0.3 (piec psow z nazwami wlasciciela,
 pies biegnie glowa do przodu). Wczesniej 13.0.2 (ploty z kazdej strony wedlug poziomu,
@@ -139,9 +140,10 @@ E1b. Pies jak lis: przy zmianie kierunku odwraca sie jak karta (w 13.0.3
     sie od razu, bez animacji karty). Owczarek - nowy wyglad: czarny
     podpalany, ostre uszy, wyzszy, mniej wydluzony, ostrzejsze ksztalty
     (wilczur). Kundle 1-3 i jagdterier maja na razie sprajt kundla
-    przeskalowany i przyciemniony - kazdy potrzebuje wlasnej grafiki
-    (siwy stary kundel, maly chudy tchorz, duzy kudlaty agresor, jagdterier
-    czarny podpalany, krotkie nogi).
+    przeskalowany i przyciemniony, kangal to przeskalowany plowy owczarek -
+    kazdy potrzebuje wlasnej grafiki (siwy stary kundel, maly chudy
+    tchorzliwy kundel, duzy kudlaty agresor, kangal: ogromny, plowy, czarna
+    maska, kolczatka na szyi).
 (E1c ZROBIONE w 13.0.4: lis znika w drzwiach kurnika, piora i krew z drzwi, pies
     wbiega za nim i znika; zagryziony lis lezy przed kurnikiem.)
 E2. Kura szabo od nowa według prawdziwych zdjęć: duża, bardzo pierzasta,
