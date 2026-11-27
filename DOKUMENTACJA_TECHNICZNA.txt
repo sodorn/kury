@@ -1,6 +1,6 @@
 ==============================================================================
   SYMULATOR HODOWLI KURCZAKOW - DOKUMENTACJA TECHNICZNA
-  gra w wersji 13.0.3   *   format zapisu w wersji 7   *   Godot 4.7.2
+  gra w wersji 13.0.4   *   format zapisu w wersji 7   *   Godot 4.7.2
 ==============================================================================
 
   Dokument dla programisty: jak gra jest zbudowana, jak dzialaja mechaniki, co
@@ -339,7 +339,9 @@
    [KOSTKA UDANA]
        |  randf() < block_chance plotu ? -> zawraca (fox_blocked)
        v
-   [WIZYTA]  lup = losowo kills_min..kills_max (3..10), nie wiecej niz stado
+   [WIZYTA]  lup = PROCENT stada: Gauss kill_share_mean (55%), przyciety
+       |     do kill_share_min..max (30..100%); cale zabijanie w ok.
+       |     kill_all_seconds (60.0 s) - przy duzym stadzie odstepy krotsze
        |     licznik trafien = scare_taps (20)
        |     PIERWSZA kura ginie od razu
        |     kolejne co losowe kill_interval_min..max (3.0..10.0 s ZEGARA)
@@ -382,7 +384,7 @@
   |    2 |   900.0 zl |   8.0 s |    40% |      0% |
   |    3 |  3000.0 zl |   6.0 s |    55% |      0% |
   |    4 |  8000.0 zl |   5.0 s |    67% |    100% |
-  |    5 | 20000.0 zl |   1.0 s |   100% |    100% |
+  |    5 | 20000.0 zl |   0.2 s |   100% |    100% |
   +------+------------+---------+--------+---------+
 
   Nazwy psow: rozbudowy.json -> pies (rozdzial 7).
@@ -739,16 +741,43 @@
       Najdluzszy taki odstep.
       uzycie: Simulation._advance_fox
 
-  fox.kills_min
-      = 3 [szt.]
-      Najmniejszy lup lisa. Lup losowany przy wejsciu z przedzialu min..max;
-      po jego zebraniu lis odchodzi.
-      uzycie: Simulation._fox_arrives
+  fox.kill_share_min
+      = 30 [%]
+      Najmniejszy lup lisa w procentach stada (13.0.4). Losowany przy wejsciu
+      rozkladem Gaussa i przycinany do min..max.
+      uzycie: FarmState.roll_fox_share
 
-  fox.kills_max
-      = 10 [szt.]
-      Najwiekszy lup lisa.
-      uzycie: Simulation._fox_arrives
+  fox.kill_share_max
+      = 100 [%]
+      Najwiekszy lup w procentach stada (100 = cale stado; zwykle tylko rzez).
+      uzycie: FarmState.roll_fox_share
+
+  fox.kill_share_mean
+      = 55 [%]
+      Srodek Gaussa lupu - tyle procent stada lis zabiera zwykle.
+      uzycie: FarmState.roll_fox_share
+
+  fox.kill_share_sd
+      = 15 [%]
+      Odchylenie Gaussa lupu w punktach procentowych.
+      uzycie: FarmState.roll_fox_share
+
+  fox.kill_all_seconds
+      = 60.0 [s]
+      W ile mniej wiecej sekund lis zabiera caly lup. Przy duzym stadzie
+      odstepy kill_interval_* sa skracane, zeby sie zmiescil.
+      uzycie: Simulation._fox_arrives (fox_kill_speed)
+
+  fox.lurk_comeback_min_minutes
+      = 2.0 [min]
+      Lis wygoniony z krzakow wraca NA PEWNO (bez kostki) po losowym czasie
+      min..max minut zegara.
+      uzycie: Game.poke_lurking_fox, Simulation._advance_fox
+
+  fox.lurk_comeback_max_minutes
+      = 6.0 [min]
+      Najdluzszy czas powrotu lisa wygonionego z krzakow.
+      uzycie: Game.poke_lurking_fox
 
   fox.visit_max_minutes
       = 10.0 [min ZEGARA]
@@ -1049,8 +1078,8 @@
     3. duży agresywny kundel - 3000 zl, co 6 s, przegania 55%, zagryza 0%
     4. owczarek niemiecki z rodowodem - 8000 zl, co 5 s, przegania 66.67%,
     zagryza 100%
-    5. jagdterier — zabójca lisów - 20000 zl, co 1 s, przegania 100%, zagryza
-    100%
+    5. jagdterier — zabójca lisów - 20000 zl, co 0.2 s, przegania 100%,
+    zagryza 100%
 
   breeds.json - pola kazdej rasy
   ------------------------------
@@ -1608,7 +1637,7 @@
     chance i kill_chance w [0, 1]; owczarek drozszy i w niczym nie
     gorszy od kundla; kundel nie drozszy niz pierwszy plot
   - lis: odstepy kostek > 0, szanse w [0, 1],
-    kills_min >= 1, kills_max >= kills_min,
+    0 < kill_share_min <= kill_share_max <= 100,
     kill_interval_min > 0, kill_interval_max >= kill_interval_min,
     killed_return_multiplier >= 1
   - egg_spoil_hours > 0, magazyn na poziomie 0 > 50 jaj
@@ -1737,5 +1766,5 @@
     limity miejsca i ruchu planu darmowego.
 
 ==============================================================================
-  koniec dokumentu  *  wygenerowano z wersji 13.0.3
+  koniec dokumentu  *  wygenerowano z wersji 13.0.4
 ==============================================================================

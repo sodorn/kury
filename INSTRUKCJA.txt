@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 13.0.3
+  INSTRUKCJA OBSLUGI *** gra w wersji 13.0.4
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -311,24 +311,31 @@
   JAK PRZYCHODZI
     najpierw CZAI SIE w krzakach na polnoc albo na poludnie od wybiegu
     (10-30 s - zza krzaka widac uszy), potem idzie pod plot (4 s).
+    Mozesz go klikac juz w krzakach - ale po kazdym trafieniu lis jednym
+    dlugim susem przeskakuje do innego krzaka i trzeba go szukac. Wygoniony
+    z krzakow wraca NA PEWNO po 2-6 minutach.
+    W NOCY lis nie biega po pustym wybiegu, tylko wchodzi do kurnika: z
+    drzwi sypia sie piora i tryska krew. Pies wbiega za nim i walczy w
+    srodku.
     Pod plotem plot losuje, czy lisa zatrzyma. Jesli tak - lis drapie,
     zawraca i znika w krzakach. Jesli nie - przeskakuje plot.
 
   CO ROBI NA WYBIEGU
-    zabija jedna kure co 3-10 sekund REALNYCH
-    (czas losowany od nowa po kazdej kurze)
-    odchodzi po 3-10 zabitych kurach
+    zabija 30-100% stada (zwykle okolo 55%), po jednej kurze co 3-10
+    sekund REALNYCH - przy duzym stadzie szybciej, bo caly lup bierze
+    w okolo 60 sekund. Psy i palec skracaja jego wizyte.
     bezpiecznik: nie zostaje dluzej niz 10 minut
 
   JAK GO PRZEGONIC RECZNIE
-    KLIKAJ W NIEGO. Trzeba 20 trafien. Licznik widac nad lisem.
+    KLIKAJ W NIEGO. Lis ma 5-50 punktow zycia (zwykle 20), kazde
+    trafienie zabiera 1. Czerwony pasek nad lisem pokazuje, ile zostalo.
     Przegoniony reka wraca 10 razy szybciej niz normalnie -
     chyba ze masz psa albo plot.
 
   RZEZ
     Gdy ferma NIE MA PSA, okolo 5% lisow, ktore wejda na wybieg,
     wpada w szal: zabija 4 razy szybciej i nie odchodzi, dopoki nie
-    wybije CALEGO stada. Ratunek: klikac (te same 20 trafien) albo
+    wybije CALEGO stada. Ratunek: klikac (do konca paska) albo
     miec psa - przy psie rzezi nie ma wcale.
 
 ==============================================================================
@@ -344,7 +351,7 @@
    4. owczarek niemiecki z rodowodem
       8 000 zl - co 5 s rzuca sie na lisa, gryzie w 67% prob za 8-20 pkt zycia, przy zerze zagryza
    5. jagdterier — zabójca lisów
-      20 000 zl - co 1 s rzuca sie na lisa, gryzie w 100% prob za 50-50 pkt zycia, przy zerze zagryza
+      20 000 zl - co 0.2 s rzuca sie na lisa, gryzie w 100% prob za 50-50 pkt zycia, przy zerze zagryza
 
   Pies pracuje sam, bez twojego udzialu, takze gdy nie patrzysz. Lis ma 5-50
   punktow zycia (zwykle ok. 20) - pasek nad nim. Twoj palec zabiera 1 punkt,

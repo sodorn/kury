@@ -13,6 +13,9 @@ const CHASE_GAP := 150.0
 var _home := Vector2.ZERO
 var _target: Node2D = null
 var _chasing := false
+## 13.0.4: w nocy pies wbiega za lisem do kurnika i walczy niewidocznie.
+var _raiding := false
+var _raid_tween: Tween = null
 
 ## Kundel i owczarek to dwa rozne psy, nie ten sam w dwoch rozmiarach.
 const MUTT := preload("res://assets/sprites/animals/dog.svg")
@@ -75,6 +78,14 @@ func show_breed(level: int) -> void:
 
 
 func _process(delta: float) -> void:
+	if _raiding:
+		var fox := _target as FarmFox
+		if fox == null or not is_instance_valid(fox) \
+				or fox.phase == FarmFox.Phase.LEAVE or fox.phase == FarmFox.Phase.DEAD:
+			_raiding = false
+			_sprite.modulate.a = 1.0
+			_go_home()
+		return
 	if not _chasing:
 		return
 	if _target == null or not is_instance_valid(_target):
@@ -126,8 +137,32 @@ func chase(fox: Node2D, _run: Rect2) -> void:
 			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 
 
+## Noc: pies chwile nasluchuje (aż zauwazy lisa), potem biegnie do drzwi
+## kurnika i znika w srodku. Walka liczy sie w symulacji jak zwykle.
+func raid(fox: Node2D, door: Vector2) -> void:
+	_target = fox
+	_raiding = true
+	_chasing = false
+	set_process(true)
+	var notice := clampf(float(Game.state.dog_interval()) * 0.5, 0.4, 4.0) if Game.state != null else 1.0
+	var go := create_tween()
+	_raid_tween = go
+	go.tween_interval(notice)
+	go.tween_callback(func() -> void:
+		_dust.emitting = true
+		_sprite.flip_h = door.x < position.x)
+	go.tween_property(self, "position", door + Vector2(18, 16), 0.7) \
+			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	go.tween_property(_sprite, "modulate:a", 0.0, 0.2)
+	go.tween_callback(func() -> void: _dust.emitting = false)
+
+
 ## Lis poszedl — pies wraca pod kurnik i siada.
 func _go_home() -> void:
+	if _raid_tween != null and _raid_tween.is_valid():
+		_raid_tween.kill()
+	_raiding = false
+	_sprite.modulate.a = 1.0
 	_chasing = false
 	_target = null
 	_dust.emitting = false

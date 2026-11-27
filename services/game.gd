@@ -970,6 +970,14 @@ func fox_taps_left() -> int:
 	return maxi(0, state.fox_taps_left)
 
 
+## 13.0.4 (wlasciciel 27.11): lis wygoniony z krzakow wraca NA PEWNO i duzo
+## szybciej - po lurk_comeback_min..max minutach zegara, bez kostki.
+func _fox_comes_back_soon() -> void:
+	var fox_cfg: Dictionary = GameData.balance().get("fox", {})
+	state.fox_comeback_left = randf_range(float(fox_cfg.get("lurk_comeback_min_minutes", 2.0)),
+			float(fox_cfg.get("lurk_comeback_max_minutes", 6.0))) * 60.0
+
+
 ## 13.1.1 (wlasciciel 27.11): klik w lisa czajacego sie w krzakach. Trzeba
 ## trafic tyle razy co na wybiegu (fox.scare_taps), ale lis nie zdazy wtedy
 ## wejsc i zabic kur. Z owczarkiem wystarczy JEDNO klikniecie - pies rzuca sie
@@ -980,6 +988,7 @@ func poke_lurking_fox() -> bool:
 	# 13.0.2 (ZADANIA A10): od owczarka (poziom 4) wzwyz pies wyrywa sie do krzakow.
 	if state.dog_level >= 4:
 		Simulation.fox_leaves(state)
+		_fox_comes_back_soon()
 		Events.fox_chased.emit()
 		Events.notice.emit(tr("HINT_FOX_LURK_DOG"))
 		return true
@@ -991,6 +1000,7 @@ func poke_lurking_fox() -> bool:
 		return false
 	state.fox_hand_scared = true
 	Simulation.fox_leaves(state)
+	_fox_comes_back_soon()
 	Events.fox_scared.emit()
 	Events.notice.emit(tr("HINT_FOX_LURK_SCARED"))
 	return true

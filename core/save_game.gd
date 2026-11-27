@@ -64,6 +64,7 @@ static func to_dict(state: FarmState, unpaid_seconds: float = 0.0) -> Dictionary
 		"rooster_hints": state.rooster_hints,
 		"fox_roll_timer": state.fox_roll_timer,
 		"fox_hand_scared": state.fox_hand_scared,
+		"fox_comeback_left": state.fox_comeback_left,
 		"disease_timer": state.disease_timer,
 		"outbreak_on": state.outbreak_on,
 		"outbreak_left": state.outbreak_left,
@@ -122,6 +123,7 @@ static func from_dict(data: Dictionary) -> Dictionary:
 	# dzieki temu kara za przegonienie golymi rekami przezywa wylaczenie gry.
 	state.fox_roll_timer = maxf(0.0, float(data.get("fox_roll_timer", 0.0)))
 	state.fox_hand_scared = bool(data.get("fox_hand_scared", false))
+	state.fox_comeback_left = maxf(0.0, float(data.get("fox_comeback_left", 0.0)))
 	state.disease_timer = maxf(0.0, float(data.get("disease_timer", 0.0)))
 	# Ognisko choroby (od 12.20). Starsze zapisy go nie znaja — zaczynaja bez
 	# ogniska i bez okresu spokoju; chore kury ze starego zapisu i tak dojda

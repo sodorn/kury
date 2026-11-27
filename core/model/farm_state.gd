@@ -66,6 +66,20 @@ var fox_lurk_taps: int = 0
 ## 13.0.2 (wlasciciel 27.11): ZYCIE LISA. fox_taps_left to teraz jego punkty
 ## zycia (palec zabiera 1, pies wiecej), fox_hp_max - ile mial na poczatku.
 var fox_hp_max: int = 0
+## 13.0.4: lis wygoniony z krzakow wraca NA PEWNO po tylu sekundach (zapis).
+var fox_comeback_left: float = 0.0
+## Mnoznik odstepow miedzy ofiarami przy tej wizycie (<= 1, bez zapisu).
+var fox_kill_speed: float = 1.0
+
+
+## 13.0.4 (wlasciciel 27.11): lup lisa to PROCENT stada - Gauss wokol
+## kill_share_mean, przyciety do kill_share_min..max. Zwraca 0..1.
+func roll_fox_share() -> float:
+	var fox: Dictionary = GameData.balance().get("fox", {})
+	var low := clampf(float(fox.get("kill_share_min", 30)) / 100.0, 0.0, 1.0)
+	var high := clampf(float(fox.get("kill_share_max", 100)) / 100.0, low, 1.0)
+	return clampf(randfn(float(fox.get("kill_share_mean", 55)) / 100.0,
+			float(fox.get("kill_share_sd", 15)) / 100.0), low, high)
 ## 13.0.2: piec psow. Przy tej wizycie lisa pies nie pomaga: stary gluchy
 ## kundel go nie uslyszal albo maly tchorzliwy uciekl (bez zapisu).
 var dog_off_visit: bool = false
@@ -784,7 +798,7 @@ func fox_visit_seconds() -> float:
 func dog_interval() -> float:
 	if dog_level <= 0:
 		return 0.0
-	return maxf(1.0, float(current_building_upgrade("dog").get("interval", 10.0)))
+	return maxf(0.1, float(current_building_upgrade("dog").get("interval", 10.0)))
 
 
 ## Szansa pojedynczej proby psa. Probuje do skutku, wiec realna skutecznosc

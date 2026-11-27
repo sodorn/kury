@@ -381,10 +381,26 @@ func _on_fox_arrived(_count: int, seconds: float) -> void:
 		var route: Dictionary = routes[randi() % routes.size()]
 		fox = _new_fox()
 		fox.stand_at_fence(_run, route["fence"], route["inside"], routes)
+	# 13.0.4 (ZADANIA A4/E1c): w nocy kury spia w kurniku - lis wchodzi
+	# tam, a nie biega po pustym wybiegu.
+	_sync_night()
+	fox.night_raid = night
+	fox.coop_door = coop_door()
 	fox.enter_run(seconds)
 	# Gluchy kundel w ogole nie rusza - spi pod kurnikiem.
 	if _dog != null and not Game.state.dog_off_visit:
-		_dog.chase(fox, _run)
+		if night:
+			_dog.raid(fox, coop_door())
+		else:
+			_dog.chase(fox, _run)
+
+
+## Drzwi kurnika (swiat farmy) - tu lis i pies wchodza w nocy.
+func coop_door() -> Vector2:
+	var coop := $Objects.get_node_or_null("Coop") as Node2D
+	if coop == null:
+		return Vector2.ZERO
+	return coop.position + Vector2(-20.0, 0.0)
 
 
 ## Pies pojawia sie na podworku, gdy tylko gracz go kupi, i znika razem

@@ -105,6 +105,12 @@ var _clock := 0.0
 ## zabiera pierwsza kure w chwili wejscia, a scena pokazuje ja po wyladowaniu.
 var _pending_kills := 0
 var _pending_breeds: Array = []
+## 13.0.4 (ZADANIA A4/E1c): w nocy lis wchodzi do kurnika zamiast na pusty
+## wybieg. Farma ustawia drzwi i noc przed enter_run().
+var night_raid := false
+var coop_door := Vector2.ZERO
+var _in_coop := false
+var _walk_seconds := 4.0
 
 ## Szkielet.
 var _rig: Node2D = null
@@ -225,7 +231,7 @@ func _refresh_counter() -> void:
 	if _counter == null or not is_instance_valid(_counter):
 		return
 	var left := Game.fox_taps_left() if Game != null and Game.state != null else 0
-	_counter.visible = left > 0 and (phase == Phase.HUNT
+	_counter.visible = left > 0 and not _in_coop and (phase == Phase.HUNT
 			or (phase == Phase.LURK and Game.state != null and Game.state.fox_lurk_taps > 0))
 	_counter.max_value = maxi(1, Game.state.fox_hp_max if Game != null and Game.state != null else 1)
 	_counter.value = left
@@ -260,6 +266,7 @@ func lurk(run: Rect2, bush_spot: Vector2, fence_point: Vector2, inside: Vector2,
 	# prawdziwego, czajacego sie (zawrocony przez plot juz odchodzi).
 	input_pickable = Game.state != null and Game.state.fox_lurk_left > 0.0
 	var walk := maxf(0.5, approach_seconds)
+	_walk_seconds = walk
 	_lurk_left = maxf(0.3, seconds - walk)
 	# Odrobine szybciej niz wynika z czasu: rozpedzanie i skret przed plotem
 	# zjadaja chwile, a symulacja liczy rowno `approach_seconds`.
@@ -290,6 +297,9 @@ func stand_at_fence(run: Rect2, fence_point: Vector2, inside: Vector2,
 ## Symulacja: lis wchodzi na wybieg. `seconds` - ile najdluzej zostanie.
 func enter_run(seconds: float) -> void:
 	_life = maxf(1.0, seconds)
+	if night_raid and coop_door != Vector2.ZERO:
+		_raid_coop()
+		return
 	match phase:
 		Phase.AT_FENCE:
 			_jump_in()
@@ -360,6 +370,34 @@ func _jump_in() -> void:
 			_on_victims(breeds))
 
 
+## Noc: lis biegnie do drzwi kurnika i znika w srodku. Ofiary pokazuja
+## sie jako krew i piora wylatujace z drzwi.
+func _raid_coop() -> void:
+	if _peek != null and _peek.is_valid():
+		_peek.kill()
+	phase = Phase.ENTER
+	input_pickable = false
+	_dust.emitting = true
+	var door := coop_door + Vector2(0, 14)
+	var fly := clampf(position.distance_to(door) / 900.0, 0.35, 1.1)
+	_leap(door, fly, 120.0, func() -> void:
+		phase = Phase.HUNT
+		_in_coop = true
+		_hunt_time = 0.0
+		_dust.emitting = false
+		_speed = 0.0
+		create_tween().tween_property(_rig, "modulate:a", 0.0, 0.2)
+		_refresh_counter()
+		if _pending_kills > 0:
+			var kills := _pending_kills
+			_pending_kills = 0
+			_on_caught(kills)
+		if not _pending_breeds.is_empty():
+			var breeds := _pending_breeds
+			_pending_breeds = []
+			_on_victims(breeds))
+
+
 func _turn_back() -> void:
 	phase = Phase.TURN_BACK
 	input_pickable = false
@@ -380,6 +418,12 @@ func leave() -> void:
 	input_pickable = false
 	_refresh_counter()
 	_dust.emitting = true
+	if _in_coop:
+		# Wybiega z kurnika prosto do najblizszego krzaka.
+		_in_coop = false
+		_rig.modulate.a = 1.0
+		_vanish_into(_nearest_exit(position).get("bush", position + Vector2(-400, 0)), 380.0)
+		return
 	var exit := _nearest_exit(position)
 	var fence: Vector2 = exit.get("fence", position + Vector2(0, 200))
 	var bush: Vector2 = exit.get("bush", fence + Vector2(0, 120))
@@ -500,6 +544,12 @@ func _do_turn_back(delta: float) -> void:
 func _do_hunt(delta: float) -> void:
 	_hunt_time += delta
 	_life -= delta
+	if _in_coop:
+		_speed = 0.0
+		if _life <= 0.0 or (_hunt_time > 0.4 and Game.state != null \
+				and Game.state.fox_visit_left <= 0.0):
+			leave()
+		return
 	# Wizyta skonczona w grze, a scena o tym nie wie - wychodzimy sami.
 	if _life <= 0.0 or (_hunt_time > 0.4 and Game.state != null \
 			and Game.state.fox_visit_left <= 0.0):
@@ -726,10 +776,41 @@ func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> vo
 		return
 	get_viewport().set_input_as_handled()
 	if phase == Phase.LURK:
-		Game.poke_lurking_fox()
+		if _leaping:
+			return
+		var gone := Game.poke_lurking_fox()
 		_refresh_counter()
+		if not gone and phase == Phase.LURK:
+			_bound_to_other_bush()
 		return
 	_hit()
+
+
+## 13.0.4 (wlasciciel 27.11): trafiony w krzakach lis jednym dlugim, szybkim
+## susem przeskakuje do INNEGO krzaka - zeby nie dalo sie go wykonczyc
+## seria klikniec w jedno miejsce.
+func _bound_to_other_bush() -> void:
+	var others: Array[Dictionary] = []
+	for exit: Dictionary in _exits:
+		if (exit["bush"] as Vector2).distance_to(_bush_spot) > 60.0:
+			others.append(exit)
+	if others.is_empty():
+		return
+	# Woli daleki krzak: losuje z dwoch najdalszych.
+	others.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return (a["bush"] as Vector2).distance_to(position) > (b["bush"] as Vector2).distance_to(position))
+	var pick: Dictionary = others[randi() % mini(2, others.size())]
+	if _peek != null and _peek.is_valid():
+		_peek.kill()
+	_bush_spot = pick["bush"]
+	_fence_point = pick["fence"]
+	_inside_point = pick["inside"]
+	_approach_speed = clampf(_bush_spot.distance_to(_fence_point) / (_walk_seconds * 0.8), 50.0, RUN_SPEED)
+	_peek_left = randf_range(0.8, 1.6)
+	_crouch = 0.2
+	_leap(_bush_spot, 0.38, 190.0, func() -> void:
+		_crouch = 1.0
+		_set_facing(1.0 if _fence_point.x >= _bush_spot.x else -1.0, true))
 
 
 ## Trafienie palcem. Liczenie trafien nalezy do Game - scena tylko zglasza.
@@ -772,6 +853,9 @@ func _on_caught(count: int) -> void:
 		return
 	_blood.emitting = true
 	_spill_blood(count)
+	if _in_coop:
+		# W kurniku nic nie widac - tylko krew i piora z drzwi.
+		return
 	_pop_heads(count)
 	var farm := get_parent().get_parent() as Node2D if get_parent() != null else null
 	if farm != null:
@@ -893,6 +977,11 @@ func _torn_apart() -> void:
 		return
 	phase = Phase.DEAD
 	_leaping = false
+	if _in_coop:
+		# Pies wywleka lisa przed kurnik i tam go rozszarpuje.
+		_in_coop = false
+		position = coop_door + Vector2(0, 40)
+		_rig.modulate.a = 1.0
 	set_process(false)
 	input_pickable = false
 	_refresh_counter()

@@ -4,7 +4,22 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 11** (wersja 13.0.3, wlasciciel 27.11, 21:11):
+- Aktualny etap: **ETAP 11** (wersja 13.0.4, wlasciciel 27.11, 22:22):
+  (1) Lup lisa to PROCENT stada: FarmState.roll_fox_share (Gauss
+  kill_share_mean 55, sd 15, przyciety 30..100); rzez 5% bez psa = cale
+  stado. fox_kill_speed skraca odstepy, zeby caly lup zmiescil sie w ok.
+  kill_all_seconds (60 s); odstep nigdy < 0,25 s (terier co 0,2 s zawsze
+  zdazy przed druga ofiara; FarmState.dog_interval min 0,1 s). Usuniete
+  kills_min/max. (2) Lis w krzakach po kazdym trafieniu skacze dlugim
+  susem do innego krzaka (fox._bound_to_other_bush, jeden z dwoch
+  najdalszych). Wygoniony z krzakow (palcem albo owczarkiem+) wraca na
+  pewno po lurk_comeback_min..max (2-6 min) - FarmState.fox_comeback_left
+  (w zapisie). (3) Noc (A4/E1c): farm._on_fox_arrived ustawia
+  fox.night_raid i coop_door (Coop + (-20,0)); fox._raid_coop - skok do
+  drzwi i znika (_in_coop), krew i piora z drzwi, bez glow; wyjscie prosto
+  do krzaka; zagryziony lezy przed kurnikiem. dog.raid - po chwili biegnie
+  do drzwi i znika, wraca gdy lis odchodzi.
+- Poprzednio (wersja 13.0.3, wlasciciel 27.11, 21:11):
   piec psow (ZADANIA A10) z nazwami wlasciciela: 1 stary gluchy kundel
   (nie_slyszy_proc 50 - przy wizycie w ogole nie rusza), 2 maly tchorzliwy
   kundel (tchorzy_proc 33 / tchorzy_po_s 3 - ucieka z pogoni), 3 duzy

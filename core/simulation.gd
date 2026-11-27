@@ -540,6 +540,21 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 	if state.chickens.size() < int(fox.get("min_hens", 5)):
 		return
 
+	# 13.0.4: lis wygoniony z krzakow wraca na pewno, bez kostki.
+	if state.fox_comeback_left > 0.0:
+		state.fox_comeback_left -= real
+		if state.fox_comeback_left > 0.0:
+			return
+		state.fox_comeback_left = 0.0
+		state.fox_roll_timer = 0.0
+		var again := 0.0 if offline else state.fox_lurk_seconds()
+		if again > 0.0:
+			state.fox_lurk_left = again
+			out["fox_lurking"] = int(out.get("fox_lurking", 0)) + 1
+			return
+		_fox_at_fence(state, out, budget, offline)
+		return
+
 	# 3. Kostka: co roll_minutes minut ZEGARA z szansa chance - tak samo
 	#    w grze i w tle (wlasciciel 25.11: "w kazdej godzinie jakas szansa").
 	#    Wczesniej w tle kostka leciala raz na dobe, a licznik uzbierany przez
@@ -588,7 +603,9 @@ static func _fox_arrives(state: FarmState, out: Dictionary, budget: int,
 	var fox: Dictionary = GameData.balance().get("fox", {})
 	# Lis bierze z gory ustalona liczbe kur, nie procent stada: wlasciciel
 	# chcial, zeby przychodzil, zabil pare sztuk i poszedl.
-	var quota := randi_range(int(fox.get("kills_min", 3)), int(fox.get("kills_max", 10)))
+	# 13.0.4 (wlasciciel 27.11): lis zabija PROCENT stada - 30..100%,
+	# zwykle okolo polowy; cale stado tylko w rzezi (massacre_chance).
+	var quota := int(round(state.roll_fox_share() * state.chickens.size()))
 	quota = clampi(quota, 1, maxi(1, state.chickens.size()))
 	var full := state.fox_visit_seconds()
 	# Rzez (wlasciciel 25.11): okolo 5% wejsc konczy sie wybiciem CALEGO stada,
@@ -603,6 +620,10 @@ static func _fox_arrives(state: FarmState, out: Dictionary, budget: int,
 				* _fox_pace_factor(state) + 10.0)
 
 	state.fox_kill_left = quota
+	# Cale zabijanie miesci sie w okolo kill_all_seconds: przy duzym stadzie
+	# lis zabija szybciej, zamiast siedziec na wybiegu godzine.
+	var avg_gap := (float(fox.get("kill_interval_min", 3.0)) + float(fox.get("kill_interval_max", 10.0))) / 2.0
+	state.fox_kill_speed = minf(1.0, float(fox.get("kill_all_seconds", 60.0)) / maxf(1.0, quota * avg_gap))
 	state.fox_kill_pace = _fox_kill_gap(state)
 	# Lis, ktoremu gracz juz dokuczal w krzakach, zachowuje obrazenia.
 	if state.fox_lurk_taps <= 0 or state.fox_taps_left <= 0:
@@ -713,8 +734,10 @@ static func _fox_visit_offline(state: FarmState, out: Dictionary, budget: int,
 ## krotszy o massacre_pace_factor.
 static func _fox_kill_gap(state: FarmState) -> float:
 	var fox: Dictionary = GameData.balance().get("fox", {})
-	return randf_range(float(fox.get("kill_interval_min", 3.0)),
-			float(fox.get("kill_interval_max", 10.0))) * _fox_pace_factor(state)
+	# Najwyzej cztery kury na sekunde - tyle zdazy nawet szalejacy lis,
+	# a terier (co 0,2 s) zawsze zdazy przed druga ofiara.
+	return maxf(0.25, randf_range(float(fox.get("kill_interval_min", 3.0)),
+			float(fox.get("kill_interval_max", 10.0))) * _fox_pace_factor(state) * state.fox_kill_speed)
 
 
 static func _fox_pace_factor(state: FarmState) -> float:
@@ -729,6 +752,7 @@ static func _fox_leaves(state: FarmState) -> void:
 	state.fox_hp_max = 0
 	state.dog_off_visit = false
 	state.dog_quit_left = -1.0
+	state.fox_kill_speed = 1.0
 	state.fox_massacre = false
 	state.fox_lurk_left = 0.0
 	state.fox_visit_left = 0.0

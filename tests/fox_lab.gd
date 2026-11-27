@@ -46,8 +46,8 @@ func _ready() -> void:
 	print("lis: kostka co %s min gry aktywnej (szansa %.0f%%), co %s h w tle (%.0f%%),"
 			% [fox["roll_minutes"], float(fox["chance"]) * 100,
 			fox["roll_minutes"], float(fox["chance"]) * 100])
-	print("     karencja %s min, minimum %s ptakow, lup %s-%s"
-			% [fox["grace_minutes"], fox["min_hens"], fox["kills_min"], fox["kills_max"]])
+	print("     karencja %s min, minimum %s ptakow, lup %s-%s%% stada"
+			% [fox["grace_minutes"], fox["min_hens"], fox["kill_share_min"], fox["kill_share_max"]])
 	for styl: Array in STYLE:
 		print("")
 		print("=== %s ===" % styl[0])

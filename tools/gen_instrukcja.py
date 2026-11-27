@@ -454,34 +454,42 @@ raw("""
   JAK PRZYCHODZI
     najpierw CZAI SIE w krzakach na polnoc albo na poludnie od wybiegu
     (%g-%g s - zza krzaka widac uszy), potem idzie pod plot (%g s).
+    Mozesz go klikac juz w krzakach - ale po kazdym trafieniu lis jednym
+    dlugim susem przeskakuje do innego krzaka i trzeba go szukac. Wygoniony
+    z krzakow wraca NA PEWNO po %g-%g minutach.
+    W NOCY lis nie biega po pustym wybiegu, tylko wchodzi do kurnika: z
+    drzwi sypia sie piora i tryska krew. Pies wbiega za nim i walczy w
+    srodku.
     Pod plotem plot losuje, czy lisa zatrzyma. Jesli tak - lis drapie,
     zawraca i znika w krzakach. Jesli nie - przeskakuje plot.
 
   CO ROBI NA WYBIEGU
-    zabija jedna kure co %g-%g sekund REALNYCH
-    (czas losowany od nowa po kazdej kurze)
-    odchodzi po %d-%d zabitych kurach
+    zabija %g-%g%% stada (zwykle okolo %g%%), po jednej kurze co %g-%g
+    sekund REALNYCH - przy duzym stadzie szybciej, bo caly lup bierze
+    w okolo %g sekund. Psy i palec skracaja jego wizyte.
     bezpiecznik: nie zostaje dluzej niz %g minut
 
   JAK GO PRZEGONIC RECZNIE
-    KLIKAJ W NIEGO. Trzeba %d trafien. Licznik widac nad lisem.
+    KLIKAJ W NIEGO. Lis ma %d-%d punktow zycia (zwykle %d), kazde
+    trafienie zabiera 1. Czerwony pasek nad lisem pokazuje, ile zostalo.
     Przegoniony reka wraca %g razy szybciej niz normalnie -
     chyba ze masz psa albo plot.
 
   RZEZ
     Gdy ferma NIE MA PSA, okolo %.0f%% lisow, ktore wejda na wybieg,
     wpada w szal: zabija %g razy szybciej i nie odchodzi, dopoki nie
-    wybije CALEGO stada. Ratunek: klikac (te same %d trafien) albo
+    wybije CALEGO stada. Ratunek: klikac (do konca paska) albo
     miec psa - przy psie rzezi nie ma wcale.
 """.rstrip() % (
     fox["roll_minutes"], fox["chance"] * 100,
     fox["grace_minutes"], fox["min_hens"],
     fox.get("lurk_min_seconds", 10), fox.get("lurk_max_seconds", 30), fox.get("approach_seconds", 4),
-    fox["kill_interval_min"], fox["kill_interval_max"],
-    fox["kills_min"], fox["kills_max"],
+    fox["lurk_comeback_min_minutes"], fox["lurk_comeback_max_minutes"],
+    fox["kill_share_min"], fox["kill_share_max"], fox["kill_share_mean"],
+    fox["kill_interval_min"], fox["kill_interval_max"], fox["kill_all_seconds"],
     fox["visit_max_minutes"],
-    fox["scare_taps"], 1.0 / fox["hand_return_factor"],
-    fox["massacre_chance"] * 100, round(1.0 / fox["massacre_pace_factor"], 1), fox["scare_taps"]))
+    fox["hp_min"], fox["hp_max"], fox["hp_mean"], 1.0 / fox["hand_return_factor"],
+    fox["massacre_chance"] * 100, round(1.0 / fox["massacre_pace_factor"], 1)))
 
 title("13. PSY I PLOT")
 dogs = BAL["buildings"]["dog"]["upgrades"]

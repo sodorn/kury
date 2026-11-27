@@ -983,13 +983,11 @@ func _test_fox() -> void:
 			and state.fox_taps_left == state.fox_hp_max,
 			"lis dostaje pelne zycie z przedzialu (%d)" % state.fox_hp_max)
 
-	# Lup lisa to STALA liczba kur z przedzialu kills_min..kills_max,
-	# a nie procent stada — wlasciciel chcial "zabije pare sztuk i pojdzie".
+	# 13.0.4 (wlasciciel 27.11): lup to PROCENT stada, 30..100%.
 	var limit := int(arrival["fox_took"]) + state.fox_kill_left
-	_check(limit >= int(fox.get("kills_min", 3)),
-			"lup nie mniejszy niz minimum (%d)" % limit)
-	_check(limit <= int(fox.get("kills_max", 10)),
-			"lup nie wiekszy niz maksimum (%d)" % limit)
+	_check(limit >= int(round(0.3 * 20)) or state.fox_massacre,
+			"lup nie mniejszy niz 30%% stada (%d z 20)" % limit)
+	_check(limit <= 20, "lup nie wiekszy niz stado (%d)" % limit)
 
 	# Lis zabija STOPNIOWO, co kilka sekund jedna kure — a nie wszystkie naraz.
 	# Krok dobieramy tak, zeby zmiescil sie miedzy dwoma zabojstwami.
@@ -1586,8 +1584,19 @@ func _test_v13_basics() -> void:
 		Simulation._fox_arrives(t, out, 1 << 30, true)
 		terier_max = maxi(terier_max, int(out["fox_took"]))
 		terier_zabil += int(out.get("fox_killed", 0))
-	_check(terier_max <= 1 and terier_zabil == 100,
-			"przy terierze lis bierze najwyzej 1 kure i zawsze ginie (%d, %d/100)" % [terier_max, terier_zabil])
+	# Takze w duzym stadzie, gdzie lis zabija co ulamek sekundy.
+	var duze_t: Array[String] = []
+	for i in 400:
+		duze_t.append("leghorn")
+	for i in 30:
+		var t := _fresh_state(duze_t, 1000000.0)
+		t.set_building_level("dog", 5)
+		var out := {"fox_took": 0, "died_hunger": 0, "died_disease": 0, "fox_arrived": 0}
+		Simulation._fox_arrives(t, out, 1 << 30, true)
+		terier_max = maxi(terier_max, int(out["fox_took"]))
+		terier_zabil += int(out.get("fox_killed", 0))
+	_check(terier_max <= 1 and terier_zabil == 130,
+			"przy terierze lis bierze najwyzej 1 kure i zawsze ginie (%d, %d/130)" % [terier_max, terier_zabil])
 	var scale := GameData.time_scale()
 	# Inkubator: przy jajach w srodku nie da sie rozbudowac; w trakcie
 	# rozbudowy nic sie nie wykluwa i nie da sie wlozyc jaj.
@@ -1696,6 +1705,55 @@ func _test_v13_basics() -> void:
 		hp_kmax = maxi(hp_kmax, hp_d)
 	_check(hp_kmin == 8 and hp_kmax == 20, "owczarek gryzie za 8..20 (%d..%d)" % [hp_kmin, hp_kmax])
 	_check(hp_stan.dog_kill_chance() == 1.0, "owczarek przy zerze zagryza lisa")
+	# 13.0.4: lup lisa 30..100% stada, zwykle okolo polowy.
+	var sh_low := 1.0
+	var sh_high := 0.0
+	var sh_sum := 0.0
+	var sh_mid := 0
+	for i in 3000:
+		var sh := hp_stan.roll_fox_share()
+		sh_low = minf(sh_low, sh)
+		sh_high = maxf(sh_high, sh)
+		sh_sum += sh
+		if sh >= 0.35 and sh <= 0.75:
+			sh_mid += 1
+	_check(sh_low >= 0.3 and sh_high <= 1.0, "lup lisa zawsze 30-100%% (%.2f-%.2f)" % [sh_low, sh_high])
+	_check(absf(sh_sum / 3000.0 - 0.55) < 0.03, "lup srednio ok. 55%% (%.2f)" % (sh_sum / 3000.0))
+	_check(sh_mid > 2400, "wiekszosc lupow 35-75%% (%d/3000)" % sh_mid)
+	# Duze stado: caly lup w okolo minute, a nie godzine.
+	var duze: Array[String] = []
+	for i in 400:
+		duze.append("leghorn")
+	var wielka := _fresh_state(duze, 1000000.0)
+	var wout := {"fox_took": 0, "died_hunger": 0, "died_disease": 0, "fox_arrived": 0}
+	wielka.dog_level = 0
+	Simulation._fox_arrives(wielka, wout, 1 << 30, false)
+	var lup := int(wout["fox_took"]) + wielka.fox_kill_left
+	_check(lup >= 120, "lis w stadzie 400 bierze co najmniej 30%% (%d)" % lup)
+	var minelo := 0.0
+	while wielka.fox_visit_left > 0.0 and minelo < 600.0:
+		Simulation.advance(wielka, 1.0 * GameData.time_scale())
+		minelo += 1.0
+	_check(minelo <= 90.0, "duzy lup zabrany w okolo minute (%.0f s)" % minelo)
+	# Wygoniony z krzakow wraca na pewno po 2-6 minutach.
+	var wraca := Game.state
+	Game.state = _fresh_state(["leghorn", "leghorn", "leghorn", "leghorn", "leghorn", "leghorn"], 100000.0)
+	_arm_fox(Game.state)
+	Game.state.fox_roll_timer = 0.0
+	Game.state.fox_lurk_left = 20.0
+	Game.state.set_building_level("dog", 4)
+	Game.poke_lurking_fox()
+	var cb := Game.state.fox_comeback_left
+	_check(cb >= 120.0 and cb <= 360.0, "lis z krzakow wraca za 2-6 min (%.0f s)" % cb)
+	var r1 := Simulation.advance(Game.state, (cb - 5.0) * GameData.time_scale())
+	_check(int(r1.get("fox_arrived", 0)) == 0 and Game.state.fox_lurk_left <= 0.0, "przed czasem lisa nie ma")
+	Game.state.fox_roll_timer = 0.0
+	GameData.balance()["fox"]["chance"] = 0.0
+	Simulation.advance(Game.state, 10.0 * GameData.time_scale())
+	_check(Game.state.fox_visit_left > 0.0 or Game.state.fox_lurk_left > 0.0,
+			"po czasie lis wraca bez kostki")
+	_disarm_fox()
+	Game.state = wraca
 
 
 ## 13.0: noc wedlug slonca nad Polska - w nocy kury nie jedza, ale znosza.
@@ -2170,7 +2228,7 @@ func _test_dog_offline() -> void:
 	var kundel: Array = sredni.call(3)
 	var owczarek: Array = sredni.call(4)
 	var fox_cfg: Dictionary = GameData.balance()["fox"]
-	var oczekiwany := (float(fox_cfg.get("kills_min", 3)) + float(fox_cfg.get("kills_max", 10))) / 2.0
+	var oczekiwany := float(fox_cfg.get("kill_share_mean", 55)) / 100.0 * 30.0
 	_check(bez[0] > oczekiwany * 0.85,
 			"bez psa lis w tle bierze pelny lup (srednio %.1f, oczekiwane %.1f)" % [bez[0], oczekiwany])
 	_check(kundel[0] < bez[0] * 0.85,
@@ -2303,9 +2361,10 @@ func _test_event_rules() -> void:
 	for klucz: String in ["chance", "massacre_chance"]:
 		var p := float(fox.get(klucz, -1.0))
 		_check(p >= 0.0 and p <= 1.0, "lis: %s miedzy 0 a 1 (%.3f)" % [klucz, p])
-	_check(int(fox.get("kills_min", 0)) >= 1
-			and int(fox.get("kills_max", 0)) >= int(fox.get("kills_min", 0)),
-			"lis: lup min >= 1 i max >= min")
+	_check(float(fox.get("kill_share_min", 0)) > 0.0
+			and float(fox.get("kill_share_max", 0)) >= float(fox.get("kill_share_min", 0))
+			and float(fox.get("kill_share_max", 0)) <= 100.0,
+			"lis: lup w procentach, 0 < min <= max <= 100")
 	_check(float(fox.get("kill_interval_min", 0.0)) > 0.0
 			and float(fox.get("kill_interval_max", 0.0)) >= float(fox.get("kill_interval_min", 0.0)),
 			"lis: odstep miedzy zabojstwami dodatni, max >= min")
@@ -2993,8 +3052,8 @@ func _test_away_fox_and_report() -> void:
 	_arm_fox(night)
 	night.fox_roll_timer = 0.0
 	night.dog_level = 1
-	fox["kills_min"] = 1
-	fox["kills_max"] = 1
+	fox["kill_share_min"] = 1.0
+	fox["kill_share_max"] = 1.0
 	var res := Simulation.advance(night, 8.0 * 3600.0 * scale, true)
 	var wizyty := 0
 	for entry: Dictionary in res["log"]:
@@ -3159,7 +3218,7 @@ func _test_fox_massacre() -> void:
 	var z_psem := Simulation.advance(pies, 1.0)
 	_check(int(z_psem["fox_arrived"]) == 1 and int(z_psem.get("fox_massacre", 0)) == 0
 			and not pies.fox_massacre, "z psem lis nie robi rzezi")
-	_check(pies.fox_kill_left <= int(fox.get("kills_max", 10)), "z psem zwykly lup")
+	_check(pies.fox_kill_left < 20, "z psem zwykly lup, nie cale stado")
 
 	# Przegoniony palcem konczy rzez.
 	var palec := _herd(20)

@@ -13,7 +13,9 @@ Zasady:
 - Zrobione pozycje przenosimy do PROJECT_STATE.md i usuwamy stąd.
 - Kolejność etapów: od najmniejszej roboty i największego zysku.
 
-Stan na 27.11.2026: wersja 13.0.3 (piec psow z nazwami wlasciciela,
+Stan na 27.11.2026: wersja 13.0.4 (lis zabija 30-100% stada, w krzakach
+odskakuje do innych krzakow i wraca po 2-6 min, w nocy wchodzi do
+kurnika). Wczesniej 13.0.3 (piec psow z nazwami wlasciciela,
 pies biegnie glowa do przodu). Wczesniej 13.0.2 (ploty z kazdej strony wedlug poziomu,
 wiecej krzakow, prawdziwa niesnosc ras, zycie lisa 5-50 z czerwonym
 paskiem). Wczesniej 13.1.1 (lis w krzakach do klikania, poprawki
@@ -34,9 +36,7 @@ A3. Pasza: na razie BEZ zmian zużycia (na jajo w grze kura je już ~3,5 raza
     mniej niż w realu, ok. 43 g vs ok. 150 g). Noc (13.1) tnie zużycie
     o kilka godzin na dobę. Wrócić po tygodniu gry z nocą: jeśli dalej za
     drogo — zmniejszyć 1,5–2 razy (feed_per_hen_minute w balance.json).
-A4. Lis w nocy (decyzja 27.11: lis w nocy WCHODZI do kurnika i zabija -
-    lisy atakuja najczesciej w nocy). Mechanika juz tak dziala; do zrobienia
-    tylko wyglad: w nocy lis idzie do drzwi kurnika, a nie na pusty wybieg.
+(A4 ZROBIONE w 13.0.4: w nocy lis wchodzi do kurnika.)
 A5. Noc w interfejsie: ikonka księżyca / napis „Kury śpią do 7:12”
     (godzina wschodu z Daylight), żeby gracz wiedział, czemu wybieg pusty.
 
@@ -142,10 +142,8 @@ E1b. Pies jak lis: przy zmianie kierunku odwraca sie jak karta (w 13.0.3
     przeskalowany i przyciemniony - kazdy potrzebuje wlasnej grafiki
     (siwy stary kundel, maly chudy tchorz, duzy kudlaty agresor, jagdterier
     czarny podpalany, krotkie nogi).
-E1c. Lis w nocy wbiega do kurnika (zamiast na pusty wybieg). W srodku nic
-    nie widac - z kurnika sypia sie piora i tryska krew. Pies czeka na
-    dworze; gdy zauwazy lisa, rusza i wbiega za nim do kurnika (znika),
-    walka liczy sie normalnie, tylko niewidocznie.
+(E1c ZROBIONE w 13.0.4: lis znika w drzwiach kurnika, piora i krew z drzwi, pies
+    wbiega za nim i znika; zagryziony lis lezy przed kurnikiem.)
 E2. Kura szabo od nowa według prawdziwych zdjęć: duża, bardzo pierzasta,
     bez sterczących „dzyndzli” (portret w osiągnięciach i sprite na
     wybiegu).
@@ -172,6 +170,13 @@ F8. Zdjęcia ras w sklepie — brak plików.
 ---------------------------------------------------------------------------
 
 ## SKRZYNKA (nowe pomysły — dopisuj tutaj)
+
+- (13.0.4) Lup lisa 30-100% stada jest bardzo ciezki dla ekonomii - puscic
+  bota i zobaczyc, czy gracz bez psa/plotu nie bankrutuje za szybko.
+- (13.0.4) Pasek zycia lisa przy krawedzi ekranu bywa uciety - przesuwac
+  go do srodka.
+- (13.0.4) Rzez (100% stada, 5% wejsc) nadal tylko na fermie BEZ psa -
+  potwierdzic z wlascicielem, czy ma byc tez przy psie.
 
 - (13.0.2) Ceny KUR rzadkich ras zostaly bez zmian - nowa oplacalnosc
   zalatwia cena jaja. Do decyzji: czy podniesc tez cene kur (pawlowska,

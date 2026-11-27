@@ -168,9 +168,21 @@ OPISY = {
     "fox.kill_interval_min": ("s ZEGARA", "Najkrotszy odstep miedzy kolejnymi zabitymi kurami. Kazdy "
                               "odstep losowany od nowa z przedzialu min..max.", "Simulation._advance_fox"),
     "fox.kill_interval_max": ("s ZEGARA", "Najdluzszy taki odstep.", "Simulation._advance_fox"),
-    "fox.kills_min": ("szt.", "Najmniejszy lup lisa. Lup losowany przy wejsciu z przedzialu min..max; "
-                      "po jego zebraniu lis odchodzi.", "Simulation._fox_arrives"),
-    "fox.kills_max": ("szt.", "Najwiekszy lup lisa.", "Simulation._fox_arrives"),
+    "fox.kill_share_min": ("%", "Najmniejszy lup lisa w procentach stada (13.0.4). Losowany przy wejsciu "
+                           "rozkladem Gaussa i przycinany do min..max.", "FarmState.roll_fox_share"),
+    "fox.kill_share_max": ("%", "Najwiekszy lup w procentach stada (100 = cale stado; zwykle tylko rzez).",
+                           "FarmState.roll_fox_share"),
+    "fox.kill_share_mean": ("%", "Srodek Gaussa lupu - tyle procent stada lis zabiera zwykle.",
+                            "FarmState.roll_fox_share"),
+    "fox.kill_share_sd": ("%", "Odchylenie Gaussa lupu w punktach procentowych.", "FarmState.roll_fox_share"),
+    "fox.kill_all_seconds": ("s", "W ile mniej wiecej sekund lis zabiera caly lup. Przy duzym stadzie "
+                             "odstepy kill_interval_* sa skracane, zeby sie zmiescil.",
+                             "Simulation._fox_arrives (fox_kill_speed)"),
+    "fox.lurk_comeback_min_minutes": ("min", "Lis wygoniony z krzakow wraca NA PEWNO (bez kostki) po "
+                                      "losowym czasie min..max minut zegara.",
+                                      "Game.poke_lurking_fox, Simulation._advance_fox"),
+    "fox.lurk_comeback_max_minutes": ("min", "Najdluzszy czas powrotu lisa wygonionego z krzakow.",
+                                      "Game.poke_lurking_fox"),
     "fox.visit_max_minutes": ("min ZEGARA", "Bezpiecznik: lis nie zostaje dluzej, nawet gdy nie zebral "
                               "lupu (np. przez limit strat przy nadrabianiu).",
                               "FarmState.fox_visit_seconds"),
@@ -783,7 +795,9 @@ def build():
    [KOSTKA UDANA]
        |  randf() < block_chance plotu ? -> zawraca (fox_blocked)
        v
-   [WIZYTA]  lup = losowo kills_min..kills_max (%s..%s), nie wiecej niz stado
+   [WIZYTA]  lup = PROCENT stada: Gauss kill_share_mean (%s%%), przyciety
+       |     do kill_share_min..max (%s..%s%%); cale zabijanie w ok.
+       |     kill_all_seconds (%s s) - przy duzym stadzie odstepy krotsze
        |     licznik trafien = scare_taps (%s)
        |     PIERWSZA kura ginie od razu
        |     kolejne co losowe kill_interval_min..max (%s..%s s ZEGARA)
@@ -803,7 +817,8 @@ def build():
    wydluzona tak, zeby zdazyl. Przegonienie palcem ja przerywa.""" % (
         fmt(fox["grace_minutes"]), fmt(fox["min_hens"]), fmt(fox["roll_minutes"]),
         fmt(fox["hand_return_factor"]),
-        fmt(fox["killed_return_multiplier"]), fox["kills_min"], fox["kills_max"], fox["scare_taps"],
+        fmt(fox["killed_return_multiplier"]), fmt(fox["kill_share_mean"]), fmt(fox["kill_share_min"]),
+        fmt(fox["kill_share_max"]), fmt(fox["kill_all_seconds"]), fox["scare_taps"],
         fmt(fox["kill_interval_min"]), fmt(fox["kill_interval_max"]), fmt(fox["carcass_share"]),
         fmt(fox["visit_max_minutes"]), fmt(fox["massacre_chance"]), fmt(fox["massacre_pace_factor"])))
     para("Przy grze w tle ta sama wizyta jest rozgrywana natychmiast na osi czasu "
@@ -1243,7 +1258,7 @@ def build():
     chance i kill_chance w [0, 1]; owczarek drozszy i w niczym nie
     gorszy od kundla; kundel nie drozszy niz pierwszy plot
   - lis: odstepy kostek > 0, szanse w [0, 1],
-    kills_min >= 1, kills_max >= kills_min,
+    0 < kill_share_min <= kill_share_max <= 100,
     kill_interval_min > 0, kill_interval_max >= kill_interval_min,
     killed_return_multiplier >= 1
   - egg_spoil_hours > 0, magazyn na poziomie 0 > 50 jaj
