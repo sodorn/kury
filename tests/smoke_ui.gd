@@ -1363,6 +1363,7 @@ func _test_fox_lurk_and_fence() -> void:
 	var run: Rect2 = Simulation.run_area()
 	Game.state.guard_level = 2
 	farm._sync_buildings()
+	Game.state.fox_lurk_left = 8.0
 	Events.fox_lurking.emit(8.0)
 	await _seconds(1.2)
 	var lisy := _nodes_of_type("FarmFox")
@@ -1371,7 +1372,8 @@ func _test_fox_lurk_and_fence() -> void:
 		return
 	var lis := lisy[0] as FarmFox
 	_check(lis.phase == FarmFox.Phase.LURK, "lis najpierw czai sie (faza LURK)")
-	_check(not lis.input_pickable, "lisa w krzakach nie da sie klikac")
+	# 13.1.1 (wlasciciel 27.11): lisa w krzakach MOZNA klikac.
+	_check(lis.input_pickable, "lisa w krzakach da sie klikac")
 	var najblizszy := INF
 	for bush_name: String in ["BushLeftTop", "BushRightTop", "BushLeftBottom", "BushRightBottom"]:
 		var bush := farm.get_node("Objects/" + bush_name) as Node2D

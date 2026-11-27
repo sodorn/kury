@@ -214,7 +214,8 @@ func _refresh_counter() -> void:
 	if _counter == null or not is_instance_valid(_counter):
 		return
 	var left := Game.fox_taps_left() if Game != null and Game.state != null else 0
-	_counter.visible = left > 0 and phase == Phase.HUNT
+	_counter.visible = left > 0 and (phase == Phase.HUNT
+			or (phase == Phase.LURK and Game.state != null and Game.state.fox_lurk_taps > 0))
 	_counter.text = str(left)
 
 
@@ -243,7 +244,9 @@ func lurk(run: Rect2, bush_spot: Vector2, fence_point: Vector2, inside: Vector2,
 	_exits = exits
 	position = bush_spot
 	phase = Phase.LURK
-	input_pickable = false
+	# 13.1.1 (wlasciciel 27.11): lisa w krzakach mozna klikac - ale tylko
+	# prawdziwego, czajacego sie (zawrocony przez plot juz odchodzi).
+	input_pickable = Game.state != null and Game.state.fox_lurk_left > 0.0
 	var walk := maxf(0.5, approach_seconds)
 	_lurk_left = maxf(0.3, seconds - walk)
 	# Odrobine szybciej niz wynika z czasu: rozpedzanie i skret przed plotem
@@ -697,7 +700,7 @@ func _turn(node: Node2D, angle: float, k: float) -> void:
 
 func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:
 	var touch := event as InputEventScreenTouch
-	if touch == null or phase != Phase.HUNT:
+	if touch == null or (phase != Phase.HUNT and phase != Phase.LURK):
 		return
 	if touch.pressed:
 		_pressed_touch = touch.index
@@ -709,6 +712,10 @@ func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> vo
 	if touch.position.distance_to(_pressed_at) > TAP_MAX_MOVE:
 		return
 	get_viewport().set_input_as_handled()
+	if phase == Phase.LURK:
+		Game.poke_lurking_fox()
+		_refresh_counter()
+		return
 	_hit()
 
 

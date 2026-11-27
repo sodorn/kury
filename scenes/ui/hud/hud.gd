@@ -38,19 +38,28 @@ func _apply_safe_area() -> void:
 
 
 ## 13.0: pasek przyciskow fermy admina (kod 000000) pod licznikami.
-var _admin_bar: HBoxContainer
+var _admin_bar: GridContainer
 
 
 func _make_admin_bar() -> void:
-	_admin_bar = HBoxContainer.new()
+	_admin_bar = GridContainer.new()
 	_admin_bar.name = "AdminBar"
-	_admin_bar.add_theme_constant_override("separation", 8)
-	_admin_bar.position = Vector2(150, 130)
+	_admin_bar.columns = 4
+	_admin_bar.add_theme_constant_override("h_separation", 8)
+	_admin_bar.add_theme_constant_override("v_separation", 8)
+	# 13.1.1: na dole ekranu - u gory zaslanial komunikaty.
+	_admin_bar.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	_admin_bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_admin_bar.offset_top = -170
+	_admin_bar.offset_bottom = -40
 	var actions := {
 		"+1000 zł": func() -> void: Game.admin_add_money(1000.0),
 		"Przywołaj lisa": func() -> void: Game.admin_call_fox(),
 		"Zabij psa": func() -> void: Game.admin_kill_dog(),
 		"Wywołaj zarazę": func() -> void: Game.admin_outbreak(),
+		"Dzień": func() -> void: Daylight.force = 0,
+		"Noc": func() -> void: Daylight.force = 1,
+		"Auto": func() -> void: Daylight.force = -1,
 	}
 	for label: String in actions:
 		var b := Button.new()

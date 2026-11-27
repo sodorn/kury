@@ -1584,6 +1584,22 @@ func _test_v13_basics() -> void:
 	_check(not Game.is_admin(), "zwykla ferma nie jest adminem")
 	Cloud.player_id = "000000"
 	_check(Game.is_admin(), "ferma 000000 jest adminem")
+	var stary_stan := Game.state
+	Game.state = _fresh_state(["leghorn"], 10.0)
+	_check(Game.admin_change_level("incubator", 1) and Game.state.incubator_level == 1
+			and Game.admin_change_level("incubator", -1) and Game.state.incubator_level == 0,
+			"admin: inkubator w gore i w dol")
+	# 13.1.1: lis w krzakach - 20 trafien bez psa, jedno z owczarkiem.
+	var lis := Game.state
+	lis.fox_lurk_left = 20.0
+	var odszedl := false
+	for i in 20:
+		odszedl = Game.poke_lurking_fox()
+	_check(odszedl and lis.fox_lurk_left <= 0.0, "lis w krzakach ucieka po 20 trafieniach")
+	lis.fox_lurk_left = 20.0
+	lis.set_building_level("dog", 2)
+	_check(Game.poke_lurking_fox() and lis.fox_lurk_left <= 0.0, "z owczarkiem wystarczy jedno klikniecie")
+	Game.state = stary_stan
 	Cloud.player_id = stary_kod
 
 

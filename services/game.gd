@@ -345,7 +345,9 @@ func admin_change_level(building_id: String, delta: int) -> bool:
 	if not is_admin():
 		return false
 	var level := state.building_level(building_id)
-	var top := level + 1 if not state.next_building_upgrade(building_id).is_empty() else level
+	# upgrade_entry, nie next_building_upgrade: inkubator ma poziomy gdzie
+	# indziej (balance.incubator) i jego przyciski admina nic nie robily.
+	var top := level + 1 if not state.upgrade_entry(building_id).is_empty() else level
 	var target := clampi(level + delta, 0, top)
 	if target == level:
 		return false
@@ -959,6 +961,31 @@ func poke_fox() -> bool:
 ## Ile jeszcze trafien dzieli gracza od przegonienia lisa.
 func fox_taps_left() -> int:
 	return maxi(0, state.fox_taps_left)
+
+
+## 13.1.1 (wlasciciel 27.11): klik w lisa czajacego sie w krzakach. Trzeba
+## trafic tyle razy co na wybiegu (fox.scare_taps), ale lis nie zdazy wtedy
+## wejsc i zabic kur. Z owczarkiem wystarczy JEDNO klikniecie - pies rzuca sie
+## na lisa jeszcze w krzakach. Zwraca true, gdy lis odszedl.
+func poke_lurking_fox() -> bool:
+	if state.fox_lurk_left <= 0.0 or state.fox_visit_left > 0.0:
+		return false
+	if state.dog_level >= 2:
+		Simulation.fox_leaves(state)
+		Events.fox_chased.emit()
+		Events.notice.emit(tr("HINT_FOX_LURK_DOG"))
+		return true
+	if state.fox_lurk_taps <= 0:
+		state.fox_lurk_taps = 1
+		state.fox_taps_left = maxi(1, int(GameData.balance().get("fox", {}).get("scare_taps", 20)))
+	state.fox_taps_left -= 1
+	if state.fox_taps_left > 0:
+		return false
+	state.fox_hand_scared = true
+	Simulation.fox_leaves(state)
+	Events.fox_scared.emit()
+	Events.notice.emit(tr("HINT_FOX_LURK_SCARED"))
+	return true
 
 
 # --- budynki ------------------------------------------------------------

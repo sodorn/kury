@@ -701,6 +701,7 @@ static func _fox_pace_factor(state: FarmState) -> float:
 
 
 static func _fox_leaves(state: FarmState) -> void:
+	state.fox_lurk_taps = 0
 	state.fox_massacre = false
 	state.fox_lurk_left = 0.0
 	state.fox_visit_left = 0.0

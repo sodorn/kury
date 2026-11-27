@@ -13,7 +13,8 @@ Zasady:
 - Zrobione pozycje przenosimy do PROJECT_STATE.md i usuwamy stąd.
 - Kolejność etapów: od najmniejszej roboty i największego zysku.
 
-Stan na 27.11.2026: wersja 13.0.1 (poprawki po 13.2; numer na prosbe
+Stan na 27.11.2026: wersja 13.1.1 (lis w krzakach do klikania, poprawki
+admina). Wczesniej 13.0.1 (poprawki po 13.2; numer na prosbe
 wlasciciela). Wczesniej 13.2 (magazyny skokami: 200 / 1 000 / 3 000 /
 10 000 / 25 000 / 60 000 / 150 000 / 350 000 / 800 000 / 2 000 000 jaj). Kopia linii 12: gałąź
 `v12.31-final-przed-13` (12.31, commit 36eb94e).
@@ -43,6 +44,28 @@ A7. Nazwy smieszniejsze i dopasowane do poziomow (stary camper, szopa
     kryta papa, stary namiot wojskowy, zardzewialy zuk, rozpadajaca sie
     chata z bali...) - przejrzec kurnik i magazyn w rozbudowy.json.
 
+A8. Magazyn wydluza czas, po jakim jaja sie psuja: rosnie lagodnie z
+    poziomem, na najwyzszym 3 x czas poczatkowy (np. mnoznik 1,0 ... 3,0).
+A9. Lis bez ochrony grasuje 2 x dluzej (wiecej ofiar bez psa i plotu) -
+    razem z nowa drabinka psow (A10), sprawdzic botem.
+A10. Piec psow zamiast dwoch (rozbudowy.json, nowe grafiki tylko gdzie trzeba):
+    1 stary gluchy kundel - jak dzisiejszy kundel + 50% szans, ze nie
+      zauwazy lisa;
+    2 maly tchorzliwy kundel - troche skuteczniejszy, 1/3 szans, ze po 3 s
+      poscigu sam ucieknie;
+    3 duzy agresywny kundel - duzo skuteczniejszy, szybciej odgania;
+    4 owczarek niemiecki - jak dzisiejszy;
+    5 pies-zabojca lisow (propozycja Claude: terier - jagdterier albo fox
+      terier, hodowane wlasnie na lisy; doberman to pies obronny, nie na
+      lisy) - lis zdazy zabic najwyzej 1 kure, pies od razu go zagryza,
+      zagryziony lis dlugo nie wraca.
+    Z poziomem 4+ jedno klikniecie lisa w krzakach = pies go przegania.
+A11. Gesi-straznicy (pomysl wlasciciela): realnie gesi glosno alarmuja na
+    lisa i czesto go odstraszaja same - gesi sa duze i agresywne. Propozycja:
+    gesi kupowane jak pies; gdy lis sie czai, gesi gegaja (dzwiek + ikonka)
+    i z szansa X% same przeganiaja go jeszcze w krzakach; do tego alarm
+    wydluza czas czajenia, wiec gracz ma wiecej czasu na klikanie.
+
 ## ETAP B — ustawienia i samouczek (1–2 sesje)
 
 B1. Zębatka z opcjami (prawy górny róg).
@@ -50,16 +73,21 @@ B2. W opcjach: dla każdego typu przycisku osobno „suwak / zwykły klik”
     (kupno ptaka, rozbudowy, pasza, szczepienie, sprzedaż...). Zapis
     w ustawieniach urządzenia, nie w farmie.
 B2a. Kod fermy i "wczytaj ferme z kodu" przeniesc z kurnika do opcji.
-B2b. Nocny motyw interfejsu: ciemny, stonowany fiolet - okienka nie
-    razia w nocy.
+B2b. Nocny motyw interfejsu: wszystkie okienka (panele budynkow, kronika,
+    alerty) w ciemnych, stonowanych granatach i fioletach zamiast bieli
+    i zolci - dobre dla oczu w nocy. Dobrac palete (np. z gotowych palet
+    nocnych online). Na farmie w nocy wiecej niebieskiego swiatla,
+    mniej szarosci.
+B2c. Opcja "Stale godziny dnia i nocy" (wl./wyl.). Wlaczona: dzien zawsze
+    od 7:00 do 20:00, godziny do zmiany w dwoch polach. Wylaczona: czas
+    astronomiczny jak teraz.
 B3. Samouczek przy nowej fermie: kilka okienek po kolei (jaja → sklep →
     pasza → kogut → inkubator → lis → zaraza → noc) + przycisk „?” do
     ponownego przejrzenia. Właściciel chce go od początku projektu.
 
 ## ETAP C — pomysły kolegów 1 i 2 (1–2 sesje)
 
-C1. Klikalne krzaki: lis czai się w krzakach 10–30 s przed podejściem;
-    dotknięcie właściwego krzaka wypłasza go, zanim dojdzie do płotu.
+C1. (ZROBIONE w 13.1.1: lisa w krzakach klika sie 20 razy, z owczarkiem raz.)
 C2. Zamówienia od klientów: np. „40 jaj araukany w 2 dni za podwójną
     cenę”. Cel na krótką metę + powód trzymania wielu ras (pasuje do
     zarazy jednej rasy).
@@ -117,7 +145,10 @@ E1a. Obrazek sklepu: handlarz trzymajacy kure za nogi do gory nogami
 E1b. Pies jak lis: przy zmianie kierunku odwraca sie jak karta. Kundel -
     tylko ruch; owczarek - ruch + nowy wyglad: czarny podpalany, ostre
     uszy, wyzszy, mniej wydluzony, ostrzejsze ksztalty (wilczur).
-E1c. Lis w nocy idzie do drzwi kurnika (zamiast na pusty wybieg).
+E1c. Lis w nocy wbiega do kurnika (zamiast na pusty wybieg). W srodku nic
+    nie widac - z kurnika sypia sie piora i tryska krew. Pies czeka na
+    dworze; gdy zauwazy lisa, rusza i wbiega za nim do kurnika (znika),
+    walka liczy sie normalnie, tylko niewidocznie.
 E2. Kura szabo od nowa według prawdziwych zdjęć: duża, bardzo pierzasta,
     bez sterczących „dzyndzli” (portret w osiągnięciach i sprite na
     wybiegu).

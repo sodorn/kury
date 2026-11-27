@@ -60,6 +60,9 @@ var fox_kill_timer: float = 0.0
 var fox_kill_pace: float = 1.0
 ## Ile jeszcze trafien palcem trzeba, zeby go przegonic.
 var fox_taps_left: int = 0
+## 13.1.1: ile trafien w lisa czajacego sie w krzakach (0 = jeszcze nikt nie
+## kliknal). Nie zapisujemy - czajenie trwa kilkanascie sekund.
+var fox_lurk_taps: int = 0
 ## Sekundy uzbierane do nastepnego losowania i znacznik, ze ostatnim razem
 ## gracz przegonil lisa recznie — wtedy wraca szybciej.
 var fox_roll_timer: float = 0.0

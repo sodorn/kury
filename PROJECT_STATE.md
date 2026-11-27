@@ -4,7 +4,15 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 11** (wersja 13.0.1 - numer na prosbe wlasciciela,
+- Aktualny etap: **ETAP 11** (wersja 13.1.1, wlasciciel 27.11): lisa
+  czajacego sie w krzakach mozna klikac (Game.poke_lurking_fox, fox.gd faza
+  LURK pickable gdy state.fox_lurk_left > 0): 20 trafien (scare_taps)
+  przegania go zanim wejdzie, z owczarkiem (dog_level >= 2) wystarczy jedno.
+  FarmState.fox_lurk_taps (bez zapisu). Admin: inkubator up/down dziala
+  (upgrade_entry zamiast next_building_upgrade), pasek admina na dole w
+  dwoch rzedach (nie zaslania komunikatow), Dzien/Noc/Auto = Daylight.force.
+  Reszta notatek - ZADANIA.md (A8-A11, B2b-c, E1c).
+- Wersja 13.0.1 - numer na prosbe wlasciciela,
   wychodzi PO 13.2; Updater porownuje tylko rownosc wersji, wiec dziala).
   Poprawki: kazdy przycisk mruga po nacisnieciu (Game._on_node_added);
   admin: lis od razu w krzakach (Events.fox_lurking), komunikaty gdy lis/
