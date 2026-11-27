@@ -55,6 +55,8 @@ static func advance(state: FarmState, delta: float, offline: bool = false) -> Di
 		loss_budget = int(floor(state.hen_count() * clampf(share, 0.0, 1.0)))
 	var done := 0.0
 	var scale := maxf(0.0001, GameData.time_scale())
+	# Nadrabiany odcinek konczy sie TERAZ - stad zegar poczatku (do nocy).
+	_clock_start = Time.get_unix_time_from_system() - remaining / scale
 	while remaining > 0.0:
 		var step := minf(remaining, step_size)
 		summary["_t"] = done / scale
@@ -97,6 +99,10 @@ static func _losses(out: Dictionary) -> int:
 	return int(out["died_hunger"]) + int(out["died_disease"]) + int(out["fox_took"])
 
 
+## Czas UNIX poczatku biezacego `advance` (koniec = teraz) - do nocy.
+static var _clock_start := 0.0
+
+
 static func _step(state: FarmState, step: float, out: Dictionary, loss_budget: int,
 		offline: bool = false) -> void:
 	out["days_passed"] = int(out["days_passed"]) + _advance_days(state, step)
@@ -114,9 +120,16 @@ static func _step(state: FarmState, step: float, out: Dictionary, loss_budget: i
 	_advance_egg_spoilage(state, step, out)
 	_advance_fox(state, step, out, loss_budget, offline)
 
+	# 13.0: w nocy (Daylight) kury spia zamkniete - nie jedza, a glod stoi.
+	var night := Daylight.is_night(_clock_start + float(out.get("_t", 0.0)))
+	out["_night"] = night
+	if night:
+		out["night_seconds"] = float(out.get("night_seconds", 0.0)) + step / GameData.time_scale()
 	# Karmienie rozliczamy przed sprawdzeniem, czy stado istnieje: inaczej
 	# po stracie ostatniej kury licznik glodu zostalby zamrozony.
-	if state.feed > 0.0:
+	if night:
+		pass
+	elif state.feed > 0.0:
 		state.feed = maxf(0.0, state.feed - state.feed_per_minute() * step / 60.0)
 		state.hunger_seconds = 0.0
 		state.hunger_next_death = 0.0
@@ -737,7 +750,8 @@ static func _lay_eggs(state: FarmState, step: float, out: Dictionary, offline: b
 		# przy odstepie 4 s i kroku 10 s zdarza sie to stale.
 		while hen.since_last_egg >= seconds:
 			hen.since_last_egg -= seconds
-			if offline or state.eggs_on_ground.size() >= capacity:
+			# 13.0: w nocy kury siedza w kurniku - jajko trafia od razu do magazynu.
+			if offline or bool(out.get("_night", false)) or state.eggs_on_ground.size() >= capacity:
 				# Pod nieobecnosc gracza i przy zapelnionym wybiegu jajko idzie
 				# prosto do magazynu. Gdy magazyn jest pelny, jajko przepada —
 				# to jest wlasnie hamulec, dzieki ktoremu gra nie przechodzi

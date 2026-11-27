@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 13.0
+  INSTRUKCJA OBSLUGI *** gra w wersji 13.1
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -188,11 +188,11 @@
   | Kura szabo       |    70 zl |    49 zl |  0,90 zl |   16s |  10m48 |   0 |
   | Kura nagoszyja   |    90 zl |    63 zl |  5,00 zl |   17s |  12m45 |   1 |
   | Marans           |   120 zl |    84 zl |  6,00 zl |   19s |  15m06 |   1 |
-  | Araukana         |   150 zl |   105 zl |  6,00 zl |   21s |  17m48 |   2 |
+  | Araukana         |   150 zl |   105 zl |  7,00 zl |   21s |  17m48 |   2 |
   | Kura jedwabista  |   180 zl |   126 zl |  8,00 zl |   23s |  20m54 |   2 |
-  | Serama           |   220 zl |   154 zl |  7,00 zl |   25s |  24m21 |   3 |
-  | Brahma olbrzymia |   250 zl |   175 zl |  8,00 zl |   26s |  28m45 |   3 |
-  | Czubatka polska  |   280 zl |   196 zl | 10,00 zl |   28s |  33m36 |   4 |
+  | Serama           |   220 zl |   154 zl |  9,00 zl |   25s |  24m21 |   3 |
+  | Brahma olbrzymia |   250 zl |   175 zl | 10,00 zl |   26s |  28m45 |   3 |
+  | Czubatka polska  |   280 zl |   196 zl | 11,00 zl |   28s |  33m36 |   4 |
   | Kura pawłowska   |   400 zl |   280 zl | 13,00 zl |   30s |  39m27 |   4 |
   | Feniks           |   500 zl |   350 zl | 14,00 zl |   32s |  45m54 |   5 |
   | Totleger         |   600 zl |   420 zl | 15,00 zl |   34s |  53m15 |   5 |

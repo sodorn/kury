@@ -4,7 +4,15 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 11** (wersja 13.0, etap 1 z planu 13.0 - wlasciciel
+- Aktualny etap: **ETAP 11** (wersja 13.1): NOC wedlug slonca nad Polska
+  (core/util/daylight.gd, Daylight.is_night, wysokosc slonca < -0,833 st.
+  dla 52,23N 21,01E; Daylight.force do testow, testy i bot ida w dzien).
+  W nocy kury nie jedza i glod stoi, dalej znosza (jaja prosto do magazynu),
+  inkubator dziala; na mapie kury ida spac do kurnika, farma granatowieje.
+  Simulation._clock_start = czas UNIX poczatku advance. Ceny jaj: araukana 7,
+  serama 9, brahma 10, czubatka 11 zl - kazdy lepszy kurnik zarabia wiecej
+  (test). PLAN DALSZYCH WERSJI: ZADANIA.md (etapy A-F + skrzynka pomyslow).
+- Wersja 13.0 (etap 1 z planu 13.0 - wlasciciel
   26.11, plik z lista K4). SNAPSHOT linii 12: 12.31 = commit 36eb94e, galaz
   v12.31-final-przed-13 (tagi blokuje proxy). Zrobione w 13.0 (etap 1):
   inkubator - przy jajach w srodku nie da sie rozbudowac

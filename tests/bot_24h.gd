@@ -46,6 +46,8 @@ static func _co(every: float, length: float, first: float, until: float) -> Arra
 
 
 func _ready() -> void:
+	# 13.0: testy ida w dzien, niezaleznie od godziny uruchomienia.
+	Daylight.force = 0
 	Cloud.use_test_server()
 	var args := OS.get_cmdline_user_args()
 	if args.has("debug"):

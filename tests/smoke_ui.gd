@@ -11,6 +11,8 @@ var _main: Node
 
 
 func _ready() -> void:
+	# 13.0: testy ida w dzien, niezaleznie od godziny uruchomienia.
+	Daylight.force = 0
 	# Testy NIGDY na prawdziwy serwer (patrz Cloud.use_test_server). Wyjatek:
 	# backend.json wskazuje lokalny udawany serwer - wtedy zostawiamy go.
 	if not Cloud.is_test_server():
@@ -70,6 +72,7 @@ func _run() -> void:
 	await _test_fox_lurk_and_fence()
 	await _test_feed_panels()
 	_test_map_level_badges()
+	await _test_night_view()
 	await _test_upgrade_looks()
 	await _test_panel_width()
 	await _test_dog_breeds()
@@ -1143,6 +1146,26 @@ func _test_sick_and_fox_look() -> void:
 
 ## Rozbudowa ma byc WIDOCZNA na farmie, nie tylko w panelu. Plot ma rosnac
 ## z kazdym poziomem obrony, a budynki zmieniac wyglad na progach 3 i 6.
+## 13.0: noc - kury znikaja z wybiegu (spia w kurniku), farma ciemnieje.
+func _test_night_view() -> void:
+	var farm: Node2D = _main.get_node("Farm")
+	Daylight.force = 1
+	farm.call("_sync_night")
+	await _frames(5)
+	var widoczne := 0
+	for a in farm.find_children("*", "FarmChicken", true, false):
+		if not (a as FarmChicken).leaving:
+			widoczne += 1
+	_shot("noc.png")
+	_check(bool(farm.get("night")) and widoczne == 0 and farm.modulate != Color.WHITE,
+			"w nocy kury ida spac, farma ciemnieje (zostalo na wybiegu: %d)" % widoczne)
+	Daylight.force = 0
+	farm.call("_sync_night")
+	await _frames(5)
+	_check(farm.modulate == Color.WHITE and farm.find_children("*", "FarmChicken", true, false).size() > 0,
+			"rano kury wracaja na wybieg")
+
+
 ## 13.0: poziom budynku w kolku przy budynku na mapie.
 func _test_map_level_badges() -> void:
 	for id: String in ["coop", "storage", "incubator"]:

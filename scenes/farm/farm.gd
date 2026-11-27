@@ -73,6 +73,7 @@ func _ready() -> void:
 	Events.fox_arrived.connect(_on_fox_arrived)
 	Events.fox_repelled.connect(_on_fox_repelled)
 	_center_world()
+	_sync_night()
 	_sync_livestock()
 	_sync_dog()
 	_sync_buildings()
@@ -82,6 +83,7 @@ func _process(delta: float) -> void:
 	_sync_left -= delta
 	if _sync_left <= 0.0:
 		_sync_left = SYNC_SECONDS
+		_sync_night()
 		_sync_livestock()
 		_sync_dog()
 		_sync_buildings()
@@ -89,6 +91,20 @@ func _process(delta: float) -> void:
 
 func _center_world() -> void:
 	position.y = (get_viewport_rect().size.y - WORLD_HEIGHT) * 0.5
+
+
+## 13.0: noc wedlug slonca nad Polska - kury i piskleta spia w kurniku
+## (znikaja z wybiegu), a cala farma ciemnieje na granatowo.
+var night := false
+
+
+func _sync_night() -> void:
+	var now := Daylight.is_night_now()
+	if now == night:
+		return
+	night = now
+	modulate = Color(0.55, 0.6, 0.85) if night else Color.WHITE
+	_sync_livestock()
 
 
 ## Doprowadza scene do zgodnosci ze stanem gry.
@@ -107,6 +123,11 @@ func _sync_livestock() -> void:
 			bucket = sick if hen.sick else healthy
 		bucket[hen.breed_id] = int(bucket.get(hen.breed_id, 0)) + 1
 	var cap := int(GameData.balance().get("run", {}).get("max_visible_hens", 26))
+	if night:
+		healthy = {}
+		sick = {}
+		healthy_roosters = {}
+		sick_roosters = {}
 	# Chore kury pokazujemy zawsze — to one wymagaja reakcji gracza. Koguty tez
 	# zawsze: jest ich po jednym na rase, a od nich zalezy, czy stado niesie.
 	var shown_sick := sick
@@ -116,7 +137,7 @@ func _sync_livestock() -> void:
 	_sync_animals(false, true, sick_roosters, true)
 	_sync_animals(false, false, healthy_roosters, true)
 	_sync_animals(false, false, _clamp_visible(healthy, budget), false)
-	_sync_animals(true, false, _clamp_visible(_chicks_by_breed(), maxi(4, cap / 3)), false)
+	_sync_animals(true, false, {} if night else _clamp_visible(_chicks_by_breed(), maxi(4, cap / 3)), false)
 	_sync_eggs(Game.ground_eggs_by_breed())
 	_sync_corpses()
 

@@ -12,6 +12,8 @@ var _passed := 0
 
 
 func _ready() -> void:
+	# 13.0: testy ida w dzien, niezaleznie od godziny uruchomienia.
+	Daylight.force = 0
 	# Testy NIGDY na prawdziwy serwer (patrz Cloud.use_test_server).
 	Cloud.use_test_server()
 	_check(Cloud.is_test_server(), "testy rozmawiaja tylko z martwym adresem, nie z baza graczy")
@@ -51,6 +53,7 @@ func _ready() -> void:
 	_test_upgrade_ladders()
 	_test_upgrades_file()
 	_test_v13_basics()
+	_test_night()
 	_test_egg_spoilage()
 	_test_egg_capacity()
 	_test_vaccine_price()
@@ -1582,6 +1585,41 @@ func _test_v13_basics() -> void:
 	Cloud.player_id = "000000"
 	_check(Game.is_admin(), "ferma 000000 jest adminem")
 	Cloud.player_id = stary_kod
+
+
+## 13.0: noc wedlug slonca nad Polska - w nocy kury nie jedza, ale znosza.
+## Kazda kolejna lepsza rasa zarabia na jajach wiecej niz poprzednie poziomy.
+func _test_night() -> void:
+	Daylight.force = -1
+	_check(not Daylight.is_night(Time.get_unix_time_from_datetime_dict({"year": 2026, "month": 6, "day": 21, "hour": 10, "minute": 0, "second": 0}))
+			and Daylight.is_night(Time.get_unix_time_from_datetime_dict({"year": 2026, "month": 6, "day": 21, "hour": 22, "minute": 0, "second": 0})),
+			"czerwiec: 12:00 dzien, 00:00 noc (czas polski)")
+	Daylight.force = -1
+	var grudzien_17: float = Time.get_unix_time_from_datetime_dict({"year": 2026, "month": 12, "day": 21, "hour": 16, "minute": 0, "second": 0})
+	var grudzien_12: float = Time.get_unix_time_from_datetime_dict({"year": 2026, "month": 12, "day": 21, "hour": 11, "minute": 0, "second": 0})
+	_check(Daylight.is_night(grudzien_17) and not Daylight.is_night(grudzien_12),
+			"grudzien: 17:00 juz noc, 12:00 dzien")
+	Daylight.force = 1
+	var st := _laying_state(["leghorn", "leghorn"], 100.0)
+	var eggs_before := st.egg_count()
+	Simulation.advance(st, 600.0 * GameData.time_scale())
+	_check(is_equal_approx(st.feed, 100.0), "w nocy kury nie jedza (pasza %.1f)" % st.feed)
+	_check(st.egg_count() > eggs_before, "w nocy kury dalej znosza (jaja %d, na ziemi %d, kur %d)" % [st.egg_count(), st.eggs_on_ground.size(), st.hen_count()])
+	var glodne := _fresh_state(["leghorn", "leghorn"], 0.0)
+	Simulation.advance(glodne, 7200.0 * GameData.time_scale())
+	_check(glodne.hen_count() == 2, "w nocy glod stoi")
+	Daylight.force = 0
+	var poprzedni := 0.0
+	var dotad := 0.0
+	var poziom := -1
+	for b: Dictionary in GameData.breeds():
+		var zarobek := float(b["egg_value"]) / float(b["egg_seconds"])
+		if int(b["coop_level"]) != poziom:
+			poprzedni = dotad
+			poziom = int(b["coop_level"])
+		_check(zarobek > poprzedni, "%s zarabia wiecej niz rasy z nizszych kurnikow (%.2f > %.2f)"
+				% [b["id"], zarobek, poprzedni])
+		dotad = maxf(dotad, zarobek)
 
 
 func _with_dog() -> FarmState:
