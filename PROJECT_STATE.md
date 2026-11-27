@@ -12,6 +12,10 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
   ceny - prawie zawsze najdrozsza); "kontener z regalami"; magazyn nie
   mowi juz o kodzie fermy; kronika po kazdym powrocie (report_hours 0.1).
   Reszta notatek wlasciciela z 27.11 - w ZADANIA.md.
+  NAPRAWA WDROZENIA: tools/deploy_pages.sh sortowal pakiety sort -V po calej
+  wersji i skasowal wlasnie wdrozony pack-13.0.1.22.txt (wedlug sort -V
+  starszy niz 13.2.21) - gra nie startowala. Teraz porzadek po numerze
+  wdrozenia (ostatni czlon), biezacej wersji nigdy nie kasuje.
 - Wersja 13.2: magazyny skokami 200 / 1 000 /
   3 000 / 10 000 / 25 000 / 60 000 / 150 000 / 350 000 / 800 000 / 2 000 000
   jaj (wlasciciel 27.11). Lis w nocy dalej zabija (decyzja 27.11).

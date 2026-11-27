@@ -5,6 +5,8 @@ pomysły „od czapy” (albo prosi o to Claude), a przed kolejną wersją przeg
 listę i wdrażamy całe etapy naraz — bez commitów co chwilę z drobiazgami.
 
 Zasady:
+- WSZYSTKO, co nie jest jeszcze zrobione (pomysly, uwagi, bledy, decyzje do
+  podjecia), trafia do tego pliku od razu - zeby nic nie zginelo.
 - Najpierw planujemy, potem wdrażamy całym etapem.
 - Nowe pomysły trafiają do sekcji „SKRZYNKA” na dole; przy przeglądzie
   przenosimy je do właściwego etapu albo odrzucamy (z powodem).
@@ -71,6 +73,8 @@ C3. Dziennik wszystkich zdarzen gry: zlota ikonka dwoch "chevronow" (jak
     Do tego przycisk w kurniku. Wpisy: rozbudowy, uklady gwiazd, nowe
     rasy, zarazy, lisy - wszystko istotne. (Kronika od 13.0.1 pokazuje
     sie po kazdym powrocie, od 6 minut nieobecnosci.)
+C4a. Cena Zbyszka i Grazynki musi pasowac do tempa znoszenia (przy 300 jajach
+    na godzine na kure jaj jest bardzo duzo) - policzyc przed wdrozeniem.
 C4. Zbieranie jaj po staremu, ale szybko (pomysl kolegi): jeden klik =
     jedno jajo, bez czekania na animacje, klik gdziekolwiek za plotem.
     Do zatrudnienia Zbyszek i Grazynka - mnoznik 2, 4, 8 jaj na klik.

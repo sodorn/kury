@@ -32,9 +32,18 @@ cd "$WORK/site"
 rm -f index.* wasm_gz_loader.js version.json
 cp "$BUILD_DIR"/* .
 
-# Stare pakiety: zostawiamy trzy najnowsze.
-ls pack-*.txt 2>/dev/null | sed 's/^pack-\(.*\)\.txt$/\1/' | sort -V | head -n -3 \
-	| while read -r old; do rm -f "pack-$old.txt"; done
+# Stare pakiety: zostawiamy trzy najnowsze. "Najnowsze" = najwiekszy numer
+# wdrozenia (ostatni czlon wersji, GITHUB_RUN_NUMBER), NIE sort -V po calej
+# wersji: 13.0.1.22 jest wedlug sort -V "starsza" niz 13.2.21 i 27.11 skrypt
+# skasowal pakiet, ktory wlasnie wdrozyl - gra konczyla sie bledem
+# "Failed loading file pack-13.0.1.22.txt". Biezacej wersji nie ruszamy nigdy.
+ls pack-*.txt 2>/dev/null | sed 's/^pack-\(.*\)\.txt$/\1/' \
+	| awk -F. '{print $NF " " $0}' | sort -n | cut -d' ' -f2- | head -n -3 \
+	| while read -r old; do
+		[ "$old" = "$VERSION" ] && continue
+		rm -f "pack-$old.txt"
+	done
+[ -f "pack-$VERSION.txt" ] || { echo "BLAD: brak pack-$VERSION.txt po sprzataniu" >&2; exit 1; }
 
 git add -A
 if git diff --cached --quiet; then
