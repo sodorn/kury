@@ -63,6 +63,28 @@ var fox_taps_left: int = 0
 ## 13.1.1: ile trafien w lisa czajacego sie w krzakach (0 = jeszcze nikt nie
 ## kliknal). Nie zapisujemy - czajenie trwa kilkanascie sekund.
 var fox_lurk_taps: int = 0
+## 13.0.2 (wlasciciel 27.11): ZYCIE LISA. fox_taps_left to teraz jego punkty
+## zycia (palec zabiera 1, pies wiecej), fox_hp_max - ile mial na poczatku.
+var fox_hp_max: int = 0
+
+
+## Losuje zycie lisa: Gauss (hp_mean, hp_sd) przyciety do hp_min..hp_max -
+## zwykle przecietny, bardzo slaby albo bardzo mocny rzadko.
+func roll_fox_hp() -> void:
+	var fox: Dictionary = GameData.balance().get("fox", {})
+	var low := int(fox.get("hp_min", 5))
+	var high := maxi(low, int(fox.get("hp_max", 50)))
+	fox_hp_max = clampi(int(round(randfn(float(fox.get("hp_mean", 20)), float(fox.get("hp_sd", 8))))), low, high)
+	fox_taps_left = fox_hp_max
+
+
+## Ile punktow zycia lisa zabiera jedno udane ugryzienie obecnego psa.
+func dog_damage() -> int:
+	if dog_level <= 0:
+		return 0
+	var cfg := current_building_upgrade("dog")
+	var low := int(cfg.get("damage_min", 5))
+	return randi_range(low, maxi(low, int(cfg.get("damage_max", low))))
 ## Sekundy uzbierane do nastepnego losowania i znacznik, ze ostatnim razem
 ## gracz przegonil lisa recznie — wtedy wraca szybciej.
 var fox_roll_timer: float = 0.0

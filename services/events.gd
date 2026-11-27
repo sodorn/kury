@@ -61,6 +61,10 @@ signal fox_scared()
 @warning_ignore("unused_signal")
 signal fox_chased()
 
+## 13.0.2: pies ugryzl lisa (zabral mu zycie), ale lis jeszcze stoi.
+@warning_ignore("unused_signal")
+signal fox_bitten()
+
 ## Pies ZABIL lisa. Scena ma pokazac rozszarpanie, a nie zwykle odejscie.
 @warning_ignore("unused_signal")
 signal fox_killed()

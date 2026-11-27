@@ -117,6 +117,7 @@ static func from_dict(data: Dictionary) -> Dictionary:
 	state.fox_kill_left = 0
 	state.fox_kill_timer = 0.0
 	state.fox_taps_left = 0
+	state.fox_hp_max = 0
 	# Licznik do losowania i znacznik recznego przegonienia przenosza sie —
 	# dzieki temu kara za przegonienie golymi rekami przezywa wylaczenie gry.
 	state.fox_roll_timer = maxf(0.0, float(data.get("fox_roll_timer", 0.0)))

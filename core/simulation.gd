@@ -491,6 +491,12 @@ static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget:
 				state.dog_timer += state.dog_interval()
 				if randf() >= state.dog_chance():
 					continue
+				# 13.0.2: ugryzienie zabiera lisowi punkty zycia; dopiero przy
+				# zerze lis ucieka albo (pies z zagryza_proc) ginie.
+				out["fox_bitten"] = int(out.get("fox_bitten", 0)) + 1
+				state.fox_taps_left -= state.dog_damage()
+				if state.fox_taps_left > 0:
+					continue
 				if randf() < state.dog_kill_chance():
 					# Zagryziony lis nie wraca. Nastepny dlugo sie nie pokaze.
 					state.fox_next_multiplier = maxf(1.0,
@@ -592,7 +598,9 @@ static func _fox_arrives(state: FarmState, out: Dictionary, budget: int,
 
 	state.fox_kill_left = quota
 	state.fox_kill_pace = _fox_kill_gap(state)
-	state.fox_taps_left = maxi(1, int(fox.get("scare_taps", 20)))
+	# Lis, ktoremu gracz juz dokuczal w krzakach, zachowuje obrazenia.
+	if state.fox_lurk_taps <= 0 or state.fox_taps_left <= 0:
+		state.roll_fox_hp()
 	state.fox_hand_scared = false
 	state.dog_timer = state.dog_interval()
 
@@ -667,6 +675,9 @@ static func _fox_visit_offline(state: FarmState, out: Dictionary, budget: int,
 			next_dog += state.dog_interval()
 			if randf() >= state.dog_chance():
 				continue
+			state.fox_taps_left -= state.dog_damage()
+			if state.fox_taps_left > 0:
+				continue
 			if randf() < state.dog_kill_chance():
 				state.fox_next_multiplier = maxf(1.0,
 						float(fox.get("killed_return_multiplier", 5.0)))
@@ -702,6 +713,7 @@ static func _fox_pace_factor(state: FarmState) -> float:
 
 static func _fox_leaves(state: FarmState) -> void:
 	state.fox_lurk_taps = 0
+	state.fox_hp_max = 0
 	state.fox_massacre = false
 	state.fox_lurk_left = 0.0
 	state.fox_visit_left = 0.0

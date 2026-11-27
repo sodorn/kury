@@ -246,13 +246,8 @@ def ground():
     s.append(feeder(160, 1120))
     s.append(waterer(940, 1120))
 
-    # plot: boki i tyl (przod jest osobnym sprite'em, zeby zaslanial kury)
-    for x in (x0, x1):
-        s.append(f'<rect x="{x - 5}" y="{y0 - 30}" width="11" height="{y1 - y0 + 10}" rx="4" '
-                 f'fill="#F2E4C4" stroke="{OUTLINE}" stroke-width="2.5"/>')
-        for y in range(y0 + 68, y1 - 20, 68):
-            s.append(post(x, y))
-    s += fence_row(y0 + 8, row_posts())
+    # plot: od 13.0.2 boki i tyl to osobne sprite'y (FenceBack, FenceLeft,
+    # FenceRight) zmieniajace wyglad z poziomem plotu - tu juz ich nie rysujemy.
     s.append('</svg>')
     return "\n".join(s)
 

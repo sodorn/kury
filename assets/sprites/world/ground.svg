@@ -387,44 +387,4 @@
 <g stroke="#7E4F2A" stroke-width="2.5"><ellipse cx="574" cy="286" rx="8" ry="10" fill="#FBA8C9" transform="rotate(-20 574 286)"/><ellipse cx="588" cy="286" rx="8" ry="10" fill="#FBA8C9" transform="rotate(20 588 286)"/><rect x="579" y="281" width="4" height="16" rx="2" fill="#7E4F2A" stroke="none"/></g>
 <g stroke="#7E4F2A" stroke-width="4.2" stroke-linejoin="round"><ellipse cx="160" cy="1146" rx="62" ry="14" fill="#4F7D2D" fill-opacity="0.22" stroke="none"/><path d="M104 1106h112l-12 40h-88Z" fill="#CD9C71"/><path d="M104 1106h112l-6 14h-100Z" fill="#E0B583"/><g stroke="#AF763D" stroke-width="2.5"><ellipse cx="136" cy="1114" rx="6" ry="4" fill="#EECE6C"/><ellipse cx="156" cy="1118" rx="6" ry="4" fill="#F3DB86"/><ellipse cx="180" cy="1114" rx="6" ry="4" fill="#EECE6C"/><ellipse cx="196" cy="1119" rx="6" ry="4" fill="#F3DB86"/></g></g>
 <g stroke="#7E4F2A" stroke-width="4.2" stroke-linejoin="round"><ellipse cx="940" cy="1144" rx="46" ry="12" fill="#4F7D2D" fill-opacity="0.22" stroke="none"/><path d="M898 1110h84l-10 34h-64Z" fill="#ADBEC7"/><ellipse cx="940" cy="1110" rx="42" ry="13" fill="#8FCEE7"/><ellipse cx="940" cy="1110" rx="42" ry="13" fill="none"/><path d="M914 1106a26 9 0 0 1 24 -4" fill="none" stroke="#DAF2FD" stroke-width="4.2"/></g>
-<rect x="45" y="850" width="11" height="705" rx="4" fill="#F2E4C4" stroke="#7E4F2A" stroke-width="2.5"/>
-<rect x="42" y="896" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="42" y="964" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="42" y="1032" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="42" y="1100" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="42" y="1168" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="42" y="1236" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="42" y="1304" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="42" y="1372" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="42" y="1440" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="1025" y="850" width="11" height="705" rx="4" fill="#F2E4C4" stroke="#7E4F2A" stroke-width="2.5"/>
-<rect x="1022" y="896" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="1022" y="964" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="1022" y="1032" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="1022" y="1100" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="1022" y="1168" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="1022" y="1236" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="1022" y="1304" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="1022" y="1372" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="1022" y="1440" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="50" y="848" width="430" height="11" rx="4" fill="#F2E4C4" stroke="#7E4F2A" stroke-width="2.5"/>
-<rect x="50" y="868" width="430" height="11" rx="4" fill="#F2E4C4" stroke="#7E4F2A" stroke-width="2.5"/>
-<rect x="600" y="848" width="430" height="11" rx="4" fill="#F2E4C4" stroke="#7E4F2A" stroke-width="2.5"/>
-<rect x="600" y="868" width="430" height="11" rx="4" fill="#F2E4C4" stroke="#7E4F2A" stroke-width="2.5"/>
-<rect x="42" y="836" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="102" y="836" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="162" y="836" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="222" y="836" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="282" y="836" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="342" y="836" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="402" y="836" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="462" y="836" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="589" y="826" width="22" height="62" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="652" y="836" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="712" y="836" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="772" y="836" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="832" y="836" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="892" y="836" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="952" y="836" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
-<rect x="1012" y="836" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
 </svg>

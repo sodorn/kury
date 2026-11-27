@@ -4,7 +4,24 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 11** (wersja 13.1.1, wlasciciel 27.11): lisa
+- Aktualny etap: **ETAP 11** (wersja 13.0.2, wlasciciel 27.11, wieczor):
+  (1) Ploty: tyl i boki zmieniaja sie z poziomem jak przod. Tylny plot to
+  drugi sprajt FENCES (FenceBack, y 888), boki to fence_side_0..4.svg
+  (tools/gen_fence.py side()), ground.svg bez narysowanego plotu;
+  farm.gd _ensure_fence_parts + _sync_buildings. (2) 6 dodatkowych krzakow
+  (EXTRA_BUSHES, Shrub0..5) - ozdoba, lis ich nie uzywa. (3) Rasy wedlug
+  prawdziwej niesnosci: egg_seconds = 1120 / jaj_rocznie (leghorn 280/rok
+  = 4 s ... dongtao 60/rok = 18,7 s), egg_value tak, by zarobek na sekunde
+  dalej rosl z poziomem kurnika (rzadkie nioski - drogie jaja). Zrodla:
+  chickenfans (pawlowska 60-90, cemani 60-100), greenfire (totleger
+  200-250), poradnik Purina. (4) Zycie lisa: balance fox.hp_min/max/mean/sd
+  (5/50/20/8, Gauss), FarmState.roll_fox_hp; fox_taps_left = biezace
+  zycie, fox_hp_max = poczatkowe (bez zapisu). Palec -1, pies
+  FarmState.dog_damage (rozbudowy obrazenia_min/max: kundel 5-12, owczarek
+  8-20); przy zerze zagryza_proc decyduje (kundel 0 = ucieka, owczarek 100
+  = ginie). Live i offline. Licznik nad lisem zastapiony czerwonym
+  ProgressBar (HpBar), Events.fox_bitten -> fox._flinch.
+- Poprzednio (wersja 13.1.1, wlasciciel 27.11): lisa
   czajacego sie w krzakach mozna klikac (Game.poke_lurking_fox, fox.gd faza
   LURK pickable gdy state.fox_lurk_left > 0): 20 trafien (scare_taps)
   przegania go zanim wejdzie, z owczarkiem (dog_level >= 2) wystarczy jedno.

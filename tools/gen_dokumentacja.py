@@ -149,8 +149,17 @@ OPISY = {
     "fox.roll_minutes": ("min ZEGARA", "Co tyle minut leci kostka na przyjscie lisa - w grze i w tle "
                          "tak samo (od 12.21).", "Simulation._advance_fox"),
     "fox.chance": ("0-1", "Szansa, ze kostka przyprowadzi lisa.", "Simulation._advance_fox"),
-    "fox.scare_taps": ("szt.", "Ile dotkniec trzeba, zeby przegonic lisa palcem.",
-                       "Game.poke_fox, scenes/farm/fox.gd (licznik)"),
+    "fox.scare_taps": ("szt.", "Stara pula trafien palcem (sprzed 13.0.2). Zostaje jako zapas, "
+                       "od 13.0.2 lisa przegania jego zycie (fox.hp_*).",
+                       "Game.poke_fox"),
+    "fox.hp_min": ("pkt", "Najmniejsze zycie lisa. Palec zabiera 1 pkt, pies wiecej "
+                   "(pies[].obrazenia_*). Pasek nad lisem pokazuje, ile zostalo.",
+                   "FarmState.roll_fox_hp, scenes/farm/fox.gd (pasek)"),
+    "fox.hp_max": ("pkt", "Najwieksze zycie lisa.", "FarmState.roll_fox_hp"),
+    "fox.hp_mean": ("pkt", "Srodek rozkladu Gaussa zycia lisa - tyle ma zwykle.",
+                    "FarmState.roll_fox_hp"),
+    "fox.hp_sd": ("pkt", "Odchylenie Gaussa zycia lisa. Im mniejsze, tym lisy bardziej podobne.",
+                  "FarmState.roll_fox_hp"),
     "fox.hand_return_factor": ("mnoznik 0.01-1", "Lis przegoniony PALCEM wraca tyle razy szybciej "
                                "(odstep kostki mnozony przez te liczbe). Nie dziala, gdy ferma ma psa "
                                "albo plot.", "Simulation._advance_fox"),
@@ -273,8 +282,13 @@ OPISY_ROZ = {
                             "FarmState.dog_interval"),
     "pies[].przegania_proc": ("%", "Szansa, ze rzut sie uda i lis wyleci z wybiegu.",
                               "FarmState.dog_chance"),
-    "pies[].zagryza_proc": ("%", "Przy udanym rzucie: szansa, ze pies lisa ZAGRYZIE.",
+    "pies[].zagryza_proc": ("%", "Gdy lisowi skonczy sie zycie: szansa, ze pies go ZAGRYZIE (inaczej lis ucieka). Od 13.0.2 kundel 0, owczarek 100.",
                             "FarmState.dog_kill_chance"),
+    "pies[].obrazenia_min": ("pkt", "Najslabsze udane ugryzienie: tyle zycia zabiera lisu. Gdy zycie "
+                             "spadnie do zera, lis ucieka albo (zagryza_proc) ginie.",
+                             "FarmState.dog_damage, Simulation"),
+    "pies[].obrazenia_max": ("pkt", "Najmocniejsze ugryzienie (losowo rowno z przedzialu).",
+                             "FarmState.dog_damage"),
     "pies[].zyje_dni_min": ("dni", "Najkrotsze zycie psa (dni prawdziwe, 24 h). Losowane przy zakupie "
                             "rozkladem Gaussa: srodek przedzialu, odchylenie 1/4 szerokosci.",
                             "FarmState.roll_dog_life"),

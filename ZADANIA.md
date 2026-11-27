@@ -13,7 +13,9 @@ Zasady:
 - Zrobione pozycje przenosimy do PROJECT_STATE.md i usuwamy stąd.
 - Kolejność etapów: od najmniejszej roboty i największego zysku.
 
-Stan na 27.11.2026: wersja 13.1.1 (lis w krzakach do klikania, poprawki
+Stan na 27.11.2026: wersja 13.0.2 (ploty z kazdej strony wedlug poziomu,
+wiecej krzakow, prawdziwa niesnosc ras, zycie lisa 5-50 z czerwonym
+paskiem). Wczesniej 13.1.1 (lis w krzakach do klikania, poprawki
 admina). Wczesniej 13.0.1 (poprawki po 13.2; numer na prosbe
 wlasciciela). Wczesniej 13.2 (magazyny skokami: 200 / 1 000 / 3 000 /
 10 000 / 25 000 / 60 000 / 150 000 / 350 000 / 800 000 / 2 000 000 jaj). Kopia linii 12: gałąź
@@ -60,6 +62,10 @@ A10. Piec psow zamiast dwoch (rozbudowy.json, nowe grafiki tylko gdzie trzeba):
       lisy) - lis zdazy zabic najwyzej 1 kure, pies od razu go zagryza,
       zagryziony lis dlugo nie wraca.
     Z poziomem 4+ jedno klikniecie lisa w krzakach = pies go przegania.
+    Od 13.0.2 kazdy pies ma w rozbudowy.json obrazenia_min/max (ile zycia
+    lisa zabiera ugryzienie) i zagryza_proc (czy przy zerze lis ginie) -
+    nowe psy dostaja wlasne wartosci (kundle 0% zagryzien, owczarek i terier
+    100%).
 A11. Gesi-straznicy (pomysl wlasciciela): realnie gesi glosno alarmuja na
     lisa i czesto go odstraszaja same - gesi sa duze i agresywne. Propozycja:
     gesi kupowane jak pies; gdy lis sie czai, gesi gegaja (dzwiek + ikonka)
@@ -175,5 +181,12 @@ F8. Zdjęcia ras w sklepie — brak plików.
 ---------------------------------------------------------------------------
 
 ## SKRZYNKA (nowe pomysły — dopisuj tutaj)
+
+- (13.0.2) Ceny KUR rzadkich ras zostaly bez zmian - nowa oplacalnosc
+  zalatwia cena jaja. Do decyzji: czy podniesc tez cene kur (pawlowska,
+  feniks, onagadori) - sprawdzic botem po kilku dniach gry wlasciciela.
+- (13.0.2) Tylny plot na poziomie 4 (beton + siatka) zaslania doly
+  kurnika i inkubatora - jesli bedzie razic, obnizyc tylny plot albo
+  przesunac budynki wyzej.
 
 - 

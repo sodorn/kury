@@ -978,8 +978,10 @@ func _test_fox() -> void:
 	_check(int(arrival["fox_took"]) >= 1, "pierwsza kura ginie zaraz po wejsciu")
 	_check(state.fox_visit_left > 0.0, "wizyta trwa dalej")
 	_check(state.fox_kill_left >= 1, "lis ma jeszcze lup do wziecia")
-	_check(state.fox_taps_left == int(fox.get("scare_taps", 20)),
-			"gracz dostaje pelna pule trafien")
+	# 13.0.2: zycie lisa losowane 5..50 (Gauss), pasek zaczyna pelny.
+	_check(state.fox_hp_max >= int(fox.get("hp_min", 5)) and state.fox_hp_max <= int(fox.get("hp_max", 50))
+			and state.fox_taps_left == state.fox_hp_max,
+			"lis dostaje pelne zycie z przedzialu (%d)" % state.fox_hp_max)
 
 	# Lup lisa to STALA liczba kur z przedzialu kills_min..kills_max,
 	# a nie procent stada — wlasciciel chcial "zabije pare sztuk i pojdzie".
@@ -1027,7 +1029,7 @@ func _test_fox() -> void:
 	_arm_fox(Game.state)
 	Simulation.advance(Game.state, 1.0)
 	_check(Game.state.fox_visit_left > 0.0, "lis na wybiegu przed przeganianiem")
-	var trafienia := int(fox.get("scare_taps", 20))
+	var trafienia := Game.state.fox_taps_left
 	for i in trafienia - 1:
 		_check(not Game.poke_fox(), "trafienie %d jeszcze nie wyprasza" % (i + 1))
 	_check(Game.poke_fox(), "ostatnie trafienie przegania lisa")
@@ -1592,15 +1594,51 @@ func _test_v13_basics() -> void:
 	# 13.1.1: lis w krzakach - 20 trafien bez psa, jedno z owczarkiem.
 	var lis := Game.state
 	lis.fox_lurk_left = 20.0
-	var odszedl := false
-	for i in 20:
+	var odszedl := Game.poke_lurking_fox()
+	var zycie := lis.fox_hp_max
+	_check(zycie >= 5 and zycie <= 50 and lis.fox_taps_left == zycie - 1,
+			"pierwsze trafienie w krzakach losuje zycie i zabiera 1 (%d)" % zycie)
+	for i in zycie - 1:
 		odszedl = Game.poke_lurking_fox()
-	_check(odszedl and lis.fox_lurk_left <= 0.0, "lis w krzakach ucieka po 20 trafieniach")
+	_check(odszedl and lis.fox_lurk_left <= 0.0, "lis w krzakach ucieka, gdy zycie spadnie do zera")
 	lis.fox_lurk_left = 20.0
 	lis.set_building_level("dog", 2)
 	_check(Game.poke_lurking_fox() and lis.fox_lurk_left <= 0.0, "z owczarkiem wystarczy jedno klikniecie")
 	Game.state = stary_stan
 	Cloud.player_id = stary_kod
+	# 13.0.2: zycie lisa - Gauss 5..50, zwykle przecietne; pies zabiera wiecej.
+	var hp_stan := _fresh_state(["leghorn"], 10.0)
+	var hp_suma := 0
+	var hp_poza := 0
+	var hp_srodek := 0
+	for i in 2000:
+		hp_stan.roll_fox_hp()
+		hp_suma += hp_stan.fox_hp_max
+		if hp_stan.fox_hp_max < 5 or hp_stan.fox_hp_max > 50:
+			hp_poza += 1
+		if hp_stan.fox_hp_max >= 10 and hp_stan.fox_hp_max <= 30:
+			hp_srodek += 1
+	_check(hp_poza == 0, "zycie lisa zawsze 5..50")
+	_check(absf(hp_suma / 2000.0 - 20.0) < 1.5, "zycie lisa srednio okolo 20 (%.1f)" % (hp_suma / 2000.0))
+	_check(hp_srodek > 1500, "wiekszosc lisow przecietna 10..30 (%d/2000)" % hp_srodek)
+	hp_stan.set_building_level("dog", 1)
+	var hp_kmin := 99
+	var hp_kmax := 0
+	for i in 500:
+		var hp_d := hp_stan.dog_damage()
+		hp_kmin = mini(hp_kmin, hp_d)
+		hp_kmax = maxi(hp_kmax, hp_d)
+	_check(hp_kmin == 5 and hp_kmax == 12, "kundel gryzie za 5..12 (%d..%d)" % [hp_kmin, hp_kmax])
+	_check(hp_stan.dog_kill_chance() == 0.0, "kundel nie zagryza - lis ucieka")
+	hp_stan.set_building_level("dog", 2)
+	hp_kmin = 99
+	hp_kmax = 0
+	for i in 500:
+		var hp_d := hp_stan.dog_damage()
+		hp_kmin = mini(hp_kmin, hp_d)
+		hp_kmax = maxi(hp_kmax, hp_d)
+	_check(hp_kmin == 8 and hp_kmax == 20, "owczarek gryzie za 8..20 (%d..%d)" % [hp_kmin, hp_kmax])
+	_check(hp_stan.dog_kill_chance() == 1.0, "owczarek przy zerze zagryza lisa")
 
 
 ## 13.0: noc wedlug slonca nad Polska - w nocy kury nie jedza, ale znosza.

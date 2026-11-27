@@ -703,6 +703,8 @@ func building_title(building_id: String) -> String:
 ## inaczej zabity albo wygoniony lis dalej siedzi na wybiegu. Na tym samym
 ## bledzie gra juz raz sie wylozyla przy trzech niesmiertelnych lisach.
 func _report_fox_end(result: Dictionary) -> void:
+	if int(result.get("fox_bitten", 0)) > 0:
+		Events.fox_bitten.emit()
 	if int(result.get("fox_killed", 0)) > 0:
 		Events.notice.emit(tr("HINT_FOX_KILLED"))
 		Events.fox_killed.emit()
@@ -977,7 +979,7 @@ func poke_lurking_fox() -> bool:
 		return true
 	if state.fox_lurk_taps <= 0:
 		state.fox_lurk_taps = 1
-		state.fox_taps_left = maxi(1, int(GameData.balance().get("fox", {}).get("scare_taps", 20)))
+		state.roll_fox_hp()
 	state.fox_taps_left -= 1
 	if state.fox_taps_left > 0:
 		return false

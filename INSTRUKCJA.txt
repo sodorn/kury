@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 13.1.1
+  INSTRUKCJA OBSLUGI *** gra w wersji 13.0.2
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -185,21 +185,21 @@
   +==================+==========+==========+==========+=======+========+=====+
   | Leghorn          |    35 zl |    24 zl |  0,70 zl |   12s |   7m30 |   0 |
   | Rhode Island     |    45 zl |    31 zl |  0,80 zl |   14s |   8m57 |   0 |
-  | Kura szabo       |    70 zl |    49 zl |  0,90 zl |   16s |  10m48 |   0 |
-  | Kura nagoszyja   |    90 zl |    63 zl |  5,00 zl |   17s |  12m45 |   1 |
-  | Marans           |   120 zl |    84 zl |  6,00 zl |   19s |  15m06 |   1 |
-  | Araukana         |   150 zl |   105 zl |  7,00 zl |   21s |  17m48 |   2 |
-  | Kura jedwabista  |   180 zl |   126 zl |  8,00 zl |   23s |  20m54 |   2 |
-  | Serama           |   220 zl |   154 zl |  9,00 zl |   25s |  24m21 |   3 |
-  | Brahma olbrzymia |   250 zl |   175 zl | 10,00 zl |   26s |  28m45 |   3 |
-  | Czubatka polska  |   280 zl |   196 zl | 11,00 zl |   28s |  33m36 |   4 |
-  | Kura pawłowska   |   400 zl |   280 zl | 13,00 zl |   30s |  39m27 |   4 |
-  | Feniks           |   500 zl |   350 zl | 14,00 zl |   32s |  45m54 |   5 |
-  | Totleger         |   600 zl |   420 zl | 15,00 zl |   34s |  53m15 |   5 |
-  | Sułtanka         |   800 zl |   560 zl | 20,00 zl |   35s |   1h02 |   6 |
-  | Onagadori        | 1 500 zl | 1 050 zl | 30,00 zl |   37s |   1h12 |   7 |
-  | Dong Tao         | 2 500 zl | 1 750 zl | 40,00 zl |   39s |   1h23 |   8 |
-  | Ayam Cemani      | 4 000 zl | 2 800 zl | 90,00 zl |   41s |   1h37 |   9 |
+  | Kura szabo       |    70 zl |    49 zl |  2,60 zl |   45s |  10m48 |   0 |
+  | Kura nagoszyja   |    90 zl |    63 zl |  5,80 zl |   19s |  12m45 |   1 |
+  | Marans           |   120 zl |    84 zl |  5,80 zl |   19s |  15m06 |   1 |
+  | Araukana         |   150 zl |   105 zl |  5,90 zl |   17s |  17m48 |   2 |
+  | Kura jedwabista  |   180 zl |   126 zl | 12,00 zl |   34s |  20m54 |   2 |
+  | Serama           |   220 zl |   154 zl | 11,00 zl |   28s |  24m21 |   3 |
+  | Brahma olbrzymia |   250 zl |   175 zl |  8,50 zl |   23s |  28m45 |   3 |
+  | Czubatka polska  |   280 zl |   196 zl | 15,00 zl |   34s |  33m36 |   4 |
+  | Kura pawłowska   |   400 zl |   280 zl | 19,00 zl |   45s |  39m27 |   4 |
+  | Feniks           |   500 zl |   350 zl | 20,00 zl |   45s |  45m54 |   5 |
+  | Totleger         |   600 zl |   420 zl |  6,70 zl |   15s |  53m15 |   5 |
+  | Sułtanka         |   800 zl |   560 zl | 19,00 zl |   34s |   1h02 |   6 |
+  | Onagadori        | 1 500 zl | 1 050 zl | 39,00 zl |   48s |   1h12 |   7 |
+  | Dong Tao         | 2 500 zl | 1 750 zl | 58,00 zl |   56s |   1h23 |   8 |
+  | Ayam Cemani      | 4 000 zl | 2 800 zl | 93,00 zl |   42s |   1h37 |   9 |
   +------------------+----------+----------+----------+-------+--------+-----+
 
   "lvl" to poziom kurnika, od ktorego rasa jest w ogole dostepna w sklepie.
@@ -338,7 +338,7 @@
    1. kundel ze schroniska z budą
       400 zl - rzuca sie na lisa co 10 s, przegania w 33%, zagryza w 0%
    2. owczarek niemiecki z rodowodem
-      8 000 zl - rzuca sie na lisa co 5 s, przegania w 67%, zagryza w 33%
+      8 000 zl - rzuca sie na lisa co 5 s, przegania w 67%, zagryza w 100%
 
   Pies pracuje sam, bez twojego udzialu, takze gdy nie patrzysz. Gdy lis
   wejdzie, pies rzuca kostka co tyle sekund. Przy udanej probie owczarek moze

@@ -32,6 +32,22 @@ const FENCES: Array[Texture2D] = [
 ]
 ## Ile pikseli tekstury plotu wystaje PONIZEJ linii, na ktorej stoi sprajt.
 const FENCE_FOOT := 6.0
+## 13.0.2: boki wybiegu w stylu poziomu plotu (tools/gen_fence.py).
+const FENCE_SIDES := [
+	preload("res://assets/sprites/world/fence_side_0.svg"),
+	preload("res://assets/sprites/world/fence_side_1.svg"),
+	preload("res://assets/sprites/world/fence_side_2.svg"),
+	preload("res://assets/sprites/world/fence_side_3.svg"),
+	preload("res://assets/sprites/world/fence_side_4.svg"),
+]
+## Tylny plot (podstawa na y=888) i boki (x=50 i x=1030, od y=850).
+const FENCE_BACK_BASE := 888.0
+const FENCE_SIDE_TOP := 850.0
+const FENCE_SIDE_XS := [50.0, 1030.0]
+## 13.0.2 (wlasciciel 27.11): wiecej krzakow na wolnej trawie - ozdoba,
+## lis z nich nie wychodzi (tylko BUSHES).
+const EXTRA_BUSHES := [Vector2(425, 2330), Vector2(655, 2330), Vector2(300, 2390),
+		Vector2(780, 2390), Vector2(30, 1990), Vector2(1050, 1990)]
 
 ## Budynki maja po trzy poziomy wygladu: zwykly, rozbudowany, przemyslowy.
 ## Mapa: nazwa wezla -> [tekstury] oraz progi poziomow rozbudowy.
@@ -434,20 +450,55 @@ func _egg_position() -> Vector2:
 		clampf(spot.y, _run.position.y, _run.end.y))
 
 
+## Tylny plot, boki i dodatkowe krzaki - tworzone raz, w kodzie.
+func _ensure_fence_parts() -> void:
+	if $Objects.has_node("FenceBack"):
+		return
+	var back := Sprite2D.new()
+	back.name = "FenceBack"
+	back.centered = false
+	back.position = Vector2(0, FENCE_BACK_BASE)
+	$Objects.add_child(back)
+	for i in FENCE_SIDE_XS.size():
+		var side := Sprite2D.new()
+		side.name = "FenceSide%d" % i
+		side.centered = false
+		side.position = Vector2(float(FENCE_SIDE_XS[i]) - 24.0, FENCE_SIDE_TOP)
+		$Objects.add_child(side)
+	var bush_tex: Texture2D = ($Objects/BushLeftTop as Sprite2D).texture
+	for i in EXTRA_BUSHES.size():
+		var bush := Sprite2D.new()
+		bush.name = "Shrub%d" % i
+		bush.texture = bush_tex
+		bush.centered = false
+		bush.offset = Vector2(-85, -104)
+		bush.position = EXTRA_BUSHES[i]
+		bush.scale = Vector2.ONE * (0.8 if i % 2 == 0 else 0.95)
+		$Objects.add_child(bush)
+
+
 ## Ustawia wyglad plotu i budynkow pod aktualne poziomy rozbudowy. Tanie:
 ## przypisanie tej samej tekstury drugi raz nic nie kosztuje, wiec mozna to
 ## wolac z tym samym rytmem co reszte synchronizacji sceny.
 func _sync_buildings() -> void:
 	if Game.state == null:
 		return
-	var fence := $Objects/FenceFront as Sprite2D
-	if fence != null:
-		var want: Texture2D = FENCES[clampi(Game.state.guard_level, 0, FENCES.size() - 1)]
+	_ensure_fence_parts()
+	var fence_level := clampi(Game.state.guard_level, 0, FENCES.size() - 1)
+	for fence_name: String in ["FenceFront", "FenceBack"]:
+		var fence := $Objects.get_node_or_null(fence_name) as Sprite2D
+		if fence == null:
+			continue
+		var want: Texture2D = FENCES[fence_level]
 		if fence.texture != want:
 			fence.texture = want
 			# Sprajt nie jest wysrodkowany, wiec wyzsza tekstura sama by
 			# urosla w dol i zaklaby trawe. Przesuwamy ja o jej wysokosc.
 			fence.offset.y = -(want.get_height() - FENCE_FOOT)
+	for i in FENCE_SIDE_XS.size():
+		var side := $Objects.get_node_or_null("FenceSide%d" % i) as Sprite2D
+		if side != null and side.texture != FENCE_SIDES[fence_level]:
+			side.texture = FENCE_SIDES[fence_level]
 	for node_name: String in BUILDING_LOOKS:
 		var building := $Objects.get_node_or_null(node_name)
 		if building == null:

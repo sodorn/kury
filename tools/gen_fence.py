@@ -161,3 +161,60 @@ for a, b in ((50, GATE_FROM), (GATE_TO, WIDTH - 50)):
 body.append("</g>")
 build("fence_front_4", H, "#5E5A52", 3.8, "#E7E3D8", "#B9B4A6", "#CFC9BA", body,
       "Poziom 4: betonowe slupki, stalowa siatka i drut kolczasty.")
+
+
+# --- 13.0.2: boki wybiegu w stylu kazdego poziomu ---------------------------
+# Wczesniej boki i tyl byly wypalone w ground.svg (zawsze drewniane) - po
+# rozbudowie plotu zmienial sie tylko przod (zgloszenie wlasciciela 27.11).
+# Tyl to teraz ta sama tekstura co przod (sprite FenceBack w farm.tscn),
+# a boki - waskie pionowe paski z tego pliku: fence_side_0..4.svg.
+SIDE_W = 48
+SIDE_H = 730          # od y=850 do y=1580 w swiecie
+SIDE_STYLE = [
+    # (linia, slupek jasny, slupek ciemny, poprzeczka, krok slupkow, szer. slupka)
+    ("#7E4F2A", "#FBEBCB", "#DCC79F", "#F2E4C4", 68, 16),
+    ("#7E4F2A", "#FBEBCB", "#DCC79F", "#E9D6AE", 60, 18),
+    ("#7E4F2A", "#FDF0D6", "#D9C098", "#E8D4AC", 30, 14),
+    ("#6E5240", "#F4E3C2", "#CFB58A", "#D9BE91", 90, 18),
+    ("#5E5A52", "#E7E3D8", "#B9B4A6", "#CFC9BA", 110, 24),
+]
+
+
+def side(level):
+    line, p0, p1, rail_color, step, pw = SIDE_STYLE[level]
+    cx = SIDE_W / 2.0
+    out = ['<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d">'
+           % (SIDE_W, SIDE_H, SIDE_W, SIDE_H),
+           "<!-- WYGENEROWANE przez tools/gen_fence.py - bok wybiegu, poziom %d -->" % level,
+           '<defs><linearGradient id="post" x1="0" y1="0" x2="0" y2="60" gradientUnits="userSpaceOnUse">'
+           '<stop offset="0" stop-color="%s"/><stop offset="1" stop-color="%s"/></linearGradient></defs>' % (p0, p1)]
+    if level >= 3:
+        # pas siatki wzdluz boku
+        out.append('<rect x="%g" y="20" width="14" height="%d" fill="none" stroke="%s" stroke-width="2"/>'
+                   % (cx - 7, SIDE_H - 40, "#9AA6B1"))
+        out.append('<g stroke="#9AA6B1" stroke-width="2" stroke-opacity="0.8">')
+        y = 20
+        while y < SIDE_H - 34:
+            out.append('<path d="M%g %g %g %g M%g %g %g %g"/>' % (cx - 7, y, cx + 7, y + 14, cx + 7, y, cx - 7, y + 14))
+            y += 14
+        out.append("</g>")
+    if level == 4:
+        out.append('<rect x="%g" y="10" width="20" height="%d" rx="5" fill="#C8C2B4" stroke="%s" stroke-width="3"/>'
+                   % (cx - 10, SIDE_H - 20, line))
+        out.append('<path d="M%g 10 V%d" stroke="#8C98A2" stroke-width="2.4"/>' % (cx + 14, SIDE_H - 10))
+    else:
+        out.append('<rect x="%g" y="10" width="11" height="%d" rx="4" fill="%s" stroke="%s" stroke-width="2.5"/>'
+                   % (cx - 5.5, SIDE_H - 20, rail_color, line))
+    y = 68
+    while y < SIDE_H - 10:
+        tall = 60 if level else 52
+        out.append('<rect x="%g" y="%g" width="%d" height="%d" rx="6" fill="url(#post)" stroke="%s" stroke-width="3.4"/>'
+                   % (cx - pw / 2.0, y - tall, pw, tall, line))
+        y += step
+    out.append("</svg>")
+    (OUT / ("fence_side_%d.svg" % level)).write_text("\n".join(out) + "\n", encoding="utf-8")
+    print("zapisano fence_side_%d.svg" % level)
+
+
+for _lv in range(5):
+    side(_lv)

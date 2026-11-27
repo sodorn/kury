@@ -67,7 +67,7 @@ var _run := Rect2()
 ## Gdzie odkladac plamy krwi, zeby lezaly POD zwierzetami.
 var _decals: Node2D = null
 ## Licznik trafien nad lisem.
-var _counter: Label = null
+var _counter: ProgressBar = null
 
 ## Plan wystepu ustawiony przez farme.
 var _bush_spot := Vector2.ZERO
@@ -129,6 +129,7 @@ func _ready() -> void:
 	Events.fox_chased.connect(leave)
 	Events.fox_left.connect(leave)
 	Events.fox_killed.connect(_torn_apart)
+	Events.fox_bitten.connect(_flinch)
 	_build_counter()
 	_apply_pose(0.0, true)
 
@@ -194,16 +195,26 @@ func _leg(name: String, parent: Sprite2D) -> Sprite2D:
 
 ## Licznik trafien nad lisem.
 func _build_counter() -> void:
-	_counter = Label.new()
+	# 13.0.2 (wlasciciel 27.11): pasek zycia lisa - czerwona pozioma
+	# fiolka, na poczatku pelna, oproznia sie z kazdym trafieniem palcem
+	# albo ugryzieniem psa.
+	_counter = ProgressBar.new()
+	_counter.name = "HpBar"
 	_counter.z_index = 4
-	_counter.add_theme_font_size_override("font_size", 56)
-	_counter.add_theme_color_override("font_color", Color(1, 1, 1))
-	_counter.add_theme_color_override("font_outline_color", Color(0.35, 0.1, 0.06))
-	_counter.add_theme_constant_override("outline_size", 14)
-	_counter.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_counter.size = Vector2(220, 70)
-	_counter.pivot_offset = Vector2(110, 35)
-	_counter.position = Vector2(-110, -210)
+	_counter.show_percentage = false
+	_counter.size = Vector2(200, 28)
+	_counter.pivot_offset = Vector2(100, 14)
+	_counter.position = Vector2(-100, -200)
+	var back := StyleBoxFlat.new()
+	back.bg_color = Color(0.18, 0.05, 0.05, 0.85)
+	back.set_corner_radius_all(14)
+	back.set_border_width_all(3)
+	back.border_color = Color(0.35, 0.1, 0.06)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = Color(0.86, 0.12, 0.12)
+	fill.set_corner_radius_all(12)
+	_counter.add_theme_stylebox_override("background", back)
+	_counter.add_theme_stylebox_override("fill", fill)
 	_counter.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_counter)
 	_refresh_counter()
@@ -216,7 +227,8 @@ func _refresh_counter() -> void:
 	var left := Game.fox_taps_left() if Game != null and Game.state != null else 0
 	_counter.visible = left > 0 and (phase == Phase.HUNT
 			or (phase == Phase.LURK and Game.state != null and Game.state.fox_lurk_taps > 0))
-	_counter.text = str(left)
+	_counter.max_value = maxi(1, Game.state.fox_hp_max if Game != null and Game.state != null else 1)
+	_counter.value = left
 
 
 func set_decals(node: Node2D) -> void:
@@ -411,6 +423,7 @@ func _nearest_exit(from: Vector2) -> Dictionary:
 
 
 func _process(delta: float) -> void:
+	_refresh_counter()
 	_clock += delta
 	if phase == Phase.DEAD:
 		return
@@ -725,6 +738,11 @@ func _hit() -> void:
 	if Game.poke_fox():
 		_refresh_counter()
 		return
+	_flinch()
+
+
+## Trafienie (palec albo zeby psa): pasek zycia podskakuje, lis odskakuje.
+func _flinch() -> void:
 	_refresh_counter()
 	if _counter != null and is_instance_valid(_counter):
 		_counter.scale = Vector2(1.5, 1.5)

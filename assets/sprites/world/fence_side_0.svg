@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="730" viewBox="0 0 48 730">
+<!-- WYGENEROWANE przez tools/gen_fence.py - bok wybiegu, poziom 0 -->
+<defs><linearGradient id="post" x1="0" y1="0" x2="0" y2="60" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FBEBCB"/><stop offset="1" stop-color="#DCC79F"/></linearGradient></defs>
+<rect x="18.5" y="10" width="11" height="710" rx="4" fill="#F2E4C4" stroke="#7E4F2A" stroke-width="2.5"/>
+<rect x="16" y="16" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="16" y="84" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="16" y="152" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="16" y="220" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="16" y="288" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="16" y="356" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="16" y="424" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="16" y="492" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="16" y="560" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+<rect x="16" y="628" width="16" height="52" rx="6" fill="url(#post)" stroke="#7E4F2A" stroke-width="3.4"/>
+</svg>

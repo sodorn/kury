@@ -1286,21 +1286,29 @@ func _test_fox_death() -> void:
 	# fox_visit_left musi byc ustawione recznie — sam sygnal tylko stawia
 	# sprajt, a poke_fox() pyta stan gry, czy lis faktycznie jest na wybiegu.
 	Game.state.fox_taps_left = 20
+	Game.state.fox_hp_max = 20
 	Game.state.fox_visit_left = 60.0
 	Events.fox_arrived.emit(5, 60.0)
 	await _seconds(1.2)
 	var lisy := _nodes_of_type("FarmFox")
 	_check(lisy.size() == 1, "lis wszedl przed psem")
 	if not lisy.is_empty():
-		var licznik: Label = null
+		# 13.0.2: zamiast liczby - czerwony pasek zycia, na poczatku pelny.
+		var pasek: ProgressBar = null
 		for child in (lisy[0] as Node).get_children():
-			if child is Label:
-				licznik = child
-		_check(licznik != null and licznik.visible and licznik.text == "20",
-				"nad lisem stoi licznik trafien")
+			if child is ProgressBar:
+				pasek = child
+		_check(pasek != null and pasek.visible and pasek.value == 20 and pasek.max_value == 20,
+				"nad lisem stoi pelny pasek zycia")
 		(lisy[0] as FarmFox)._hit()
 		await _frames(4)
-		_check(licznik != null and licznik.text == "19", "licznik spada po trafieniu")
+		_check(pasek != null and pasek.value == 19, "pasek zycia spada po trafieniu palcem")
+		# Ugryzienie psa tez zabiera zycie i pasek to pokazuje.
+		Game.state.fox_taps_left = 9
+		Events.fox_bitten.emit()
+		await _frames(4)
+		_check(pasek != null and pasek.value == 9, "pasek zycia spada po ugryzieniu psa")
+		await _seconds(0.3)
 		_shot("lis_licznik.png")
 		Game.state.fox_taps_left = 20
 		Game.state.fox_visit_left = 0.0

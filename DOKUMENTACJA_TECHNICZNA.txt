@@ -1,6 +1,6 @@
 ==============================================================================
   SYMULATOR HODOWLI KURCZAKOW - DOKUMENTACJA TECHNICZNA
-  gra w wersji 13.1.1   *   format zapisu w wersji 6   *   Godot 4.7.2
+  gra w wersji 13.0.2   *   format zapisu w wersji 6   *   Godot 4.7.2
 ==============================================================================
 
   Dokument dla programisty: jak gra jest zbudowana, jak dzialaja mechaniki, co
@@ -379,7 +379,7 @@
   | poz. |      cena | rzut co | szansa | zagryza |
   +======+===========+=========+========+=========+
   |    1 |  400.0 zl |  10.0 s |    33% |      0% |
-  |    2 | 8000.0 zl |   5.0 s |    67% |     33% |
+  |    2 | 8000.0 zl |   5.0 s |    67% |    100% |
   +------+-----------+---------+--------+---------+
 
   Nazwy psow: rozbudowy.json -> pies (rozdzial 7).
@@ -688,8 +688,30 @@
 
   fox.scare_taps
       = 20 [szt.]
-      Ile dotkniec trzeba, zeby przegonic lisa palcem.
-      uzycie: Game.poke_fox, scenes/farm/fox.gd (licznik)
+      Stara pula trafien palcem (sprzed 13.0.2). Zostaje jako zapas, od 13.0.2
+      lisa przegania jego zycie (fox.hp_*).
+      uzycie: Game.poke_fox
+
+  fox.hp_min
+      = 5 [pkt]
+      Najmniejsze zycie lisa. Palec zabiera 1 pkt, pies wiecej
+      (pies[].obrazenia_*). Pasek nad lisem pokazuje, ile zostalo.
+      uzycie: FarmState.roll_fox_hp, scenes/farm/fox.gd (pasek)
+
+  fox.hp_max
+      = 50 [pkt]
+      Najwieksze zycie lisa.
+      uzycie: FarmState.roll_fox_hp
+
+  fox.hp_mean
+      = 20 [pkt]
+      Srodek rozkladu Gaussa zycia lisa - tyle ma zwykle.
+      uzycie: FarmState.roll_fox_hp
+
+  fox.hp_sd
+      = 8 [pkt]
+      Odchylenie Gaussa zycia lisa. Im mniejsze, tym lisy bardziej podobne.
+      uzycie: FarmState.roll_fox_hp
 
   fox.hand_return_factor
       = 0.1 [mnoznik 0.01-1]
@@ -923,8 +945,18 @@
       uzycie: FarmState.dog_chance
 
   pies[].zagryza_proc   [%]
-      Przy udanym rzucie: szansa, ze pies lisa ZAGRYZIE.
+      Gdy lisowi skonczy sie zycie: szansa, ze pies go ZAGRYZIE (inaczej lis
+      ucieka). Od 13.0.2 kundel 0, owczarek 100.
       uzycie: FarmState.dog_kill_chance
+
+  pies[].obrazenia_min   [pkt]
+      Najslabsze udane ugryzienie: tyle zycia zabiera lisu. Gdy zycie spadnie
+      do zera, lis ucieka albo (zagryza_proc) ginie.
+      uzycie: FarmState.dog_damage, Simulation
+
+  pies[].obrazenia_max   [pkt]
+      Najmocniejsze ugryzienie (losowo rowno z przedzialu).
+      uzycie: FarmState.dog_damage
 
   pies[].zyje_dni_min   [dni]
       Najkrotsze zycie psa (dni prawdziwe, 24 h). Losowane przy zakupie
@@ -998,7 +1030,7 @@
     1. kundel ze schroniska z budą - 400 zl, co 10 s, przegania 33.33%,
     zagryza 0%
     2. owczarek niemiecki z rodowodem - 8000 zl, co 5 s, przegania 66.67%,
-    zagryza 33.33%
+    zagryza 100%
 
   breeds.json - pola kazdej rasy
   ------------------------------
@@ -1075,22 +1107,22 @@
   | id          | price | sell | egg_val | egg_s | incub_s | grow_s | lvl |
   +=============+=======+======+=========+=======+=========+========+=====+
   | leghorn     |    35 |   24 |     0.7 |   4.0 |      60 |     90 |   0 |
-  | rhode       |    45 |   31 |     0.8 |   4.6 |      72 |    107 |   0 |
-  | szabo       |    70 |   49 |     0.9 |   5.2 |      87 |    129 |   0 |
-  | nagoszyja   |    90 |   63 |       5 |   5.8 |     104 |    151 |   1 |
-  | marans      |   120 |   84 |       6 |   6.4 |     122 |    180 |   1 |
-  | araukana    |   150 |  105 |       7 |   7.0 |     143 |    213 |   2 |
-  | jedwabista  |   180 |  126 |       8 |   7.6 |     167 |    251 |   2 |
-  | serama      |   220 |  154 |       9 |   8.2 |     194 |    293 |   3 |
-  | brahma      |   250 |  175 |      10 |   8.8 |     229 |    346 |   3 |
-  | czubatka    |   280 |  196 |      11 |   9.4 |     268 |    404 |   4 |
-  | pavlovskaya |   400 |  280 |      13 |  10.0 |     315 |    474 |   4 |
-  | feniks      |   500 |  350 |      14 |  10.6 |     366 |    552 |   5 |
-  | deathlayer  |   600 |  420 |      15 |  11.2 |     425 |    640 |   5 |
-  | sultanka    |   800 |  560 |      20 |  11.8 |     493 |    749 |   6 |
-  | onagadori   |  1500 | 1050 |      30 |  12.4 |     574 |    879 |   7 |
-  | dongtao     |  2500 | 1750 |      40 |  13.0 |     654 |   1021 |   8 |
-  | cemani      |  4000 | 2800 |      90 |  13.6 |     758 |   1190 |   9 |
+  | rhode       |    45 |   31 |     0.8 |   4.5 |      72 |    107 |   0 |
+  | szabo       |    70 |   49 |     2.6 |  14.9 |      87 |    129 |   0 |
+  | nagoszyja   |    90 |   63 |     5.8 |   6.2 |     104 |    151 |   1 |
+  | marans      |   120 |   84 |     5.8 |   6.2 |     122 |    180 |   1 |
+  | araukana    |   150 |  105 |     5.9 |   5.6 |     143 |    213 |   2 |
+  | jedwabista  |   180 |  126 |      12 |  11.2 |     167 |    251 |   2 |
+  | serama      |   220 |  154 |      11 |   9.3 |     194 |    293 |   3 |
+  | brahma      |   250 |  175 |     8.5 |   7.5 |     229 |    346 |   3 |
+  | czubatka    |   280 |  196 |      15 |  11.2 |     268 |    404 |   4 |
+  | pavlovskaya |   400 |  280 |      19 |  14.9 |     315 |    474 |   4 |
+  | feniks      |   500 |  350 |      20 |  14.9 |     366 |    552 |   5 |
+  | deathlayer  |   600 |  420 |     6.7 |   5.0 |     425 |    640 |   5 |
+  | sultanka    |   800 |  560 |      19 |  11.2 |     493 |    749 |   6 |
+  | onagadori   |  1500 | 1050 |      39 |  16.0 |     574 |    879 |   7 |
+  | dongtao     |  2500 | 1750 |      58 |  18.7 |     654 |   1021 |   8 |
+  | cemani      |  4000 | 2800 |      93 |  14.0 |     758 |   1190 |   9 |
   +-------------+-------+------+---------+-------+---------+--------+-----+
 
   Czasy w tej tabeli sa w sekundach GRY. Na zegar: pomnoz przez 3.
@@ -1174,6 +1206,7 @@
   fox_visited(count: int)
   fox_scared()
   fox_chased()
+  fox_bitten()
   fox_killed()
   fox_repelled()
   game_won(reason: String)
@@ -1683,5 +1716,5 @@
     limity miejsca i ruchu planu darmowego.
 
 ==============================================================================
-  koniec dokumentu  *  wygenerowano z wersji 13.1.1
+  koniec dokumentu  *  wygenerowano z wersji 13.0.2
 ==============================================================================
