@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 13.1
+  INSTRUKCJA OBSLUGI *** gra w wersji 13.2
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -245,23 +245,23 @@
    1. lodówka w piwnicy
       limit 200 jaj - na start
    2. mała szopka
-      limit 500 jaj - 600 zl, budowa 5 min
+      limit 1 000 jaj - 600 zl, budowa 5 min
    3. garaż blaszany 3×5 m
-      limit 1 000 jaj - 3 000 zl, budowa 8 min
+      limit 3 000 jaj - 3 000 zl, budowa 8 min
    4. ocieplony kontener 20 stóp z regałami
-      limit 2 000 jaj - 10 500 zl, budowa 12 min
+      limit 10 000 jaj - 10 500 zl, budowa 12 min
    5. kontener-chłodnia i silos na paszę
-      limit 4 000 jaj - 30 000 zl, budowa 17 min
+      limit 25 000 jaj - 30 000 zl, budowa 17 min
    6. magazyn z płyty warstwowej 8×10 m i silos 10 t
-      limit 8 000 jaj - 80 000 zl, budowa 23 min
+      limit 60 000 jaj - 80 000 zl, budowa 23 min
    7. hala stalowa 12×15 m z chłodnią
-      limit 15 000 jaj - 200 000 zl, budowa 30 min
+      limit 150 000 jaj - 200 000 zl, budowa 30 min
    8. hala 20×20 m z chłodnią i silosami 2×30 t
-      limit 30 000 jaj - 540 000 zl, budowa 38 min
+      limit 350 000 jaj - 540 000 zl, budowa 38 min
    9. centrum magazynowe 800 m² z sortownią jaj
-      limit 60 000 jaj - 1 000 000 zl, budowa 48 min
+      limit 800 000 jaj - 1 000 000 zl, budowa 48 min
   10. baza paszowa: hala 1500 m², silosy 2×150 t i waga
-      limit 100 000 jaj - 1 800 000 zl, budowa 1 h
+      limit 2 000 000 jaj - 1 800 000 zl, budowa 1 h
 
   Rozbudowa magazynu podnosi limit jaj. Ceny paszy nie zmienia - tansza jest
   tylko wieksza paczka (big-bag). Magazyn zmienia wyglad na poziomie 4 i 7.

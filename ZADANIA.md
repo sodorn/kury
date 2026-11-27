@@ -11,18 +11,14 @@ Zasady:
 - Zrobione pozycje przenosimy do PROJECT_STATE.md i usuwamy stąd.
 - Kolejność etapów: od najmniejszej roboty i największego zysku.
 
-Stan na 27.11.2026: wersja 13.1. Kopia linii 12: gałąź
+Stan na 27.11.2026: wersja 13.2 (magazyny skokami: 200 / 1 000 / 3 000 /
+10 000 / 25 000 / 60 000 / 150 000 / 350 000 / 800 000 / 2 000 000 jaj). Kopia linii 12: gałąź
 `v12.31-final-przed-13` (12.31, commit 36eb94e).
 
 ---------------------------------------------------------------------------
 
 ## ETAP A — małe rzeczy, decyzje już zapadły (ok. 1 sesja)
 
-A1. Magazyny: pojemność rośnie skokami, mniej więcej 1 godzina znoszenia
-    stada typowego dla danego etapu gry. Propozycja do zatwierdzenia:
-    200 / 1 000 / 3 000 / 10 000 / 25 000 / 60 000 / 150 000 / 350 000 /
-    800 000 / 2 000 000 jaj. Ceny bez zmian. Realizm: paleta = ok. 10 800 jaj.
-    Sprawdzić botem, czy gra nie przyspiesza za mocno.
 A2. Ochrona przed bankructwem nieaktywnych: „dopłata z ARiMR” — gdy na
     fermie nie ma ani jednej kury, a pieniędzy nie starcza na 2 kury
     i koguta najtańszej rasy, raz na dobę darmowy zestaw startowy
@@ -31,9 +27,9 @@ A3. Pasza: na razie BEZ zmian zużycia (na jajo w grze kura je już ~3,5 raza
     mniej niż w realu, ok. 43 g vs ok. 150 g). Noc (13.1) tnie zużycie
     o kilka godzin na dobę. Wrócić po tygodniu gry z nocą: jeśli dalej za
     drogo — zmniejszyć 1,5–2 razy (feed_per_hen_minute w balance.json).
-A4. Lis w nocy: kury śpią zamknięte w kurniku. Decyzja właściciela:
-    czy lis w nocy może je dopaść (zamknięty kurnik = bezpiecznie?),
-    czy zostaje jak jest (lis co godzinę, także w nocy).
+A4. Lis w nocy (decyzja 27.11: lis w nocy WCHODZI do kurnika i zabija -
+    lisy atakuja najczesciej w nocy). Mechanika juz tak dziala; do zrobienia
+    tylko wyglad: w nocy lis idzie do drzwi kurnika, a nie na pusty wybieg.
 A5. Noc w interfejsie: ikonka księżyca / napis „Kury śpią do 7:12”
     (godzina wschodu z Daylight), żeby gracz wiedział, czemu wybieg pusty.
 

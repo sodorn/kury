@@ -1971,10 +1971,13 @@ func _test_egg_capacity() -> void:
 		_check(lim > poprzedni, "magazyn %d miesci wiecej jaj niz poprzedni (%d > %d)"
 				% [i + 1, lim, poprzedni])
 		poprzedni = lim
-	# 12.21 (wlasciciel 25.11): limity male - start 200, potem 500, 1000...
-	_check(int(storage.get("egg_capacity", 0)) == 200, "lodowka w piwnicy miesci 200 jaj")
-	_check(int(ups[0].get("egg_capacity", 0)) == 500 and int(ups[1].get("egg_capacity", 0)) == 1000,
-			"mala szopka 500, trzeci poziom 1000")
+	# 13.2 (wlasciciel 27.11): pojemnosc rosnie skokami - 200, 1000, 3000,
+	# 10 000 ... 2 000 000 (ok. godzina znoszenia stada z danego etapu).
+	var skoki := [200, 1000, 3000, 10000, 25000, 60000, 150000, 350000, 800000, 2000000]
+	var jest: Array = [int(storage.get("egg_capacity", 0))]
+	for u: Dictionary in ups:
+		jest.append(int(u.get("egg_capacity", 0)))
+	_check(jest == skoki, "magazyny: %s" % str(jest))
 
 	# Kura przy pelnym magazynie nie dokłada do niego jaj — i o to chodzi.
 	var farm := _fresh_state(["leghorn", "leghorn"], 1000.0)

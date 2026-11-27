@@ -1,6 +1,6 @@
 ==============================================================================
   SYMULATOR HODOWLI KURCZAKOW - DOKUMENTACJA TECHNICZNA
-  gra w wersji 13.1   *   format zapisu w wersji 6   *   Godot 4.7.2
+  gra w wersji 13.2   *   format zapisu w wersji 6   *   Godot 4.7.2
 ==============================================================================
 
   Dokument dla programisty: jak gra jest zbudowana, jak dzialaja mechaniki, co
@@ -956,19 +956,19 @@
 
   MAGAZYN:
     0. lodówka w piwnicy - 200 jaj, 0 zl, 0 min
-    1. mała szopka - 500 jaj, 600 zl, 5 min
-    2. garaż blaszany 3×5 m - 1000 jaj, 3000 zl, 8 min
-    3. ocieplony kontener 20 stóp z regałami - 2000 jaj, 10500 zl, 12 min
-    4. kontener-chłodnia i silos na paszę - 4000 jaj, 30000 zl, 17 min
-    5. magazyn z płyty warstwowej 8×10 m i silos 10 t - 8000 jaj, 80000 zl, 23
+    1. mała szopka - 1000 jaj, 600 zl, 5 min
+    2. garaż blaszany 3×5 m - 3000 jaj, 3000 zl, 8 min
+    3. ocieplony kontener 20 stóp z regałami - 10000 jaj, 10500 zl, 12 min
+    4. kontener-chłodnia i silos na paszę - 25000 jaj, 30000 zl, 17 min
+    5. magazyn z płyty warstwowej 8×10 m i silos 10 t - 60000 jaj, 80000 zl,
+    23 min
+    6. hala stalowa 12×15 m z chłodnią - 150000 jaj, 200000 zl, 30 min
+    7. hala 20×20 m z chłodnią i silosami 2×30 t - 350000 jaj, 540000 zl, 38
     min
-    6. hala stalowa 12×15 m z chłodnią - 15000 jaj, 200000 zl, 30 min
-    7. hala 20×20 m z chłodnią i silosami 2×30 t - 30000 jaj, 540000 zl, 38
+    8. centrum magazynowe 800 m² z sortownią jaj - 800000 jaj, 1000000 zl, 48
     min
-    8. centrum magazynowe 800 m² z sortownią jaj - 60000 jaj, 1000000 zl, 48
-    min
-    9. baza paszowa: hala 1500 m², silosy 2×150 t i waga - 100000 jaj, 1800000
-    zl, 60 min
+    9. baza paszowa: hala 1500 m², silosy 2×150 t i waga - 2000000 jaj,
+    1800000 zl, 60 min
 
   INKUBATOR:
     0. domowy inkubator ze styropianu i żarówki - 9 jaj, 0 zl, 0 min
@@ -1683,5 +1683,5 @@
     limity miejsca i ruchu planu darmowego.
 
 ==============================================================================
-  koniec dokumentu  *  wygenerowano z wersji 13.1
+  koniec dokumentu  *  wygenerowano z wersji 13.2
 ==============================================================================

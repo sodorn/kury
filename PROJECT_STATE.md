@@ -4,7 +4,10 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 11** (wersja 13.1): NOC wedlug slonca nad Polska
+- Aktualny etap: **ETAP 11** (wersja 13.2): magazyny skokami 200 / 1 000 /
+  3 000 / 10 000 / 25 000 / 60 000 / 150 000 / 350 000 / 800 000 / 2 000 000
+  jaj (wlasciciel 27.11). Lis w nocy dalej zabija (decyzja 27.11).
+- Wersja 13.1: NOC wedlug slonca nad Polska
   (core/util/daylight.gd, Daylight.is_night, wysokosc slonca < -0,833 st.
   dla 52,23N 21,01E; Daylight.force do testow, testy i bot ida w dzien).
   W nocy kury nie jedza i glod stoi, dalej znosza (jaja prosto do magazynu),
