@@ -1,0 +1,5505 @@
+[
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "rhode",
+     "egg": 3.09433308346569,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "szabo",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "szabo",
+     "egg": 4.24233301900422,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "marans",
+     "egg": 5.33799991361232,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "araukana",
+     "egg": 2.88799969878917,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "jedwabista",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "serama",
+     "egg": 5.2489998334454,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "brahma",
+     "egg": 6.24399970220879,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "brahma",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "araukana",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "pavlovskaya",
+     "egg": 5.57159322606153,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "feniks",
+     "egg": 10.1673488021484,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 3.34933327914996,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "nagoszyja",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "serama",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "czubatka",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "pavlovskaya",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "feniks",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "deathlayer",
+     "egg": 6.69966665276658,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "deathlayer",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "onagadori",
+     "egg": 10.0053333076312,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "onagadori",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    }
+   ],
+   "chicks": [
+    {
+     "breed": "czubatka",
+     "grown": 7.55466667735531,
+     "rooster": true
+    },
+    {
+     "breed": "czubatka",
+     "grown": 7.48766668562719,
+     "rooster": true
+    }
+   ],
+   "construction": {},
+   "coop_level": 9,
+   "corpses": [
+    {
+     "breed": "marans",
+     "cause": "fox",
+     "elapsed": 181.342666607035,
+     "x": 203.399429321289,
+     "y": 1076.08557128906
+    },
+    {
+     "breed": "araukana",
+     "cause": "fox",
+     "elapsed": 181.342666607035,
+     "x": 482.078704833984,
+     "y": 1225.71997070312
+    },
+    {
+     "breed": "jedwabista",
+     "cause": "fox",
+     "elapsed": 181.342666607035,
+     "x": 845.160339355469,
+     "y": 1256.49279785156
+    },
+    {
+     "breed": "feniks",
+     "cause": "fox",
+     "elapsed": 181.342666607035,
+     "x": 237.42350769043,
+     "y": 1430.24523925781
+    },
+    {
+     "breed": "jedwabista",
+     "cause": "fox",
+     "elapsed": 181.342666607035,
+     "x": 505.678588867188,
+     "y": 990.933410644531
+    },
+    {
+     "breed": "czubatka",
+     "cause": "fox",
+     "elapsed": 181.342666607035,
+     "x": 899.043884277344,
+     "y": 1329.88391113281
+    },
+    {
+     "breed": "nagoszyja",
+     "cause": "fox",
+     "elapsed": 11.5486666349941,
+     "x": 169.980972290039,
+     "y": 1129.55908203125
+    },
+    {
+     "breed": "jedwabista",
+     "cause": "fox",
+     "elapsed": 9.14900000798601,
+     "x": 509.024230957031,
+     "y": 1025.73168945312
+    }
+   ],
+   "day_fraction": 0.96319111055949,
+   "days": 3,
+   "disease_calm": 38091.044945954,
+   "disease_timer": 0.0,
+   "dog_age": 6461.64100003238,
+   "dog_level": 0,
+   "dog_life": 1652634.18998148,
+   "egg_ages": {
+    "araukana": [
+     [
+      17,
+      354.172999858856
+     ]
+    ],
+    "brahma": [
+     [
+      116,
+      3078.49602002741
+     ]
+    ],
+    "czubatka": [
+     [
+      3,
+      134.736999988556
+     ]
+    ],
+    "deathlayer": [
+     [
+      39,
+      2315.15718002677
+     ]
+    ],
+    "feniks": [
+     [
+      130,
+      3059.21978669406
+     ]
+    ],
+    "jedwabista": [
+     [
+      380,
+      3151.74570669414
+     ]
+    ],
+    "leghorn": [
+     [
+      13,
+      2224.5120000839
+     ]
+    ],
+    "nagoszyja": [
+     [
+      8,
+      138.68700003624
+     ]
+    ],
+    "onagadori": [
+     [
+      2,
+      59.4589998722076
+     ]
+    ],
+    "pavlovskaya": [
+     [
+      38,
+      3070.78552669407
+     ]
+    ],
+    "rhode": [
+     [
+      12,
+      135.886999845505
+     ]
+    ],
+    "serama": [
+     [
+      6,
+      138.736999988556
+     ]
+    ],
+    "sultanka": [
+     [
+      1,
+      59.4589998722076
+     ]
+    ],
+    "szabo": [
+     [
+      20,
+      354.172999858856
+     ]
+    ]
+   },
+   "eggs": {
+    "araukana": 17,
+    "brahma": 116,
+    "czubatka": 3,
+    "deathlayer": 39,
+    "feniks": 130,
+    "jedwabista": 380,
+    "leghorn": 13,
+    "nagoszyja": 8,
+    "onagadori": 2,
+    "pavlovskaya": 38,
+    "rhode": 12,
+    "serama": 6,
+    "sultanka": 1,
+    "szabo": 20
+   },
+   "eggs_on_ground": [
+    "feniks",
+    "czubatka",
+    "szabo",
+    "leghorn",
+    "czubatka",
+    "deathlayer",
+    "nagoszyja",
+    "rhode",
+    "araukana",
+    "pavlovskaya",
+    "leghorn",
+    "brahma",
+    "szabo",
+    "jedwabista",
+    "serama",
+    "rhode",
+    "leghorn",
+    "feniks",
+    "onagadori",
+    "araukana",
+    "szabo",
+    "rhode",
+    "leghorn",
+    "deathlayer",
+    "brahma",
+    "pavlovskaya",
+    "serama",
+    "szabo",
+    "leghorn",
+    "rhode",
+    "araukana"
+   ],
+   "event_dry": {
+    "disease": 0.0,
+    "fox": 0.0
+   },
+   "feed": 41252.6027741202,
+   "fox_hand_scared": false,
+   "fox_pending": 0,
+   "fox_roll_timer": 1359.35899970606,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 0.0,
+   "incubating": [
+    {
+     "breed": "deathlayer",
+     "count": 1,
+     "elapsed": 280.802833290646
+    },
+    {
+     "breed": "deathlayer",
+     "count": 1,
+     "elapsed": 280.704166622718
+    },
+    {
+     "breed": "deathlayer",
+     "count": 1,
+     "elapsed": 280.614833247432
+    },
+    {
+     "breed": "deathlayer",
+     "count": 1,
+     "elapsed": 280.536833337721
+    },
+    {
+     "breed": "feniks",
+     "count": 1,
+     "elapsed": 280.392166665982
+    },
+    {
+     "breed": "feniks",
+     "count": 1,
+     "elapsed": 280.292833220761
+    },
+    {
+     "breed": "feniks",
+     "count": 1,
+     "elapsed": 280.204166622768
+    },
+    {
+     "breed": "feniks",
+     "count": 1,
+     "elapsed": 280.070166639312
+    },
+    {
+     "breed": "feniks",
+     "count": 1,
+     "elapsed": 279.981499882373
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 279.825499904005
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 279.736833306012
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 279.648166549073
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 279.54816664445
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 279.458833269164
+    }
+   ],
+   "incubator_level": 3,
+   "intro_seen": true,
+   "money": 26645.7,
+   "outbreak_breed": "",
+   "outbreak_dead": 0,
+   "outbreak_left": 0,
+   "outbreak_on": false,
+   "outbreak_saved": 0,
+   "outbreak_survive": 0.0,
+   "outbreak_timer": 0.0,
+   "rooster_hints": {
+    "brahma": 1.0,
+    "czubatka": 1,
+    "deathlayer": 2,
+    "feniks": 2.0,
+    "marans": 1.0,
+    "nagoszyja": 1,
+    "onagadori": 1,
+    "rhode": 1.0,
+    "serama": 1.0,
+    "sultanka": 1
+   },
+   "saved_at": 1795783369.565,
+   "storage_level": 9,
+   "unlocked": [
+    "leghorn",
+    "rhode",
+    "szabo",
+    "nagoszyja",
+    "marans",
+    "araukana",
+    "jedwabista",
+    "serama",
+    "brahma",
+    "czubatka",
+    "pavlovskaya",
+    "feniks",
+    "deathlayer",
+    "sultanka",
+    "onagadori"
+   ],
+   "version": 6,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "000000",
+  "updated_at": 1795783369
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "leghorn",
+     "egg": 9.76964443390863,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 9.76964443390863,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 13.1163255017296,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    }
+   ],
+   "chicks": [],
+   "coop_level": 0,
+   "corpses": [],
+   "day_fraction": 0.590442239876921,
+   "days": 48,
+   "eggs": {
+    "leghorn": 4
+   },
+   "eggs_on_ground": [
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn"
+   ],
+   "feed": 49.4366582957931,
+   "fox_pending": 0,
+   "fox_timer": 28410.5837627931,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 0.0,
+   "incubating": [],
+   "incubator_level": 0,
+   "money": 5.0,
+   "saved_at": 1795143211.493,
+   "storage_level": 0,
+   "unlocked": [
+    "leghorn"
+   ],
+   "version": 4,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "123456",
+  "updated_at": 1795143211
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "rhode",
+     "egg": 1.32733302333443,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.586332997423299,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 4.58233298540387,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 4.0836663716396,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.67099965351572,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.45599965989514,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.40499970059035,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.30633303266194,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.25566638253067,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.21299970887467,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.10633298499821,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.05299970253288,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 2.79966637240393,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 2.74066635715109,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 2.63666634508171,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 2.57833302764883,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 2.53033300985172,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.0829996950742758,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.0829996950742758,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.67033304436891,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.1803330348812,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.08633301327398,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.03599967231631,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 4.0403329999096,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 11.4493330671929,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 10.4636663949026,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.42366638383979,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.42366638383979,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.42366638383979,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.42366638383979,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 1.42366638384005,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 1.42366638384005,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 1.42366638384005,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 1.42366638384005,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 1.42366638384005,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.423666383839596,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.423666383839596,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.423666383839596,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.423666383839596,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.423666383839596,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.423666383839596,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.423666383839596,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.423666383839596,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 4.02366638383983,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.42833302595211,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.42833302595211,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.42833302595211,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.42833302595211,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.42833302595211,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.42833302595211,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.42833302595211,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 3.42833302595211,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 8.22833302594966,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 1.82833302594969,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 7.22833302594975,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 7.22833302594975,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 4.42833302594972,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 4.42833302594972,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 4.42833302594972,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 4.42833302594972,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 10.4283330259497,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.675473024938876,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.675473024938876,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.675473024938876,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.675473024938876,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.675473024938876,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.675473024938876,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.675473024938876,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 4.43484646608912,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 4.43484646608912,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 4.43484646608912,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 4.43484646608912,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 7.18641980545415,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 7.18641980545415,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 7.18641980545415,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 7.18641980545415,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 1.40878647400566,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 7.43115314255734,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 7.43115314255734,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 7.43115314255734,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 7.43115314255734,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 7.43115314255734,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 11.4361464830533,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 11.4361464830533,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 11.4361464830533,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 11.4361464830533,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 11.4361464830533,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 11.4361464830533,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 11.4361464830533,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 11.4361464830533,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 11.4361464830533,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 11.4361464830533,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 11.4361464830533,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 11.6808798201565,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 11.6808798201565,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "sultanka",
+     "egg": 11.6808798201565,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    }
+   ],
+   "chicks": [],
+   "construction": {},
+   "coop_level": 6,
+   "corpses": [],
+   "day_fraction": 0.0629655266826866,
+   "days": 289,
+   "disease_calm": 8066.18389423475,
+   "disease_timer": 0.0,
+   "dog_age": 7652.76699972166,
+   "dog_level": 2,
+   "dog_life": 695299.689500021,
+   "egg_ages": {
+    "rhode": [
+     [
+      19,
+      3.97299981117249
+     ]
+    ]
+   },
+   "eggs": {
+    "rhode": 19
+   },
+   "eggs_on_ground": [
+    "sultanka",
+    "sultanka",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode"
+   ],
+   "event_dry": {
+    "disease": 264.84999905459,
+    "fox": 12.5163333403468
+   },
+   "feed": 12084.9838944927,
+   "fox_hand_scared": false,
+   "fox_pending": 0,
+   "fox_roll_timer": 2057.89277979857,
+   "fox_visit_left": 0.0,
+   "guard_level": 4,
+   "hunger_seconds": 0.0,
+   "incubating": [
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 186.643666646095
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 186.587999960997
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 186.538333238386
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 186.482999941934
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 186.433333298796
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 186.382666569192
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 186.3333333147
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 186.277666629602
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 186.222333253676
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 186.172333301365
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 186.122666578754
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 186.072666626443
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 186.022999903833
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.96766660738
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.917666575596
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.867999932458
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.812333247359
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.759999971888
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.706666609949
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.65166662267
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.600333274719
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.551999947749
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.502333304611
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.446999928686
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.396999976374
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.313666643049
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.25799995795
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.208666623986
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.153333248061
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.102999907103
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.053333263966
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 185.003666620828
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 173.693666599706
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 173.627333305798
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 173.560999932417
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 173.49866658701
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 173.449666641692
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 173.388999921626
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 173.33199992036
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 173.277333242254
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 173.222999952796
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 173.161999923556
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 173.117999933733
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 173.062333248634
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 173.006999952181
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 172.951666576256
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 172.89599997063
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 172.84633324802
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 172.785666607426
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 172.729999922327
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 172.674666625875
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 172.613666596635
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 172.552666646868
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 172.491999926802
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 172.436333241703
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 172.375999910283
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 172.314333262696
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 172.257666570604
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 172.203666590318
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 172.148333293866
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 172.092999917941
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 172.037333312315
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 171.976666592248
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 171.920999907149
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 171.854999922415
+    },
+    {
+     "breed": "sultanka",
+     "count": 1,
+     "elapsed": 171.793666584001
+    }
+   ],
+   "incubator_level": 7,
+   "intro_seen": true,
+   "money": 50450.1,
+   "outbreak_breed": "",
+   "outbreak_dead": 0,
+   "outbreak_left": 0,
+   "outbreak_on": false,
+   "outbreak_saved": 0,
+   "outbreak_survive": 0.0,
+   "outbreak_timer": 0.0,
+   "rooster_hints": {
+    "araukana": 1.0,
+    "brahma": 1.0,
+    "czubatka": 1.0,
+    "deathlayer": 1.0,
+    "feniks": 1.0,
+    "jedwabista": 1.0,
+    "marans": 1.0,
+    "nagoszyja": 1.0,
+    "pavlovskaya": 1.0,
+    "serama": 1.0,
+    "sultanka": 2.0,
+    "szabo": 1.0
+   },
+   "saved_at": 1795775009.829,
+   "storage_level": 4,
+   "unlocked": [
+    "leghorn",
+    "rhode",
+    "sultanka",
+    "deathlayer",
+    "feniks",
+    "pavlovskaya",
+    "czubatka",
+    "szabo",
+    "nagoszyja",
+    "marans",
+    "araukana",
+    "jedwabista",
+    "serama",
+    "brahma"
+   ],
+   "version": 6,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "130090",
+  "updated_at": 1795775009
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "leghorn",
+     "egg": 1.33433333979348,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 1.33433333979348,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 1.33433333979348,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    }
+   ],
+   "chicks": [],
+   "coop_level": 0,
+   "corpses": [],
+   "day_fraction": 0.00889055556632243,
+   "days": 0,
+   "eggs": {},
+   "eggs_on_ground": [
+    "leghorn",
+    "leghorn",
+    "leghorn"
+   ],
+   "event_dry": {},
+   "feed": 19.8790884442992,
+   "fox_pending": 0,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 0.0,
+   "incubating": [],
+   "incubator_level": 0,
+   "intro_seen": true,
+   "money": 150.0,
+   "saved_at": 1795254709.382,
+   "storage_level": 0,
+   "unlocked": [],
+   "version": 5,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "131090",
+  "updated_at": 1795254709
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "leghorn",
+     "egg": 0.0186667601267496,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 0.0186667601267496,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 0.0186667601267496,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    }
+   ],
+   "chicks": [],
+   "coop_level": 0,
+   "corpses": [],
+   "day_fraction": 0.0133644446002112,
+   "days": 0,
+   "eggs": {},
+   "eggs_on_ground": [
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn"
+   ],
+   "event_dry": {},
+   "feed": 19.8182435534372,
+   "fox_pending": 0,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 0.0,
+   "incubating": [],
+   "incubator_level": 0,
+   "intro_seen": true,
+   "money": 150.0,
+   "saved_at": 1795218139.441,
+   "storage_level": 0,
+   "unlocked": [],
+   "version": 5,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "187265",
+  "updated_at": 1795218139
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "nagoszyja",
+     "egg": 2.56066518767879,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "nagoszyja",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "nagoszyja",
+     "egg": 2.56066518767879,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "marans",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "marans",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "marans",
+     "egg": 5.96066518767859,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "marans",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "marans",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "araukana",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "araukana",
+     "egg": 6.36066518767929,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "araukana",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "jedwabista",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "jedwabista",
+     "egg": 2.80333329504501,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    }
+   ],
+   "chicks": [],
+   "construction": {},
+   "coop_level": 2,
+   "corpses": [],
+   "day_fraction": 0.320954994591986,
+   "days": 53,
+   "disease_calm": 0.0,
+   "disease_timer": 7.08199957774596,
+   "dog_age": 0.0,
+   "dog_level": 0,
+   "dog_life": 0.0,
+   "egg_ages": {
+    "araukana": [
+     [
+      1,
+      15.9509999752045
+     ]
+    ],
+    "jedwabista": [
+     [
+      2,
+      16.5999999046326
+     ]
+    ],
+    "marans": [
+     [
+      1,
+      16.5999999046326
+     ]
+    ],
+    "nagoszyja": [
+     [
+      4,
+      16.5999999046326
+     ]
+    ]
+   },
+   "eggs": {
+    "araukana": 1,
+    "jedwabista": 2,
+    "marans": 1,
+    "nagoszyja": 4
+   },
+   "eggs_on_ground": [],
+   "event_dry": {
+    "disease": 0.0,
+    "fox": 0.0
+   },
+   "feed": 8101.91997075522,
+   "fox_hand_scared": false,
+   "fox_pending": 0,
+   "fox_roll_timer": 1837.08199574674,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 0.0,
+   "incubating": [
+    {
+     "breed": "araukana",
+     "count": 1,
+     "elapsed": 88.1216666213005
+    },
+    {
+     "breed": "araukana",
+     "count": 1,
+     "elapsed": 87.9381665698204
+    },
+    {
+     "breed": "araukana",
+     "count": 1,
+     "elapsed": 87.7796666137052
+    },
+    {
+     "breed": "araukana",
+     "count": 1,
+     "elapsed": 87.6216666213503
+    },
+    {
+     "breed": "araukana",
+     "count": 1,
+     "elapsed": 87.4796665422095
+    },
+    {
+     "breed": "araukana",
+     "count": 1,
+     "elapsed": 87.3211665860943
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 87.0971666090048
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 86.9716665260477
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 86.8806665651574
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 86.7701665871029
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 86.6801665537333
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 86.5801665299014
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 86.4796665423092
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 86.4051665776026
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 86.3216665499544
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 86.2381666415154
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 86.1716665738112
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 86.0956665986143
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 86.0306665414003
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 85.9551665299637
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 85.8886665814688
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 85.8131665700322
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 85.7466666215372
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 85.671666573861
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 85.5386665576618
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 85.4631665462252
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 85.3966665977303
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 85.3221666330237
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 85.2546666377988
+    },
+    {
+     "breed": "marans",
+     "count": 1,
+     "elapsed": 85.1886665338549
+    },
+    {
+     "breed": "araukana",
+     "count": 1,
+     "elapsed": 84.9136665577241
+    },
+    {
+     "breed": "araukana",
+     "count": 1,
+     "elapsed": 84.8381665462876
+    },
+    {
+     "breed": "araukana",
+     "count": 1,
+     "elapsed": 84.7721665615529
+    }
+   ],
+   "incubator_level": 5,
+   "intro_seen": true,
+   "money": 7211.7,
+   "outbreak_breed": "",
+   "outbreak_dead": 0,
+   "outbreak_left": 0,
+   "outbreak_on": false,
+   "outbreak_saved": 0,
+   "outbreak_survive": 0.0,
+   "outbreak_timer": 0.0,
+   "rooster_hints": {
+    "araukana": 1.0,
+    "jedwabista": 1.0,
+    "marans": 2.0,
+    "nagoszyja": 3.0,
+    "rhode": 2.0,
+    "szabo": 3.0
+   },
+   "saved_at": 1795776239.75,
+   "storage_level": 2,
+   "unlocked": [
+    "leghorn",
+    "rhode",
+    "szabo",
+    "nagoszyja",
+    "marans",
+    "araukana",
+    "jedwabista"
+   ],
+   "version": 6,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "272180",
+  "updated_at": 1795776239
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "leghorn",
+     "egg": 2.12633366994008,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 0.62300033993595,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 0.339333649773673,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    }
+   ],
+   "chicks": [
+    {
+     "breed": "leghorn",
+     "grown": 10.9796669849145,
+     "rooster": true
+    },
+    {
+     "breed": "leghorn",
+     "grown": 10.2723336395721,
+     "rooster": false
+    },
+    {
+     "breed": "leghorn",
+     "grown": 10.0886670129781,
+     "rooster": true
+    }
+   ],
+   "construction": {},
+   "coop_level": 0,
+   "corpses": [],
+   "day_fraction": 0.224602593128776,
+   "days": 0,
+   "disease_calm": 0.0,
+   "disease_timer": 0.0,
+   "dog_level": 0,
+   "egg_ages": {
+    "leghorn": [
+     [
+      7,
+      1.42000007629395
+     ]
+    ]
+   },
+   "eggs": {
+    "leghorn": 7
+   },
+   "eggs_on_ground": [
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn"
+   ],
+   "event_dry": {
+    "disease": 0.0,
+    "fox": 0.0
+   },
+   "feed": 34.6706222917819,
+   "fox_hand_scared": false,
+   "fox_pending": 0,
+   "fox_roll_timer": 0.0,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 0.0,
+   "incubating": [
+    {
+     "breed": "leghorn",
+     "count": 1,
+     "elapsed": 9.73200036542069
+    }
+   ],
+   "incubator_level": 0,
+   "intro_seen": true,
+   "money": 2.59999999999998,
+   "outbreak_breed": "",
+   "outbreak_dead": 0,
+   "outbreak_left": 0,
+   "outbreak_on": false,
+   "outbreak_saved": 0,
+   "outbreak_survive": 0.0,
+   "outbreak_timer": 0.0,
+   "rooster_hints": {
+    "leghorn": 1.0
+   },
+   "saved_at": 1795720650.424,
+   "storage_level": 0,
+   "unlocked": [
+    "leghorn"
+   ],
+   "version": 6,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "281577",
+  "updated_at": 1795720650
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "leghorn",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    }
+   ],
+   "chicks": [],
+   "coop_level": 0,
+   "corpses": [],
+   "day_fraction": 0.826572138058661,
+   "days": 145,
+   "disease_timer": 0.0,
+   "dog_level": 0,
+   "egg_ages": {},
+   "eggs": {},
+   "eggs_on_ground": [],
+   "event_dry": {
+    "disease": 235.703998720614,
+    "fox": 35.7366654038073
+   },
+   "feed": 0.0,
+   "fox_hand_scared": false,
+   "fox_pending": 0,
+   "fox_roll_timer": 0.0,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 23393.4049553255,
+   "incubating": [],
+   "incubator_level": 1,
+   "intro_seen": true,
+   "money": 201.0,
+   "rooster_hints": {},
+   "saved_at": 1795532703.0322,
+   "storage_level": 0,
+   "unlocked": [
+    "nagoszyja",
+    "marans",
+    "leghorn"
+   ],
+   "version": 6,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "327733",
+  "updated_at": 1795532703
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "leghorn",
+     "egg": 3.59333332343724,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 3.59333332343724,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 3.59333332343724,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    }
+   ],
+   "chicks": [],
+   "coop_level": 0,
+   "corpses": [],
+   "day_fraction": 0.00598888887239541,
+   "days": 0,
+   "eggs": {},
+   "eggs_on_ground": [],
+   "event_dry": {},
+   "feed": 19.9185511113358,
+   "fox_pending": 0,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 0.0,
+   "incubating": [],
+   "incubator_level": 0,
+   "intro_seen": true,
+   "money": 150.0,
+   "saved_at": 1795256771.909,
+   "storage_level": 0,
+   "unlocked": [],
+   "version": 5,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "367990",
+  "updated_at": 1795256771
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "leghorn",
+     "egg": 3.11913832027516,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 3.11913832027516,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 3.0,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 3.0,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    }
+   ],
+   "chicks": [],
+   "coop_level": 0,
+   "corpses": [],
+   "day_fraction": 0.289473616678396,
+   "days": 0,
+   "disease_timer": 0.0,
+   "dog_level": 0,
+   "egg_ages": {
+    "leghorn": [
+     [
+      128,
+      388.695095099156
+     ]
+    ]
+   },
+   "eggs": {
+    "leghorn": 131
+   },
+   "eggs_on_ground": [
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn"
+   ],
+   "event_dry": {},
+   "feed": 0.0,
+   "fox_hand_scared": false,
+   "fox_pending": 0,
+   "fox_roll_timer": 0.0,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 6.56503168676212,
+   "incubating": [],
+   "incubator_level": 1,
+   "intro_seen": true,
+   "money": 99890.5,
+   "rooster_hints": {},
+   "saved_at": 1795524766.02199,
+   "storage_level": 0,
+   "unlocked": [
+    "leghorn",
+    "rhode"
+   ],
+   "version": 6,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "399975",
+  "updated_at": 1795524766
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "leghorn",
+     "egg": 3.10056066512056,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 3.10056066512056,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 3.0,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 3.0,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    }
+   ],
+   "chicks": [],
+   "coop_level": 0,
+   "corpses": [],
+   "day_fraction": 0.288219916157264,
+   "days": 0,
+   "disease_timer": 0.0,
+   "dog_level": 0,
+   "egg_ages": {
+    "leghorn": [
+     [
+      128,
+      386.494167126363
+     ]
+    ]
+   },
+   "eggs": {
+    "leghorn": 131
+   },
+   "eggs_on_ground": [
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn"
+   ],
+   "event_dry": {},
+   "feed": 0.0,
+   "fox_hand_scared": false,
+   "fox_pending": 0,
+   "fox_roll_timer": 0.0,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 5.83138902923762,
+   "incubating": [],
+   "incubator_level": 1,
+   "intro_seen": true,
+   "money": 99890.5,
+   "rooster_hints": {},
+   "saved_at": 1795532725.25367,
+   "storage_level": 0,
+   "unlocked": [
+    "leghorn",
+    "rhode"
+   ],
+   "version": 6,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "439267",
+  "updated_at": 1795532725
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 4.06097627782642,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 3.89497615003407,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 2.64497615003396,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 13.3269761671999,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 5.55897627973386,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 4.9599760642034,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 6.17697607183282,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 7.42697607183272,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 7.84397612714586,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 9.4939762225131,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 10.8269761671998,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 10.4609762301423,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 9.87597619199552,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 9.09397612714573,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 8.02697621488391,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.07597623967927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 4.67597623967943,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 7.47597623967937,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 7.47597623967937,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 11.075976239679,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 11.075976239679,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.06319767952312,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.06319767952312,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.06319767952312,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.06319767952312,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 1.06319767952312,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 11.8054932353474,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 11.8054932353474,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 11.8054932353474,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 3.35033324728346,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 3.35033324728346,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 3.35033324728346,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 3.35033324728346,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 3.35033324728346,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 0.968999950951379,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 0.968999950951379,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 0.968999950951379,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 0.968999950951379,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 0.968999950951379,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 0.968999950951379,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 0.968999950951379,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 0.968999950951379,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 0.968999950951379,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 0.968999950951379,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 0.968999950951379,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 0.968999950951379,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 0.968999950951379,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 0.968999950951379,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "cemani",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    }
+   ],
+   "chicks": [],
+   "construction": {
+    "coop": [
+     3269.46300005913,
+     3600.0
+    ],
+    "storage": [
+     1454.6289999485,
+     1800.0
+    ]
+   },
+   "coop_level": 8,
+   "corpses": [
+    {
+     "breed": "cemani",
+     "cause": "hunger",
+     "elapsed": 230.052333331935,
+     "x": 379.167633056641,
+     "y": 1119.03918457031
+    }
+   ],
+   "day_fraction": 0.383311506946656,
+   "days": 197,
+   "disease_calm": 37051.3746722638,
+   "disease_timer": 0.0,
+   "dog_age": 42104.5920002458,
+   "dog_level": 2,
+   "dog_life": 596533.527123739,
+   "egg_ages": {
+    "cemani": [
+     [
+      500,
+      248.015000104904
+     ]
+    ]
+   },
+   "eggs": {
+    "cemani": 500
+   },
+   "eggs_on_ground": [
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani",
+    "cemani"
+   ],
+   "event_dry": {
+    "disease": 0.0,
+    "fox": 0.0
+   },
+   "feed": 14293.3216847955,
+   "fox_hand_scared": false,
+   "fox_pending": 0,
+   "fox_roll_timer": 3510.09199721005,
+   "fox_visit_left": 0.0,
+   "guard_level": 4,
+   "hunger_seconds": 0.0,
+   "incubating": [
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 201.978333294056
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 201.922999997603
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 201.867333312505
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 201.78399997918
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 201.72299994994
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 201.667333344314
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 201.611999968389
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 201.551000018622
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 201.489666680208
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 201.428666650968
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 201.361999968414
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 201.30066663
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 201.239333291587
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 201.183999995134
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 201.128333310036
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 201.062000016127
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 201.006333331028
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 200.955999990071
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 200.894999960831
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 200.839666664379
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 200.778666635139
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 200.72299995004
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 200.656333346958
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 200.600999971033
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 200.539333323446
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 200.483999947521
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 200.428666651068
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 200.378333310111
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 200.328666666973
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 200.2726666727
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 200.222666640916
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 200.167333344464
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 200.11733331268
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 200.061666627581
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 200.01166667527
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 199.961999952659
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 199.911666691174
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 199.856000006076
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 199.806333283465
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 199.761666675295
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 199.700666646055
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 199.650666614271
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 199.595000008645
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 199.533666670231
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 199.478333294306
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 199.42266668868
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 199.36166665944
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 199.305999974341
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 199.250666677889
+    },
+    {
+     "breed": "cemani",
+     "count": 1,
+     "elapsed": 199.19499999279
+    }
+   ],
+   "incubator_level": 6,
+   "intro_seen": true,
+   "money": 112545.6,
+   "outbreak_breed": "",
+   "outbreak_dead": 0,
+   "outbreak_left": 0,
+   "outbreak_on": false,
+   "outbreak_saved": 0,
+   "outbreak_survive": 0.0,
+   "outbreak_timer": 0.0,
+   "rooster_hints": {},
+   "saved_at": 1795764013.368,
+   "storage_level": 5,
+   "unlocked": [
+    "rhode",
+    "marans",
+    "araukana",
+    "leghorn",
+    "feniks",
+    "onagadori",
+    "cemani"
+   ],
+   "version": 6,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "586243",
+  "updated_at": 1795764013
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "leghorn",
+     "egg": 17.2759015466478,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 17.2759015466478,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    }
+   ],
+   "chicks": [
+    {
+     "breed": "leghorn",
+     "grown": 70.617289231278
+    }
+   ],
+   "coop_level": 0,
+   "corpses": [],
+   "day_fraction": 0.536286001731506,
+   "days": 48,
+   "eggs": {
+    "leghorn": 4
+   },
+   "eggs_on_ground": [
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn"
+   ],
+   "feed": 49.5610310324165,
+   "fox_pending": 0,
+   "fox_timer": 28443.0775056803,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 0.0,
+   "incubating": [],
+   "incubator_level": 0,
+   "money": 5.0,
+   "saved_at": 1795143179.447,
+   "storage_level": 0,
+   "unlocked": [
+    "leghorn"
+   ],
+   "version": 4,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "586400",
+  "updated_at": 1795143179
+ },
+ {
+  "payload": {
+   "chickens": [],
+   "chicks": [],
+   "coop_level": 0,
+   "corpses": [
+    {
+     "breed": "rhode",
+     "cause": "disease",
+     "elapsed": 86.8260001254698,
+     "x": 605.457092285156,
+     "y": 1436.20275878906
+    },
+    {
+     "breed": "leghorn",
+     "cause": "disease",
+     "elapsed": 86.8260001254698,
+     "x": 364.091125488281,
+     "y": 1109.62060546875
+    },
+    {
+     "breed": "szabo",
+     "cause": "disease",
+     "elapsed": 86.8260001254698,
+     "x": 840.783874511719,
+     "y": 1321.48901367188
+    },
+    {
+     "breed": "leghorn",
+     "cause": "disease",
+     "elapsed": 86.8260001254698,
+     "x": 931.4169921875,
+     "y": 1429.92919921875
+    }
+   ],
+   "day_fraction": 0.521266660863809,
+   "days": 60,
+   "disease_timer": 0.0,
+   "dog_level": 0,
+   "egg_ages": {
+    "rhode": [
+     [
+      175,
+      237.03600025177
+     ]
+    ],
+    "szabo": [
+     [
+      39,
+      237.03600025177
+     ]
+    ]
+   },
+   "eggs": {
+    "rhode": 175,
+    "szabo": 39
+   },
+   "eggs_on_ground": [
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "szabo",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "szabo",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "rhode",
+    "szabo",
+    "rhode",
+    "rhode"
+   ],
+   "event_dry": {
+    "disease": 182.980331654948,
+    "fox": 112.980331654948
+   },
+   "feed": 0.0,
+   "fox_hand_scared": false,
+   "fox_pending": 0,
+   "fox_roll_timer": 0.0,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 1653.60366526254,
+   "incubating": [],
+   "incubator_level": 2,
+   "intro_seen": true,
+   "money": 15.32,
+   "saved_at": 1795398176.343,
+   "storage_level": 1,
+   "unlocked": [
+    "rhode",
+    "szabo",
+    "leghorn"
+   ],
+   "version": 6,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "657722",
+  "updated_at": 1795398176
+ },
+ {
+  "payload": {
+   "chickens": [],
+   "chicks": [],
+   "coop_level": 0,
+   "corpses": [],
+   "day_fraction": 0.316189436063588,
+   "days": 85,
+   "disease_timer": 0.0,
+   "dog_level": 0,
+   "egg_ages": {},
+   "eggs": {},
+   "eggs_on_ground": [],
+   "event_dry": {
+    "disease": 182.980331654948,
+    "fox": 112.980331654948
+   },
+   "feed": 0.0,
+   "fox_hand_scared": false,
+   "fox_pending": 0,
+   "fox_roll_timer": 0.0,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 1653.60366526254,
+   "incubating": [
+    {
+     "breed": "szabo",
+     "count": 1,
+     "elapsed": 0.0
+    },
+    {
+     "breed": "rhode",
+     "count": 1,
+     "elapsed": 0.0
+    },
+    {
+     "breed": "rhode",
+     "count": 1,
+     "elapsed": 0.0
+    },
+    {
+     "breed": "rhode",
+     "count": 1,
+     "elapsed": 0.0
+    },
+    {
+     "breed": "rhode",
+     "count": 1,
+     "elapsed": 0.0
+    },
+    {
+     "breed": "rhode",
+     "count": 1,
+     "elapsed": 0.0
+    },
+    {
+     "breed": "rhode",
+     "count": 1,
+     "elapsed": 0.0
+    },
+    {
+     "breed": "rhode",
+     "count": 1,
+     "elapsed": 0.0
+    }
+   ],
+   "incubator_level": 2,
+   "intro_seen": true,
+   "money": 15.32,
+   "saved_at": 1795442807.224,
+   "storage_level": 1,
+   "unlocked": [
+    "rhode",
+    "szabo",
+    "leghorn"
+   ],
+   "version": 6,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "659722",
+  "updated_at": 1795442807
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "nagoszyja",
+     "egg": 0.572332669551762,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "marans",
+     "egg": 4.82066618406868,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "czubatka",
+     "egg": 5.13633292915732,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 2.71299960882608,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.550666590972211,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.550666590972211,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "nagoszyja",
+     "egg": 0.102999902148201,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "marans",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "marans",
+     "egg": 0.203000004080211,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "marans",
+     "egg": 0.203000004080211,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "serama",
+     "egg": 3.40300000408196,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "serama",
+     "egg": 3.40300000408196,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "serama",
+     "egg": 3.40300000408196,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "serama",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "brahma",
+     "egg": 0.20300000407927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "brahma",
+     "egg": 0.20300000407927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "brahma",
+     "egg": 0.20300000407927,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "brahma",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "czubatka",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "pavlovskaya",
+     "egg": 9.00300000407921,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "pavlovskaya",
+     "egg": 9.00300000407921,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "pavlovskaya",
+     "egg": 9.00300000407921,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "pavlovskaya",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "nagoszyja",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    }
+   ],
+   "chicks": [
+    {
+     "breed": "jedwabista",
+     "grown": 53.5719999418752,
+     "rooster": false
+    },
+    {
+     "breed": "jedwabista",
+     "grown": 52.1386666245796,
+     "rooster": true
+    },
+    {
+     "breed": "jedwabista",
+     "grown": 50.8613332856517,
+     "rooster": true
+    },
+    {
+     "breed": "jedwabista",
+     "grown": 49.5943333258325,
+     "rooster": true
+    },
+    {
+     "breed": "jedwabista",
+     "grown": 48.394666666915,
+     "rooster": true
+    },
+    {
+     "breed": "jedwabista",
+     "grown": 47.2046666098134,
+     "rooster": true
+    },
+    {
+     "breed": "jedwabista",
+     "grown": 45.4063332830175,
+     "rooster": true
+    },
+    {
+     "breed": "jedwabista",
+     "grown": 45.1726666246393,
+     "rooster": true
+    },
+    {
+     "breed": "serama",
+     "grown": 26.8293333026754,
+     "rooster": true
+    },
+    {
+     "breed": "serama",
+     "grown": 25.3679999485074,
+     "rooster": false
+    },
+    {
+     "breed": "serama",
+     "grown": 24.0849999562651,
+     "rooster": true
+    },
+    {
+     "breed": "serama",
+     "grown": 22.8073333081639,
+     "rooster": true
+    },
+    {
+     "breed": "serama",
+     "grown": 21.5959999539709,
+     "rooster": true
+    },
+    {
+     "breed": "serama",
+     "grown": 20.3963332950536,
+     "rooster": false
+    },
+    {
+     "breed": "serama",
+     "grown": 18.9299999853909,
+     "rooster": false
+    },
+    {
+     "breed": "serama",
+     "grown": 18.785666622826,
+     "rooster": true
+    }
+   ],
+   "construction": {},
+   "coop_level": 4,
+   "corpses": [
+    {
+     "breed": "brahma",
+     "cause": "hunger",
+     "elapsed": 197.793999970034,
+     "x": 294.793304443359,
+     "y": 1392.43237304688
+    },
+    {
+     "breed": "czubatka",
+     "cause": "hunger",
+     "elapsed": 192.361333350961,
+     "x": 902.454345703125,
+     "y": 1308.28991699219
+    },
+    {
+     "breed": "serama",
+     "cause": "hunger",
+     "elapsed": 186.609666646725,
+     "x": 896.691833496094,
+     "y": 1278.07751464844
+    },
+    {
+     "breed": "jedwabista",
+     "cause": "hunger",
+     "elapsed": 179.147666674813,
+     "x": 515.1533203125,
+     "y": 1341.32763671875
+    },
+    {
+     "breed": "nagoszyja",
+     "cause": "hunger",
+     "elapsed": 172.878000003589,
+     "x": 872.547668457031,
+     "y": 1236.07568359375
+    }
+   ],
+   "day_fraction": 0.00150220339105801,
+   "days": 183,
+   "disease_calm": 648.856157349988,
+   "disease_timer": 0.0,
+   "dog_age": 54983.0269999494,
+   "dog_level": 2,
+   "dog_life": 646024.052358285,
+   "egg_ages": {
+    "brahma": [
+     [
+      57,
+      475.796999931336
+     ]
+    ],
+    "czubatka": [
+     [
+      16,
+      466.598000049591
+     ]
+    ],
+    "jedwabista": [
+     [
+      2,
+      446.848999977112
+     ]
+    ],
+    "leghorn": [
+     [
+      5,
+      448.266000032425
+     ]
+    ],
+    "marans": [
+     [
+      30,
+      188.464999914169
+     ]
+    ],
+    "nagoszyja": [
+     [
+      17,
+      448.266000032425
+     ]
+    ],
+    "pavlovskaya": [
+     [
+      30,
+      476.996999979019
+     ]
+    ],
+    "rhode": [
+     [
+      41,
+      188.464999914169
+     ]
+    ],
+    "serama": [
+     [
+      23,
+      188.464999914169
+     ]
+    ],
+    "szabo": [
+     [
+      11,
+      188.464999914169
+     ]
+    ]
+   },
+   "eggs": {
+    "brahma": 57,
+    "czubatka": 16,
+    "jedwabista": 2,
+    "leghorn": 5,
+    "marans": 30,
+    "nagoszyja": 17,
+    "pavlovskaya": 30,
+    "rhode": 41,
+    "serama": 23,
+    "szabo": 11
+   },
+   "eggs_on_ground": [
+    "serama",
+    "marans",
+    "rhode",
+    "rhode",
+    "rhode",
+    "marans",
+    "marans",
+    "nagoszyja",
+    "nagoszyja",
+    "rhode",
+    "rhode",
+    "czubatka",
+    "marans",
+    "serama",
+    "serama",
+    "serama",
+    "rhode"
+   ],
+   "event_dry": {
+    "disease": 0.0,
+    "fox": 0.0
+   },
+   "feed": 10441.1899193006,
+   "fox_hand_scared": false,
+   "fox_pending": 0,
+   "fox_roll_timer": 1497.17399606179,
+   "fox_visit_left": 0.0,
+   "guard_level": 4,
+   "hunger_seconds": 0.0,
+   "incubating": [
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 221.72399991518
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 221.369333364262
+    },
+    {
+     "breed": "brahma",
+     "count": 1,
+     "elapsed": 221.102000015696
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 220.058000025973
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 219.835999903925
+    },
+    {
+     "breed": "brahma",
+     "count": 1,
+     "elapsed": 219.569333332653
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 218.757999994315
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 218.547333337842
+    },
+    {
+     "breed": "brahma",
+     "count": 1,
+     "elapsed": 218.313999909164
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 217.469333269285
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 217.224666692924
+    },
+    {
+     "breed": "brahma",
+     "count": 1,
+     "elapsed": 217.014000036451
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 216.235999999654
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 216.025333343181
+    },
+    {
+     "breed": "brahma",
+     "count": 1,
+     "elapsed": 215.803333380078
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 215.03666664991
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 214.813999909515
+    },
+    {
+     "breed": "brahma",
+     "count": 1,
+     "elapsed": 214.591999946413
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 213.846666592809
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 213.736666618251
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 213.525333343431
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 213.425333279863
+    },
+    {
+     "breed": "brahma",
+     "count": 1,
+     "elapsed": 213.225333311672
+    },
+    {
+     "breed": "brahma",
+     "count": 1,
+     "elapsed": 213.135999936386
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 211.791999914904
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 211.591999946713
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 211.392666596869
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 211.113999941674
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 210.891999978572
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 210.648666638905
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 210.469333269986
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 210.324666598248
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 210.180666703802
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 210.047333338693
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 209.925333280213
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 209.825333375591
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 209.691333392134
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 209.591999946913
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 209.480666576716
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 209.369999983811
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 209.258666613613
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 209.147333243416
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 209.047333338793
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 208.947333275225
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 208.714000005493
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 208.613999941925
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 208.502666571727
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 208.391999978822
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 208.291999915254
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 208.192666628979
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 208.091999947063
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 207.991333265148
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 207.89266659722
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 207.791999915304
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 207.692000010682
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 207.591999947113
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 207.50333334912
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 207.391999978923
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 207.291999915354
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 92.7923332757414
+    },
+    {
+     "breed": "czubatka",
+     "count": 1,
+     "elapsed": 92.6643333342462
+    },
+    {
+     "breed": "brahma",
+     "count": 1,
+     "elapsed": 92.5473333107339
+    },
+    {
+     "breed": "serama",
+     "count": 1,
+     "elapsed": 92.4529999799531
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 92.2476666676212
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 35.7176666224044
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 35.578999992627
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 35.4623332782882
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 35.3399999901077
+    },
+    {
+     "breed": "pavlovskaya",
+     "count": 1,
+     "elapsed": 35.2176666224543
+    }
+   ],
+   "incubator_level": 8,
+   "intro_seen": true,
+   "money": 43241.41,
+   "outbreak_breed": "",
+   "outbreak_dead": 0,
+   "outbreak_left": 0,
+   "outbreak_on": false,
+   "outbreak_saved": 0,
+   "outbreak_survive": 0.0,
+   "outbreak_timer": 0.0,
+   "rooster_hints": {
+    "araukana": 1.0,
+    "brahma": 1.0,
+    "czubatka": 1.0,
+    "jedwabista": 2.0,
+    "leghorn": 1.0,
+    "marans": 1.0,
+    "pavlovskaya": 1.0,
+    "rhode": 3.0,
+    "szabo": 2.0
+   },
+   "saved_at": 1795776058.392,
+   "storage_level": 4,
+   "unlocked": [
+    "rhode",
+    "leghorn",
+    "nagoszyja",
+    "marans",
+    "araukana",
+    "jedwabista",
+    "serama",
+    "brahma",
+    "szabo",
+    "czubatka",
+    "pavlovskaya"
+   ],
+   "version": 6,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "666478",
+  "updated_at": 1795776058
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "leghorn",
+     "egg": 2.91296666397131,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 0.163299985720228,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 3.1632999857202,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    }
+   ],
+   "chicks": [],
+   "coop_level": 0,
+   "corpses": [],
+   "day_fraction": 0.101294434524523,
+   "days": 100,
+   "disease_timer": 0.0,
+   "dog_level": 0,
+   "egg_ages": {},
+   "eggs": {},
+   "eggs_on_ground": [],
+   "event_dry": {
+    "disease": 0.0,
+    "fox": 0.0
+   },
+   "feed": 0.0,
+   "fox_hand_scared": false,
+   "fox_pending": 0,
+   "fox_roll_timer": 0.0,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 53111.1813276281,
+   "incubating": [],
+   "incubator_level": 0,
+   "intro_seen": true,
+   "money": 242.0,
+   "saved_at": 1795442706.582,
+   "storage_level": 0,
+   "unlocked": [],
+   "version": 6,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "756362",
+  "updated_at": 1795442706
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "leghorn",
+     "egg": 3.82559969465917,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 3.82559969465917,
+     "rooster": false,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 0.0,
+     "rooster": true,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    }
+   ],
+   "chicks": [],
+   "coop_level": 0,
+   "corpses": [
+    {
+     "breed": "leghorn",
+     "cause": "disease",
+     "elapsed": 47.4296666733684,
+     "x": 926.122802734375,
+     "y": 996.298400878906
+    }
+   ],
+   "day_fraction": 0.151879326132506,
+   "days": 67,
+   "eggs": {
+    "leghorn": 16
+   },
+   "eggs_on_ground": [],
+   "event_dry": {
+    "disease": 150.0,
+    "fox": 0.0
+   },
+   "feed": 124.288821999087,
+   "fox_pending": 0,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 0.0,
+   "incubating": [],
+   "incubator_level": 0,
+   "intro_seen": true,
+   "money": 560.6,
+   "saved_at": 1795262880.78,
+   "storage_level": 0,
+   "unlocked": [
+    "leghorn"
+   ],
+   "version": 5,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "870408",
+  "updated_at": 1795262880
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "leghorn",
+     "egg": 40.0,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 40.0,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 40.0,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    }
+   ],
+   "chicks": [],
+   "coop_level": 0,
+   "corpses": [],
+   "day_fraction": 0.649106291400708,
+   "days": 56,
+   "eggs": {
+    "leghorn": 325
+   },
+   "eggs_on_ground": [
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn",
+    "leghorn"
+   ],
+   "feed": 28.887064964409,
+   "fox_pending": 0,
+   "fox_timer": 23575.3853318797,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 0.0,
+   "incubating": [],
+   "incubator_level": 0,
+   "money": 5.0,
+   "saved_at": 1795389421.013,
+   "storage_level": 0,
+   "unlocked": [
+    "leghorn"
+   ],
+   "version": 4,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "909850",
+  "updated_at": 1795389421
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "rhode",
+     "egg": 31.5893497864406,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "nagoszyja",
+     "egg": 4.51399970054624,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "leghorn",
+     "egg": 28.5759164015452,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "leghorn",
+     "egg": 28.1599165121714,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 18.3639998435974,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "nagoszyja",
+     "egg": 54.9259163061778,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "szabo",
+     "egg": 14.8949164072672,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "leghorn",
+     "egg": 18.3379998207092,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "szabo",
+     "egg": 9.96599984169005,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 21.7879998683929,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "nagoszyja",
+     "egg": 31.2199997901917,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "nagoszyja",
+     "egg": 11.4739999771118,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "leghorn",
+     "egg": 7.67899990081786,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "rhode",
+     "egg": 22.2469999790192,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": true
+    },
+    {
+     "breed": "nagoszyja",
+     "egg": 29.048999786377,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 27.7199997901917,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 26.7199997901917,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "rhode",
+     "egg": 14.7199997901917,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    }
+   ],
+   "chicks": [
+    {
+     "breed": "rhode",
+     "grown": 8.71999979019165
+    },
+    {
+     "breed": "szabo",
+     "grown": 3.71999979019165
+    }
+   ],
+   "coop_level": 0,
+   "corpses": [],
+   "day_fraction": 0.153926183540581,
+   "days": 109,
+   "eggs": {
+    "leghorn": 10,
+    "nagoszyja": 9
+   },
+   "eggs_on_ground": [
+    "nagoszyja",
+    "leghorn",
+    "rhode",
+    "nagoszyja",
+    "leghorn",
+    "rhode",
+    "leghorn",
+    "rhode",
+    "szabo",
+    "rhode",
+    "nagoszyja",
+    "szabo",
+    "leghorn",
+    "nagoszyja",
+    "leghorn",
+    "rhode",
+    "nagoszyja",
+    "nagoszyja",
+    "leghorn",
+    "leghorn",
+    "rhode",
+    "rhode",
+    "rhode",
+    "leghorn",
+    "szabo",
+    "nagoszyja",
+    "szabo",
+    "leghorn",
+    "nagoszyja"
+   ],
+   "feed": 437.741709969639,
+   "fox_pending": 0,
+   "fox_timer": 7228.3163024755,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 0.0,
+   "incubating": [
+    {
+     "breed": "nagoszyja",
+     "count": 1,
+     "elapsed": 76.2499997615814
+    }
+   ],
+   "incubator_level": 0,
+   "money": 101.81,
+   "saved_at": 1795142184.657,
+   "storage_level": 0,
+   "unlocked": [
+    "leghorn",
+    "rhode",
+    "nagoszyja",
+    "szabo"
+   ],
+   "version": 4,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "KZ7J-R863-3XQB",
+  "updated_at": 1795142184
+ },
+ {
+  "payload": {
+   "chickens": [
+    {
+     "breed": "leghorn",
+     "egg": 10.1611497720083,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 10.1611497720083,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    },
+    {
+     "breed": "leghorn",
+     "egg": 10.1611497720083,
+     "sick": false,
+     "sick_s": 0.0,
+     "vax": false
+    }
+   ],
+   "chicks": [],
+   "coop_level": 0,
+   "corpses": [],
+   "day_fraction": 0.283601916286714,
+   "days": 0,
+   "eggs": {
+    "leghorn": 3
+   },
+   "eggs_on_ground": [],
+   "feed": 44.2768151134634,
+   "fox_pending": 0,
+   "fox_timer": 15508.8457949429,
+   "fox_visit_left": 0.0,
+   "guard_level": 0,
+   "hunger_seconds": 0.0,
+   "incubating": [
+    {
+     "breed": "leghorn",
+     "count": 1,
+     "elapsed": 37.8889164924622
+    }
+   ],
+   "incubator_level": 0,
+   "money": 91.2,
+   "saved_at": 1795141787.793,
+   "storage_level": 0,
+   "unlocked": [
+    "leghorn"
+   ],
+   "version": 4,
+   "win_reason": "",
+   "won": false
+  },
+  "player_id": "UZAJ-TL6N-AR2S",
+  "updated_at": 1795141787
+ }
+]
