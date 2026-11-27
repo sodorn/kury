@@ -4,7 +4,7 @@ BUILDING_COOP_DESC,"Tu mieszka stado. Kury znoszą jaja na wybiegu, dopóki maj�
 BUILDING_INCUBATOR_NAME,Inkubator
 BUILDING_INCUBATOR_DESC,"Włóż jaja, a wyklują się z nich pisklęta twoich ras. Pisklę dorasta i dołącza do stada."
 BUILDING_STORAGE_NAME,Magazyn
-BUILDING_STORAGE_DESC,"Zebrane jaja, zapas paszy i kod twojej fermy."
+BUILDING_STORAGE_DESC,"Zebrane jaja i zapas paszy."
 BUILDING_SHOP_NAME,Sklep
 BUILDING_SHOP_DESC,"Kupujesz i sprzedajesz tu wszystko: jaja, kury, paszę i szczepionki."
 BREED_LEGHORN_NAME,Leghorn
@@ -407,3 +407,6 @@ ALERT_DOG_DIED_TITLE,"Pies odszedł"
 ALERT_DOG_DIED_BODY,"Twój pies (%s) zdechł ze starości. Podwórko znowu nie ma stróża — kup nowego psa w kurniku."
 LOG_DOG_DIED,"Pies (%s) zdechł ze starości."
 HINT_ADMIN_FARM,"Ferma admina 000000: dodatkowe przyciski do testów."
+HINT_ADMIN_FOX_BUSY,"Lis już jest na fermie albo czai się w krzakach."
+HINT_ADMIN_OUTBREAK_BUSY,"Zaraza już trwa."
+HINT_ADMIN_NO_DOG,"Nie ma psa do zabicia."

@@ -2934,10 +2934,13 @@ func _test_away_fox_and_report() -> void:
 	var hits := [0]
 	var on_report := func(_r: Dictionary) -> void: hits[0] += 1
 	Events.away_report.connect(on_report)
-	Game._apply_elapsed(3600.0)
-	_check(hits[0] == 0, "godzina przerwy - bez kroniki")
+	# 13.0.1 (wlasciciel 27.11): kronika po kazdym powrocie (od 6 minut).
+	Game._apply_elapsed(60.0)
+	_check(hits[0] == 0, "minuta przerwy - bez kroniki")
 	Game._apply_elapsed(4.0 * 3600.0)
 	_check(hits[0] == 1 and not Game.last_away_report.is_empty(), "4 h przerwy - kronika fermy")
+	Game._apply_elapsed(600.0)
+	_check(hits[0] == 2, "10 minut przerwy - tez kronika")
 	Events.away_report.disconnect(on_report)
 	Game.last_away_report = {}
 	_restore_event("disease", dis_backup)

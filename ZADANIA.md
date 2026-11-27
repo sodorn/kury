@@ -11,7 +11,8 @@ Zasady:
 - Zrobione pozycje przenosimy do PROJECT_STATE.md i usuwamy stąd.
 - Kolejność etapów: od najmniejszej roboty i największego zysku.
 
-Stan na 27.11.2026: wersja 13.2 (magazyny skokami: 200 / 1 000 / 3 000 /
+Stan na 27.11.2026: wersja 13.0.1 (poprawki po 13.2; numer na prosbe
+wlasciciela). Wczesniej 13.2 (magazyny skokami: 200 / 1 000 / 3 000 /
 10 000 / 25 000 / 60 000 / 150 000 / 350 000 / 800 000 / 2 000 000 jaj). Kopia linii 12: gałąź
 `v12.31-final-przed-13` (12.31, commit 36eb94e).
 
@@ -33,12 +34,22 @@ A4. Lis w nocy (decyzja 27.11: lis w nocy WCHODZI do kurnika i zabija -
 A5. Noc w interfejsie: ikonka księżyca / napis „Kury śpią do 7:12”
     (godzina wschodu z Daylight), żeby gracz wiedział, czemu wybieg pusty.
 
+A6. Martwe kury leza do doby; ikonka lopaty (brazowa, lewy dolny rog,
+    w krzakach) = pochowaj wszystkie. Ofiary zarazy w calosci, bez krwi,
+    zgnilozielone; ofiary lisa jak teraz.
+A7. Nazwy smieszniejsze i dopasowane do poziomow (stary camper, szopa
+    kryta papa, stary namiot wojskowy, zardzewialy zuk, rozpadajaca sie
+    chata z bali...) - przejrzec kurnik i magazyn w rozbudowy.json.
+
 ## ETAP B — ustawienia i samouczek (1–2 sesje)
 
 B1. Zębatka z opcjami (prawy górny róg).
 B2. W opcjach: dla każdego typu przycisku osobno „suwak / zwykły klik”
     (kupno ptaka, rozbudowy, pasza, szczepienie, sprzedaż...). Zapis
     w ustawieniach urządzenia, nie w farmie.
+B2a. Kod fermy i "wczytaj ferme z kodu" przeniesc z kurnika do opcji.
+B2b. Nocny motyw interfejsu: ciemny, stonowany fiolet - okienka nie
+    razia w nocy.
 B3. Samouczek przy nowej fermie: kilka okienek po kolei (jaja → sklep →
     pasza → kogut → inkubator → lis → zaraza → noc) + przycisk „?” do
     ponownego przejrzenia. Właściciel chce go od początku projektu.
@@ -50,6 +61,32 @@ C1. Klikalne krzaki: lis czai się w krzakach 10–30 s przed podejściem;
 C2. Zamówienia od klientów: np. „40 jaj araukany w 2 dni za podwójną
     cenę”. Cel na krótką metę + powód trzymania wielu ras (pasuje do
     zarazy jednej rasy).
+
+## ETAP C2 — kronika i dziennik (1 sesja)
+
+C3. Dziennik wszystkich zdarzen gry: zlota ikonka dwoch "chevronow" (jak
+    belki sierzanta) w prawym dolnym rogu; rozwija liste: tytul wiekszymi
+    literami ("Uwaga, zaraza"), pod spodem opis i godzina. Okienka
+    (kronika, zaraza, pies...) zamykasz OK, a tresc zostaje w dzienniku.
+    Do tego przycisk w kurniku. Wpisy: rozbudowy, uklady gwiazd, nowe
+    rasy, zarazy, lisy - wszystko istotne. (Kronika od 13.0.1 pokazuje
+    sie po kazdym powrocie, od 6 minut nieobecnosci.)
+C4. Zbieranie jaj po staremu, ale szybko (pomysl kolegi): jeden klik =
+    jedno jajo, bez czekania na animacje, klik gdziekolwiek za plotem.
+    Do zatrudnienia Zbyszek i Grazynka - mnoznik 2, 4, 8 jaj na klik.
+
+## ETAP C3 — nowe mechaniki (do przemyslenia przed wdrozeniem)
+
+C5. Astrologia: uklady gwiazd dobre/zle dla jednej rasy z danego poziomu
+    rzadkosci. Dobre: x3 jaj, inkubacja 3 razy krotsza, odpornosc na
+    zaraze. Zle: 3 razy wolniej, 10 razy wieksza szansa zarazy. Ikonka:
+    bialy heptagram z niebieska poswiata, pod nia opis obecnego ukladu.
+C6. Hormony w sklepie, zuzywane jak pasza: +50% ceny w skupie (tylko na
+    mieso), kurczaki dorastaja o 30% szybciej. Kurnik: hormony od poziomu
+    7, moc rosnie z poziomem.
+C7. Cztery najwyzsze poziomy kazdego budynku daja duze premie. Inkubator
+    poziomy 7-10: wylegi szybsze o 10/20/30/50%. Kurnik: hormony (C6).
+    Magazyn: do wymyslenia (propozycja: wolniejsze psucie jaj).
 
 ## ETAP D — konta i kopie zapasowe (1–2 sesje, ważne dla bezpieczeństwa)
 
@@ -71,6 +108,12 @@ E1. Budynki: początkowe małe, proste, brzydkie, dziadowskie i śmiesznie
     groteskowe (budka z palet to naprawdę budka z palet); każdy poziom
     większy i ładniejszy, na górze pałacyki. Dalej pastelowo. Wygląd ma
     odpowiadać nazwie z data/rozbudowy.json.
+E1a. Obrazek sklepu: handlarz trzymajacy kure za nogi do gory nogami
+    (obecny wyglada zle).
+E1b. Pies jak lis: przy zmianie kierunku odwraca sie jak karta. Kundel -
+    tylko ruch; owczarek - ruch + nowy wyglad: czarny podpalany, ostre
+    uszy, wyzszy, mniej wydluzony, ostrzejsze ksztalty (wilczur).
+E1c. Lis w nocy idzie do drzwi kurnika (zamiast na pusty wybieg).
 E2. Kura szabo od nowa według prawdziwych zdjęć: duża, bardzo pierzasta,
     bez sterczących „dzyndzli” (portret w osiągnięciach i sprite na
     wybiegu).

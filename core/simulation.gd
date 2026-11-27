@@ -450,26 +450,22 @@ static func _outbreak_breed_of(state: FarmState) -> String:
 ## (sama cena dawalaby cemani sto razy wieksza szanse niz leghornowi). null,
 ## gdy nie ma kogo zarazic.
 static func _pick_for_infection(state: FarmState, breed_id: String) -> Chicken:
-	var healthy: Array[Chicken] = []
-	var weights: Array[float] = []
-	var total := 0.0
+	# 13.0.1 (wlasciciel 27.11): rasa ogniska losowana ROWNO - wczesniej waga
+	# sqrt(ceny) sprawiala, ze zaraza prawie zawsze brala najdrozsza rase.
+	var by_breed := {}
 	for hen: Chicken in state.chickens:
 		if hen.sick or hen.vaccinated:
 			continue
 		if not breed_id.is_empty() and hen.breed_id != breed_id:
 			continue
-		var weight := sqrt(maxf(1.0, float(GameData.breed(hen.breed_id).get("price", 1))))
-		healthy.append(hen)
-		weights.append(weight)
-		total += weight
-	if healthy.is_empty():
+		if not by_breed.has(hen.breed_id):
+			by_breed[hen.breed_id] = []
+		(by_breed[hen.breed_id] as Array).append(hen)
+	if by_breed.is_empty():
 		return null
-	var roll := randf() * total
-	for i in healthy.size():
-		roll -= weights[i]
-		if roll <= 0.0:
-			return healthy[i]
-	return healthy[healthy.size() - 1]
+	var keys: Array = by_breed.keys()
+	var pool: Array = by_breed[keys[randi() % keys.size()]]
+	return pool[randi() % pool.size()]
 
 
 static func _advance_fox(state: FarmState, step: float, out: Dictionary, budget: int,

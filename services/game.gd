@@ -42,6 +42,9 @@ var _restore_code := ""
 
 
 func _ready() -> void:
+	# 13.0.1 (wlasciciel 27.11): kazdy przycisk mruga po nacisnieciu, zeby
+	# bylo widac, ze klikniecie przeszlo.
+	get_tree().node_added.connect(_on_node_added)
 	Cloud.pulled.connect(_on_cloud_pulled)
 	load_or_start()
 
@@ -355,14 +358,23 @@ func admin_change_level(building_id: String, delta: int) -> bool:
 
 ## Lis od razu wychodzi z krzakow (a dalej jak zwykle: plot, pies, palec).
 func admin_call_fox() -> void:
-	if not is_admin() or state.fox_visit_left > 0.0:
+	if not is_admin():
+		return
+	if state.fox_visit_left > 0.0 or state.fox_lurk_left > 0.0:
+		Events.notice.emit(tr("HINT_ADMIN_FOX_BUSY"))
 		return
 	state.fox_lurk_left = maxf(1.0, state.fox_lurk_seconds())
+	# 13.0.1: bez sygnalu lis nie pokazywal sie w krzakach - wyskakiwal
+	# dopiero po kilkunastu sekundach, prosto na wybieg.
+	Events.fox_lurking.emit(state.fox_lurk_left)
 	Events.resources_changed.emit()
 
 
 func admin_kill_dog() -> void:
-	if not is_admin() or state.dog_level <= 0:
+	if not is_admin():
+		return
+	if state.dog_level <= 0:
+		Events.notice.emit(tr("HINT_ADMIN_NO_DOG"))
 		return
 	state.dog_age = state.dog_life
 	_report(Simulation.advance(state, 1.0))
@@ -370,7 +382,10 @@ func admin_kill_dog() -> void:
 
 
 func admin_outbreak() -> void:
-	if not is_admin() or state.outbreak_on:
+	if not is_admin():
+		return
+	if state.outbreak_on:
+		Events.notice.emit(tr("HINT_ADMIN_OUTBREAK_BUSY"))
 		return
 	var out := {"died_disease": 0, "log": []}
 	Simulation._start_outbreak(state, out, 1 << 30)
@@ -1063,3 +1078,19 @@ func _dog_name(level: int) -> String:
 func _breed_name(breed_id: String) -> String:
 	var def := GameData.breed(breed_id)
 	return tr(String(def.get("name", ""))) if not def.is_empty() else "?"
+
+
+func _on_node_added(node: Node) -> void:
+	if node is BaseButton:
+		var button := node as BaseButton
+		button.button_down.connect(func() -> void: _flash_button(button))
+
+
+## Krotki blysk koloru na nacisnietym przycisku.
+func _flash_button(button: BaseButton) -> void:
+	if not is_instance_valid(button) or not button.is_inside_tree():
+		return
+	var ci := button as CanvasItem
+	ci.self_modulate = Color(1.35, 1.2, 0.6)
+	var tween := button.create_tween()
+	tween.tween_property(ci, "self_modulate", Color.WHITE, 0.25)

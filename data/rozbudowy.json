@@ -34,7 +34,7 @@
 		{"poziom": 0, "nazwa": "lodówka w piwnicy",                          "cena": 0,       "budowa_min": 0,  "jaj": 200},
 		{"poziom": 1, "nazwa": "mała szopka",                                "cena": 600,     "budowa_min": 5,  "jaj": 1000},
 		{"poziom": 2, "nazwa": "garaż blaszany 3×5 m",                       "cena": 3000,    "budowa_min": 8,  "jaj": 3000},
-		{"poziom": 3, "nazwa": "ocieplony kontener 20 stóp z regałami",      "cena": 10500,   "budowa_min": 12, "jaj": 10000},
+		{"poziom": 3, "nazwa": "kontener z regałami",      "cena": 10500,   "budowa_min": 12, "jaj": 10000},
 		{"poziom": 4, "nazwa": "kontener-chłodnia i silos na paszę",         "cena": 30000,   "budowa_min": 17, "jaj": 25000},
 		{"poziom": 5, "nazwa": "magazyn z płyty warstwowej 8×10 m i silos 10 t", "cena": 80000, "budowa_min": 23, "jaj": 60000},
 		{"poziom": 6, "nazwa": "hala stalowa 12×15 m z chłodnią",            "cena": 200000,  "budowa_min": 30, "jaj": 150000},

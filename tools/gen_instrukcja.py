@@ -533,7 +533,7 @@ raw("""
                  grasz i gdy nie grasz. Przez pierwsze %g min nowej fermy
                  nikt nie choruje.
 
-  JAKA RASA      zaraza atakuje JEDNA rase naraz (drozsza chetniej).
+  JAKA RASA      zaraza atakuje JEDNA rase naraz, losowo.
                  Inne rasy sa odporne - im wiecej ras, tym mniej tracisz.
 
   JAK SIE SZERZY pierwszy ptak choruje od razu, potem zaraza przechodzi

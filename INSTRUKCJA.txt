@@ -9,7 +9,7 @@
            S Y M U L A T O R   H O D O W L I   K U R C Z A K O W
 ==============================================================================
 
-  INSTRUKCJA OBSLUGI *** gra w wersji 13.2
+  INSTRUKCJA OBSLUGI *** gra w wersji 13.0.1
 
   Gra dziala w przegladarce: https://sodorn.github.io/kury/
 
@@ -248,7 +248,7 @@
       limit 1 000 jaj - 600 zl, budowa 5 min
    3. garaż blaszany 3×5 m
       limit 3 000 jaj - 3 000 zl, budowa 8 min
-   4. ocieplony kontener 20 stóp z regałami
+   4. kontener z regałami
       limit 10 000 jaj - 10 500 zl, budowa 12 min
    5. kontener-chłodnia i silos na paszę
       limit 25 000 jaj - 30 000 zl, budowa 17 min
@@ -372,7 +372,7 @@
                  grasz i gdy nie grasz. Przez pierwsze 30 min nowej fermy
                  nikt nie choruje.
 
-  JAKA RASA      zaraza atakuje JEDNA rase naraz (drozsza chetniej).
+  JAKA RASA      zaraza atakuje JEDNA rase naraz, losowo.
                  Inne rasy sa odporne - im wiecej ras, tym mniej tracisz.
 
   JAK SIE SZERZY pierwszy ptak choruje od razu, potem zaraza przechodzi
@@ -432,10 +432,10 @@
   Wszystkie zdobyte karty ras sa potem pod GWIAZDKA w lewym gornym rogu
   (OSIAGNIECIA). Niezdobyte rasy widac tam jako ciemne sylwetki.
 
-  KRONIKA FERMY. Po przerwie dluzszej niz 3 godziny gra pokazuje kronike: ile
-  jaj zniosly kury, ile przepadlo, ile razy byl lis i co zabral, czy wybuchla
-  zaraza, co sie zbudowalo - i dziennik z godzinami ("02:14 Lis wszedl na
-  wybieg. Zabral ptakow: 6.").
+  KRONIKA FERMY. Po przerwie dluzszej niz 0.1 godziny gra pokazuje kronike:
+  ile jaj zniosly kury, ile przepadlo, ile razy byl lis i co zabral, czy
+  wybuchla zaraza, co sie zbudowalo - i dziennik z godzinami ("02:14 Lis
+  wszedl na wybieg. Zabral ptakow: 6.").
 
 ==============================================================================
  17. SCIAGAWKA

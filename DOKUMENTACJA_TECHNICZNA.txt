@@ -1,6 +1,6 @@
 ==============================================================================
   SYMULATOR HODOWLI KURCZAKOW - DOKUMENTACJA TECHNICZNA
-  gra w wersji 13.2   *   format zapisu w wersji 6   *   Godot 4.7.2
+  gra w wersji 13.0.1   *   format zapisu w wersji 6   *   Godot 4.7.2
 ==============================================================================
 
   Dokument dla programisty: jak gra jest zbudowana, jak dzialaja mechaniki, co
@@ -307,7 +307,7 @@
               szansa = rate_per_hour(stado) * 60.0 / 3600
               rate_per_hour: 10->0.0/h, 20->0.05/h, 50->0.5/h, 100->1.5/h
               (miedzy punktami liniowo, poza nimi plasko)
-  wybuch:     losuje JEDNA rase (waga = sqrt(cena rasy)) i zaraza
+  wybuch:     losuje JEDNA rase (kazda z rowna szansa) i zaraza
               WSZYSTKIE jej zdrowe, niezaszczepione ptaki; inne rasy
               odporne. Szansa wyzdrowienia 0.0..0.3 co 0.1 (raz na ognisko)
               pierwszy ptak od razu, kolejne co 60.0 s ZEGARA
@@ -529,7 +529,7 @@
       uzycie: GameData.time_scale, wszedzie
 
   offline.report_hours
-      = 3.0 [h ZEGARA]
+      = 0.1 [h ZEGARA]
       Po przerwie co najmniej tylu godzin gra pokazuje KRONIKE FERMY z
       podsumowaniem i dziennikiem zdarzen.
       uzycie: Game._apply_elapsed, AwayReportPanel
@@ -958,7 +958,7 @@
     0. lodówka w piwnicy - 200 jaj, 0 zl, 0 min
     1. mała szopka - 1000 jaj, 600 zl, 5 min
     2. garaż blaszany 3×5 m - 3000 jaj, 3000 zl, 8 min
-    3. ocieplony kontener 20 stóp z regałami - 10000 jaj, 10500 zl, 12 min
+    3. kontener z regałami - 10000 jaj, 10500 zl, 12 min
     4. kontener-chłodnia i silos na paszę - 25000 jaj, 30000 zl, 17 min
     5. magazyn z płyty warstwowej 8×10 m i silos 10 t - 60000 jaj, 80000 zl,
     23 min
@@ -1683,5 +1683,5 @@
     limity miejsca i ruchu planu darmowego.
 
 ==============================================================================
-  koniec dokumentu  *  wygenerowano z wersji 13.2
+  koniec dokumentu  *  wygenerowano z wersji 13.0.1
 ==============================================================================

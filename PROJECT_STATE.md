@@ -4,7 +4,15 @@ Trwaly punkt odniesienia miedzy sesjami. Aktualizowany po kazdym etapie.
 
 ## Stan
 
-- Aktualny etap: **ETAP 11** (wersja 13.2): magazyny skokami 200 / 1 000 /
+- Aktualny etap: **ETAP 11** (wersja 13.0.1 - numer na prosbe wlasciciela,
+  wychodzi PO 13.2; Updater porownuje tylko rownosc wersji, wiec dziala).
+  Poprawki: kazdy przycisk mruga po nacisnieciu (Game._on_node_added);
+  admin: lis od razu w krzakach (Events.fox_lurking), komunikaty gdy lis/
+  zaraza juz trwa albo nie ma psa; rasa zarazy losowana ROWNO (bylo sqrt
+  ceny - prawie zawsze najdrozsza); "kontener z regalami"; magazyn nie
+  mowi juz o kodzie fermy; kronika po kazdym powrocie (report_hours 0.1).
+  Reszta notatek wlasciciela z 27.11 - w ZADANIA.md.
+- Wersja 13.2: magazyny skokami 200 / 1 000 /
   3 000 / 10 000 / 25 000 / 60 000 / 150 000 / 350 000 / 800 000 / 2 000 000
   jaj (wlasciciel 27.11). Lis w nocy dalej zabija (decyzja 27.11).
 - Wersja 13.1: NOC wedlug slonca nad Polska

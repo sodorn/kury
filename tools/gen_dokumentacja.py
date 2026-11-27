@@ -727,7 +727,7 @@ def build():
               szansa = rate_per_hour(stado) * %s / 3600
               rate_per_hour: %s
               (miedzy punktami liniowo, poza nimi plasko)
-  wybuch:     losuje JEDNA rase (waga = sqrt(cena rasy)) i zaraza
+  wybuch:     losuje JEDNA rase (kazda z rowna szansa) i zaraza
               WSZYSTKIE jej zdrowe, niezaszczepione ptaki; inne rasy
               odporne. Szansa wyzdrowienia %s..%s co %s (raz na ognisko)
               pierwszy ptak od razu, kolejne co %s s ZEGARA

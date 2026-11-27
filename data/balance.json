@@ -38,7 +38,7 @@
     "_opis": "Czas gry plynie tak samo, gdy grasz i gdy nie grasz: scale razy wolniej od zegara sciennego. Dawny speed_divider 60 dla nieaktywnej gry zostal usuniety - teraz noc liczy sie tak samo jak granie. max_hours to sufit na jedno nadrabianie, w godzinach rzeczywistych. report_hours: po przerwie co najmniej tylu godzin zegara gra pokazuje KRONIKE FERMY - co sie dzialo pod nieobecnosc gracza (lis, choroba, jaja, budowy) z godzinami.",
     "max_hours": 72,
     "scale": 0.3333333333,
-    "report_hours": 3.0
+    "report_hours": 0.1
   },
   "day": {
     "seconds": 600
@@ -57,7 +57,7 @@
     "reference_hens": 10
   },
   "disease": {
-    "_opis": "CHOROBA (12.20, od 12.22 jedna rasa - wlasciciel 25.11). Co roll_seconds sekund REALNYCH kostka z szansa z krzywej rate_per_hour (pary [liczba ptakow w calym stadzie, szansa na godzine], miedzy punktami liniowo). Wybuch losuje JEDNA rase (drozsza chetniej, waga = pierwiastek z ceny) i zaraza po kolei WSZYSTKIE jej niezaszczepione ptaki, jednego co spread_seconds. Inne rasy sa odporne - premia za zroznicowane stado. Przy wybuchu losuje sie, jaka czesc chorych przezyje: od survive_share_min do survive_share_max co survive_share_step (0-30%); kazdy chory po death_minutes minutach REALNYCH albo pada, albo zdrowieje i jest odporny do konca zycia. Leku nie ma; chora mozna sprzedac do McDonalda za mcdonalds_price. Szczepionka chroni zdrowe, chorych nie leczy. Po wygasnieciu ogniska calm_hours_min..calm_hours_max godzin spokoju. Przez pierwsze grace_minutes gry nikt nie choruje.",
+    "_opis": "CHOROBA (12.20, od 12.22 jedna rasa - wlasciciel 25.11). Co roll_seconds sekund REALNYCH kostka z szansa z krzywej rate_per_hour (pary [liczba ptakow w calym stadzie, szansa na godzine], miedzy punktami liniowo). Wybuch losuje JEDNA rase (od 13.0.1 kazda rasa z rowna szansa) i zaraza po kolei WSZYSTKIE jej niezaszczepione ptaki, jednego co spread_seconds. Inne rasy sa odporne - premia za zroznicowane stado. Przy wybuchu losuje sie, jaka czesc chorych przezyje: od survive_share_min do survive_share_max co survive_share_step (0-30%); kazdy chory po death_minutes minutach REALNYCH albo pada, albo zdrowieje i jest odporny do konca zycia. Leku nie ma; chora mozna sprzedac do McDonalda za mcdonalds_price. Szczepionka chroni zdrowe, chorych nie leczy. Po wygasnieciu ogniska calm_hours_min..calm_hours_max godzin spokoju. Przez pierwsze grace_minutes gry nikt nie choruje.",
     "death_minutes": 5.0,
     "vaccine_price": 0,
     "vaccine_price_per_hen": 5,
