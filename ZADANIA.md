@@ -115,11 +115,59 @@ C7. Cztery najwyzsze poziomy kazdego budynku daja duze premie. Inkubator
 
 ## ETAP D — konta i kopie zapasowe (1–2 sesje, ważne dla bezpieczeństwa)
 
-D1. Logowanie użytkownik + hasło (Supabase Auth; login bez e-maila
-    zamieniony wewnętrznie na sztuczny adres). Zakładanie konta przy nowej
-    fermie, zmiana hasła pod zębatką. Reguły w bazie (RLS): każdy zapisuje
-    tylko swoją farmę — DZIŚ każdy, kto zna kod, może nadpisać cudzą.
-    Jednorazowe przypisanie istniejących farm do kont: zaloguj + podaj kod.
+D1. Logowanie (decyzja wlasciciela 28.11, 01:08). Robimy POZNIEJ.
+    Przeplyw:
+    a) Wejscie do gry: jesli przegladarka ma zapamietana sesje (token
+       Supabase w localStorage) - gra loguje od razu, bez pytania.
+    b) Jesli nie: ekran "Zaloz konto": nazwa gracza + haslo (min. 6) +
+       e-mail OPCJONALNIE. Obok "Mam juz konto - zaloguj" (nazwa + haslo)
+       i "Zapomnialem hasla".
+    c) Bez e-maila: gra wyraznie ostrzega "bez e-maila nie odzyskasz
+       hasla". Awaryjnie wlasciciel moze zresetowac haslo GitHub Action
+       "Zresetuj haslo" (nazwa -> nowe haslo, klucz serwisowy tylko
+       w sekretach GitHuba).
+    d) Z e-mailem: "Zapomnialem hasla" -> wpisujesz e-mail -> przychodzi
+       mail z LINKIEM -> link otwiera gre na ekranie "Nowe haslo" -> gra
+       ustawia haslo i loguje. Supabase to obsluguje: resetPasswordForEmail
+       z redirectTo = adres gry, potem updateUser({password}) po zdarzeniu
+       PASSWORD_RECOVERY. Adres gry trzeba dodac do Redirect URLs
+       w ustawieniach Auth.
+    e) WYMAGANE: wlasny serwer SMTP (np. darmowy Brevo/Resend). Domyslny
+       mailer Supabase wysyla tylko do czlonkow zespolu projektu i ma
+       limit kilku maili na godzine - graczom nic by nie doszlo.
+       Potrzebny adres nadawcy (domena albo skrzynka wlasciciela).
+       Potwierdzanie e-maila przy zakladaniu konta WYLACZONE (gra od razu).
+    Technicznie:
+    f) Konto Supabase: e-mail logowania = prawdziwy e-mail, a bez e-maila
+       sztuczny nazwa@kury.invalid. Nazwa gracza w tabeli profiles
+       (unikalna, a-z 0-9 _, 3-20 znakow). Logowanie po nazwie: mala
+       Edge Function zamienia nazwe na e-mail po stronie serwera i loguje
+       - e-maile graczy nigdy nie wychodza do przegladarki. Dopisanie
+       e-maila pozniej pod zebatka (updateUser email).
+    g) Baza: farms.owner_id = auth.uid(); RLS - czytac i zapisywac swoja
+       ferme moze tylko wlasciciel. Podglad cudzej fermy tylko widokiem do
+       odczytu. Kod fermy przestaje byc haslem (zostaje do pokazania).
+    h) Migracja: istniejacy gracz zaklada konto i raz podaje stary kod -
+       funkcja w bazie przypisuje mu ferme, jesli nikt jej nie przejal.
+       Ferme 130090 przejmuje kolega sam.
+    i) Admin 000000: rola w app_metadata (ustawiana kluczem serwisowym).
+    j) Pozniej opcjonalnie "Zaloguj przez Google".
+    Odrzucone: konto anonimowe na start (gra ginie po wyczyszczeniu
+    przegladarki).
+    SETUP MAILI (robi wlasciciel, PRZED etapem D; status: NIE ZROBIONE):
+    1. Domena (ok. 10-60 zl/rok, np. OVH, home.pl, Cloudflare) - adres
+       nadawcy z gmaila Brevo odradza (laduje w spamie).
+    2. Darmowe konto Brevo (300 maili/dzien, bez karty).
+    3. Brevo > Senders, Domains > dodaj domene > wkleic pokazane rekordy
+       DNS u rejestratora domeny > Authenticate.
+    4. Brevo > SMTP & API > SMTP > Generate SMTP key. Serwer
+       smtp-relay.brevo.com, port 587, login z tej strony.
+    5. Supabase > Authentication > SMTP Settings > Enable custom SMTP:
+       host, port, login, haslo = klucz SMTP, nadawca noreply@domena,
+       nazwa "Symulator Hodowli Kurczakow". Klucza NIE wklejac na czat.
+    6. Dac znac Claude'owi: nazwa domeny + "SMTP ustawiony".
+    Zrodla: supabase.com/docs/guides/auth/auth-smtp,
+    supabase.com/docs/guides/auth/rate-limits.
 D2. Historia zapisów w bazie: trigger (funkcja, którą baza sama odpala przy
     każdej zmianie wiersza) kopiuje poprzednią wersję farmy do tabeli
     historii; trzymamy 30 dni.
